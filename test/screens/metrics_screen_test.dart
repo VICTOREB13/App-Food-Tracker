@@ -10,20 +10,18 @@ import 'package:food_tracker/widgets/metrics/macro_distribution_bento_card.dart'
 import 'package:food_tracker/widgets/metrics/quick_weight_entry_dialog.dart';
 import 'package:food_tracker/widgets/metrics/streak_compliance_bento_card.dart';
 import 'package:food_tracker/widgets/metrics/weight_trend_bento_card.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
   setUpAll(() {
-    GoogleFonts.config.allowRuntimeFetching = false;
     sqfliteFfiInit();
-    databaseFactory = databaseFactoryFfi;
+    databaseFactory = databaseFactoryFfiNoIsolate;
   });
 
   late Database testDb;
 
   setUp(() async {
-    testDb = await databaseFactoryFfi.openDatabase(
+    testDb = await databaseFactoryFfiNoIsolate.openDatabase(
       inMemoryDatabasePath,
       options: OpenDatabaseOptions(
         version: 1,
@@ -106,12 +104,7 @@ void main() {
           home: MetricsScreen(),
         ),
       );
-
-      await tester.runAsync(() async {
-        await Future.delayed(const Duration(milliseconds: 100));
-      });
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pumpAndSettle();
 
       // Check App Bar
       expect(find.text('Métricas y Progreso'), findsOneWidget);
@@ -139,30 +132,19 @@ void main() {
           home: MetricsScreen(),
         ),
       );
-
-      await tester.runAsync(() async {
-        await Future.delayed(const Duration(milliseconds: 100));
-      });
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pumpAndSettle();
 
       // Default is 30 days
       expect(MealController.instance.selectedWeightDays, equals(30));
 
       // Switch to 7 days
       await tester.tap(find.text('7 días'));
-      await tester.runAsync(() async {
-        await Future.delayed(const Duration(milliseconds: 100));
-      });
-      await tester.pump();
+      await tester.pumpAndSettle();
       expect(MealController.instance.selectedWeightDays, equals(7));
 
       // Switch to 90 days
       await tester.tap(find.text('90 días'));
-      await tester.runAsync(() async {
-        await Future.delayed(const Duration(milliseconds: 100));
-      });
-      await tester.pump();
+      await tester.pumpAndSettle();
       expect(MealController.instance.selectedWeightDays, equals(90));
     });
 
@@ -172,17 +154,11 @@ void main() {
           home: MetricsScreen(),
         ),
       );
-
-      await tester.runAsync(() async {
-        await Future.delayed(const Duration(milliseconds: 100));
-      });
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pumpAndSettle();
 
       final fab = find.byType(FloatingActionButton);
       await tester.tap(fab);
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 200));
+      await tester.pumpAndSettle();
 
       expect(find.byType(QuickWeightEntryDialog), findsOneWidget);
       expect(find.text('PESO CORPORAL (KG)'), findsOneWidget);

@@ -8,7 +8,6 @@ import 'package:food_tracker/services/secure_storage_service.dart';
 import 'package:food_tracker/widgets/profile/activity_goal_selector_card.dart';
 import 'package:food_tracker/widgets/profile/biometric_inputs_card.dart';
 import 'package:food_tracker/widgets/profile/metabolic_summary_bento_card.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class FakeFlutterSecureStorage extends Fake implements FlutterSecureStorage {
@@ -61,9 +60,8 @@ class FakeFlutterSecureStorage extends Fake implements FlutterSecureStorage {
 
 void main() {
   setUpAll(() {
-    GoogleFonts.config.allowRuntimeFetching = false;
     sqfliteFfiInit();
-    databaseFactory = databaseFactoryFfi;
+    databaseFactory = databaseFactoryFfiNoIsolate;
   });
 
   late Database db;
@@ -73,7 +71,7 @@ void main() {
     fakeStorage = FakeFlutterSecureStorage();
     SecureStorageService.setMockInstance(SecureStorageService.withStorage(fakeStorage));
 
-    db = await databaseFactoryFfi.openDatabase(
+    db = await databaseFactoryFfiNoIsolate.openDatabase(
       inMemoryDatabasePath,
       options: OpenDatabaseOptions(
         version: 2,
@@ -121,11 +119,13 @@ void main() {
   }
 
   Future<void> pumpScreen(WidgetTester tester) async {
-    await tester.runAsync(() async {
-      await Future.delayed(const Duration(milliseconds: 100));
+    tester.view.physicalSize = const Size(800, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
     });
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
   }
 
   group('UserProfileScreen Widget & Interaction Tests', () {
@@ -224,10 +224,7 @@ void main() {
       expect(find.text('Perfil metabólico y metas sincronizadas con éxito'), findsOneWidget);
 
       // Verifica persistencia en SQLite
-      UserProfile? savedProfile;
-      await tester.runAsync(() async {
-        savedProfile = await DatabaseService.instance.getUserProfile();
-      });
+      final savedProfile = await DatabaseService.instance.getUserProfile();
       expect(savedProfile, isNotNull);
       final profile = savedProfile!;
       expect(profile.name, equals('Victor Engineer'));

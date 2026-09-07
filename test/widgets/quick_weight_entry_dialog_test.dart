@@ -3,20 +3,18 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/controllers/meal_controller.dart';
 import 'package:food_tracker/services/database_service.dart';
 import 'package:food_tracker/widgets/metrics/quick_weight_entry_dialog.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
   setUpAll(() {
-    GoogleFonts.config.allowRuntimeFetching = false;
     sqfliteFfiInit();
-    databaseFactory = databaseFactoryFfi;
+    databaseFactory = databaseFactoryFfiNoIsolate;
   });
 
   late Database testDb;
 
   setUp(() async {
-    testDb = await databaseFactoryFfi.openDatabase(
+    testDb = await databaseFactoryFfiNoIsolate.openDatabase(
       inMemoryDatabasePath,
       options: OpenDatabaseOptions(
         version: 1,
@@ -162,11 +160,7 @@ void main() {
       await tester.enterText(textFields.at(1), 'En ayunas');
 
       await tester.tap(find.text('Guardar'));
-      await tester.runAsync(() async {
-        await Future.delayed(const Duration(milliseconds: 100));
-      });
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 200));
+      await tester.pumpAndSettle();
 
       expect(find.text('Registrar Peso'), findsNothing);
       expect(find.byType(SnackBar), findsOneWidget);
