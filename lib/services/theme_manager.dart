@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -77,16 +77,24 @@ class AppColors {
   static Color textMuted(BuildContext context) =>
       isDark(context) ? const Color(0xFF71717A) : const Color(0xFFA1A1AA);
 
-  // Canonical Crimson Red
   static const Color primary = Color(0xFFDC2626);
   static const Color primaryLight = Color(0xFFEF4444);
   static const Color primaryDark = Color(0xFF991B1B);
 
-  // Nutritional Macros Semantics
-  static const Color calories = Color(0xFFDC2626); // Brand Red
-  static const Color protein = Color(0xFF10B981);  // Emerald
-  static const Color carbs = Color(0xFFF59E0B);    // Amber
-  static const Color fat = Color(0xFF0EA5E9);      // Sky Blue
+  static const Color calories = Color(0xFFDC2626);
+  static const Color caloriesFlame = Color(0xFFF97316);
+  static const Color protein = Color(0xFF10B981);
+  static const Color proteinCoral = Color(0xFFEF4444);
+  static const Color carbs = Color(0xFFF59E0B);
+  static const Color carbsAmber = Color(0xFFEAB308);
+  static const Color fat = Color(0xFF0EA5E9);
+  static const Color fatSapphire = Color(0xFF3B82F6);
+  static const Color water = Color(0xFF06B6D4);
+  static const Color success = Color(0xFF10B981);
+
+  static const double cardRadius = 20.0;
+  static const double pillRadius = 32.0;
+  static const double iconRadius = 14.0;
 }
 
 class AppTheme {
@@ -105,7 +113,7 @@ class AppTheme {
       cardTheme: CardThemeData(
         color: const Color(0xFF121215),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppColors.cardRadius),
           side: const BorderSide(color: Color(0xFF27272A), width: 1),
         ),
         elevation: 0,
@@ -167,7 +175,7 @@ class AppTheme {
       cardTheme: CardThemeData(
         color: const Color(0xFFFFFFFF),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppColors.cardRadius),
           side: const BorderSide(color: Color(0xFFE4E4E7), width: 1),
         ),
         elevation: 0,

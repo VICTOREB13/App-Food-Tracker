@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../../services/theme_manager.dart';
 
 class VeCard extends StatelessWidget {
@@ -7,6 +7,7 @@ class VeCard extends StatelessWidget {
   final VoidCallback? onTap;
   final Color? backgroundColor;
   final Color? borderColor;
+  final double borderRadius;
 
   const VeCard({
     super.key,
@@ -15,6 +16,7 @@ class VeCard extends StatelessWidget {
     this.onTap,
     this.backgroundColor,
     this.borderColor,
+    this.borderRadius = AppColors.cardRadius,
   });
 
   @override
@@ -23,7 +25,7 @@ class VeCard extends StatelessWidget {
       padding: padding,
       decoration: BoxDecoration(
         color: backgroundColor ?? AppColors.surface(context),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(borderRadius),
         border: Border.all(
           color: borderColor ?? AppColors.border(context),
           width: 1,
@@ -40,7 +42,7 @@ class VeCard extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(borderRadius),
         splashColor: AppColors.primary.withValues(alpha: 0.12),
         highlightColor: AppColors.primary.withValues(alpha: 0.05),
         child: cardContent,

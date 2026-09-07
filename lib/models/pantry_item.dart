@@ -1,4 +1,4 @@
-﻿import 'package:uuid/uuid.dart';
+import 'package:uuid/uuid.dart';
 import 'model_sanitizer.dart';
 
 class PantryItem {
@@ -77,10 +77,10 @@ class PantryItem {
       name: map['name']?.toString() ?? 'Alimento',
       brand: map['brand']?.toString(),
       category: map['category']?.toString(),
-      calories: (map['calories'] ?? 0) as num?,
-      protein: (map['protein'] ?? 0) as num?,
-      carbs: (map['carbs'] ?? 0) as num?,
-      fat: (map['fat'] ?? 0) as num?,
+      calories: ModelSanitizer.clampDouble(map['calories']),
+      protein: ModelSanitizer.clampDouble(map['protein']),
+      carbs: ModelSanitizer.clampDouble(map['carbs']),
+      fat: ModelSanitizer.clampDouble(map['fat']),
       isFavorite: (map['is_favorite'] == 1 || map['is_favorite'] == true),
     );
   }

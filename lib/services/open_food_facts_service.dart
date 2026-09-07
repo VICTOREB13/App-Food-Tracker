@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/model_sanitizer.dart';
 import '../models/pantry_item.dart';
@@ -47,34 +47,38 @@ class OpenFoodFactsService {
       final brand = product['brands']?.toString();
       final category = product['categories']?.toString().split(',').first.trim();
 
-      final calories = (nutriments['energy-kcal_100g'] ??
-              nutriments['energy-kcal'] ??
-              nutriments['energy-kcal_serving'] ??
-              0) as num?;
+      final calories = ModelSanitizer.clampDouble(
+        nutriments['energy-kcal_100g'] ??
+            nutriments['energy-kcal'] ??
+            nutriments['energy-kcal_serving'],
+      );
 
-      final protein = (nutriments['proteins_100g'] ??
-              nutriments['proteins'] ??
-              nutriments['proteins_serving'] ??
-              0) as num?;
+      final protein = ModelSanitizer.clampDouble(
+        nutriments['proteins_100g'] ??
+            nutriments['proteins'] ??
+            nutriments['proteins_serving'],
+      );
 
-      final carbs = (nutriments['carbohydrates_100g'] ??
-              nutriments['carbohydrates'] ??
-              nutriments['carbohydrates_serving'] ??
-              0) as num?;
+      final carbs = ModelSanitizer.clampDouble(
+        nutriments['carbohydrates_100g'] ??
+            nutriments['carbohydrates'] ??
+            nutriments['carbohydrates_serving'],
+      );
 
-      final fat = (nutriments['fat_100g'] ??
-              nutriments['fat'] ??
-              nutriments['fat_serving'] ??
-              0) as num?;
+      final fat = ModelSanitizer.clampDouble(
+        nutriments['fat_100g'] ??
+            nutriments['fat'] ??
+            nutriments['fat_serving'],
+      );
 
       return PantryItem(
         name: ModelSanitizer.truncate(name, 255, fallback: 'Alimento escaneado'),
         brand: brand,
         category: category,
-        calories: ModelSanitizer.clampDouble(calories),
-        protein: ModelSanitizer.clampDouble(protein),
-        carbs: ModelSanitizer.clampDouble(carbs),
-        fat: ModelSanitizer.clampDouble(fat),
+        calories: calories,
+        protein: protein,
+        carbs: carbs,
+        fat: fat,
       );
     } catch (_) {
       return null;

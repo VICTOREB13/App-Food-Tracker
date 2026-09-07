@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -121,8 +121,6 @@ class DatabaseService {
     await db.execute('CREATE INDEX IF NOT EXISTS idx_pantry_favorite ON pantry_items(is_favorite);');
   }
 
-  // --- MEALS CRUD ---
-
   Future<int> insertMeal(Meal meal) async {
     final db = await database;
     return await db.insert(
@@ -161,13 +159,13 @@ class DatabaseService {
 
   Future<List<Meal>> getMealsForDay(DateTime day) async {
     final db = await database;
-    final startOfDay = DateTime(day.year, day.month, day.day, 0, 0, 0).toIso8601String();
-    final endOfDay = DateTime(day.year, day.month, day.day, 23, 59, 59, 999).toIso8601String();
+    final startOfDay = DateTime(day.year, day.month, day.day).toIso8601String();
+    final nextDay = DateTime(day.year, day.month, day.day + 1).toIso8601String();
 
     final results = await db.query(
       'meals',
-      where: 'date >= ? AND date <= ?',
-      whereArgs: [startOfDay, endOfDay],
+      where: 'date >= ? AND date < ?',
+      whereArgs: [startOfDay, nextDay],
       orderBy: 'date ASC',
     );
     return results.map((m) => Meal.fromSqliteMap(m)).toList();
@@ -178,8 +176,6 @@ class DatabaseService {
     final results = await db.query('meals', orderBy: 'date DESC');
     return results.map((m) => Meal.fromSqliteMap(m)).toList();
   }
-
-  // --- PANTRY ITEMS CRUD ---
 
   Future<int> insertPantryItem(PantryItem item) async {
     final db = await database;
@@ -239,8 +235,6 @@ class DatabaseService {
 
     return results.map((p) => PantryItem.fromSqliteMap(p)).toList();
   }
-
-  // --- MAINTENANCE ---
 
   Future<void> executeVacuum() async {
     final db = await database;

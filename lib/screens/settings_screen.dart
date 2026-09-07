@@ -1,9 +1,10 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/settings_controller.dart';
 import '../services/theme_manager.dart';
 import '../widgets/common/ve_app_bar.dart';
 import '../widgets/common/ve_card.dart';
+import '../widgets/common/ve_logo.dart';
 import '../widgets/settings/api_key_input_card.dart';
 import '../widgets/settings/backup_card.dart';
 import '../widgets/settings/daily_goals_card.dart';
@@ -183,13 +184,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 24),
           Center(
-            child: Text(
-              'Victor Engineer - Food Tracker v1.0.0\nArquitectura 100% Local-First & BYOK',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                fontSize: 11,
-                color: AppColors.textMuted(context),
-              ),
+            child: Column(
+              children: [
+                const VeLogo(size: 36, borderRadius: 10),
+                const SizedBox(height: 10),
+                Text(
+                  'Victor Engineer - Food Tracker v1.0.0\nArquitectura 100% Local-First & BYOK',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
+                    color: AppColors.textMuted(context),
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 16),

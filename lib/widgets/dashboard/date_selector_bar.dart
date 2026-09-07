@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../services/theme_manager.dart';
@@ -28,13 +28,23 @@ class DateSelectorBar extends StatelessWidget {
 
   String _formatDate() {
     final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final target = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
-    final diff = target.difference(today).inDays;
-
-    if (diff == 0) return 'Hoy, ${DateFormat('d MMM', 'es').format(selectedDate)}';
-    if (diff == -1) return 'Ayer, ${DateFormat('d MMM', 'es').format(selectedDate)}';
-    if (diff == 1) return 'Mañana, ${DateFormat('d MMM', 'es').format(selectedDate)}';
+    if (selectedDate.year == now.year &&
+        selectedDate.month == now.month &&
+        selectedDate.day == now.day) {
+      return 'Hoy, ${DateFormat('d MMM', 'es').format(selectedDate)}';
+    }
+    final yesterday = DateTime(now.year, now.month, now.day - 1);
+    if (selectedDate.year == yesterday.year &&
+        selectedDate.month == yesterday.month &&
+        selectedDate.day == yesterday.day) {
+      return 'Ayer, ${DateFormat('d MMM', 'es').format(selectedDate)}';
+    }
+    final tomorrow = DateTime(now.year, now.month, now.day + 1);
+    if (selectedDate.year == tomorrow.year &&
+        selectedDate.month == tomorrow.month &&
+        selectedDate.day == tomorrow.day) {
+      return 'Mañana, ${DateFormat('d MMM', 'es').format(selectedDate)}';
+    }
 
     return DateFormat('EEE, d MMM yyyy', 'es').format(selectedDate);
   }

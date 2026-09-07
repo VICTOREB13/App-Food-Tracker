@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/daily_goals.dart';
 import '../../services/theme_manager.dart';
@@ -34,7 +34,7 @@ class _DailyGoalsCardState extends State<DailyGoalsCard> {
   void didUpdateWidget(covariant DailyGoalsCard oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.initialGoals != widget.initialGoals) {
-      _initControllers(widget.initialGoals);
+      _updateControllers(widget.initialGoals);
     }
   }
 
@@ -43,6 +43,13 @@ class _DailyGoalsCardState extends State<DailyGoalsCard> {
     _proteinController = TextEditingController(text: goals.protein.toStringAsFixed(0));
     _carbsController = TextEditingController(text: goals.carbs.toStringAsFixed(0));
     _fatController = TextEditingController(text: goals.fat.toStringAsFixed(0));
+  }
+
+  void _updateControllers(DailyGoals goals) {
+    _caloriesController.text = goals.calories.toStringAsFixed(0);
+    _proteinController.text = goals.protein.toStringAsFixed(0);
+    _carbsController.text = goals.carbs.toStringAsFixed(0);
+    _fatController.text = goals.fat.toStringAsFixed(0);
   }
 
   @override

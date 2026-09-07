@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import '../controllers/meal_controller.dart';
@@ -10,6 +10,7 @@ import '../widgets/common/confirmation_dialog.dart';
 import '../widgets/common/ve_app_bar.dart';
 import '../widgets/meal_detail/food_item_editor_dialog.dart';
 import '../widgets/meal_detail/food_items_list_card.dart';
+import '../widgets/meal_detail/meal_form_fields.dart';
 import '../widgets/meal_detail/meal_image_card.dart';
 import '../widgets/meal_detail/meal_macro_chips_row.dart';
 
@@ -150,13 +151,21 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
             notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
           );
 
-      final updated = baseMeal.copyWith(
+      final mealWithDetails = baseMeal.copyWith(
         name: name,
         mealType: _mealType,
         date: _date,
         imagePath: _imagePath,
+        calories: _calories,
+        protein: _protein,
+        carbs: _carbs,
+        fat: _fat,
         notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
-      ).recalculateFromItems(_items);
+      );
+
+      final updated = _items.isNotEmpty
+          ? mealWithDetails.recalculateFromItems(_items)
+          : mealWithDetails;
 
       if (widget.initialMeal != null) {
         await MealController.instance.updateMeal(updated);
@@ -215,34 +224,13 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
             fat: _fat,
           ),
           const SizedBox(height: 16),
-          TextField(
-            controller: _nameController,
-            style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w600),
-            decoration: const InputDecoration(
-              labelText: 'Nombre del plato *',
-              hintText: 'Ej. Pechuga a la plancha con arroz',
-            ),
-          ),
-          const SizedBox(height: 12),
-          DropdownButtonFormField<String>(
-            value: _mealType,
-            menuMaxHeight: 280,
-            decoration: const InputDecoration(labelText: 'Tipo de Comida'),
-            items: Meal.validMealTypes
-                .map((type) => DropdownMenuItem(value: type, child: Text(type)))
-                .toList(),
-            onChanged: (val) {
+          MealFormFields(
+            nameController: _nameController,
+            notesController: _notesController,
+            mealType: _mealType,
+            onMealTypeChanged: (val) {
               if (val != null) setState(() => _mealType = val);
             },
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _notesController,
-            maxLines: 2,
-            decoration: const InputDecoration(
-              labelText: 'Notas / Observaciones',
-              hintText: 'Ej. Se usó poco aceite en sofrito, porción mediana',
-            ),
           ),
           const SizedBox(height: 16),
           FoodItemsListCard(

@@ -1,4 +1,4 @@
-﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/services/gemini_vision_service.dart';
 
 void main() {
@@ -111,6 +111,39 @@ void main() {
       expect(prompt, contains('Grasa Oculta'));
       expect(prompt, contains('5g y 10g adicionales de grasa'));
       expect(prompt, contains('Porciones compartidas'));
+    });
+
+    test('MealAnalysisResult maneja markdown code fences y números como strings sin fallar', () {
+      const markdownJson = '''```json
+      {
+        "plato": "Arepa Reina Pepiada",
+        "items": [
+          {
+            "alimento": "Arepa de maíz",
+            "gramos_estimados": "120",
+            "calorias": "210",
+            "proteinas_g": "4.0",
+            "carbohidratos_g": "45.0",
+            "grasas_g": "1.5"
+          }
+        ],
+        "totales": {
+          "calorias": "480",
+          "proteinas_g": "24.0",
+          "carbohidratos_g": "46.0",
+          "grasas_g": "22.0"
+        }
+      }
+      ```''';
+
+      final result = MealAnalysisResult.fromJsonString(markdownJson);
+      expect(result.dishName, equals('Arepa Reina Pepiada'));
+      expect(result.totalCalories, equals(480.0));
+      expect(result.totalProtein, equals(24.0));
+      expect(result.totalCarbs, equals(46.0));
+      expect(result.totalFat, equals(22.0));
+      expect(result.items.first.name, equals('Arepa de maíz'));
+      expect(result.items.first.calories, equals(210.0));
     });
   });
 }

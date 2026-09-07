@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/food_item.dart';
 import '../../services/theme_manager.dart';
@@ -45,7 +45,7 @@ class _FoodItemEditorDialogState extends State<_FoodItemEditorDialog> {
 
   @override
   void dispose() {
-    _nameController.dispose;
+    _nameController.dispose();
     _gramsController.dispose();
     _caloriesController.dispose();
     _proteinController.dispose();

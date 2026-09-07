@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 import 'package:uuid/uuid.dart';
 import 'food_item.dart';
 import 'model_sanitizer.dart';
@@ -80,6 +80,9 @@ class Meal {
   }
 
   Meal recalculateFromItems(List<FoodItem> newItems) {
+    if (newItems.isEmpty) {
+      return this;
+    }
     double totalCalories = 0.0;
     double totalProtein = 0.0;
     double totalCarbs = 0.0;
@@ -165,10 +168,10 @@ class Meal {
       mealType: map['meal_type']?.toString() ?? 'Almuerzo',
       date: ModelSanitizer.parseDate(map['date']),
       imagePath: map['image_path']?.toString(),
-      calories: (map['calories'] ?? 0) as num?,
-      protein: (map['protein'] ?? 0) as num?,
-      carbs: (map['carbs'] ?? 0) as num?,
-      fat: (map['fat'] ?? 0) as num?,
+      calories: ModelSanitizer.clampDouble(map['calories']),
+      protein: ModelSanitizer.clampDouble(map['protein']),
+      carbs: ModelSanitizer.clampDouble(map['carbs']),
+      fat: ModelSanitizer.clampDouble(map['fat']),
       notes: map['notes']?.toString(),
       aiBreakdownJson: map['ai_breakdown_json']?.toString(),
     );

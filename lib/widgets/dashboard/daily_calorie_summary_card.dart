@@ -1,8 +1,10 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/daily_goals.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_card.dart';
+import 'calories_hero_ring.dart';
+import 'macro_bento_card.dart';
 
 class DailyCalorieSummaryCard extends StatelessWidget {
   final double currentCalories;
@@ -60,61 +62,79 @@ class DailyCalorieSummaryCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
             children: [
-              Text(
-                currentCalories.toStringAsFixed(0),
-                style: GoogleFonts.outfit(
-                  fontSize: 34,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary(context),
-                  letterSpacing: -0.5,
-                ),
+              CaloriesHeroRing(
+                current: currentCalories,
+                goal: goals.calories,
+                size: 88,
+                strokeWidth: 8,
               ),
-              const SizedBox(width: 6),
-              Text(
-                '/ ${goals.calories.toStringAsFixed(0)} kcal',
-                style: GoogleFonts.inter(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary(context),
-                ),
-              ),
-              const Spacer(),
-              Text(
-                remaining >= 0
-                    ? '${remaining.toStringAsFixed(0)} restantes'
-                    : '+${(-remaining).toStringAsFixed(0)} exceso',
-                style: GoogleFonts.inter(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: remaining >= 0 ? AppColors.protein : AppColors.primary,
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Text(
+                          currentCalories.toStringAsFixed(0),
+                          style: GoogleFonts.outfit(
+                            fontSize: 34,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textPrimary(context),
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '/ ${goals.calories.toStringAsFixed(0)} kcal',
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.textSecondary(context),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      remaining >= 0
+                          ? '${remaining.toStringAsFixed(0)} restantes'
+                          : '+${(-remaining).toStringAsFixed(0)} exceso',
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: remaining >= 0 ? AppColors.protein : AppColors.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: calorieProgress,
+                        minHeight: 6,
+                        backgroundColor: AppColors.border(context),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          remaining >= 0 ? AppColors.primary : AppColors.primaryLight,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 10),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: LinearProgressIndicator(
-              value: calorieProgress,
-              minHeight: 8,
-              backgroundColor: AppColors.border(context),
-              valueColor: AlwaysStoppedAnimation<Color>(
-                remaining >= 0 ? AppColors.primary : AppColors.primaryLight,
-              ),
-            ),
           ),
           const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
-                child: _buildMacroColumn(
-                  context,
+                child: MacroBentoCard(
                   label: 'Proteína',
+                  iconEmoji: '🍗',
                   current: currentProtein,
                   goal: goals.protein,
                   color: AppColors.protein,
@@ -122,9 +142,9 @@ class DailyCalorieSummaryCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: _buildMacroColumn(
-                  context,
+                child: MacroBentoCard(
                   label: 'Carbos',
+                  iconEmoji: '🌾',
                   current: currentCarbs,
                   goal: goals.carbs,
                   color: AppColors.carbs,
@@ -132,79 +152,15 @@ class DailyCalorieSummaryCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: _buildMacroColumn(
-                  context,
+                child: MacroBentoCard(
                   label: 'Grasas',
+                  iconEmoji: '🥑',
                   current: currentFat,
                   goal: goals.fat,
                   color: AppColors.fat,
                 ),
               ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMacroColumn(
-    BuildContext context, {
-    required String label,
-    required double current,
-    required double goal,
-    required Color color,
-  }) {
-    final progress = goal > 0 ? (current / goal).clamp(0.0, 1.0) : 0.0;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceSubtle(context),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.border(context)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                label,
-                style: GoogleFonts.inter(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: color,
-                ),
-              ),
-              Text(
-                '${(progress * 100).toInt()}%',
-                style: GoogleFonts.inter(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textMuted(context),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '${current.toStringAsFixed(0)}/${goal.toStringAsFixed(0)}g',
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary(context),
-            ),
-          ),
-          const SizedBox(height: 6),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 4,
-              backgroundColor: AppColors.border(context),
-              valueColor: AlwaysStoppedAnimation<Color>(color),
-            ),
           ),
         ],
       ),

@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/models/food_item.dart';
 import 'package:food_tracker/models/meal.dart';
@@ -116,6 +116,15 @@ void main() {
       expect(updated.fat, equals(15.0));
       expect(updated.items.length, equals(3));
       expect(updated.items.first.name, equals('Arroz blanco'));
+    });
+
+    test('recalculateFromItems con lista vacía conserva macros existentes y no los resetea a cero', () {
+      final meal = Meal(name: 'Comida rápida', calories: 450, protein: 20, carbs: 50, fat: 12);
+      final updated = meal.recalculateFromItems([]);
+      expect(updated.calories, equals(450.0));
+      expect(updated.protein, equals(20.0));
+      expect(updated.carbs, equals(50.0));
+      expect(updated.fat, equals(12.0));
     });
   });
 }

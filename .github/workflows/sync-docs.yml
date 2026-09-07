@@ -1,0 +1,56 @@
+name: Sincronizar Docs a Obsidian
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'artifacts/**'
+
+jobs:
+  sync-to-vault:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Clonar Repositorio del Proyecto
+        uses: actions/checkout@v4
+        with:
+          path: source-repo
+
+      - name: 📥 Clonar Bóveda de Obsidian
+        uses: actions/checkout@v4
+        with:
+          repository: VICTOREB13/obsidian-obsidian-vault
+          token: ${{ secrets.VAULT_PAT }}
+          path: target-vault
+
+      - name: 🔄 Procesar, Renombrar y Copiar Artefactos
+        run: |
+          PROYECTO="Food_Tracker"
+          PREFIJO="PRJ_VEFoodTracker_"
+          RUTA_OBSIDIAN="target-vault/01_Proyectos/PRJ_$PROYECTO"
+          
+          mkdir -p "$RUTA_OBSIDIAN"
+          
+          find source-repo/artifacts -type f -name "*.md" | while read -r archivo_origen; do
+            nombre_base=$(basename "$archivo_origen")
+            cp "$archivo_origen" "$RUTA_OBSIDIAN/${PREFIJO}${nombre_base}"
+          done
+          
+          find "$RUTA_OBSIDIAN" -type f -name "*.md" | while read -r archivo_destino; do
+            sed -i "s/\[\[architecture\]\]/\[\[${PREFIJO}architecture|architecture\]\]/g" "$archivo_destino"
+            sed -i "s/\[\[api_spec\]\]/\[\[${PREFIJO}api_spec|api_spec\]\]/g" "$archivo_destino"
+            sed -i "s/\[\[implementation_plan\]\]/\[\[${PREFIJO}implementation_plan|implementation_plan\]\]/g" "$archivo_destino"
+            sed -i "s/\[\[task\]\]/\[\[${PREFIJO}task|task\]\]/g" "$archivo_destino"
+            sed -i "s/\[\[changelog_v1\]\]/\[\[${PREFIJO}changelog_v1|changelog_v1\]\]/g" "$archivo_destino"
+            sed -i "s/\[\[audit_report\]\]/\[\[${PREFIJO}audit_report|audit_report\]\]/g" "$archivo_destino"
+          done
+          
+      - name: 🚀 Empujar a Obsidian Vault
+        run: |
+          cd target-vault
+          git config user.name "Victor Engineer Bot"
+          git config user.email "bot@victorengineer.fyi"
+          git add .
+          git commit -m "docs: 🤖 Actualización automática de artefactos para PRJ_$PROYECTO" || echo "No hay cambios nuevos en los documentos"
+          git push

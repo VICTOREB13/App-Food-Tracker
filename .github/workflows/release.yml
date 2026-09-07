@@ -1,0 +1,222 @@
+name: Publicar Release Oficial
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  quality_gate:
+    name: Quality Gate (Analyze & Test)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar Código
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Configurar Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Restaurar Dependencias
+        run: flutter pub get
+
+      - name: Linter y Análisis Estático (Quality Gate)
+        run: flutter analyze
+
+      - name: Ejecutar Pruebas Automatizadas
+        run: flutter test --coverage
+
+  build_windows:
+    name: Compilar Ejecutable Windows x64
+    needs: [quality_gate]
+    runs-on: windows-latest
+
+    steps:
+      - name: Descargar Código
+        uses: actions/checkout@v4
+
+      - name: Configurar Entorno Visual Studio C++ (MSVC)
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Configurar Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Habilitar Soporte de Windows Desktop
+        run: flutter config --enable-windows-desktop
+
+      - name: Generar Archivos de Plataforma Windows
+        run: flutter create --platforms windows .
+
+      - name: Restaurar Dependencias
+        run: flutter pub get
+
+      - name: Compilar Aplicación para Windows
+        run: flutter build windows --release
+
+      - name: Empaquetar Binario en Archivo ZIP
+        shell: pwsh
+        run: |
+          $releasePath = if (Test-Path "build\windows\x64\runner\Release") { 
+              "build\windows\x64\runner\Release" 
+          } elseif (Test-Path "build\windows\runner\Release") { 
+              "build\windows\runner\Release" 
+          } else { 
+              Get-ChildItem -Path "build\windows" -Recurse -Filter "*.exe" | Select-Object -First 1 | ForEach-Object { $_.DirectoryName }
+          }
+          Write-Host "Comprimiendo release desde: $releasePath"
+          New-Item -ItemType Directory -Force -Path "dist"
+          Compress-Archive -Path "$releasePath\*" -DestinationPath "dist\Victor-Engineer-Food-Tracker-Windows-x64.zip" -Force
+
+      - name: Subir Artifact Temporal de Windows
+        uses: actions/upload-artifact@v4
+        with:
+          name: Victor-Engineer-Food-Tracker-Windows-x64
+          path: dist/Victor-Engineer-Food-Tracker-Windows-x64.zip
+
+  build_android:
+    name: Compilar APK Android
+    needs: [quality_gate]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar Código
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Configurar Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Generar Archivos de Plataforma Android
+        run: flutter create --platforms android .
+
+      - name: Configurar Compatibilidad de Android SDK (compileSdk 36)
+        run: |
+          echo "compileSdkVersion=36" >> android/gradle.properties
+          echo "flutter.compileSdkVersion=36" >> android/gradle.properties
+          echo "flutter.compileSdkVersion=36" >> android/local.properties 2>/dev/null || true
+
+          if [ -f "android/app/build.gradle" ]; then
+            sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 36/' android/app/build.gradle
+            sed -i 's/compileSdkVersion flutter.compileSdkVersion/compileSdkVersion 36/' android/app/build.gradle
+          fi
+          if [ -f "android/app/build.gradle.kts" ]; then
+            sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 36/' android/app/build.gradle.kts
+            sed -i 's/compileSdk = [0-9]*/compileSdk = 36/' android/app/build.gradle.kts
+          fi
+
+      - name: Configurar Nombre y Permisos
+        run: |
+          sed -i 's/android:label=".*"/android:label="VE Food Tracker"/' android/app/src/main/AndroidManifest.xml
+          sed -i '/<manifest/a \    <uses-permission android:name="android.permission.INTERNET" />' android/app/src/main/AndroidManifest.xml
+          sed -i '/<manifest/a \    <uses-permission android:name="android.permission.CAMERA" />' android/app/src/main/AndroidManifest.xml
+
+      - name: Configurar Firma Criptográfica Permanente (Keystore)
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          mkdir -p ~/.android
+          mkdir -p assets/keystore
+          if [ -n "$ANDROID_KEYSTORE_BASE64" ]; then
+            echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > assets/keystore/release.keystore
+            cp assets/keystore/release.keystore ~/.android/debug.keystore
+            echo "✅ Keystore restaurado desde GitHub Secrets (ANDROID_KEYSTORE_BASE64)"
+          elif [ -f "assets/keystore/release.keystore" ]; then
+            cp assets/keystore/release.keystore ~/.android/debug.keystore
+            echo "✅ Keystore local configurado"
+          else
+            echo "⚠️ No se detectó ANDROID_KEYSTORE_BASE64 ni release.keystore; se usará keystore por defecto"
+          fi
+
+      - name: Restaurar Dependencias
+        run: flutter pub get
+
+      - name: Alinear compileSdk 36 en dependencias de Gradle
+        run: |
+          mkdir -p ~/.gradle
+          echo "compileSdkVersion=36" >> ~/.gradle/gradle.properties
+          echo "compileSdk=36" >> ~/.gradle/gradle.properties
+          echo "flutter.compileSdkVersion=36" >> ~/.gradle/gradle.properties
+
+          for cp in "$HOME/.pub-cache" "${PUB_CACHE:-$HOME/.pub-cache}"; do
+            if [ -d "$cp" ]; then
+              find "$cp" -name "build.gradle" -exec sed -i -E 's/compileSdkVersion[ (].*/compileSdkVersion 36/g' {} + 2>/dev/null || true
+              find "$cp" -name "build.gradle" -exec sed -i -E 's/compileSdk [0-9]+/compileSdk 36/g' {} + 2>/dev/null || true
+            fi
+          done
+
+      - name: Extraer Versión de pubspec.yaml
+        id: app_version
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //' | cut -d '+' -f 1 | tr -d ' ')
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Versión detectada para APK: $VERSION"
+
+      - name: Compilar APK (Fat APK)
+        run: flutter build apk --release --build-name=${{ steps.app_version.outputs.VERSION }} --build-number=${{ github.run_number }}
+
+      - name: Renombrar APK para Release
+        run: |
+          mkdir -p dist
+          cp build/app/outputs/flutter-apk/app-release.apk dist/Victor-Engineer-Food-Tracker-Android.apk
+
+      - name: Subir Artifact Temporal de Android
+        uses: actions/upload-artifact@v4
+        with:
+          name: Victor-Engineer-Food-Tracker-Android-APK
+          path: dist/Victor-Engineer-Food-Tracker-Android.apk
+
+  publish_release:
+    name: Publicar GitHub Release
+    needs: [build_windows, build_android]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar Código
+        uses: actions/checkout@v4
+
+      - name: Descargar Artifacts Compilados
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+          path: ./dist
+
+      - name: Crear Release Oficial en GitHub
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Victor Engineer - Food Tracker ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            dist/Victor-Engineer-Food-Tracker-Windows-x64.zip
+            dist/Victor-Engineer-Food-Tracker-Android.apk

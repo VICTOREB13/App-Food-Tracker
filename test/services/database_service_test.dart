@@ -1,4 +1,4 @@
-﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:food_tracker/models/meal.dart';
@@ -129,23 +129,25 @@ void main() {
       expect(fetched, isNull);
     });
 
-    test('getMealsForDay filtra con precisión comidas por fecha', () async {
+    test('getMealsForDay filtra con precisión comidas por fecha incluyendo microsegundos límite', () async {
       final service = DatabaseService.instance;
       final day = DateTime(2026, 9, 6);
 
       final mealToday1 = Meal(id: 'm-t1', name: 'Desayuno', date: DateTime(2026, 9, 6, 8, 30));
       final mealToday2 = Meal(id: 'm-t2', name: 'Almuerzo', date: DateTime(2026, 9, 6, 13, 0));
+      final mealEndOfDay = Meal(id: 'm-end', name: 'Snack Medianoche', date: DateTime(2026, 9, 6, 23, 59, 59, 999, 999));
       final mealYesterday = Meal(id: 'm-y1', name: 'Cena Ayer', date: DateTime(2026, 9, 5, 20, 0));
       final mealTomorrow = Meal(id: 'm-tm1', name: 'Snack Mañana', date: DateTime(2026, 9, 7, 10, 0));
 
       await service.insertMeal(mealToday1);
       await service.insertMeal(mealToday2);
+      await service.insertMeal(mealEndOfDay);
       await service.insertMeal(mealYesterday);
       await service.insertMeal(mealTomorrow);
 
       final mealsForToday = await service.getMealsForDay(day);
-      expect(mealsForToday.length, equals(2));
-      expect(mealsForToday.map((m) => m.id), containsAll(['m-t1', 'm-t2']));
+      expect(mealsForToday.length, equals(3));
+      expect(mealsForToday.map((m) => m.id), containsAll(['m-t1', 'm-t2', 'm-end']));
       expect(mealsForToday.map((m) => m.id), isNot(contains('m-y1')));
       expect(mealsForToday.map((m) => m.id), isNot(contains('m-tm1')));
     });

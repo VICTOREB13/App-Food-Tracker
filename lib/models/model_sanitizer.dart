@@ -1,4 +1,4 @@
-﻿class ModelSanitizer {
+class ModelSanitizer {
   static const int maxNameLength = 255;
   static const int maxNotesLength = 2000;
   static const int maxPathLength = 1024;
@@ -22,12 +22,18 @@
   }
 
   static double clampDouble(
-    num? value, {
+    dynamic value, {
     double min = minMacroValue,
     double max = maxMacroValue,
   }) {
-    if (value == null || value.isNaN) return min;
-    final doubleVal = value.toDouble();
+    if (value == null) return min;
+    double? doubleVal;
+    if (value is num) {
+      doubleVal = value.toDouble();
+    } else {
+      doubleVal = double.tryParse(value.toString().trim());
+    }
+    if (doubleVal == null || doubleVal.isNaN) return min;
     if (doubleVal < min) return min;
     if (doubleVal > max) return max;
     return double.parse(doubleVal.toStringAsFixed(2));

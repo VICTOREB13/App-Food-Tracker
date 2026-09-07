@@ -1,4 +1,4 @@
-﻿import 'package:uuid/uuid.dart';
+import 'package:uuid/uuid.dart';
 import 'model_sanitizer.dart';
 
 class FoodItem {
@@ -73,11 +73,15 @@ class FoodItem {
     return FoodItem(
       id: json['id']?.toString(),
       name: (json['alimento'] ?? json['name'] ?? 'Alimento').toString(),
-      estimatedGrams: (json['gramos_estimados'] ?? json['estimated_grams'] ?? 0) as num?,
-      calories: (json['calorias'] ?? json['calories'] ?? 0) as num?,
-      protein: (json['proteinas_g'] ?? json['protein'] ?? 0) as num?,
-      carbs: (json['carbohidratos_g'] ?? json['carbs'] ?? 0) as num?,
-      fat: (json['grasas_g'] ?? json['fat'] ?? 0) as num?,
+      estimatedGrams: ModelSanitizer.clampDouble(
+        json['gramos_estimados'] ?? json['estimated_grams'],
+        min: 0.0,
+        max: 50000.0,
+      ),
+      calories: ModelSanitizer.clampDouble(json['calorias'] ?? json['calories']),
+      protein: ModelSanitizer.clampDouble(json['proteinas_g'] ?? json['protein']),
+      carbs: ModelSanitizer.clampDouble(json['carbohidratos_g'] ?? json['carbs']),
+      fat: ModelSanitizer.clampDouble(json['grasas_g'] ?? json['fat']),
       visualJustification: (json['justificacion_visual'] ?? json['visual_justification'])?.toString(),
     );
   }

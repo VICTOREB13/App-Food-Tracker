@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 import 'dart:typed_data';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import '../models/food_item.dart';
@@ -25,7 +25,18 @@ class MealAnalysisResult {
   });
 
   factory MealAnalysisResult.fromJsonString(String jsonStr) {
-    final Map<String, dynamic> data = json.decode(jsonStr);
+    var cleaned = jsonStr.trim();
+    if (cleaned.startsWith('```json')) {
+      cleaned = cleaned.substring(7);
+    } else if (cleaned.startsWith('```')) {
+      cleaned = cleaned.substring(3);
+    }
+    if (cleaned.endsWith('```')) {
+      cleaned = cleaned.substring(0, cleaned.length - 3);
+    }
+    cleaned = cleaned.trim();
+
+    final Map<String, dynamic> data = json.decode(cleaned);
     final String dish = (data['plato'] ?? 'Comida Analizada').toString();
 
     final List<FoodItem> parsedItems = [];
@@ -44,10 +55,10 @@ class MealAnalysisResult {
 
     if (data['totales'] is Map<String, dynamic>) {
       final totales = data['totales'] as Map<String, dynamic>;
-      cal = ModelSanitizer.clampDouble(totales['calorias'] as num?);
-      prot = ModelSanitizer.clampDouble(totales['proteina_g'] as num?);
-      carbs = ModelSanitizer.clampDouble(totales['carbohidratos_g'] as num?);
-      fat = ModelSanitizer.clampDouble(totales['grasas_g'] as num?);
+      cal = ModelSanitizer.clampDouble(totales['calorias']);
+      prot = ModelSanitizer.clampDouble(totales['proteina_g'] ?? totales['proteinas_g']);
+      carbs = ModelSanitizer.clampDouble(totales['carbohidratos_g']);
+      fat = ModelSanitizer.clampDouble(totales['grasas_g']);
     } else {
       for (final item in parsedItems) {
         cal += item.calories;
