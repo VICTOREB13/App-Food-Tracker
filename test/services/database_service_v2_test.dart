@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as p;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:food_tracker/models/user_profile.dart';
 import 'package:food_tracker/models/weight_log.dart';
@@ -115,10 +117,14 @@ void main() {
 
     test('Migración atómica v1 -> v2 preserva datos existentes de meals y crea tablas v2', () async {
       await DatabaseService.instance.closeForTesting();
+      final tempDbPath = p.join(
+        Directory.systemTemp.path,
+        'migration_test_${DateTime.now().microsecondsSinceEpoch}.db',
+      );
 
       // Open database as version 1
       var migrationDb = await databaseFactoryFfi.openDatabase(
-        inMemoryDatabasePath,
+        tempDbPath,
         options: OpenDatabaseOptions(
           version: 1,
           onCreate: (db, version) async {
@@ -169,7 +175,7 @@ void main() {
       // Upgrade to version 2 with onUpgrade
       await migrationDb.close();
       migrationDb = await databaseFactoryFfi.openDatabase(
-        inMemoryDatabasePath,
+        tempDbPath,
         options: OpenDatabaseOptions(
           version: 2,
           onUpgrade: (db, oldVersion, newVersion) async {
@@ -225,6 +231,12 @@ void main() {
       expect(fetchedLog!.weight, equals(75.0));
 
       await migrationDb.close();
+      final tempFile = File(tempDbPath);
+      if (tempFile.existsSync()) {
+        try {
+          tempFile.deleteSync();
+        } catch (_) {}
+      }
     });
 
     test('Operaciones CRUD completas de WeightLog', () async {

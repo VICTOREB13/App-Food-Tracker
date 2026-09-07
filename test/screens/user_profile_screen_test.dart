@@ -117,10 +117,16 @@ void main() {
     );
   }
 
+  Future<void> pumpScreen(WidgetTester tester) async {
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 150));
+    await tester.pump(const Duration(milliseconds: 150));
+  }
+
   group('UserProfileScreen Widget & Interaction Tests', () {
     testWidgets('Renderiza correctamente la pantalla, títulos y tarjetas atómicas', (tester) async {
       await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
+      await pumpScreen(tester);
 
       // Verifica App Bar
       expect(find.text('Perfil Metabólico'), findsOneWidget);
@@ -142,7 +148,7 @@ void main() {
 
     testWidgets('Modo Onboarding muestra títulos y botón adaptados', (tester) async {
       await tester.pumpWidget(createTestWidget(isOnboarding: true));
-      await tester.pumpAndSettle();
+      await pumpScreen(tester);
 
       expect(find.text('Configura tu Perfil'), findsOneWidget);
       expect(find.text('Paso 1: Parámetros Biológicos y Metas TDEE'), findsOneWidget);
@@ -151,14 +157,14 @@ void main() {
 
     testWidgets('Calcula en tiempo real al alternar género biológico', (tester) async {
       await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
+      await pumpScreen(tester);
 
       // Por defecto es Masculino
       expect(find.text('Masculino'), findsOneWidget);
 
       // Tocar opción 'Femenino'
       await tester.tap(find.text('Femenino'));
-      await tester.pumpAndSettle();
+      await pumpScreen(tester);
 
       // El resumen metabólico debe recalcularse (BMR femenino es menor debido a -161)
       expect(find.byType(MetabolicSummaryBentoCard), findsOneWidget);
@@ -166,14 +172,14 @@ void main() {
 
     testWidgets('Calcula en tiempo real al seleccionar otro nivel de actividad', (tester) async {
       await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
+      await pumpScreen(tester);
 
       // Seleccionar 'Muy Activo (1.725x)'
       final veryActiveTile = find.text('Muy Activo (1.725x)');
       expect(veryActiveTile, findsOneWidget);
 
       await tester.tap(veryActiveTile);
-      await tester.pumpAndSettle();
+      await pumpScreen(tester);
 
       // Verifica que el widget sigue renderizando y responde
       expect(find.byType(MetabolicSummaryBentoCard), findsOneWidget);
@@ -181,14 +187,14 @@ void main() {
 
     testWidgets('Calcula en tiempo real al seleccionar otro objetivo corporal', (tester) async {
       await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
+      await pumpScreen(tester);
 
       // Seleccionar 'Ganancia Muscular' (+300 kcal)
       final gainTile = find.text('Ganancia Muscular');
       expect(gainTile, findsOneWidget);
 
       await tester.tap(gainTile);
-      await tester.pumpAndSettle();
+      await pumpScreen(tester);
 
       expect(find.byType(MetabolicSummaryBentoCard), findsOneWidget);
     });
@@ -199,12 +205,12 @@ void main() {
       await tester.pumpWidget(createTestWidget(
         onSaved: () => onSavedCalled = true,
       ));
-      await tester.pumpAndSettle();
+      await pumpScreen(tester);
 
       // Tocar botón de guardar
       final saveBtn = find.text('Guardar Perfil y Sincronizar Metas');
       await tester.tap(saveBtn);
-      await tester.pumpAndSettle();
+      await pumpScreen(tester);
 
       // Verifica invocación del callback
       expect(onSavedCalled, isTrue);

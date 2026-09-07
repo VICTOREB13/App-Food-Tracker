@@ -73,7 +73,7 @@ class BarcodeLookupService {
 
     // Step 1: Check if USDA API key is configured
     final usdaApiKey = await _secureStorage.getUsdaApiKey();
-    if (usdaApiKey != null && usdaApiKey.isNotEmpty) {
+    if (usdaApiKey != null && usdaApiKey.trim().isNotEmpty) {
       try {
         final usdaItem = await _usdaService.fetchProductByBarcode(
           sanitized,

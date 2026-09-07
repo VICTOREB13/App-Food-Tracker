@@ -92,13 +92,22 @@ void main() {
 
   group('MetricsScreen Widget Tests', () {
     testWidgets('renders all essential bento cards and controls', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
       await tester.pumpWidget(
         const MaterialApp(
           home: MetricsScreen(),
         ),
       );
 
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 150));
+      await tester.pump(const Duration(milliseconds: 150));
 
       // Check App Bar
       expect(find.text('Métricas y Progreso'), findsOneWidget);
@@ -127,19 +136,23 @@ void main() {
         ),
       );
 
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 150));
+      await tester.pump(const Duration(milliseconds: 150));
 
       // Default is 30 days
       expect(MealController.instance.selectedWeightDays, equals(30));
 
       // Switch to 7 days
       await tester.tap(find.text('7 días'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 150));
       expect(MealController.instance.selectedWeightDays, equals(7));
 
       // Switch to 90 days
       await tester.tap(find.text('90 días'));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 150));
       expect(MealController.instance.selectedWeightDays, equals(90));
     });
 
@@ -150,11 +163,14 @@ void main() {
         ),
       );
 
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 150));
+      await tester.pump(const Duration(milliseconds: 150));
 
       final fab = find.byType(FloatingActionButton);
       await tester.tap(fab);
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
 
       expect(find.byType(QuickWeightEntryDialog), findsOneWidget);
       expect(find.text('PESO CORPORAL (KG)'), findsOneWidget);

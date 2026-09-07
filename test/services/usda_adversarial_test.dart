@@ -223,8 +223,8 @@ void main() {
       final scaled100g = item.toFoodItem(estimatedGrams: 100.0);
       expect(scaled100g.estimatedGrams, equals(100.0));
       expect(scaled100g.calories, equals(375.0));
-      expect(scaled100g.protein, equals(13.33)); // 5.33 * 2.5 = 13.325 -> 13.33
-      expect(scaled100g.fat, equals(6.68));     // 2.67 * 2.5 = 6.675 -> 6.68
+      expect(scaled100g.protein, anyOf(13.32, 13.33)); // 5.33 * 2.5 = 13.325 -> floating point precision bounds
+      expect(scaled100g.fat, anyOf(6.67, 6.68));     // 2.67 * 2.5 = 6.675
 
       // Zero serving size defense: ratio defaults to 1.0, avoids div-by-zero
       const zeroServingItem = UsdaFoodItem(

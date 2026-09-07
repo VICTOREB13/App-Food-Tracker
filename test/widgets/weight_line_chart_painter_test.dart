@@ -20,7 +20,10 @@ void main() {
         ),
       );
 
-      expect(find.byType(CustomPaint), findsOneWidget);
+      expect(
+        find.byWidgetPredicate((w) => w is CustomPaint && w.painter is WeightLineChartPainter),
+        findsOneWidget,
+      );
     });
 
     testWidgets('renders single log baseline and marker without errors', (tester) async {
@@ -46,7 +49,10 @@ void main() {
         ),
       );
 
-      expect(find.byType(CustomPaint), findsOneWidget);
+      expect(
+        find.byWidgetPredicate((w) => w is CustomPaint && w.painter is WeightLineChartPainter),
+        findsOneWidget,
+      );
     });
 
     testWidgets('renders multi-point trend curve with gradient and grid lines', (tester) async {
@@ -71,7 +77,10 @@ void main() {
         ),
       );
 
-      expect(find.byType(CustomPaint), findsOneWidget);
+      expect(
+        find.byWidgetPredicate((w) => w is CustomPaint && w.painter is WeightLineChartPainter),
+        findsOneWidget,
+      );
     });
 
     testWidgets('handles identical min and max weight without division by zero', (tester) async {
@@ -95,7 +104,10 @@ void main() {
         ),
       );
 
-      expect(find.byType(CustomPaint), findsOneWidget);
+      expect(
+        find.byWidgetPredicate((w) => w is CustomPaint && w.painter is WeightLineChartPainter),
+        findsOneWidget,
+      );
     });
 
     testWidgets('handles zero or tiny canvas size gracefully', (tester) async {
@@ -115,7 +127,10 @@ void main() {
         ),
       );
 
-      expect(find.byType(CustomPaint), findsOneWidget);
+      expect(
+        find.byWidgetPredicate((w) => w is CustomPaint && w.painter is WeightLineChartPainter),
+        findsOneWidget,
+      );
     });
 
     test('shouldRepaint detects changes accurately', () {

@@ -481,7 +481,7 @@ void main() {
     test('2.4 Special characters, symbols, and unicode emojis are preserved with rules intact', () {
       const specialPrompt = '''
       Usuario: Victor ✨🥑🥩
-      Símbolos: !@#\$%^&*()_+-=[]{}|;':",.<>?/~`
+      Símbolos: !@#\$%^&*()_+-=[]{}|;'",.<>?/~`
       Caracteres en español: Niño, güero, pingüino, ¿cuánto?, ¡atención!
       Notas: 100% libre de gluten.
       ''';
