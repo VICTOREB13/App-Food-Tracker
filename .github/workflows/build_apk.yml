@@ -55,17 +55,6 @@ jobs:
 
           if [ -f "android/build.gradle" ]; then
             sed -i "s/ext.kotlin_version = .*/ext.kotlin_version = '1.9.22'/" android/build.gradle 2>/dev/null || true
-            echo "" >> android/build.gradle
-            echo "subprojects {" >> android/build.gradle
-            echo "    afterEvaluate { project ->" >> android/build.gradle
-            echo "        if (project.hasProperty('android')) {" >> android/build.gradle
-            echo "            project.android {" >> android/build.gradle
-            echo "                compileSdkVersion 34" >> android/build.gradle
-            echo "                buildToolsVersion '34.0.0'" >> android/build.gradle
-            echo "            }" >> android/build.gradle
-            echo "        }" >> android/build.gradle
-            echo "    }" >> android/build.gradle
-            echo "}" >> android/build.gradle
           fi
 
       - name: Configurar Nombre de Aplicación y Permisos
