@@ -40,6 +40,7 @@ jobs:
           find "$RUTA_OBSIDIAN" -type f -name "*.md" | while read -r archivo_destino; do
             sed -i "s/\[\[architecture\]\]/\[\[${PREFIJO}architecture|architecture\]\]/g" "$archivo_destino"
             sed -i "s/\[\[api_spec\]\]/\[\[${PREFIJO}api_spec|api_spec\]\]/g" "$archivo_destino"
+            sed -i "s/\[\[design_system\]\]/\[\[${PREFIJO}design_system|design_system\]\]/g" "$archivo_destino"
             sed -i "s/\[\[implementation_plan\]\]/\[\[${PREFIJO}implementation_plan|implementation_plan\]\]/g" "$archivo_destino"
             sed -i "s/\[\[task\]\]/\[\[${PREFIJO}task|task\]\]/g" "$archivo_destino"
             sed -i "s/\[\[changelog_v1\]\]/\[\[${PREFIJO}changelog_v1|changelog_v1\]\]/g" "$archivo_destino"

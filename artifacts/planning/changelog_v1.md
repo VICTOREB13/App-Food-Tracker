@@ -1,10 +1,11 @@
 ---
-tipo: changelog
-proyecto: VE_FoodTracker
-version: v1.0.0
-estado: activo
-fecha: 2026-09-06
+title: Registro de Cambios (Changelog) - Victor Engineer Food Tracker
+status: active
 tags: [proyecto, changelog, versiones, keepachangelog, semver]
+agent: project-planner
+project: VE_FoodTracker
+version: v1.0.0
+date: 2026-09-06
 ---
 
 # 📜 Registro de Cambios (Changelog) - Victor Engineer Food Tracker
@@ -42,10 +43,12 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 - **Exportación e Importación de Respaldos:** Servicio `BackupService` con serialización JSON indentada y transacción atómica en SQLite para restauración sin riesgo de corrupción.
 - **Mantenimiento de Base de Datos:** Ejecución de `VACUUM` y monitoreo de estadísticas de almacenamiento (conteo de registros y peso en KB) en `SettingsScreen`.
 - **Descomposición Atómica de UI (< 300 LoC):** 25 widgets modulares y 3 pantallas maestras cumpliendo estrictamente la directriz de menos de 300 líneas de código.
-- **Batería de Pruebas Automatizadas:** 13 archivos de prueba cubriendo modelos, lógica de negocio de servicios y renderizado de widgets.
+- **Batería de Pruebas Automatizadas:** 15 archivos de prueba cubriendo modelos, controladores, lógica de negocio de servicios y renderizado de widgets.
 - **Pipelines de Integración Continua (CI/CD):** Flujos de GitHub Actions para Quality Gate (`ci.yml`), compilación de APK Android (`build_apk.yml`), binario de Windows (`build_windows.yml`) y publicación de releases oficiales (`release.yml`).
 
 ### Fixed
+- **Compatibilidad Flutter 3.22+ y 3.27+:** Implementada extensión ColorCompat para soportar .withValues(alpha: ...) en Flutter 3.22 sin fallas de compilación.
+- **Extracción Resiliente de JSON en Visión AI:** MealAnalysisResult soporta respuestas con texto conversacional previo o posterior a bloques Markdown y nombres alternativos de campos.
 - **Condiciones de Carrera en Base de Datos:** Resuelto problema potencial en arranques simultáneos mediante cacheo de `_initFuture` en el singleton `DatabaseService`.
 - **Rutas de Workflows de GitHub Actions:** Eliminada la asunción heredada de carpeta subyacente `./app`, normalizando la ejecución desde la raíz del repositorio.
 - **Recálculo de Macros en Comidas:** `recalculateFromItems` mantiene las macros manuales existentes si la lista de items está vacía, evitando reseteos accidentales a cero.

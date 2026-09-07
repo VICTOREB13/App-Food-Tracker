@@ -1,10 +1,11 @@
 ---
-tipo: task_list
-proyecto: VE_FoodTracker
-iteracion: v1.0.0
-estado: activo
-fecha: 2026-09-06
+title: Checklist Maestro de Tareas de Agentes (v1.0.0)
+status: active
 tags: [proyecto, tasks, checklist, subagents, roles]
+agent: project-planner
+project: VE_FoodTracker
+version: v1.0.0
+date: 2026-09-06
 ---
 
 # 📋 Checklist Maestro de Tareas de Agentes (v1.0.0)

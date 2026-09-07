@@ -1,10 +1,12 @@
 ---
-tipo: arquitectura
-proyecto: VE_FoodTracker
-version: v1.0.0
-estado: activo
-stack_principal: [Flutter 3.22+, SQLite WAL, Gemini 2.5 Flash, Open Food Facts, FlutterSecureStorage]
+title: Arquitectura del Sistema: Victor Engineer Food Tracker
+status: active
 tags: [proyecto, arquitectura, tech-stack, local-first, mobile, offline]
+agent: backend-architect
+project: App_Food_Tracker
+version: v1.0.0
+date: 2026-09-06
+stack_principal: [Flutter 3.22+, SQLite WAL, Gemini 2.5 Flash, Open Food Facts, FlutterSecureStorage]
 ---
 
 # 🏗️ Arquitectura del Sistema: Victor Engineer - Food Tracker (v1.0.0)

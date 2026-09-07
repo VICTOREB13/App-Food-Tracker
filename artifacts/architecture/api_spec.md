@@ -1,9 +1,11 @@
 ---
-tipo: api_spec
-proyecto: VE_FoodTracker
-version: v1.0.0
-estado: activo
+title: Especificación de API, Esquema SQLite y Contratos Backend
+status: active
 tags: [proyecto, api, backend, database, sqlite, gemini, contracts]
+agent: backend-architect
+project: App_Food_Tracker
+version: v1.0.0
+date: 2026-09-06
 ---
 
 # 📡 Especificación de Contrato de Datos, Esquema SQLite y Servicios Backend

@@ -26,18 +26,22 @@ class MealAnalysisResult {
 
   factory MealAnalysisResult.fromJsonString(String jsonStr) {
     var cleaned = jsonStr.trim();
-    if (cleaned.startsWith('```json')) {
-      cleaned = cleaned.substring(7);
-    } else if (cleaned.startsWith('```')) {
-      cleaned = cleaned.substring(3);
+    
+    // Check if wrapped in markdown code fence anywhere in the string
+    final jsonFenceMatch = RegExp(r'```(?:json)?\s*([\s\S]*?)\s*```').firstMatch(cleaned);
+    if (jsonFenceMatch != null) {
+      cleaned = jsonFenceMatch.group(1)!.trim();
+    } else {
+      // Fallback: extract substring between first '{' and last '}'
+      final firstBrace = cleaned.indexOf('{');
+      final lastBrace = cleaned.lastIndexOf('}');
+      if (firstBrace != -1 && lastBrace != -1 && lastBrace > firstBrace) {
+        cleaned = cleaned.substring(firstBrace, lastBrace + 1).trim();
+      }
     }
-    if (cleaned.endsWith('```')) {
-      cleaned = cleaned.substring(0, cleaned.length - 3);
-    }
-    cleaned = cleaned.trim();
 
     final Map<String, dynamic> data = json.decode(cleaned);
-    final String dish = (data['plato'] ?? 'Comida Analizada').toString();
+    final String dish = (data['plato'] ?? data['nombre'] ?? data['dish'] ?? data['name'] ?? 'Comida Analizada').toString();
 
     final List<FoodItem> parsedItems = [];
     if (data['items'] is List) {
@@ -53,12 +57,12 @@ class MealAnalysisResult {
     double carbs = 0.0;
     double fat = 0.0;
 
-    if (data['totales'] is Map<String, dynamic>) {
-      final totales = data['totales'] as Map<String, dynamic>;
-      cal = ModelSanitizer.clampDouble(totales['calorias']);
-      prot = ModelSanitizer.clampDouble(totales['proteina_g'] ?? totales['proteinas_g']);
-      carbs = ModelSanitizer.clampDouble(totales['carbohidratos_g']);
-      fat = ModelSanitizer.clampDouble(totales['grasas_g']);
+    final totalesMap = data['totales'] ?? data['totals'];
+    if (totalesMap is Map<String, dynamic>) {
+      cal = ModelSanitizer.clampDouble(totalesMap['calorias'] ?? totalesMap['calories'] ?? totalesMap['total_calorias']);
+      prot = ModelSanitizer.clampDouble(totalesMap['proteina_g'] ?? totalesMap['proteinas_g'] ?? totalesMap['protein'] ?? totalesMap['proteins_g']);
+      carbs = ModelSanitizer.clampDouble(totalesMap['carbohidratos_g'] ?? totalesMap['carbohidratos'] ?? totalesMap['carbs'] ?? totalesMap['carbohydrates_g']);
+      fat = ModelSanitizer.clampDouble(totalesMap['grasas_g'] ?? totalesMap['grasa_g'] ?? totalesMap['fat'] ?? totalesMap['fats_g']);
     } else {
       for (final item in parsedItems) {
         cal += item.calories;

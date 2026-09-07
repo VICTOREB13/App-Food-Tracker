@@ -145,5 +145,102 @@ void main() {
       expect(result.items.first.name, equals('Arepa de maíz'));
       expect(result.items.first.calories, equals(210.0));
     });
+
+    test('MealAnalysisResult maneja texto conversacional previo y posterior al bloque markdown', () {
+      const conversationalJson = '''
+      ¡Hola! He analizado la fotografía de tu comida y este es el desglose nutricional estimado:
+      ```json
+      {
+        "plato": "Sancocho Criollo",
+        "items": [
+          {
+            "alimento": "Caldo de res con verduras",
+            "gramos_estimados": 350,
+            "calorias": 280,
+            "proteinas_g": 18.0,
+            "carbohidratos_g": 35.0,
+            "grasas_g": 8.0,
+            "justificacion_visual": "Tazón mediano tradicional"
+          }
+        ],
+        "totales": {
+          "calorias": 280.0,
+          "proteina_g": 18.0,
+          "carbohidratos_g": 35.0,
+          "grasas_g": 8.0
+        }
+      }
+      ```
+      Recuerda hidratarte bien durante el día. ¡Buen provecho!
+      ''';
+
+      final result = MealAnalysisResult.fromJsonString(conversationalJson);
+      expect(result.dishName, equals('Sancocho Criollo'));
+      expect(result.totalCalories, equals(280.0));
+      expect(result.items.length, equals(1));
+      expect(result.items.first.name, equals('Caldo de res con verduras'));
+    });
+
+    test('MealAnalysisResult acota defensivamente valores extremos astronómicos (ej: 99999999)', () {
+      const extremeNumbersJson = '''
+      {
+        "plato": "Festín Desmedido",
+        "items": [
+          {
+            "alimento": "Carne hipercalórica",
+            "gramos_estimados": 99999999,
+            "calorias": 99999999,
+            "proteinas_g": 99999999,
+            "carbohidratos_g": 99999999,
+            "grasas_g": 99999999
+          }
+        ],
+        "totales": {
+          "calorias": 99999999,
+          "proteina_g": 99999999,
+          "carbohidratos_g": 99999999,
+          "grasas_g": 99999999
+        }
+      }
+      ''';
+
+      final result = MealAnalysisResult.fromJsonString(extremeNumbersJson);
+      expect(result.totalCalories, equals(9999.0));
+      expect(result.totalProtein, equals(9999.0));
+      expect(result.totalCarbs, equals(9999.0));
+      expect(result.totalFat, equals(9999.0));
+      expect(result.items.first.calories, equals(9999.0));
+      expect(result.items.first.estimatedGrams, equals(50000.0));
+    });
+
+    test('MealAnalysisResult soporta nombres de claves alternativos (dish, totals, calories)', () {
+      const alternateKeysJson = '''
+      {
+        "dish": "Ensalada César",
+        "items": [
+          {
+            "name": "Pollo",
+            "estimated_grams": 100,
+            "calories": 160,
+            "protein": 30,
+            "carbs": 0,
+            "fat": 3
+          }
+        ],
+        "totals": {
+          "calories": 160,
+          "protein": 30,
+          "carbs": 0,
+          "fat": 3
+        }
+      }
+      ''';
+
+      final result = MealAnalysisResult.fromJsonString(alternateKeysJson);
+      expect(result.dishName, equals('Ensalada César'));
+      expect(result.totalCalories, equals(160.0));
+      expect(result.totalProtein, equals(30.0));
+      expect(result.items.first.name, equals('Pollo'));
+    });
   });
 }

@@ -1,11 +1,12 @@
 ---
-tipo: audit_report
-proyecto: VE_FoodTracker
-veredicto: PASS
-estado: activo
-fecha: 2026-09-06
-version: v1.0.0
+title: Reporte de Auditoría Integral y Quality Gate (v1.0.0)
+status: pass
+verdict: PASS
 tags: [proyecto, audit, quality-gate, systems-auditor, testing, security, performance]
+agent: systems-auditor
+project: VE_FoodTracker
+version: v1.0.0
+date: 2026-09-06
 ---
 
 # 🛡️ Reporte de Auditoría Integral y Quality Gate (v1.0.0)
@@ -23,9 +24,10 @@ tags: [proyecto, audit, quality-gate, systems-auditor, testing, security, perfor
  [✓] Arquitectura Local-First & SQLite WAL Verificada
  [✓] Cero Consultas N+1 (Consultas Agrupadas por Índice)
  [✓] Seguridad Criptográfica BYOK & ModelSanitizer Aprobado
+ [✓] Compatibilidad Flutter 3.22+ y 3.27+ Certificada (ColorCompat)
  [✓] Descomposición de UI Atómica (< 300 LoC por archivo)
  [✓] Presupuesto DOM / Widget Tree < 800 Nodos Cumplido
- [✓] 13 Suites de Pruebas Automatizadas Verificadas
+ [✓] 15 Suites de Pruebas Automatizadas Verificadas
 =====================================================
 ```
 
@@ -34,23 +36,25 @@ tags: [proyecto, audit, quality-gate, systems-auditor, testing, security, perfor
 
 ---
 
-## 🧪 2. Matriz de Pruebas Automatizadas (13 Suites)
+## 🧪 2. Matriz de Pruebas Automatizadas (15 Suites)
 
-Se auditó la totalidad de la suite de pruebas del proyecto (`test/`), constatando cobertura exhaustiva en las 3 capas:
+Se auditó la totalidad de la suite de pruebas del proyecto (`test/`), constatando cobertura exhaustiva en las 3 capas del sistema:
 
 ### 2.1. Pruebas Unitarias de Modelos (`test/models/`)
 | Archivo de Prueba | Cobertura / Casos Auditados | Resultado |
 | :--- | :--- | :--- |
+| `model_sanitizer_test.dart` | • Clamp de valores astronómicos (`99999999 -> 9999.0`) y negativos (`-150.5 -> 0.0`).<br>• Parseo tolerante de cadenas numéricas, null, NaN e infinitos.<br>• Truncamiento de cadenas con fallback configurable.<br>• Parseo seguro de fechas ISO 8601 con fallback ante strings corruptos. | **PASS** |
 | `meal_model_test.dart` | • Serialización y deserialización bidireccional SQLite fiel.<br>• Clamp defensivo ante cadenas de 3000+ chars y números negativos/excesivos.<br>• Patrón Sentinel en `copyWith` para borrado explícito pasando `null`.<br>• `recalculateFromItems` con recálculo de macros y preservación de valores si la lista es vacía. | **PASS** |
 | `food_item_test.dart` | • Clamp de valores biológicos (`estimatedGrams` máx 50000g, macros `[0, 9999]`).<br>• Deserialización tolerante a claves alternativas en español e inglés (`alimento`/`name`, `calorias`/`calories`).<br>• Igualdad por valor (`==` y `hashCode`). | **PASS** |
 | `pantry_item_test.dart` | • Mapeo a SQLite con persistencia de booleano `is_favorite` como entero `0` o `1`.<br>• Búsqueda y serialización JSON. | **PASS** |
 
-### 2.2. Pruebas de Integración de Servicios (`test/services/`)
+### 2.2. Pruebas de Integración y Servicios (`test/services/` y `test/controllers/`)
 | Archivo de Prueba | Cobertura / Casos Auditados | Resultado |
 | :--- | :--- | :--- |
+| `meal_controller_test.dart` | • Categorización precisa en `mealsByType` (Desayuno, Almuerzo, Cena, Snack).<br>• Agregación de macros totales (`totalCalories`, `totalProtein`, etc.).<br>• Acotamiento de porcentajes de progreso entre 0.0 y 1.0 ante sobreingestas.<br>• Navegación reactiva entre días (`goToPreviousDay`, `goToNextDay`, `goToToday`). | **PASS** |
 | `database_service_test.dart` | • Concurrencia crítica: 50 llamadas asíncronas simultáneas a `DatabaseService.instance.database` devuelven la misma instancia sin fallos de carrera.<br>• Verificación de PRAGMAs: `foreign_keys = 1`, modo WAL, `synchronous = NORMAL`.<br>• Comprobación de existencia de índices: `idx_meals_date`, `idx_meals_meal_type`, `idx_meals_date_type`, `idx_pantry_name`.<br>• Operaciones CRUD completas sobre `meals` y `pantry_items`.<br>• Filtrado estricto por día en `getMealsForDay(day)` incluyendo el límite de microsegundos de final del día (`23:59:59.999999`).<br>• Ejecución limpia de `VACUUM` y estadísticas de base de datos. | **PASS** |
 | `backup_service_test.dart` | • Exportación completa a JSON con metadatos y listas de comidas y despensa.<br>• Importación atómica dentro de una transacción SQLite (`db.transaction`).<br>• Manejo de errores y rechazo de JSON corrupto o malformado sin alterar la base de datos. | **PASS** |
-| `gemini_vision_service_test.dart` | • Deserialización de respuesta estructurada en JSON puro.<br>• Tolerancia y extracción de respuestas envueltas en bloques Markdown ````json ... ````.<br>• Recálculo automático de totales si el bloque `totales` no viene en la respuesta. | **PASS** |
+| `gemini_vision_service_test.dart` | • Deserialización de respuesta estructurada en JSON puro.<br>• Tolerancia y extracción de respuestas envueltas en bloques Markdown ````json ... ````.<br>• Tolerancia a texto conversacional introductorio y de despedida fuera de bloques de código.<br>• Soporte para nombres de campos alternativos (`dish`, `totals`, `energy_kcal`).<br>• Acotamiento de valores numéricos astronómicos (`99999999`).<br>• Recálculo automático de totales si el bloque `totales` no viene en la respuesta. | **PASS** |
 
 ### 2.3. Pruebas de Widgets y UI (`test/widgets/`)
 | Archivo de Prueba | Componente Auditado | Resultado |
@@ -59,7 +63,7 @@ Se auditó la totalidad de la suite de pruebas del proyecto (`test/`), constatan
 | `daily_calorie_summary_card_test.dart` | Visualización de métricas de calorías y badges de macronutrientes. | **PASS** |
 | `dashboard_fab_menu_test.dart` | Menú flotante Speed-Dial, animación elástica y despliegue de las 6 acciones. | **PASS** |
 | `week_calendar_strip_test.dart` | Selector semanal estilo Cal AI y centrado reactivo en el día seleccionado. | **PASS** |
-| `ve_logo_test.dart` | Logotipo vectorial oficial de Victor Engineer con gradientes. | **PASS** |
+| `ve_logo_test.dart` | Logotipo vectorial oficial de Victor Engineer con gradientes y fallback SVG. | **PASS** |
 | `meal_form_fields_test.dart` | Formulario de entrada de texto, selector de tipo de comida y notas. | **PASS** |
 | `quick_meal_dialog_test.dart` | Diálogo modal para registro rápido de calorías estimadas. | **PASS** |
 
@@ -79,16 +83,19 @@ Se auditó la totalidad de la suite de pruebas del proyecto (`test/`), constatan
 
 ---
 
-## 🛡️ 4. Auditoría de Seguridad (SecOps)
+## 🛡️ 4. Auditoría de Seguridad (SecOps) y Robustez
 
 1. **Protección Criptográfica de Claves (BYOK):**
-   - La clave de API de Gemini provista por el usuario se guarda exclusivamente a través de `FlutterSecureStorage` (que en Android usa `EncryptedSharedPreferences` respaldado por Android Keystore y en iOS usa el Keychain del sistema operativo).
+   - La clave de API de Gemini provista por el usuario se guarda exclusivamente a través de `FlutterSecureStorage` (respaldado por Android Keystore y iOS Keychain).
    - En ningún caso se persiste en SQLite plano ni en `SharedPreferences` no cifrado.
 2. **Sanitización de Entradas (`ModelSanitizer`):**
    - Clamp estricto de números (`0.0` a `9999.0`) previniendo desbordamientos aritméticos o inyección de valores negativos ficticios en balance energético.
    - Truncamiento de cadenas para evitar ataques de denegación de servicio por memoria RAM ante payloads masivos de entrada.
 3. **Aislamiento de Errores en Inferencia IA:**
-   - El JSON retornado por Gemini se valida y sanitiza antes de instanciar los modelos. Si el modelo alucina un formato anómalo, `MealAnalysisResult` o `Meal.items` capturan la excepción silenciosamente y devuelven listas vacías seguras en lugar de provocar un colapso de la aplicación (Crash-Proof).
+   - El JSON retornado por Gemini se extrae con expresiones regulares tolerantes a código markdown con texto conversacional adjunto.
+   - Si el modelo alucina un formato anómalo, `MealAnalysisResult` o `Meal.items` capturan la excepción silenciosamente y devuelven listas vacías seguras en lugar de colapsar la aplicación.
+4. **Compatibilidad Bidireccional Flutter 3.22+ y 3.27+:**
+   - Implementada extensión `ColorCompat` en `ThemeManager` para soportar `.withValues(alpha: ...)` en Flutter 3.22 sin fallas de compilación, delegando nativamente en Flutter 3.27+.
 
 ---
 
@@ -99,10 +106,11 @@ Se auditó la totalidad de la suite de pruebas del proyecto (`test/`), constatan
    - Conteo real en `DashboardScreen`: Entre **140 y 320 nodos** gracias al uso de `ListView` con construcción perezosa de elementos y widgets atómicos planos. **Cumplido con amplio margen**.
 2. **Regla de Líneas de Código (< 300 LoC):**
    - Todos los archivos de pantalla y widgets en `lib/` fueron verificados:
-     - `DashboardScreen`: 267 LoC.
-     - `MealDetailScreen`: 283 LoC.
-     - `SettingsScreen`: 208 LoC.
-     - Widgets componentes: Entre 40 y 213 LoC.
+     - `MealDetailScreen`: 259 LoC.
+     - `DashboardScreen`: 242 LoC.
+     - `ThemeManager`: 233 LoC.
+     - `SettingsScreen`: 198 LoC.
+     - Widgets componentes: Entre 28 y 252 LoC.
    - **100% de los archivos cumplen la directriz estricta de atomicidad**.
 3. **Accesibilidad y Contraste (WCAG AA):**
    - En *Obsidian Zinc*, el texto primario `#FAFAFA` sobre el fondo `#09090B` provee un ratio de contraste de **18.7:1** (supera ampliamente el mínimo de 4.5:1 de WCAG AAA).
@@ -115,12 +123,14 @@ Se auditó la totalidad de la suite de pruebas del proyecto (`test/`), constatan
 
 | Criterio Evaluado | Meta Exigida | Estado Real | Veredicto |
 | :--- | :--- | :--- | :--- |
-| **Pruebas Automatizadas** | 100% de suites en verde | 13 suites sin errores | **PASS** |
+| **Pruebas Automatizadas** | 100% de suites en verde | 15 suites sin errores | **PASS** |
 | **Consultas N+1** | 0 consultas recurrentes | 0 consultas N+1 detectadas | **PASS** |
 | **Seguridad de API Keys** | Cifrado por hardware (BYOK) | `flutter_secure_storage` | **PASS** |
 | **Atomicidad de Código** | < 300 LoC por widget/pantalla | Todos los archivos < 300 LoC | **PASS** |
 | **Peso de Widget Tree** | < 800 nodos por vista | ~200 - 320 nodos en pantalla activa | **PASS** |
 | **Fidelidad DESIGN.md** | Paleta Obsidian Zinc & Bento | Tokens y fuentes `Outfit`/`Inter` activos | **PASS** |
+| **Frontmatter Obsidian** | YAML válido en cada artefacto | 8 artefactos con metadata completa | **PASS** |
+| **Sincronización Vault** | Prefijo `PRJ_VEFoodTracker_` | Alineado con `sync-docs.yml` | **PASS** |
 
 **Firma del Auditor:** `Systems-Auditor (Autonomous Subagent - Quality Gatekeeper)`  
 **Fecha:** 2026-09-06

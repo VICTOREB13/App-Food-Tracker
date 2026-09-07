@@ -1,10 +1,11 @@
 ---
-tipo: overview
-proyecto: VE_FoodTracker
-estado: activo
-fecha: 2026-09-06
-version: v1.0.0
+title: Visión General del Proyecto: Victor Engineer Food Tracker
+status: active
 tags: [proyecto, overview, victor-engineer, local-first, flutter, ai-vision, bento-grid]
+agent: project-planner
+project: VE_FoodTracker
+version: v1.0.0
+date: 2026-09-06
 ---
 
 # 🚀 Visión General del Proyecto: Victor Engineer - Food Tracker (NutriTracker Local-First)
