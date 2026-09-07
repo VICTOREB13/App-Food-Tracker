@@ -65,7 +65,7 @@ void main() {
 
   testWidgets('NutriTrackerApp boots and renders DashboardScreen without crashing', (tester) async {
     await tester.pumpWidget(const NutriTrackerApp());
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 200));
 
     expect(find.byType(NutriTrackerApp), findsOneWidget);
     expect(ThemeManager.instance, isNotNull);
@@ -75,7 +75,7 @@ void main() {
     await DatabaseService.instance.closeForTesting();
 
     await tester.pumpWidget(const NutriTrackerApp());
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 200));
 
     expect(find.byType(NutriTrackerApp), findsOneWidget);
   });
