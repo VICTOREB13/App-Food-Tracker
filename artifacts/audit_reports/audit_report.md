@@ -4,7 +4,7 @@ status: pass
 verdict: PASS
 tags: [proyecto, audit, quality-gate, systems-auditor, testing, security, performance]
 agent: systems-auditor
-project: VE_FoodTracker
+project: App_Food_Tracker
 version: v1.0.0
 date: 2026-09-06
 ---

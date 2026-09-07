@@ -3,7 +3,7 @@ title: Plan de Implementación: Victor Engineer Food Tracker (MVP v1.0.0)
 status: completed
 tags: [proyecto, planning, mvp, local-first, evolutionary-prototyping]
 agent: project-planner
-project: VE_FoodTracker
+project: App_Food_Tracker
 version: v1.0.0
 date: 2026-09-06
 ---

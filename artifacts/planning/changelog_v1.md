@@ -3,7 +3,7 @@ title: Registro de Cambios (Changelog) - Victor Engineer Food Tracker
 status: active
 tags: [proyecto, changelog, versiones, keepachangelog, semver]
 agent: project-planner
-project: VE_FoodTracker
+project: App_Food_Tracker
 version: v1.0.0
 date: 2026-09-06
 ---

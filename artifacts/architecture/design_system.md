@@ -3,7 +3,7 @@ title: Sistema de Diseño y Tokens UI/UX
 status: approved
 tags: [design-system, ui-ux, flutter, bento-grid, cal-ai, vitalis, speed-dial, obsidian-zinc, victor-engineer, local-first]
 agent: frontend-ui
-project: VE_FoodTracker
+project: App_Food_Tracker
 version: v1.0.0
 date: 2026-09-06
 ---

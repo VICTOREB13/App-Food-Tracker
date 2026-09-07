@@ -3,7 +3,7 @@ title: Checklist Maestro de Tareas de Agentes (v1.0.0)
 status: active
 tags: [proyecto, tasks, checklist, subagents, roles]
 agent: project-planner
-project: VE_FoodTracker
+project: App_Food_Tracker
 version: v1.0.0
 date: 2026-09-06
 ---
