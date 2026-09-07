@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'screens/dashboard_screen.dart';
 import 'services/database_service.dart';
 import 'services/theme_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  try {
+    await initializeDateFormatting('es', null);
+  } catch (e) {
+    debugPrint('DateFormatting initialization warning: $e');
+  }
 
   try {
     await DatabaseService.instance.init();

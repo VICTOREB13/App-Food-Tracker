@@ -27,26 +27,30 @@ class DateSelectorBar extends StatelessWidget {
   }
 
   String _formatDate() {
-    final now = DateTime.now();
-    if (selectedDate.year == now.year &&
-        selectedDate.month == now.month &&
-        selectedDate.day == now.day) {
-      return 'Hoy, ${DateFormat('d MMM', 'es').format(selectedDate)}';
-    }
-    final yesterday = DateTime(now.year, now.month, now.day - 1);
-    if (selectedDate.year == yesterday.year &&
-        selectedDate.month == yesterday.month &&
-        selectedDate.day == yesterday.day) {
-      return 'Ayer, ${DateFormat('d MMM', 'es').format(selectedDate)}';
-    }
-    final tomorrow = DateTime(now.year, now.month, now.day + 1);
-    if (selectedDate.year == tomorrow.year &&
-        selectedDate.month == tomorrow.month &&
-        selectedDate.day == tomorrow.day) {
-      return 'Mañana, ${DateFormat('d MMM', 'es').format(selectedDate)}';
-    }
+    try {
+      final now = DateTime.now();
+      if (selectedDate.year == now.year &&
+          selectedDate.month == now.month &&
+          selectedDate.day == now.day) {
+        return 'Hoy, ${DateFormat('d MMM', 'es').format(selectedDate)}';
+      }
+      final yesterday = DateTime(now.year, now.month, now.day - 1);
+      if (selectedDate.year == yesterday.year &&
+          selectedDate.month == yesterday.month &&
+          selectedDate.day == yesterday.day) {
+        return 'Ayer, ${DateFormat('d MMM', 'es').format(selectedDate)}';
+      }
+      final tomorrow = DateTime(now.year, now.month, now.day + 1);
+      if (selectedDate.year == tomorrow.year &&
+          selectedDate.month == tomorrow.month &&
+          selectedDate.day == tomorrow.day) {
+        return 'Mañana, ${DateFormat('d MMM', 'es').format(selectedDate)}';
+      }
 
-    return DateFormat('EEE, d MMM yyyy', 'es').format(selectedDate);
+      return DateFormat('EEE, d MMM yyyy', 'es').format(selectedDate);
+    } catch (_) {
+      return '${selectedDate.day.toString().padLeft(2, '0')}/${selectedDate.month.toString().padLeft(2, '0')}/${selectedDate.year}';
+    }
   }
 
   @override

@@ -2,10 +2,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/main.dart';
 import 'package:food_tracker/services/database_service.dart';
 import 'package:food_tracker/services/theme_manager.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
-  setUpAll(() {
+  setUpAll(() async {
+    await initializeDateFormatting('es', null);
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
   });
