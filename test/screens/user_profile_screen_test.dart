@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/models/user_profile.dart';
 import 'package:food_tracker/screens/user_profile_screen.dart';
 import 'package:food_tracker/services/database_service.dart';
 import 'package:food_tracker/services/secure_storage_service.dart';
