@@ -20,6 +20,7 @@ import '../widgets/dashboard/quick_meal_dialog.dart';
 import '../widgets/dashboard/streak_badge.dart';
 import '../widgets/dashboard/week_calendar_strip.dart';
 import 'meal_detail_screen.dart';
+import 'metrics_screen.dart';
 import 'settings_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -65,6 +66,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final bytes = await file.readAsBytes();
     if (!mounted) return;
 
+    final selectedModel = await SecureStorageService.instance.getSelectedGeminiModel();
+    final masterPrompt = await SecureStorageService.instance.getMasterPrompt();
+    final effectiveModel = selectedModel ?? GeminiVisionService.defaultModel;
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -76,7 +81,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const SizedBox(width: 16),
             Expanded(
               child: Text(
-                'Analizando con Gemini 2.5 Flash...\nCubicando volumen y macros.',
+                'Analizando con $effectiveModel...\nCubicando volumen y macros.',
                 style: GoogleFonts.inter(fontSize: 13),
               ),
             ),
@@ -86,7 +91,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
 
     try {
-      final gemini = GeminiVisionService(apiKey: apiKey);
+      final gemini = GeminiVisionService(
+        apiKey: apiKey,
+        modelName: effectiveModel,
+        masterPrompt: masterPrompt,
+      );
       final analysis = await gemini.analyzeMealPhoto(rawImageBytes: bytes);
       final savedPath = await ImageProcessingService.instance.saveMealImage(
         bytes,
@@ -170,21 +179,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
     try {
       await _mealController.saveMeal(waterMeal);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('💧 +250 ml de agua registrados con éxito.'),
-          backgroundColor: AppColors.water,
-          duration: Duration(seconds: 2),
-        ),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('💧 +250 ml de agua registrados con éxito.'),
+        backgroundColor: AppColors.water,
+        duration: Duration(seconds: 2),
+      ));
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error al registrar agua: $e'),
-          backgroundColor: AppColors.primary,
-        ),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Error al registrar agua: $e'),
+        backgroundColor: AppColors.primary,
+      ));
     }
   }
 
@@ -194,20 +199,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
       try {
         await _mealController.saveMeal(quickMeal);
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('⚡ ${quickMeal.name} registrado (${quickMeal.calories.toInt()} kcal).'),
-            backgroundColor: AppColors.protein,
-          ),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('⚡ ${quickMeal.name} registrado (${quickMeal.calories.toInt()} kcal).'),
+          backgroundColor: AppColors.protein,
+        ));
       } catch (e) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error al registrar comida rápida: $e'),
-            backgroundColor: AppColors.primary,
-          ),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Error al registrar comida rápida: $e'),
+          backgroundColor: AppColors.primary,
+        ));
       }
     }
   }
@@ -222,7 +223,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
         subtitle: 'Victor Engineer',
         actions: [
           const Center(child: StreakBadge(streakDays: 3)),
-          const SizedBox(width: 4),
+          IconButton(
+            icon: const Icon(Icons.insights_outlined),
+            tooltip: 'Métricas',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const MetricsScreen()),
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             tooltip: 'Ajustes',

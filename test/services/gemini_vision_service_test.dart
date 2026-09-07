@@ -242,5 +242,50 @@ void main() {
       expect(result.totalProtein, equals(30.0));
       expect(result.items.first.name, equals('Pollo'));
     });
+
+    test('buildSystemInstruction sin master prompt retorna baseSystemInstruction idéntica', () {
+      final defaultInstruction = GeminiVisionService.buildSystemInstruction();
+      expect(defaultInstruction, equals(GeminiVisionService.baseSystemInstruction));
+      expect(defaultInstruction, equals(GeminiVisionService.systemInstruction));
+
+      final emptyInstruction = GeminiVisionService.buildSystemInstruction('   ');
+      expect(emptyInstruction, equals(GeminiVisionService.baseSystemInstruction));
+    });
+
+    test('buildSystemInstruction inyecta Master Prompt del usuario manteniendo reglas volumétricas', () {
+      const masterPrompt = '''
+      Usuario: Victor, 30 años, 80kg, 180cm
+      Objetivo: Déficit calórico (-500 kcal)
+      Meta diaria: 1950 kcal, 160g proteína
+      ''';
+
+      final prompt = GeminiVisionService.buildSystemInstruction(masterPrompt);
+
+      // Preserves original clinical volumetric rules
+      expect(prompt, contains('Puño cerrado'));
+      expect(prompt, contains('Palma de la mano'));
+      expect(prompt, contains('Pulgar'));
+      expect(prompt, contains('Grasa Oculta'));
+
+      // Injects Master Prompt section and user details
+      expect(prompt, contains('--- CONTEXTO BIOLÓGICO Y METAS DEL COMENSAL (MASTER PROMPT) ---'));
+      expect(prompt, contains('Victor, 30 años, 80kg'));
+      expect(prompt, contains('Déficit calórico (-500 kcal)'));
+      expect(prompt, contains('Ajusta tus estimaciones y observaciones'));
+    });
+
+    test('GeminiVisionService inicializa con modelo por defecto o custom y masterPrompt opcional', () {
+      final serviceDefault = GeminiVisionService(apiKey: 'dummy-key');
+      expect(serviceDefault.modelName, equals('gemini-2.5-flash'));
+      expect(serviceDefault.masterPrompt, isNull);
+
+      final serviceCustom = GeminiVisionService(
+        apiKey: 'dummy-key',
+        modelName: 'gemini-2.5-pro',
+        masterPrompt: 'Contexto de usuario',
+      );
+      expect(serviceCustom.modelName, equals('gemini-2.5-pro'));
+      expect(serviceCustom.masterPrompt, equals('Contexto de usuario'));
+    });
   });
 }

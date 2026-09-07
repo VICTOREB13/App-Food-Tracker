@@ -1,10 +1,15 @@
-﻿# Flutter & Dart
+# Flutter & Dart
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
 .packages
 build/
 coverage/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
 
 # OS & IDE
 .DS_Store

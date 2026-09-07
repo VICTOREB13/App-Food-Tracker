@@ -87,10 +87,11 @@ class MealAnalysisResult {
 class GeminiVisionService {
   final String apiKey;
   final String modelName;
+  final String? masterPrompt;
 
   static const String defaultModel = 'gemini-2.5-flash';
 
-  static const String systemInstruction = '''
+  static const String baseSystemInstruction = '''
 Eres un nutricionista clínico y experto en estimación volumétrica visual de alimentos sin báscula para comidas caseras latinoamericanas y familiares.
 
 Reglas obligatorias de cubicaje:
@@ -111,20 +112,44 @@ Reglas obligatorias de cubicaje:
    - Responde únicamente con el JSON definido en el esquema.
 ''';
 
+  /// Backward-compatible alias preserving exact test suite assertions
+  static const String systemInstruction = baseSystemInstruction;
+
+  /// Builds dynamic system instruction injecting user biological profile & TDEE goals
+  static String buildSystemInstruction([String? masterPrompt]) {
+    final buffer = StringBuffer(baseSystemInstruction);
+    if (masterPrompt != null && masterPrompt.trim().isNotEmpty) {
+      buffer.writeln('\n--- CONTEXTO BIOLÓGICO Y METAS DEL COMENSAL (MASTER PROMPT) ---');
+      buffer.writeln(masterPrompt.trim());
+      buffer.writeln('Ajusta tus estimaciones y observaciones considerando las metas calóricas, requerimientos y contexto nutricional del comensal.');
+    }
+    return buffer.toString();
+  }
+
   GeminiVisionService({
     required this.apiKey,
     this.modelName = defaultModel,
+    this.masterPrompt,
   });
 
   Future<MealAnalysisResult> analyzeMealPhoto({
     required Uint8List rawImageBytes,
     String? userContext,
+    String? overrideModel,
+    String? overrideMasterPrompt,
   }) async {
     final compressedBytes = ImageProcessingService.instance.compressAndResize(
       rawImageBytes,
       targetMaxDimension: 1024,
       quality: 85,
     );
+
+    final effectiveModel = (overrideModel != null && overrideModel.trim().isNotEmpty)
+        ? overrideModel.trim()
+        : modelName;
+
+    final effectivePrompt = overrideMasterPrompt ?? masterPrompt;
+    final effectiveInstruction = buildSystemInstruction(effectivePrompt);
 
     final schema = Schema.object(
       description: 'Desglose nutricional y volumétrico de comida casera',
@@ -156,9 +181,9 @@ Reglas obligatorias de cubicaje:
     );
 
     final model = GenerativeModel(
-      model: modelName,
+      model: effectiveModel,
       apiKey: apiKey,
-      systemInstruction: Content.system(systemInstruction),
+      systemInstruction: Content.system(effectiveInstruction),
       generationConfig: GenerationConfig(
         responseMimeType: 'application/json',
         responseSchema: schema,

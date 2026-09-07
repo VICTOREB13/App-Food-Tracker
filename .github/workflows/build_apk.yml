@@ -24,7 +24,6 @@ jobs:
       - name: Configurar Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.0'
           channel: 'stable'
           cache: true
 
@@ -59,7 +58,7 @@ jobs:
 
       - name: Configurar Nombre de Aplicación y Permisos
         run: |
-          sed -i 's/android:label=".*"/android:label="VE Food Tracker"/' android/app/src/main/AndroidManifest.xml
+          sed -i 's/android:label=".*"/android:label="Food Tracker"/' android/app/src/main/AndroidManifest.xml
           sed -i '/<manifest/a \    <uses-permission android:name="android.permission.INTERNET" />' android/app/src/main/AndroidManifest.xml
           sed -i '/<manifest/a \    <uses-permission android:name="android.permission.CAMERA" />' android/app/src/main/AndroidManifest.xml
 

@@ -1,6 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'model_sanitizer.dart';
 
+@immutable
 class DailyGoals {
+  static const Object _sentinel = Object();
+
   final double calories;
   final double protein;
   final double carbs;
@@ -14,22 +18,22 @@ class DailyGoals {
   });
 
   DailyGoals copyWith({
-    dynamic calories,
-    dynamic protein,
-    dynamic carbs,
-    dynamic fat,
+    Object? calories = _sentinel,
+    Object? protein = _sentinel,
+    Object? carbs = _sentinel,
+    Object? fat = _sentinel,
   }) {
     return DailyGoals(
-      calories: calories != null
+      calories: !identical(calories, _sentinel)
           ? ModelSanitizer.clampDouble(calories, min: 500, max: 10000)
           : this.calories,
-      protein: protein != null
+      protein: !identical(protein, _sentinel)
           ? ModelSanitizer.clampDouble(protein, min: 10, max: 1000)
           : this.protein,
-      carbs: carbs != null
+      carbs: !identical(carbs, _sentinel)
           ? ModelSanitizer.clampDouble(carbs, min: 10, max: 1000)
           : this.carbs,
-      fat: fat != null
+      fat: !identical(fat, _sentinel)
           ? ModelSanitizer.clampDouble(fat, min: 10, max: 1000)
           : this.fat,
     );

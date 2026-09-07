@@ -7,6 +7,8 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import '../models/meal.dart';
 import '../models/pantry_item.dart';
+import '../models/user_profile.dart';
+import '../models/weight_log.dart';
 
 class DatabaseService {
   static DatabaseService? _instance;
@@ -100,35 +102,54 @@ class DatabaseService {
 
     return await openDatabase(
       dbPath,
-      version: 1,
-      onConfigure: (db) async {
-        // WAL mode: rawQuery is required because PRAGMA journal_mode returns a row result.
-        // Android SQLiteDatabase.execSQL() throws SQLException if executed as a statement.
-        try {
-          await db.rawQuery('PRAGMA journal_mode = WAL;');
-        } catch (e) {
-          debugPrint('Warning: Failed to set PRAGMA journal_mode: $e');
-        }
-
-        try {
-          await db.execute('PRAGMA synchronous = NORMAL;');
-        } catch (e) {
-          debugPrint('Warning: Failed to set PRAGMA synchronous: $e');
-        }
-
-        try {
-          await db.execute('PRAGMA foreign_keys = ON;');
-        } catch (e) {
-          debugPrint('Warning: Failed to set PRAGMA foreign_keys: $e');
-        }
-      },
+      version: 2,
+      onConfigure: _onConfigure,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
+  Future<void> _onConfigure(Database db) async {
+    // WAL mode: rawQuery is required because PRAGMA journal_mode returns a row result.
+    // Android SQLiteDatabase.execSQL() throws SQLException if executed as a statement.
+    try {
+      await db.rawQuery('PRAGMA journal_mode = WAL;');
+    } catch (e) {
+      debugPrint('Warning: Failed to set PRAGMA journal_mode: $e');
+    }
+
+    try {
+      await db.execute('PRAGMA synchronous = NORMAL;');
+    } catch (e) {
+      debugPrint('Warning: Failed to set PRAGMA synchronous: $e');
+    }
+
+    try {
+      await db.execute('PRAGMA foreign_keys = ON;');
+    } catch (e) {
+      debugPrint('Warning: Failed to set PRAGMA foreign_keys: $e');
+    }
+  }
+
   Future<void> _onCreate(Database db, int version) async {
+    await _createMealsTable(db);
+    await _createPantryTable(db);
+    await _createWeightLogsTable(db);
+    await _createUserProfileTable(db);
+    await _createIndices(db);
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await _createWeightLogsTable(db);
+      await _createUserProfileTable(db);
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_weight_logs_date ON weight_logs(date);');
+    }
+  }
+
+  Future<void> _createMealsTable(DatabaseExecutor db) async {
     await db.execute('''
-      CREATE TABLE meals (
+      CREATE TABLE IF NOT EXISTS meals (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         meal_type TEXT NOT NULL,
@@ -142,9 +163,11 @@ class DatabaseService {
         ai_breakdown_json TEXT
       )
     ''');
+  }
 
+  Future<void> _createPantryTable(DatabaseExecutor db) async {
     await db.execute('''
-      CREATE TABLE pantry_items (
+      CREATE TABLE IF NOT EXISTS pantry_items (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         brand TEXT,
@@ -156,19 +179,56 @@ class DatabaseService {
         is_favorite INTEGER NOT NULL DEFAULT 0
       )
     ''');
+  }
 
-    await _createIndices(db);
+  Future<void> _createWeightLogsTable(DatabaseExecutor db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS weight_logs (
+        id TEXT PRIMARY KEY,
+        date TEXT NOT NULL,
+        weight REAL NOT NULL,
+        notes TEXT
+      )
+    ''');
+  }
+
+  Future<void> _createUserProfileTable(DatabaseExecutor db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS user_profile (
+        id TEXT PRIMARY KEY,
+        name TEXT,
+        age INTEGER NOT NULL,
+        gender TEXT NOT NULL,
+        height REAL NOT NULL,
+        weight REAL NOT NULL,
+        activity_level TEXT NOT NULL,
+        body_goal TEXT NOT NULL,
+        estimated_steps INTEGER NOT NULL DEFAULT 8000,
+        bmr REAL NOT NULL,
+        tdee REAL NOT NULL,
+        target_calories REAL NOT NULL,
+        target_protein REAL NOT NULL,
+        target_carbs REAL NOT NULL,
+        target_fat REAL NOT NULL,
+        master_prompt TEXT,
+        updated_at TEXT NOT NULL
+      )
+    ''');
   }
 
   Future<void> _createIndices(DatabaseExecutor db) async {
     await db.execute('CREATE INDEX IF NOT EXISTS idx_meals_date ON meals(date);');
     await db.execute('CREATE INDEX IF NOT EXISTS idx_meals_meal_type ON meals(meal_type);');
     await db.execute('CREATE INDEX IF NOT EXISTS idx_meals_date_type ON meals(date, meal_type);');
-
     await db.execute('CREATE INDEX IF NOT EXISTS idx_pantry_name ON pantry_items(name COLLATE NOCASE);');
     await db.execute('CREATE INDEX IF NOT EXISTS idx_pantry_category ON pantry_items(category);');
     await db.execute('CREATE INDEX IF NOT EXISTS idx_pantry_favorite ON pantry_items(is_favorite);');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_weight_logs_date ON weight_logs(date);');
   }
+
+  // ==========================================
+  // MEALS OPERATIONS
+  // ==========================================
 
   Future<int> insertMeal(Meal meal) async {
     final db = await database;
@@ -225,6 +285,10 @@ class DatabaseService {
     final results = await db.query('meals', orderBy: 'date DESC');
     return results.map((m) => Meal.fromSqliteMap(m)).toList();
   }
+
+  // ==========================================
+  // PANTRY OPERATIONS
+  // ==========================================
 
   Future<int> insertPantryItem(PantryItem item) async {
     final db = await database;
@@ -285,6 +349,159 @@ class DatabaseService {
     return results.map((p) => PantryItem.fromSqliteMap(p)).toList();
   }
 
+  // ==========================================
+  // WEIGHT LOGS OPERATIONS (PHASE 2 - MILESTONE 1)
+  // ==========================================
+
+  Future<int> insertWeightLog(WeightLog log) async {
+    final db = await database;
+    return await db.insert(
+      'weight_logs',
+      log.toSqliteMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<int> updateWeightLog(WeightLog log) async {
+    final db = await database;
+    return await db.update(
+      'weight_logs',
+      log.toSqliteMap(),
+      where: 'id = ?',
+      whereArgs: [log.id],
+    );
+  }
+
+  Future<int> deleteWeightLog(String id) async {
+    final db = await database;
+    return await db.delete(
+      'weight_logs',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<WeightLog?> getWeightLogById(String id) async {
+    final db = await database;
+    try {
+      final results = await db.query(
+        'weight_logs',
+        where: 'id = ?',
+        whereArgs: [id],
+        limit: 1,
+      );
+      if (results.isEmpty) return null;
+      return WeightLog.fromSqliteMap(results.first);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<List<WeightLog>> getAllWeightLogs() async {
+    final db = await database;
+    try {
+      final results = await db.query(
+        'weight_logs',
+        orderBy: 'date DESC',
+      );
+      return results.map((m) => WeightLog.fromSqliteMap(m)).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<WeightLog?> getLatestWeightLog() async {
+    final db = await database;
+    try {
+      final results = await db.query(
+        'weight_logs',
+        orderBy: 'date DESC',
+        limit: 1,
+      );
+      if (results.isEmpty) return null;
+      return WeightLog.fromSqliteMap(results.first);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<List<WeightLog>> getWeightLogsByRange(DateTime startDate, DateTime endDate) async {
+    final db = await database;
+    try {
+      final results = await db.query(
+        'weight_logs',
+        where: 'date >= ? AND date <= ?',
+        whereArgs: [startDate.toIso8601String(), endDate.toIso8601String()],
+        orderBy: 'date ASC',
+      );
+      return results.map((m) => WeightLog.fromSqliteMap(m)).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<List<WeightLog>> getWeightLogsLastDays(int days) async {
+    final now = DateTime.now();
+    final startDate = now.subtract(Duration(days: days));
+    return await getWeightLogsByRange(startDate, now);
+  }
+
+  Future<void> batchUpsertWeightLogs(List<WeightLog> logs) async {
+    if (logs.isEmpty) return;
+    final db = await database;
+    await db.transaction((txn) async {
+      final batch = txn.batch();
+      for (final log in logs) {
+        batch.insert(
+          'weight_logs',
+          log.toSqliteMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+      await batch.commit(noResult: true);
+    });
+  }
+
+  // ==========================================
+  // USER PROFILE OPERATIONS (PHASE 2 - MILESTONE 1)
+  // ==========================================
+
+  Future<int> saveUserProfile(UserProfile profile) async {
+    final db = await database;
+    return await db.insert(
+      'user_profile',
+      profile.toSqliteMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<UserProfile?> getUserProfile() async {
+    final db = await database;
+    try {
+      final results = await db.query(
+        'user_profile',
+        limit: 1,
+      );
+      if (results.isEmpty) return null;
+      return UserProfile.fromSqliteMap(results.first);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<int> deleteUserProfile({String id = 'primary'}) async {
+    final db = await database;
+    return await db.delete(
+      'user_profile',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  // ==========================================
+  // MAINTENANCE & TELEMETRY
+  // ==========================================
+
   Future<void> executeVacuum() async {
     final db = await database;
     await db.execute('VACUUM;');
@@ -298,6 +515,18 @@ class DatabaseService {
     final pantryCountRes = await db.rawQuery('SELECT COUNT(*) as count FROM pantry_items;');
     final pantryCount = Sqflite.firstIntValue(pantryCountRes) ?? 0;
 
+    int weightCount = 0;
+    try {
+      final weightCountRes = await db.rawQuery('SELECT COUNT(*) as count FROM weight_logs;');
+      weightCount = Sqflite.firstIntValue(weightCountRes) ?? 0;
+    } catch (_) {}
+
+    int profileCount = 0;
+    try {
+      final profileCountRes = await db.rawQuery('SELECT COUNT(*) as count FROM user_profile;');
+      profileCount = Sqflite.firstIntValue(profileCountRes) ?? 0;
+    } catch (_) {}
+
     int fileSizeBytes = 0;
     try {
       final dbPath = await _getDatabasePath();
@@ -310,6 +539,8 @@ class DatabaseService {
     return {
       'meals_count': mealsCount,
       'pantry_count': pantryCount,
+      'weight_logs_count': weightCount,
+      'has_user_profile': profileCount > 0,
       'file_size_bytes': fileSizeBytes,
       'file_size_kb': (fileSizeBytes / 1024).toStringAsFixed(1),
     };

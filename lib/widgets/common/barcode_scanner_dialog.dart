@@ -1,7 +1,7 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/pantry_item.dart';
-import '../../services/open_food_facts_service.dart';
+import '../../services/barcode_lookup_service.dart';
 import '../../services/theme_manager.dart';
 
 Future<PantryItem?> showBarcodeScannerDialog(BuildContext context) {
@@ -39,13 +39,13 @@ class _BarcodeScannerDialogState extends State<_BarcodeScannerDialog> {
     });
 
     try {
-      final item = await OpenFoodFactsService.instance.fetchProductByBarcode(code);
+      final item = await BarcodeLookupService.instance.lookupBarcode(code);
       if (!mounted) return;
       if (item != null) {
         Navigator.of(context).pop(item);
       } else {
         setState(() {
-          _errorMessage = 'Producto no encontrado en Open Food Facts.';
+          _errorMessage = 'Producto no encontrado en USDA ni Open Food Facts.';
           _isLoading = false;
         });
       }

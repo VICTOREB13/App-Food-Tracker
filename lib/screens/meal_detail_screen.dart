@@ -89,9 +89,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
       backgroundColor: AppColors.surface(context),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
       builder: (ctx) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -121,10 +119,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
       compressed,
       widget.initialMeal?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
     );
-
-    setState(() {
-      _imagePath = savedPath;
-    });
+    setState(() => _imagePath = savedPath);
   }
 
   Future<void> _saveMeal() async {
@@ -138,20 +133,12 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
 
     setState(() => _isSaving = true);
     try {
-      final baseMeal = widget.initialMeal ??
-          Meal(
-            name: name,
-            mealType: _mealType,
-            date: _date,
-            imagePath: _imagePath,
-            calories: _calories,
-            protein: _protein,
-            carbs: _carbs,
-            fat: _fat,
-            notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
-          );
-
-      final mealWithDetails = baseMeal.copyWith(
+      final notes = _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null;
+      final mealWithDetails = (widget.initialMeal ?? Meal(
+        name: name,
+        mealType: _mealType,
+        date: _date,
+      )).copyWith(
         name: name,
         mealType: _mealType,
         date: _date,
@@ -160,7 +147,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
         protein: _protein,
         carbs: _carbs,
         fat: _fat,
-        notes: _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null,
+        notes: notes,
       );
 
       final updated = _items.isNotEmpty
