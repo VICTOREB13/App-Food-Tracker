@@ -44,7 +44,6 @@ jobs:
     name: Compilar Ejecutable Windows x64
     needs: [quality_gate]
     runs-on: windows-2022
-    continue-on-error: true
 
     steps:
       - name: Descargar Código
@@ -196,7 +195,7 @@ jobs:
   publish_release:
     name: Publicar GitHub Release
     needs: [quality_gate, build_windows, build_android]
-    if: always() && !cancelled() && needs.quality_gate.result == 'success' && (needs.build_android.result == 'success' || needs.build_windows.result == 'success')
+    if: always() && !cancelled() && needs.quality_gate.result == 'success' && needs.build_android.result == 'success' && needs.build_windows.result == 'success'
     runs-on: ubuntu-latest
 
     steps:
@@ -219,7 +218,7 @@ jobs:
           draft: false
           prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') }}
           generate_release_notes: true
-          fail_on_unmatched_files: false
+          fail_on_unmatched_files: true
           files: |
             dist/*.apk
             dist/*.zip

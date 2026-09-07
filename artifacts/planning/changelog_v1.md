@@ -24,7 +24,7 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
-## [1.0.0] - 2026-09-06
+## [0.1.0-alpha] - 2026-09-06
 
 ### Added
 - **Arquitectura Local-First:** Base de datos SQLite local (`sqflite` y `sqflite_common_ffi`) configurada con `PRAGMA journal_mode = WAL;`, `PRAGMA synchronous = NORMAL;` y `PRAGMA foreign_keys = ON;` para lecturas y escrituras no bloqueantes con latencia inferior a 16 ms.
