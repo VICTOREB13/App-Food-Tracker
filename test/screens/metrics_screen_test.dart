@@ -10,10 +10,12 @@ import 'package:food_tracker/widgets/metrics/macro_distribution_bento_card.dart'
 import 'package:food_tracker/widgets/metrics/quick_weight_entry_dialog.dart';
 import 'package:food_tracker/widgets/metrics/streak_compliance_bento_card.dart';
 import 'package:food_tracker/widgets/metrics/weight_trend_bento_card.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
   setUpAll(() {
+    GoogleFonts.config.allowRuntimeFetching = false;
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
   });

@@ -8,6 +8,7 @@ import 'package:food_tracker/services/secure_storage_service.dart';
 import 'package:food_tracker/widgets/profile/activity_goal_selector_card.dart';
 import 'package:food_tracker/widgets/profile/biometric_inputs_card.dart';
 import 'package:food_tracker/widgets/profile/metabolic_summary_bento_card.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class FakeFlutterSecureStorage extends Fake implements FlutterSecureStorage {
@@ -60,6 +61,7 @@ class FakeFlutterSecureStorage extends Fake implements FlutterSecureStorage {
 
 void main() {
   setUpAll(() {
+    GoogleFonts.config.allowRuntimeFetching = false;
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
   });
