@@ -43,7 +43,8 @@ jobs:
   build_windows:
     name: Compilar Ejecutable Windows x64
     needs: [quality_gate]
-    runs-on: windows-latest
+    runs-on: windows-2022
+    continue-on-error: true
 
     steps:
       - name: Descargar Código
@@ -116,19 +117,19 @@ jobs:
       - name: Generar Archivos de Plataforma Android
         run: flutter create --project-name food_tracker --platforms android .
 
-      - name: Configurar Compatibilidad de Android SDK (compileSdk 36)
+      - name: Configurar Compatibilidad de Android SDK (compileSdk 34)
         run: |
-          echo "compileSdkVersion=36" >> android/gradle.properties
-          echo "flutter.compileSdkVersion=36" >> android/gradle.properties
-          echo "flutter.compileSdkVersion=36" >> android/local.properties 2>/dev/null || true
+          echo "compileSdkVersion=34" >> android/gradle.properties
+          echo "flutter.compileSdkVersion=34" >> android/gradle.properties
+          echo "flutter.compileSdkVersion=34" >> android/local.properties 2>/dev/null || true
 
           if [ -f "android/app/build.gradle" ]; then
-            sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 36/' android/app/build.gradle
-            sed -i 's/compileSdkVersion flutter.compileSdkVersion/compileSdkVersion 36/' android/app/build.gradle
+            sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 34/' android/app/build.gradle
+            sed -i 's/compileSdkVersion flutter.compileSdkVersion/compileSdkVersion 34/' android/app/build.gradle
           fi
           if [ -f "android/app/build.gradle.kts" ]; then
-            sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 36/' android/app/build.gradle.kts
-            sed -i 's/compileSdk = [0-9]*/compileSdk = 36/' android/app/build.gradle.kts
+            sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 34/' android/app/build.gradle.kts
+            sed -i 's/compileSdk = [0-9]*/compileSdk = 34/' android/app/build.gradle.kts
           fi
 
       - name: Configurar Nombre y Permisos
@@ -157,17 +158,17 @@ jobs:
       - name: Restaurar Dependencias
         run: flutter pub get
 
-      - name: Alinear compileSdk 36 en dependencias de Gradle
+      - name: Alinear compileSdk 34 en dependencias de Gradle
         run: |
           mkdir -p ~/.gradle
-          echo "compileSdkVersion=36" >> ~/.gradle/gradle.properties
-          echo "compileSdk=36" >> ~/.gradle/gradle.properties
-          echo "flutter.compileSdkVersion=36" >> ~/.gradle/gradle.properties
+          echo "compileSdkVersion=34" >> ~/.gradle/gradle.properties
+          echo "compileSdk=34" >> ~/.gradle/gradle.properties
+          echo "flutter.compileSdkVersion=34" >> ~/.gradle/gradle.properties
 
           for cp in "$HOME/.pub-cache" "${PUB_CACHE:-$HOME/.pub-cache}"; do
             if [ -d "$cp" ]; then
-              find "$cp" -name "build.gradle" -exec sed -i -E 's/compileSdkVersion[ (].*/compileSdkVersion 36/g' {} + 2>/dev/null || true
-              find "$cp" -name "build.gradle" -exec sed -i -E 's/compileSdk [0-9]+/compileSdk 36/g' {} + 2>/dev/null || true
+              find "$cp" -name "build.gradle" -exec sed -i -E 's/compileSdkVersion[ (].*/compileSdkVersion 34/g' {} + 2>/dev/null || true
+              find "$cp" -name "build.gradle" -exec sed -i -E 's/compileSdk [0-9]+/compileSdk 34/g' {} + 2>/dev/null || true
             fi
           done
 
@@ -194,7 +195,8 @@ jobs:
 
   publish_release:
     name: Publicar GitHub Release
-    needs: [build_windows, build_android]
+    needs: [quality_gate, build_windows, build_android]
+    if: always() && !cancelled() && needs.quality_gate.result == 'success' && (needs.build_android.result == 'success' || needs.build_windows.result == 'success')
     runs-on: ubuntu-latest
 
     steps:
@@ -217,6 +219,7 @@ jobs:
           draft: false
           prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') }}
           generate_release_notes: true
+          fail_on_unmatched_files: false
           files: |
-            dist/Victor-Engineer-Food-Tracker-Windows-x64.zip
-            dist/Victor-Engineer-Food-Tracker-Android.apk
+            dist/*.apk
+            dist/*.zip

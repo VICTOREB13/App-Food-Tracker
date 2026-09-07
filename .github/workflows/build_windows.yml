@@ -6,7 +6,7 @@ on:
 jobs:
   build_windows:
     name: Construir Ejecutable Windows x64 (Victor Engineer Food Tracker)
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     steps:
       - name: Descargar Código
