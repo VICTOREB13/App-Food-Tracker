@@ -181,7 +181,7 @@ jobs:
           mkdir -p ~/.android
           mkdir -p assets/keystore
           if [ -n "$ANDROID_KEYSTORE_BASE64" ]; then
-            echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > assets/keystore/release.keystore
+            echo "$ANDROID_KEYSTORE_BASE64" | tr -d '\r\n ' | base64 -d -i > assets/keystore/release.keystore
             cp assets/keystore/release.keystore ~/.android/debug.keystore
             echo "✅ Keystore restaurado desde GitHub Secrets (ANDROID_KEYSTORE_BASE64)"
           elif [ -f "assets/keystore/release.keystore" ]; then
