@@ -56,22 +56,53 @@ class DatabaseService {
     await database;
   }
 
+  Future<String> _getDatabasePath() async {
+    if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
+      final directory = await getApplicationDocumentsDirectory();
+      return p.join(directory.path, 'app_food_tracker.db');
+    } else {
+      try {
+        final databasesPath = await getDatabasesPath();
+        return p.join(databasesPath, 'app_food_tracker.db');
+      } catch (e) {
+        debugPrint('Warning: getDatabasesPath failed ($e), falling back to getApplicationDocumentsDirectory');
+        final directory = await getApplicationDocumentsDirectory();
+        return p.join(directory.path, 'app_food_tracker.db');
+      }
+    }
+  }
+
   Future<Database> _initDatabase() async {
-    if (!kIsWeb && (Platform.isWindows || Platform.isLinux)) {
+    if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
       sqfliteFfiInit();
       databaseFactory = databaseFactoryFfi;
     }
 
-    final directory = await getApplicationDocumentsDirectory();
-    final dbPath = p.join(directory.path, 'app_food_tracker.db');
+    final dbPath = await _getDatabasePath();
 
     return await openDatabase(
       dbPath,
       version: 1,
       onConfigure: (db) async {
-        await db.execute('PRAGMA journal_mode = WAL;');
-        await db.execute('PRAGMA synchronous = NORMAL;');
-        await db.execute('PRAGMA foreign_keys = ON;');
+        // WAL mode: rawQuery is required because PRAGMA journal_mode returns a row result.
+        // Android SQLiteDatabase.execSQL() throws SQLException if executed as a statement.
+        try {
+          await db.rawQuery('PRAGMA journal_mode = WAL;');
+        } catch (e) {
+          debugPrint('Warning: Failed to set PRAGMA journal_mode: $e');
+        }
+
+        try {
+          await db.execute('PRAGMA synchronous = NORMAL;');
+        } catch (e) {
+          debugPrint('Warning: Failed to set PRAGMA synchronous: $e');
+        }
+
+        try {
+          await db.execute('PRAGMA foreign_keys = ON;');
+        } catch (e) {
+          debugPrint('Warning: Failed to set PRAGMA foreign_keys: $e');
+        }
       },
       onCreate: _onCreate,
     );
@@ -251,8 +282,7 @@ class DatabaseService {
 
     int fileSizeBytes = 0;
     try {
-      final directory = await getApplicationDocumentsDirectory();
-      final dbPath = p.join(directory.path, 'app_food_tracker.db');
+      final dbPath = await _getDatabasePath();
       final file = File(dbPath);
       if (await file.exists()) {
         fileSizeBytes = await file.length();

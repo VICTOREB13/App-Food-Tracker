@@ -47,9 +47,27 @@ jobs:
           } else { 
               Get-ChildItem -Path "build\windows" -Recurse -Filter "*.exe" | Select-Object -First 1 | ForEach-Object { $_.DirectoryName }
           }
-          Write-Host "Empaquetando desde: $releasePath"
+          Write-Host "Directorio de release detectado: $releasePath"
+
+          # Verificar y asegurar que sqlite3.dll este presente en el directorio de release
+          if (-not (Test-Path "$releasePath\sqlite3.dll")) {
+              Write-Warning "sqlite3.dll no esta directamente en $releasePath. Buscando en build\windows..."
+              $foundSqlite = Get-ChildItem -Path "build\windows" -Recurse -Filter "sqlite3.dll" | Select-Object -First 1
+              if ($foundSqlite) {
+                  Write-Host "Copiando $($foundSqlite.FullName) a $releasePath"
+                  Copy-Item -Path $foundSqlite.FullName -Destination $releasePath -Force
+              } else {
+                  Write-Error "ERROR: sqlite3.dll no fue encontrado en ningun lugar de build\windows!"
+                  exit 1
+              }
+          }
+
+          Write-Host "Archivos a empaquetar en $releasePath:"
+          Get-ChildItem -Path $releasePath | Select-Object Name, Length, LastWriteTime | Format-Table -AutoSize
+
           New-Item -ItemType Directory -Force -Path "dist"
           Compress-Archive -Path "$releasePath\*" -DestinationPath "dist\Victor-Engineer-Food-Tracker-Windows-x64.zip" -Force
+          Write-Host "Archivo ZIP generado exitosamente en dist\Victor-Engineer-Food-Tracker-Windows-x64.zip"
 
       - name: Subir Binario de Windows al Artifact
         uses: actions/upload-artifact@v4

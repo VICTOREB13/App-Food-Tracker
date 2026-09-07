@@ -1,12 +1,22 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'screens/dashboard_screen.dart';
 import 'services/database_service.dart';
 import 'services/theme_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await DatabaseService.instance.init();
-  await ThemeManager.instance.loadTheme();
+
+  try {
+    await DatabaseService.instance.init();
+  } catch (e, stack) {
+    debugPrint('Database initialization warning: $e\n$stack');
+  }
+
+  try {
+    await ThemeManager.instance.loadTheme();
+  } catch (e, stack) {
+    debugPrint('Theme initialization warning: $e\n$stack');
+  }
 
   runApp(const NutriTrackerApp());
 }
