@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -241,7 +240,7 @@ void main() {
     });
 
     test('Fallback models list is populated and contains standard models', () {
-      final fallbacks = GeminiModelService.fallbackModels;
+      const fallbacks = GeminiModelService.fallbackModels;
       expect(fallbacks.length, greaterThanOrEqualTo(3));
       expect(fallbacks.any((m) => m.name == 'gemini-2.5-flash'), isTrue);
       expect(fallbacks.any((m) => m.name == 'gemini-2.0-flash'), isTrue);

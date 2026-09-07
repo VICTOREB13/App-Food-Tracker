@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/models/user_profile.dart';
 import 'package:food_tracker/screens/user_profile_screen.dart';
 import 'package:food_tracker/services/database_service.dart';
 import 'package:food_tracker/services/secure_storage_service.dart';
 import 'package:food_tracker/widgets/profile/activity_goal_selector_card.dart';
 import 'package:food_tracker/widgets/profile/biometric_inputs_card.dart';
 import 'package:food_tracker/widgets/profile/metabolic_summary_bento_card.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class FakeFlutterSecureStorage extends Fake implements FlutterSecureStorage {

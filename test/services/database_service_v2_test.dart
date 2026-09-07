@@ -1,8 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:food_tracker/models/meal.dart';
-import 'package:food_tracker/models/pantry_item.dart';
 import 'package:food_tracker/models/user_profile.dart';
 import 'package:food_tracker/models/weight_log.dart';
 import 'package:food_tracker/services/database_service.dart';

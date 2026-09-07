@@ -263,12 +263,12 @@ void main() {
       expect(prompt, contains('## 2. Nivel de Actividad y Gasto Energético'));
       expect(prompt, contains('10000 pasos/día'));
       expect(prompt, contains('1750 kcal/día'));
-      expect(prompt, contains('2712 kcal/día') | contains('2713 kcal/día'));
+      expect(prompt, anyOf(contains('2712 kcal/día'), contains('2713 kcal/día')));
 
       // Sección 3: Metas
       expect(prompt, contains('## 3. Metas Metabólicas y Objetivos'));
       expect(prompt, contains('Pérdida de Grasa'));
-      expect(prompt, contains('2212 kcal/día') | contains('2213 kcal/día'));
+      expect(prompt, anyOf(contains('2212 kcal/día'), contains('2213 kcal/día')));
 
       // Sección 4: Macronutrientes
       expect(prompt, contains('## 4. Distribución de Macronutrientes Objetivo'));

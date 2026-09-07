@@ -7,13 +7,13 @@ void main() {
   group('WeightLineChartPainter Tests', () {
     testWidgets('renders empty state placeholder when logs is empty', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: SizedBox(
               width: 300,
               height: 180,
               child: CustomPaint(
-                painter: const WeightLineChartPainter(logs: []),
+                painter: WeightLineChartPainter(logs: []),
               ),
             ),
           ),

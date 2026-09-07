@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/controllers/meal_controller.dart';
 import 'package:food_tracker/services/database_service.dart';
 import 'package:food_tracker/widgets/metrics/quick_weight_entry_dialog.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {

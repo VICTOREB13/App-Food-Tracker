@@ -20,13 +20,13 @@ void main() {
           gender: 'male',
           weightKg: tc['w']! as double,
           heightCm: tc['h']! as double,
-          age: (tc['a']! as num).toInt(),
+          age: tc['a']! as int,
         );
         final bmrFemale = MetabolicCalculator.calculateBmr(
           gender: 'female',
           weightKg: tc['w']! as double,
           heightCm: tc['h']! as double,
-          age: (tc['a']! as num).toInt(),
+          age: tc['a']! as int,
         );
 
         final diff = double.parse((bmrMale - bmrFemale).toStringAsFixed(1));

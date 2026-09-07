@@ -1,12 +1,9 @@
-import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:food_tracker/models/gemini_model_info.dart';
-import 'package:food_tracker/models/daily_goals.dart';
 import 'package:food_tracker/services/gemini_model_service.dart';
 import 'package:food_tracker/services/gemini_vision_service.dart';
 import 'package:food_tracker/services/secure_storage_service.dart';
@@ -476,7 +473,7 @@ void main() {
     });
 
     test('2.3 Whitespace-only string Master Prompt returns baseSystemInstruction verbatim', () {
-      final result = GeminiVisionService.buildSystemInstruction("   \n\t  \r \n  ");
+      final result = GeminiVisionService.buildSystemInstruction('   \n\t  \r \n  ');
       expect(result, equals(GeminiVisionService.baseSystemInstruction));
       verifyClinicalVolumetricRulesIntact(result);
     });
