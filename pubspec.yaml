@@ -2,7 +2,7 @@ name: food_tracker
 description: "Victor Engineer - Food Tracker (NutriTracker Local-First)"
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 0.1.0-alpha+1
 
 environment:
   sdk: '>=3.2.0 <4.0.0'
