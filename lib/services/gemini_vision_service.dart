@@ -1,0 +1,176 @@
+﻿import 'dart:convert';
+import 'dart:typed_data';
+import 'package:google_generative_ai/google_generative_ai.dart';
+import '../models/food_item.dart';
+import '../models/model_sanitizer.dart';
+import 'image_processing_service.dart';
+
+class MealAnalysisResult {
+  final String dishName;
+  final List<FoodItem> items;
+  final double totalCalories;
+  final double totalProtein;
+  final double totalCarbs;
+  final double totalFat;
+  final String rawJson;
+
+  const MealAnalysisResult({
+    required this.dishName,
+    required this.items,
+    required this.totalCalories,
+    required this.totalProtein,
+    required this.totalCarbs,
+    required this.totalFat,
+    required this.rawJson,
+  });
+
+  factory MealAnalysisResult.fromJsonString(String jsonStr) {
+    final Map<String, dynamic> data = json.decode(jsonStr);
+    final String dish = (data['plato'] ?? 'Comida Analizada').toString();
+
+    final List<FoodItem> parsedItems = [];
+    if (data['items'] is List) {
+      for (final itemMap in (data['items'] as List)) {
+        if (itemMap is Map<String, dynamic>) {
+          parsedItems.add(FoodItem.fromJson(itemMap));
+        }
+      }
+    }
+
+    double cal = 0.0;
+    double prot = 0.0;
+    double carbs = 0.0;
+    double fat = 0.0;
+
+    if (data['totales'] is Map<String, dynamic>) {
+      final totales = data['totales'] as Map<String, dynamic>;
+      cal = ModelSanitizer.clampDouble(totales['calorias'] as num?);
+      prot = ModelSanitizer.clampDouble(totales['proteina_g'] as num?);
+      carbs = ModelSanitizer.clampDouble(totales['carbohidratos_g'] as num?);
+      fat = ModelSanitizer.clampDouble(totales['grasas_g'] as num?);
+    } else {
+      for (final item in parsedItems) {
+        cal += item.calories;
+        prot += item.protein;
+        carbs += item.carbs;
+        fat += item.fat;
+      }
+    }
+
+    return MealAnalysisResult(
+      dishName: dish,
+      items: parsedItems,
+      totalCalories: ModelSanitizer.clampDouble(cal),
+      totalProtein: ModelSanitizer.clampDouble(prot),
+      totalCarbs: ModelSanitizer.clampDouble(carbs),
+      totalFat: ModelSanitizer.clampDouble(fat),
+      rawJson: jsonStr,
+    );
+  }
+}
+
+class GeminiVisionService {
+  final String apiKey;
+  final String modelName;
+
+  static const String defaultModel = 'gemini-2.5-flash';
+
+  static const String systemInstruction = '''
+Eres un nutricionista clínico y experto en estimación volumétrica visual de alimentos sin báscula para comidas caseras latinoamericanas y familiares.
+
+Reglas obligatorias de cubicaje:
+1. Referencias anatómicas de volumen:
+   - Puño cerrado ~ 1 taza de volumen (~150-200g de arroz, frijoles o pastas cocidas).
+   - Palma de la mano (grosor del meñique) ~ 100-130g de carne, pollo o pescado cocido.
+   - Pulgar / Falange distal ~ 1 cucharada o ~10-15g de aceite, mantequilla o grasa.
+   - Dos manos ahuecadas ~ 50-80g de ensalada de hojas crudas.
+2. Conversión cocido vs crudo:
+   - Arroz y pasta: absorben agua, multiplicando por 2.5 a 3 su peso (100g crudo = ~250-300g cocido). Estima el peso cocido visible.
+   - Carnes y aves: merma por cocción de 20% a 25% por pérdida de jugos.
+   - Legumbres (frijoles, lentejas): absorben agua duplicando o triplicando su peso.
+3. Regla de Grasa Oculta en Comida Casera:
+   - En platos caseros tradicionales (guisos, sofritos, arroz con aderezo, estofados), añade siempre entre 5g y 10g adicionales de grasa (aceite/sofrito) por ración que no se ven a simple vista pero están integrados en la salsa o preparación.
+4. Porciones compartidas:
+   - Si el usuario indica en el contexto que la foto es de una fuente, olla o plato compartido y especifica su porción (ej. "me comí 1/3"), calcula exclusivamente la porción consumida por el usuario.
+5. Formato estricto:
+   - Responde únicamente con el JSON definido en el esquema.
+''';
+
+  GeminiVisionService({
+    required this.apiKey,
+    this.modelName = defaultModel,
+  });
+
+  Future<MealAnalysisResult> analyzeMealPhoto({
+    required Uint8List rawImageBytes,
+    String? userContext,
+  }) async {
+    final compressedBytes = ImageProcessingService.instance.compressAndResize(
+      rawImageBytes,
+      targetMaxDimension: 1024,
+      quality: 85,
+    );
+
+    final schema = Schema.object(
+      description: 'Desglose nutricional y volumétrico de comida casera',
+      properties: {
+        'plato': Schema.string(description: 'Nombre representativo del plato'),
+        'items': Schema.array(
+          description: 'Lista de ingredientes o alimentos identificados',
+          items: Schema.object(
+            properties: {
+              'alimento': Schema.string(description: 'Nombre del alimento o ingrediente'),
+              'gramos_estimados': Schema.number(description: 'Peso estimado en gramos'),
+              'calorias': Schema.number(description: 'Calorías estimadas'),
+              'proteinas_g': Schema.number(description: 'Proteínas en gramos'),
+              'carbohidratos_g': Schema.number(description: 'Carbohidratos en gramos'),
+              'grasas_g': Schema.number(description: 'Grasas en gramos'),
+              'justificacion_visual': Schema.string(description: 'Explicación volumétrica visual'),
+            },
+            optionalProperties: [],
+          ),
+        ),
+        'totales': Schema.object(
+          properties: {
+            'calorias': Schema.number(description: 'Total calorías del plato'),
+            'proteina_g': Schema.number(description: 'Total proteínas en gramos'),
+            'carbohidratos_g': Schema.number(description: 'Total carbohidratos en gramos'),
+            'grasas_g': Schema.number(description: 'Total grasas en gramos'),
+          },
+          optionalProperties: [],
+        ),
+      },
+      optionalProperties: [],
+    );
+
+    final model = GenerativeModel(
+      model: modelName,
+      apiKey: apiKey,
+      systemInstruction: Content.system(systemInstruction),
+      generationConfig: GenerationConfig(
+        responseMimeType: 'application/json',
+        responseSchema: schema,
+        temperature: 0.2,
+      ),
+    );
+
+    final promptBuffer = StringBuffer();
+    promptBuffer.writeln('Analiza esta comida casera y estima su desglose nutricional siguiendo las reglas volumétricas.');
+    if (userContext != null && userContext.trim().isNotEmpty) {
+      promptBuffer.writeln('Contexto y notas del comensal: ${userContext.trim()}');
+    }
+
+    final content = Content.multi([
+      DataPart('image/jpeg', compressedBytes),
+      TextPart(promptBuffer.toString()),
+    ]);
+
+    final response = await model.generateContent([content]);
+    final text = response.text;
+    if (text == null || text.trim().isEmpty) {
+      throw Exception('Gemini devolvió una respuesta vacía');
+    }
+
+    return MealAnalysisResult.fromJsonString(text);
+  }
+}
