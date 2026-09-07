@@ -85,7 +85,7 @@ class _QuickMealDialogState extends State<_QuickMealDialog> {
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
-            value: _mealType,
+            initialValue: _mealType,
             menuMaxHeight: 280,
             decoration: const InputDecoration(labelText: 'Tipo de Comida'),
             items: Meal.validMealTypes

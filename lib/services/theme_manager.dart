@@ -110,7 +110,7 @@ class AppTheme {
         onPrimary: Colors.white,
         onSurface: Color(0xFFFAFAFA),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: const Color(0xFF121215),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppColors.cardRadius),
@@ -172,7 +172,7 @@ class AppTheme {
         onPrimary: Colors.white,
         onSurface: Color(0xFF09090B),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: const Color(0xFFFFFFFF),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppColors.cardRadius),
@@ -220,13 +220,5 @@ class AppTheme {
         bodySmall: GoogleFonts.inter(color: const Color(0xFFA1A1AA)),
       ),
     );
-  }
-}
-
-/// Extension providing backwards-compatibility for Flutter 3.22 where Color.withValues
-/// is not yet an instance method, while seamlessly falling back to native on Flutter 3.27+.
-extension ColorCompat on Color {
-  Color withValues({double? alpha, double? red, double? green, double? blue}) {
-    return withOpacity(alpha ?? (this.alpha / 255.0));
   }
 }

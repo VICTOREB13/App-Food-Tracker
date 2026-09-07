@@ -23,7 +23,6 @@ class _MetricsScreenState extends State<MetricsScreen> {
   final MealController _mealController = MealController.instance;
   int _selectedDays = 30;
   List<Meal> _rangeMeals = [];
-  bool _isLoading = false;
 
   static const List<int> _availableRanges = [7, 30, 90];
 
@@ -45,17 +44,18 @@ class _MetricsScreenState extends State<MetricsScreen> {
   }
 
   Future<void> _loadData() async {
-    setState(() => _isLoading = true);
     try {
       await _mealController.loadWeightLogs(days: _selectedDays);
       final allMeals = await DatabaseService.instance.getAllMeals();
       final cutoff = DateTime.now().subtract(Duration(days: _selectedDays));
-      _rangeMeals = allMeals.where((m) => m.date.isAfter(cutoff)).toList();
-    } catch (_) {
-      _rangeMeals = [];
-    } finally {
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() {
+          _rangeMeals = allMeals.where((m) => m.date.isAfter(cutoff)).toList();
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _rangeMeals = []);
       }
     }
   }

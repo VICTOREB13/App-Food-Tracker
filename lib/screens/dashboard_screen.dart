@@ -69,6 +69,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final selectedModel = await SecureStorageService.instance.getSelectedGeminiModel();
     final masterPrompt = await SecureStorageService.instance.getMasterPrompt();
     final effectiveModel = selectedModel ?? GeminiVisionService.defaultModel;
+    if (!mounted) return;
 
     showDialog(
       context: context,

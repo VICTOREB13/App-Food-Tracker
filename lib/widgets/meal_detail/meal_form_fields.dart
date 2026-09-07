@@ -31,7 +31,7 @@ class MealFormFields extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         DropdownButtonFormField<String>(
-          value: mealType,
+          initialValue: mealType,
           menuMaxHeight: 280,
           decoration: const InputDecoration(labelText: 'Tipo de Comida'),
           items: Meal.validMealTypes

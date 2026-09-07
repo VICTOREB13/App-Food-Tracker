@@ -193,7 +193,7 @@ class GeminiModelSelectorCard extends StatelessWidget {
           const SizedBox(height: 12),
           // Dropdown selector
           DropdownButtonFormField<String>(
-            value: effectiveSelected,
+            initialValue: effectiveSelected,
             isExpanded: true,
             dropdownColor: AppColors.surface(context),
             decoration: InputDecoration(
@@ -315,10 +315,9 @@ class GeminiModelSelectorCard extends StatelessWidget {
                   children: [
                     Text(
                       'ID: ${currentModelInfo.name}',
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.jetBrainsMono(
                         fontSize: 10,
                         color: AppColors.textMuted(context),
-                        fontFamily: 'monospace',
                       ),
                     ),
                     if (currentModelInfo.inputTokenLimit > 0) ...[

@@ -42,7 +42,6 @@ class _MetabolicSummaryBentoCardState extends State<MetabolicSummaryBentoCard> {
       );
     }
 
-    final targetCals = profile.targetCalories > 0 ? profile.targetCalories : 1.0;
     final protCals = profile.targetProtein * 4.0;
     final carbCals = profile.targetCarbs * 4.0;
     final fatCals = profile.targetFat * 9.0;

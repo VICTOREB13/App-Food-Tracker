@@ -72,9 +72,7 @@ class SettingsController extends ChangeNotifier {
       } else {
         _availableGeminiModels = GeminiModelService.fallbackModels;
         _isOnlineModels = false;
-        if (_selectedGeminiModel == null) {
-          _selectedGeminiModel = GeminiModelService.fallbackModels.first.name;
-        }
+        _selectedGeminiModel ??= GeminiModelService.fallbackModels.first.name;
       }
     } finally {
       _isLoading = false;
@@ -137,9 +135,7 @@ class SettingsController extends ChangeNotifier {
       _availableGeminiModels = GeminiModelService.fallbackModels;
       _isOnlineModels = false;
       _isLoadingModels = false;
-      if (_selectedGeminiModel == null) {
-        _selectedGeminiModel = GeminiModelService.fallbackModels.first.name;
-      }
+      _selectedGeminiModel ??= GeminiModelService.fallbackModels.first.name;
       notifyListeners();
       return;
     }

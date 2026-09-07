@@ -15,13 +15,13 @@ class UsdaApiException implements Exception {
 }
 
 class UsdaRateLimitException extends UsdaApiException {
-  const UsdaRateLimitException([String message = 'Límite de solicitudes USDA excedido (1,000 req/hora).'])
-      : super(message, statusCode: 429);
+  const UsdaRateLimitException([super.message = 'Límite de solicitudes USDA excedido (1,000 req/hora).'])
+      : super(statusCode: 429);
 }
 
 class UsdaAuthenticationException extends UsdaApiException {
-  const UsdaAuthenticationException([String message = 'API Key de USDA no válida o no autorizada (HTTP 403).'])
-      : super(message, statusCode: 403);
+  const UsdaAuthenticationException([super.message = 'API Key de USDA no válida o no autorizada (HTTP 403).'])
+      : super(statusCode: 403);
 }
 
 class UsdaFoodDataService {

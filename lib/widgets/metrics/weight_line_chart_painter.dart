@@ -68,7 +68,7 @@ class WeightLineChartPainter extends CustomPainter {
 
   void _paintSingleLogState(Canvas canvas, Size size, WeightLog log) {
     const paddingLeft = 46.0;
-    final paddingRight = 16.0;
+    const paddingRight = 16.0;
     final baselineY = size.height * 0.55;
 
     // Subtle horizontal baseline
