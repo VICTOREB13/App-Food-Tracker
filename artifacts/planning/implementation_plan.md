@@ -1,77 +1,97 @@
 ---
-title: Plan de Implementación: Victor Engineer Food Tracker (MVP v1.0.0)
+title: Plan de Implementación: Victor Engineer - Food Tracker
 status: completed
-tags: [proyecto, planning, mvp, local-first, evolutionary-prototyping]
+tags: [proyecto, planning, mvp, local-first, evolutionary-prototyping, gemini, usda, mifflin-st-jeor]
 agent: project-planner
 project: App_Food_Tracker
-version: v1.0.0
-date: 2026-09-06
+version: v0.2.0-alpha
+date: 2026-09-07
 ---
 
-# 🎯 Plan de Implementación: Victor Engineer Food Tracker (MVP v1.0.0)
+# 🎯 Plan de Implementación: Victor Engineer - Food Tracker (v0.2.0-alpha)
 
-> **Mesa de Control (Project-Planner):** Este plan desglosa la construcción iterativa del MVP de "Victor Engineer - Food Tracker" siguiendo la metodología de Prototipado Evolutivo y el principio YAGNI (You Aren't Gonna Need It).
+> **Mesa de Control (Project-Planner):** Este plan desglosa la construcción iterativa de "Victor Engineer - Food Tracker" siguiendo la metodología de Prototipado Evolutivo, el principio YAGNI (You Aren't Gonna Need It) y la descomposición atómica de responsabilidades entre subagentes especializados.
 
 ---
 
-## 🎯 1. Objetivo de la Iteración v1.0.0
+## 🎯 1. Objetivos de las Iteraciones v0.1.0 y v0.2.0-alpha
 
-Construir un Producto Mínimo Viable (MVP) completamente funcional, offline-first y con fidelidad visual de grado comercial, que permita a un usuario:
-1. Analizar fotografías de comidas caseras latinoamericanas y estimar automáticamente calorías y macronutrientes usando IA (Gemini 2.5 Flash) sin necesidad de una báscula.
-2. Custodiar su propia clave de API (BYOK) de forma segura con cifrado a nivel de hardware (`flutter_secure_storage`).
-3. Registrar, editar, eliminar y consultar comidas organizadas cronológicamente en SQLite local de cero latencia (< 16 ms) con modo WAL.
-4. Escanear productos envasados por código de barras mediante Open Food Facts.
-5. Exportar e importar respaldos completos de la base de datos en formato JSON.
-6. Disfrutar de una interfaz de usuario Obsidian Zinc / Crisp Zinc, tipografía Outfit e Inter, y componentes Bento Grid desacoplados en widgets atómicos (< 300 LoC).
+1. **Iteración v0.1.0 (Fundación MVP Local-First):**
+   - Establecer la arquitectura SQLite con modo WAL y transacciones seguras.
+   - Desarrollar la estimación volumétrica visual mediante IA (Gemini Vision) y BYOK seguro.
+   - Construir el sistema de diseño Victor Engineer (Obsidian Zinc / Crisp Zinc) y las 3 pantallas maestras bajo el límite de 300 LoC.
+   - Implementar escáner de despensa (Open Food Facts) y respaldo atómico JSON.
+2. **Iteración v0.2.0-alpha (Precisión Clínica, Dinamismo Multimodal & Analíticas):**
+   - Eliminar hardcoding de modelos de Gemini mediante introspección en vivo del endpoint de la API.
+   - Integrar la base de datos oficial del USDA FoodData Central con fallback automático a Open Food Facts.
+   - Implementar motor metabólico Mifflin-St Jeor con cálculo de TMB/TDEE y generación del Master Prompt para Gemini.
+   - Actualizar el esquema SQLite a versión 2 con tabla indexada de peso (`weight_logs`).
+   - Crear el panel de analíticas Bento Grid (`MetricsScreen`) con trazado de curvas Bézier a 60 FPS.
+   - Configurar Keystore permanente RSA 2048 con validez hasta 2056 para distribución continua sin reinstalaciones.
 
 ---
 
 ## 🛠️ 2. Fases de Construcción Ejecutadas
 
-### Fase 1: Fundaciones de Datos y Modelos Inmutables
+### Fase 1: Fundaciones de Datos y Modelos Inmutables (v0.1.0) — [COMPLETADO]
 - [x] Crear `ModelSanitizer` para clamp numérico, truncamiento de texto y deserialización defensiva.
 - [x] Implementar modelos de datos con inmutabilidad y patrón Sentinel para eliminación explícita (`Meal`, `FoodItem`, `PantryItem`, `DailyGoals`).
 - [x] Implementar `DatabaseService` sobre SQLite con `PRAGMA journal_mode = WAL;`, `PRAGMA synchronous = NORMAL;`, `PRAGMA foreign_keys = ON;`, e índices compuestos para fechas y tipos de comida.
 - [x] Resolver condiciones de carrera en la inicialización asíncrona de la base de datos mediante caching de `_initFuture`.
 
-### Fase 2: Servicios de Dominio, Seguridad & Visión por Computadora
+### Fase 2: Servicios de Dominio, Seguridad & Visión por Computadora (v0.1.0) — [COMPLETADO]
 - [x] Implementar `SecureStorageService` para almacenar la API Key de Gemini y las metas diarias de forma encriptada.
-- [x] Implementar `ImageProcessingService` para redimensionamiento en memoria (máximo 1024x1024 px) y compresión JPEG 85% para optimizar payloads hacia Gemini.
-- [x] Diseñar el prompt clínico nutricional e implementar `GeminiVisionService` con esquemas estrictos de salida JSON (`responseSchema`) y reglas volumétricas (puño, palma, falange, grasa oculta, merma de cocción).
+- [x] Implementar `ImageProcessingService` para redimensionamiento en memoria (máximo 1024x1024 px) y compresión JPEG 85%.
+- [x] Diseñar el prompt clínico nutricional e implementar `GeminiVisionService` con esquemas estrictos de salida JSON (`responseSchema`) y reglas volumétricas.
 - [x] Implementar `OpenFoodFactsService` con timeouts defensivos y mapeo resiliente de macronutrientes.
 - [x] Implementar `BackupService` para exportación e importación transaccional en JSON.
 
-### Fase 3: Controladores de Estado y Arquitectura UI Atómica
-- [x] Crear `ThemeManager` reactivo con persistencia en `SharedPreferences` y soporte dinámico para Obsidian Zinc (oscuro) y Crisp Zinc (claro).
+### Fase 3: Controladores de Estado y Arquitectura UI Atómica (v0.1.0) — [COMPLETADO]
+- [x] Crear `ThemeManager` reactivo con persistencia en `SharedPreferences` y soporte dinámico para Obsidian Zinc y Crisp Zinc.
 - [x] Implementar `MealController` y `SettingsController` con `ChangeNotifier`.
-- [x] Diseñar y construir widgets atómicos reutilizables (< 300 LoC cada uno):
-  - `VeAppBar`, `VeCard`, `VeLogo`, `MacroIndicatorChip`, `ConfirmationDialog`, `BarcodeScannerDialog`.
-  - `CaloriesHeroRing`, `DailyCalorieSummaryCard`, `MacroBentoCard`, `WeekCalendarStrip`, `DateSelectorBar`, `StreakBadge`, `DashboardFabMenu`, `QuickMealDialog`, `ApiKeyPromptDialog`, `MealSectionCard`.
-  - `MealImageCard`, `MealMacroChipsRow`, `MealFormFields`, `FoodItemsListCard`, `FoodItemEditorDialog`.
-  - `ApiKeyInputCard`, `DailyGoalsCard`, `DatabaseMaintenanceCard`, `BackupCard`.
-- [x] Ensamblar las 3 pantallas maestras bajo el límite de 300 LoC:
-  - `DashboardScreen` (267 LoC).
-  - `MealDetailScreen` (283 LoC).
-  - `SettingsScreen` (208 LoC).
+- [x] Diseñar y construir widgets atómicos reutilizables (< 300 LoC cada uno) para Dashboard, Detalle de Comida y Ajustes.
+- [x] Ensamblar las 3 pantallas maestras: `DashboardScreen`, `MealDetailScreen` y `SettingsScreen`.
 
-### Fase 4: Automatización de Pruebas y Quality Gate
-- [x] Crear batería completa de pruebas unitarias para modelos (deserialización, límites defensivos, sentinel copyWith).
-- [x] Crear suite de pruebas para servicios (`DatabaseService` en memoria, concurrencia de 50 llamadas, filtros de fecha, PRAGMAs e índices; `BackupService` export/import; `GeminiVisionService` parseo de JSON plano y con bloques Markdown).
-- [x] Crear suite de pruebas para widgets clave (`CaloriesHeroRing`, `DailyCalorieSummaryCard`, `DashboardFabMenu`, `WeekCalendarStrip`, `VeLogo`, `MealFormFields`, `QuickMealDialog`).
-- [x] Ejecutar la auditoría del Quality Gate y generar `audit_report.md` con veredicto `Status: PASS`.
+### Fase 4: Descubrimiento Dinámico de Modelos Gemini (v0.2.0-alpha) — [COMPLETADO]
+- [x] Crear modelo inmutable `GeminiModelInfo` con patrón Sentinel y parsing de nombres canónicos (`models/...`).
+- [x] Implementar `GeminiModelService` con llamada en vivo a `GET /v1beta/models?key={API_KEY}` y filtrado estricto por capacidad `generateContent` y multimodalidad de imagen.
+- [x] Crear `GeminiModelSelectorCard` en `SettingsScreen` con categorías semánticas (Recomendado, Pro, Balanceado).
+- [x] Conectar la selección activa persistida en `SecureStorageService` directamente al flujo de análisis de comidas en `GeminiVisionService`.
 
-### Fase 5: Infraestructura, DevOps & Automatización CI/CD
-- [x] Auditar y reconfigurar los flujos de GitHub Actions (`ci.yml`, `build_apk.yml`, `build_windows.yml`, `release.yml`, `sync-docs.yml`).
-- [x] Eliminar dependencias erróneas a carpetas `./app` y normalizar la compilación desde la raíz del repositorio.
-- [x] Establecer disparadores de release por etiquetas Git (`v*`) y generación automatizada de binarios (APK y Windows x64).
+### Fase 5: Integración USDA FoodData Central & Cascada Híbrida (v0.2.0-alpha) — [COMPLETADO]
+- [x] Crear modelo `UsdaFoodItem` con parsing tolerante para esquemas `/foods/search` y `/food/{id}`.
+- [x] Implementar `UsdaFoodDataService` con factor de conversión energética ($kJ \rightarrow kcal$ de 4.184), búsqueda por UPC/código de barras y limitador de tasa de 1.000 req/hr.
+- [x] Crear `UsdaApiKeyCard` en `SettingsScreen` con almacenamiento seguro en hardware (`flutter_secure_storage`).
+- [x] Diseñar `BarcodeLookupService` como orquestador de cascada: consulta primaria a USDA y fallback transparente a Open Food Facts.
+
+### Fase 6: Motor Metabólico Mifflin-St Jeor & Onboarding (v0.2.0-alpha) — [COMPLETADO]
+- [x] Crear modelo `UserProfile` con atributos biométricos (sexo, peso, altura, edad, nivel de actividad física, pasos diarios y objetivo nutricional).
+- [x] Implementar `MetabolicCalculator` con fórmulas Mifflin-St Jeor para TMB y factores multiplicadores de TDEE.
+- [x] Construir generador de **Master Prompt** que contextualiza las peticiones de visión IA de acuerdo a las características biométricas del usuario.
+- [x] Crear pantalla modular `UserProfileScreen` (238 LoC) con widgets desacoplados (`BiometricInputsCard`, `ActivityGoalSelectorCard`, `MetabolicSummaryBentoCard`).
+- [x] Sincronizar automáticamente el cálculo del TDEE con `DailyGoals` y persistencia atómica en SQLite.
+
+### Fase 7: Persistencia SQLite v2 & Métricas Bento Grid (v0.2.0-alpha) — [COMPLETADO]
+- [x] Actualizar esquema de base de datos a versión 2 con tabla `weight_logs` e índice B-Tree `idx_weight_logs_date`.
+- [x] Migrar `BackupService` a versión 2 con serialización transaccional de registros de peso y perfil biométrico.
+- [x] Implementar métodos en `DatabaseService` y `MealController` para consulta de peso por rangos (7, 30, 90 días).
+- [x] Diseñar `WeightLineChartPainter` con trazado de curvas Bézier a 60 FPS, sombreado de gradiente, líneas meta y puntos interactivos.
+- [x] Construir pantalla modular `MetricsScreen` (198 LoC) y widgets Bento: `WeightTrendBentoCard`, `CalorieComplianceBentoCard`, `MacroDistributionBentoCard`, `StreakComplianceBentoCard` y `QuickWeightEntryDialog`.
+
+### Fase 8: Automatización de Pruebas, Quality Gate & CI/CD Permanente (v0.2.0-alpha) — [COMPLETADO]
+- [x] Expandir suite de pruebas a 37 archivos con 237 pruebas unitarias, de integración y de widgets 100% en verde.
+- [x] Generar clave de firma Keystore RSA 2048 permanente con validez hasta el año 2056 para Android.
+- [x] Inyectar script de inicialización Gradle en CI para compatibilidad estricta con `compileSdk 34` y fijar versión segura de `sqflite`.
+- [x] Publicar Release oficial en GitHub Actions: `v0.2.0-alpha` con APK de Android y ZIP de Windows x64.
 
 ---
 
-## 🔮 3. Hoja de Ruta para Iteraciones Futuras (v1.1.0+)
+## 🔮 3. Hoja de Ruta para Iteraciones Futuras (v0.3.0+)
 
-1. **Analíticas Avanzadas (Estilo Vitalis):**
-   - Pantalla dedicada `AnalyticsScreen` con gráficos de adherencia semanal y curvas de ingesta por franja horaria.
-2. **Sincronización P2P Opcional:**
-   - Sincronización local-first cifrada punto a punto entre dispositivos sin pasar por servidores centrales.
-3. **Widget de Escritorio / Notificaciones de Hidratación:**
-   - Recordatorios periódicos con registro de agua en un toque.
+1. **Sincronización Local P2P Segura:**
+   - Replicación cifrada punto a punto entre dispositivos en la misma red local Wi-Fi sin servidores centrales.
+2. **Exportación de Reportes Clínicos:**
+   - Generación de informes en PDF y hojas de cálculo Excel con gráficos de composición corporal y adherencia para profesionales de la nutrición.
+3. **Micro-Widgets de Escritorio y Notificaciones del Sistema:**
+   - Widgets flotantes compactos para Windows y notificaciones enriquecidas en Android para registro de agua en un solo clic.
+

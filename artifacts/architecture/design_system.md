@@ -1,16 +1,16 @@
 ---
-title: Sistema de Diseño y Tokens UI/UX
+title: Sistema de Diseño y Tokens UI/UX: Victor Engineer - Food Tracker
 status: approved
-tags: [design-system, ui-ux, flutter, bento-grid, cal-ai, vitalis, speed-dial, obsidian-zinc, victor-engineer, local-first]
+tags: [design-system, ui-ux, flutter, bento-grid, cal-ai, vitalis, speed-dial, obsidian-zinc, victor-engineer, local-first, mifflin-st-jeor]
 agent: frontend-ui
 project: App_Food_Tracker
-version: v1.0.0
-date: 2026-09-06
+version: v0.2.0-alpha
+date: 2026-09-07
 ---
 
-# 🎨 Especificación de Diseño: Victor Engineer Food Tracker (v1.0.0)
+# 🎨 Especificación de Diseño: Victor Engineer - Food Tracker (v0.2.0-alpha)
 
-Documento maestro de interfaz de usuario (UI), experiencia de usuario (UX), sistema de tokens visuales y animaciones fluidas para la aplicación móvil **Victor Engineer Food Tracker**.
+Documento maestro de interfaz de usuario (UI), experiencia de usuario (UX), sistema de tokens visuales y animaciones fluidas para la aplicación móvil y de escritorio **Victor Engineer - Food Tracker**.
 
 ---
 
@@ -20,6 +20,7 @@ Documento maestro de interfaz de usuario (UI), experiencia de usuario (UX), sist
 2. **Claridad Visual Bento-Grid:** Densidad balanceada con tarjetas squircle (radio uniforme de 20 px), contraste suave y micro-indicadores visuales circulares (anillos de progreso).
 3. **Animaciones con Física Orgánica:** Transiciones elásticas (`Curves.easeOutBack`) inspiradas en microinteracciones táctiles modernas, acompañadas de respuesta háptica (`HapticFeedback.lightImpact`).
 4. **Identidad de Marca Victor Engineer:** Integración de los modos *Obsidian Zinc* (oscuro por defecto) y *Crisp Zinc* (claro), manteniendo el acento carmesí corporativo `#DC2626` complementado con una paleta funcional para macronutrientes.
+5. **Cero Deprecaciones y API Moderna:** Migración absoluta de `.withOpacity(...)` a `.withValues(alpha: ...)`.
 
 ---
 
@@ -80,137 +81,112 @@ Documento maestro de interfaz de usuario (UI), experiencia de usuario (UX), sist
 
 ---
 
-## 📱 3. Anatomía y Estructura de Pantallas
+## 📱 3. Catálogo de Pantallas Maestras (< 300 LoC)
 
-### 3.1. Pantalla Principal: Dashboard Diario (`HomeScreen`)
+### 3.1. Dashboard Principal (`DashboardScreen` - 294 LoC)
+- **Header Superior (`VeAppBar`):** Marca `VE FoodTracker`, racha de días, accesos directos a `MetricsScreen`, `UserProfileScreen` y `SettingsScreen`.
+- **Selector Semanal (`WeekCalendarStrip`):** Días del calendario centrados en el día activo con indicadores de cumplimiento calórico.
+- **Tarjeta Hero de Calorías (`CaloriesHeroRing` & `DailyCalorieSummaryCard`):** Anillo de progreso animado con calorías restantes y consumidas.
+- **Bento de Macronutrientes (`MacroBentoCard`):** Desglose equilibrado en tres columnas para Proteínas, Carbohidratos y Grasas.
+- **Feed de Comidas por Categoría (`MealSectionCard`):** Secciones organizadas para Desayuno, Almuerzo, Cena y Snacks.
+- **Speed-Dial FAB (`DashboardFabMenu`):** Menú 2x3 con física elástica `Curves.easeOutBack`.
 
-1. **Header Superior:**
-   * Marca: `VE FoodTracker` en tipografía `Outfit Bold`.
-   * Badge de Racha (`🔥 3 días`) con animación de pulso sutil al registrar una comida.
-2. **Carrusel Horizontal Semanal:**
-   * Selector semanal estilo Cal AI. Días anteriores muestran estado de completitud.
-   * Día seleccionado resaltado con fondo sólido (`#FFFFFF` en oscuro / `#09090B` en claro) y texto en alto contraste.
-3. **Hero Card: Calorías Diarias (Bento Primario):**
-   * Métrica en `Outfit Bold` 40 sp ("1,420 Calorías restantes" o "Consumidas").
-   * Indicador circular de progreso (*Progress Ring*) dibujado con `CustomPainter`, con gradiente cónico suave.
-4. **Bento Grid de Macronutrientes (3 Columnas):**
-   * Tres tarjetas equilibradas para Proteína, Carbohidratos y Grasas.
-   * Cada tarjeta incluye un mini-anillo circular con icono representativo (`🍗`, `🌾`, `🥑`) y gramaje restante/consumido.
-5. **Feed Cronológico de Comidas:**
-   * Desglose ordenado por `Desayuno`, `Almuerzo`, `Cena` y `Snacks`.
-   * Tarjetas con miniatura de la foto, badge de verificación IA y resumen de macros.
-   * **Estado vacío interactivo:** Ilustración minimalista de plato con mensaje *"Toca + para analizar tu primera comida"*.
+### 3.2. Detalle y Edición de Comida (`MealDetailScreen` - 287 LoC)
+- **Tarjeta de Imagen (`MealImageCard`):** Miniatura del plato o selector de cámara/galería.
+- **Fila de Macros (`MealMacroChipsRow`):** Chips de macronutrientes interactivos.
+- **Formulario de Comida (`MealFormFields`):** Selector de categoría, nombre y notas.
+- **Lista de Ingredientes (`FoodItemsListCard`):** Edición atómica y diálogo `FoodItemEditorDialog`.
 
----
+### 3.3. Configuración y Ajustes (`SettingsScreen` - 262 LoC)
+- **Gestión de Modelos Gemini (`GeminiModelSelectorCard`):** Selector reactivo con introspección dinámica de la API.
+- **Credenciales USDA (`UsdaApiKeyCard`):** Entrada cifrada de API Key para USDA FoodData Central.
+- **Clave API Gemini (`ApiKeyInputCard`):** Almacenamiento seguro BYOK.
+- **Metas Diarias (`DailyGoalsCard`):** Ajuste de calorías y macronutrientes.
+- **Mantenimiento y Respaldo (`DatabaseMaintenanceCard`, `BackupCard`):** Operaciones de `VACUUM` y respaldo JSON v2.
 
-### 3.2. Pantalla de Progreso y Analíticas (`AnalyticsScreen` — Estilo Vitalis)
+### 3.4. Perfil Nutricional & Onboarding (`UserProfileScreen` - 238 LoC)
+- **Entrada Biométrica (`BiometricInputsCard`):** Peso, altura, edad y sexo biológico.
+- **Actividad y Pasos (`ActivityGoalSelectorCard`):** Multiplicadores de estilo de vida y pasos diarios.
+- **Resumen Metabólico (`MetabolicSummaryBentoCard`):** Cálculo instantáneo de TMB y TDEE mediante fórmula Mifflin-St Jeor.
 
-1. **Tarjeta de Balance Semanal:**
-   * Porcentaje de adherencia calórica y comparativa semanal (`+8% vs semana anterior`).
-2. **Gráfico Sparkline de Ingesta Horaria:**
-   * Curva suave que visualiza en qué momentos del día se concentró la ingesta calórica.
-3. **Distribución Porcentual de Macros:**
-   * Barras de progreso apiladas (Proteínas / Carbohidratos / Grasas) contra los ratios meta.
-4. **Registro Rápido de Hidratación:**
-   * Contador de vasos de agua (250 ml por toque) con animación de llenado líquido.
-
----
-
-### 3.3. Pantalla de Perfil y Configuración (`ProfileScreen`)
-
-1. **Ficha de Usuario:** Avatar circular con monograma `VE`, nombre completo, edad, peso y estatura.
-2. **Ajuste de Metas Nutricionales:**
-   * Cálculo de TDEE y meta diaria (Déficit, Mantenimiento, Volumen).
-   * Distribución manual o guiada de macros.
-3. **Gestión de IA (BYOK):**
-   * Campo seguro (`flutter_secure_storage`) para la API Key de Gemini del usuario.
-   * Selector de modelo (`gemini-2.5-flash`, `gemini-1.5-pro`).
-   * Parámetro de estimación de aceite/grasa de cocción casera.
-4. **Mantenimiento y Respaldos:**
-   * Exportación e importación de la base de datos completa en formato JSON.
+### 3.5. Métricas y Analíticas (`MetricsScreen` - 198 LoC)
+- **Tendencia de Peso (`WeightTrendBentoCard`):** Gráfico interactivo a 60 FPS dibujado con `WeightLineChartPainter` (curvas Bézier, gradiente de área y líneas meta).
+- **Adherencia Calórica (`CalorieComplianceBentoCard`):** Gráficos de barras y ratios de cumplimiento.
+- **Distribución de Macros (`MacroDistributionBentoCard`):** Porcentajes relativos vs metas del usuario.
+- **Racha y Consistencia (`StreakComplianceBentoCard`):** Historial semanal de registro continuo.
+- **Registro Rápido de Peso (`QuickWeightEntryDialog`):** Modal con validación numérica y protección anti-NaN.
 
 ---
 
-## ⚡ 4. Dock Flotante y Animación Speed-Dial
+## ⚡ 4. Speed-Dial Flotante y Coreografía de Microinteracciones
 
-Este componente reproduce el comportamiento del menú de acciones dinámico:
-
-### 4.1. Coreografía de la Animación
-
-1. **Estado Normal (Cerrado):**
-   * Barra flotante desacoplada de los bordes inferiores (`FloatingPillDock`) con iconos de `Inicio`, `Progreso`, `Despensa` y `Perfil`.
-   * Botón circular flotante `+` adyacente a la derecha con color de acento `#DC2626`.
-2. **Transición al Tocar `+`:**
-   * El icono interior rota **45 grados** en sentido horario transformándose en una `✕`.
-   * Duración: `280 ms` con curva `Curves.fastOutSlowIn`.
-3. **Despliegue del Grid Elástico:**
-   * Un panel squircle emerge hacia arriba desde la posición del botón.
-   * Interpolación combinada de escala (`0.85 -> 1.0`) y traslación vertical (`+30 px -> 0 px`) con rebote elástico mediante `Curves.easeOutBack`.
-   * Fondo atenuado con desenfoque de cristal (`BackdropFilter` con `sigma: 16` y tinte oscuro semitransparente).
-4. **Acciones Disponibles en la Cuadrícula 2x3:**
-   * **📸 Foto IA:** Lanza la cámara con guías de encuadre para analizar el plato con Gemini Flash.
-   * **🖼️ Galería:** Selecciona una fotografía del carrete del dispositivo.
-   * **🏷️ Código de Barras:** Escáner para productos envasados vía Open Food Facts API.
-   * **✍️ Registro Manual:** Entrada manual con búsqueda en la despensa SQLite local.
-   * **💧 Añadir Agua:** Registro inmediato de +250ml sin ventanas intermedias.
-   * **⚡ Comida Rápida:** Asignación rápida de calorías estimadas sin desglose detallado.
+1. **Estado Cerrado:** Botón circular con icono `+` y acento carmesí `#DC2626`.
+2. **Apertura:** Rotación de 45° a cruz `✕` en 280 ms con `Curves.fastOutSlowIn`.
+3. **Despliegue del Grid:** Panel squircle con interpolación combinada de escala (`0.85 -> 1.0`) y rebote elástico `Curves.easeOutBack`.
+4. **Acciones 2x3:**
+   - 📸 **Foto IA:** Cámara con guías de encuadre para análisis con Gemini.
+   - 🖼️ **Galería:** Selección de imagen del carrete.
+   - 🏷️ **Código de Barras:** Escáner con búsqueda en cascada USDA + Open Food Facts.
+   - ✍️ **Registro Manual:** Inserción guiada con autocompletado en despensa local.
+   - 💧 **+250ml Agua:** Incremento instantáneo sin modales intermedios.
+   - ⚡ **Comida Rápida:** Diálogo express de calorías estimadas.
 
 ---
 
-## 💻 5. Estructura del Código en Flutter
+## 💻 5. Estructura Real del Código en Flutter
 
 ```
 lib/
-├── core/
-│   ├── theme/
-│   │   ├── app_colors.dart            # Tokens Obsidian Zinc, Crisp Zinc y semántica de macros
-│   │   ├── app_typography.dart        # Fuentes Outfit e Inter
-│   │   └── app_theme.dart             # ThemeData reactivo
-│   ├── network/
-│   │   └── resilient_http_client.dart # Cliente HTTP con reintentos defensivos
-│   └── utils/
-│       └── image_compressor.dart      # Redimensión nativa a 1024px
-├── data/
-│   ├── database/
-│   │   ├── app_database.dart          # SQLite con WAL Mode
-│   │   └── tables/                    # Meals, Ingredients, DailyGoals
-│   ├── services/
-│   │   ├── gemini_vision_service.dart # Inferencia directa con google_generative_ai
-│   │   ├── open_food_facts_service.dart # Consulta de código de barras
-│   │   └── secure_storage_service.dart # Almacenamiento cifrado de API Keys
-│   └── models/
-│       ├── meal.dart                  # Modelo inmutable con Sentinel copyWith
-│       └── macro_nutrients.dart
 ├── controllers/
-│   ├── dashboard_controller.dart      # Estado de calorías y fechas
-│   ├── meal_logging_controller.dart   # Pipeline Foto -> IA -> SQLite
-│   ├── analytics_controller.dart      # Métricas y resúmenes semanales
-│   └── settings_controller.dart       # API Keys y perfil biométrico
-└── views/
-    ├── home/
-    │   ├── home_screen.dart
-    │   └── widgets/
-    │       ├── week_calendar_strip.dart
-    │       ├── calories_hero_ring.dart
-    │       ├── macro_bento_card.dart
-    │       └── meal_log_tile.dart
-    ├── analytics/
-    │   └── analytics_screen.dart
-    ├── profile/
-    │   └── profile_screen.dart
-    └── navigation/
-        ├── floating_pill_dock.dart    # Dock inferior desacoplado
-        └── expandable_speed_dial.dart # FAB rotativo con panel elástico
+│   ├── meal_controller.dart
+│   └── settings_controller.dart
+├── models/
+│   ├── daily_goals.dart
+│   ├── food_item.dart
+│   ├── gemini_model_info.dart
+│   ├── meal.dart
+│   ├── model_sanitizer.dart
+│   ├── pantry_item.dart
+│   ├── usda_food_item.dart
+│   ├── user_profile.dart
+│   └── weight_log.dart
+├── screens/
+│   ├── dashboard_screen.dart          # 294 LoC
+│   ├── meal_detail_screen.dart        # 287 LoC
+│   ├── metrics_screen.dart            # 198 LoC
+│   ├── settings_screen.dart           # 262 LoC
+│   └── user_profile_screen.dart       # 238 LoC
+├── services/
+│   ├── backup_service.dart
+│   ├── barcode_lookup_service.dart
+│   ├── database_service.dart
+│   ├── gemini_model_service.dart
+│   ├── gemini_vision_service.dart
+│   ├── image_processing_service.dart
+│   ├── metabolic_calculator.dart
+│   ├── open_food_facts_service.dart
+│   ├── secure_storage_service.dart
+│   ├── theme_manager.dart
+│   └── usda_food_data_service.dart
+└── widgets/
+    ├── common/                        # VeAppBar, VeCard, VeLogo, etc.
+    ├── dashboard/                     # CaloriesHeroRing, Bento, FAB Menu, etc.
+    ├── meal_detail/                   # ImageCard, ChipsRow, FormFields, etc.
+    ├── metrics/                       # WeightTrendBento, WeightLineChartPainter, etc.
+    ├── profile/                       # BiometricInputsCard, MetabolicSummary, etc.
+    └── settings/                      # GeminiModelSelector, UsdaApiKeyCard, etc.
 ```
 
 ---
 
-## 📋 6. Checklist de Validación Visual
+## 📋 6. Checklist de Validación Visual Certificado
 
-- [ ] Cargar tipografías `GoogleFonts.outfit` e `GoogleFonts.inter` en `pubspec.yaml`.
-- [ ] Implementar la clase semántica `AppColors` con soporte para temas oscuro y claro.
-- [ ] Construir el widget `CaloriesHeroRing` con `CustomPainter` animado mediante `AnimationController`.
-- [ ] Implementar la tarjeta bento `MacroBentoCard` con mini-indicador circular por cada macronutriente.
-- [ ] Crear el selector horizontal semanal `WeekCalendarStrip` con desplazamiento automático centrado en el día activo.
-- [ ] Construir `FloatingPillDock` y el menú `ExpandableSpeedDial` con animación elástica `Curves.easeOutBack`.
-- [ ] Integrar compresión de imagen previa al envío al modelo de visión (máximo 1024x1024 px).
+- [x] Carga de tipografías `Outfit` e `Inter` en `pubspec.yaml` mediante `google_fonts`.
+- [x] Implementación semántica de temas `ThemeManager` (*Obsidian Zinc* y *Crisp Zinc*).
+- [x] Sustitución del 100% de llamadas `.withOpacity` por `.withValues(alpha: ...)`.
+- [x] Renderizado de `CaloriesHeroRing` animado y `MacroBentoCard` de tres columnas.
+- [x] Selector horizontal semanal `WeekCalendarStrip` con centrado automático.
+- [x] `DashboardFabMenu` con física elástica `Curves.easeOutBack`.
+- [x] Trazador vectorial acelerado por hardware `WeightLineChartPainter` a 60 FPS.
+- [x] Descomposición de las 5 pantallas maestras cumpliendo la directriz < 300 LoC.
+

@@ -1,22 +1,22 @@
 ---
-title: Especificación de API, Esquema SQLite y Contratos Backend
+title: Especificación de API, Esquema SQLite v2 y Contratos Backend
 status: active
-tags: [proyecto, api, backend, database, sqlite, gemini, contracts]
+tags: [proyecto, api, backend, database, sqlite, gemini, usda, contracts, mifflin-st-jeor]
 agent: backend-architect
 project: App_Food_Tracker
-version: v1.0.0
-date: 2026-09-06
+version: v0.2.0-alpha
+date: 2026-09-07
 ---
 
-# 📡 Especificación de Contrato de Datos, Esquema SQLite y Servicios Backend
+# 📡 Especificación de Contrato de Datos, Esquema SQLite v2 y Servicios Backend
 
-> **Backend-Architect:** Este artefacto define formalmente el esquema relacional de base de datos local SQLite, los índices de cobertura, los modelos de datos inmutables y los contratos de servicios internos y externos (Gemini AI Vision y Open Food Facts).
+> **Backend-Architect:** Este artefacto define formalmente el esquema relacional de base de datos local SQLite v2, los índices B-Tree de cobertura, los modelos de dominio inmutables (Sentinel) y los contratos de servicios internos y externos (Dynamic Gemini API, USDA FoodData Central, Open Food Facts y Calculadora Metabólica).
 
 ---
 
-## 🗄️ 1. Esquema Relacional de Base de Datos SQLite (DDL)
+## 🗄️ 1. Esquema Relacional de Base de Datos SQLite v2 (DDL)
 
-La base de datos opera localmente bajo el archivo `app_food_tracker.db` en el directorio de documentos de la aplicación, configurada con WAL mode y claves foráneas.
+La base de datos opera localmente bajo el archivo `app_food_tracker.db` en el directorio de documentos de la aplicación, configurada con WAL mode y llaves foráneas.
 
 ### 1.1. Tabla: `meals`
 Almacena cada registro de comida (desayuno, almuerzo, cena, snack o hidratación).
@@ -54,11 +54,23 @@ CREATE TABLE pantry_items (
 );
 ```
 
-### 1.3. Índices de Cobertura y Rendimiento (Zero N+1)
-Para garantizar consultas de día completo e historiales en menos de **2 milisegundos**, se han creado los siguientes índices:
+### 1.3. Tabla: `weight_logs` (Introducida en v2)
+Almacena el historial cronológico de peso corporal para tendencias biométricas y trazado de curvas.
 
 ```sql
--- Consultas filtradas por fecha (rango diario y selector semanal):
+CREATE TABLE weight_logs (
+  id TEXT PRIMARY KEY,
+  weight REAL NOT NULL,
+  date TEXT NOT NULL,
+  notes TEXT
+);
+```
+
+### 1.4. Índices de Cobertura B-Tree y Rendimiento (Zero N+1)
+Para garantizar lecturas masivas e históricos diarios en menos de **2 milisegundos**, se han creado los siguientes índices B-Tree:
+
+```sql
+-- Consultas filtradas por fecha en comidas (rango diario y selector semanal):
 CREATE INDEX IF NOT EXISTS idx_meals_date ON meals(date);
 
 -- Agrupaciones por categoría de comida:
@@ -75,51 +87,82 @@ CREATE INDEX IF NOT EXISTS idx_pantry_category ON pantry_items(category);
 
 -- Acceso inmediato a alimentos favoritos:
 CREATE INDEX IF NOT EXISTS idx_pantry_favorite ON pantry_items(is_favorite);
+
+-- Consultas de tendencias de peso por rangos (7, 30, 90 días):
+CREATE INDEX IF NOT EXISTS idx_weight_logs_date ON weight_logs(date);
 ```
 
 ---
 
-## 🧬 2. Modelos de Dominio y Sanitización Defensiva
+## 🧬 2. Modelos de Dominio Inmutables y Patrón Sentinel
+
+Todos los modelos incorporan el patrón privado `_sentinel = Object()` en `copyWith` para distinguir la omisión de un parámetro de la asignación explícita de `null`.
 
 ### 2.1. Modelo `Meal`
-- **Atributos:**
-  - `id` (String): UUID v4 único. Truncado a 128 chars.
-  - `name` (String): Nombre del plato. Sanitizado a 255 chars máx. Fallback: `'Comida'`.
-  - `mealType` (String): Uno de `['Desayuno', 'Almuerzo', 'Cena', 'Snack']`.
-  - `date` (DateTime): Fecha y hora del consumo. Fallback: `DateTime.now()`.
-  - `imagePath` (String?): Ruta absoluta a la fotografía redimensionada (o `null`). Truncado a 1024 chars máx.
-  - `calories` (double): Calorías netas. Clamped `[0.0, 9999.0]`.
-  - `protein` (double): Gramos de proteína. Clamped `[0.0, 9999.0]`.
-  - `carbs` (double): Gramos de carbohidratos. Clamped `[0.0, 9999.0]`.
-  - `fat` (double): Gramos de grasa. Clamped `[0.0, 9999.0]`.
-  - `notes` (String?): Comentarios o contexto del usuario. Truncado a 2000 chars máx.
-  - `aiBreakdownJson` (String?): Payload JSON generado por Gemini Vision con el cubicaje detallado. Truncado a 100000 chars máx.
-- **Propiedad Computada `items`:** Deserializa de forma segura `aiBreakdownJson` retornando `List<FoodItem>`. Maneja estructuras corruptas sin generar excepciones no capturadas.
-- **Método `recalculateFromItems(List<FoodItem> newItems)`:** Recalcula la suma de macros y regenera el payload JSON manteniendo la coherencia entre el desglose y el resumen del plato.
-- **Método `copyWith` con Patrón Sentinel:** Permite resetear explícitamente `imagePath: null`, `notes: null` y `aiBreakdownJson: null`.
+- `id` (String): UUID v4 único. Truncado a 128 chars.
+- `name` (String): Nombre del plato. Sanitizado a 255 chars máx. Fallback: `'Comida'`.
+- `mealType` (String): Uno de `['Desayuno', 'Almuerzo', 'Cena', 'Snack']`.
+- `date` (DateTime): Fecha y hora del consumo. Fallback: `DateTime.now()`.
+- `imagePath` (String?): Ruta local de la fotografía redimensionada (o `null`). Truncado a 1024 chars.
+- `calories`, `protein`, `carbs`, `fat` (double): Clamped `[0.0, 9999.0]`.
+- `notes` (String?): Comentarios del usuario. Truncado a 2000 chars máx.
+- `aiBreakdownJson` (String?): Payload JSON de inferencia volumétrica. Truncado a 100000 chars.
+- Getter `items`: Deserialización resiliente retornando `List<FoodItem>`.
+- Método `recalculateFromItems(List<FoodItem> newItems)`: Recálculo síncrono de macros y regeneración del JSON.
 
 ### 2.2. Modelo `FoodItem`
-- **Atributos:**
-  - `id` (String): Identificador único (UUID v4).
-  - `name` (String): Nombre del alimento/ingrediente. Sanitizado a 255 chars máx.
-  - `estimatedGrams` (double): Peso en gramos estimado visualmente. Clamped `[0.0, 50000.0]`.
-  - `calories`, `protein`, `carbs`, `fat` (double): Macronutrientes. Clamped `[0.0, 9999.0]`.
-  - `visualJustification` (String?): Razón volumétrica (ej: "Aproximadamente 1 puño cerrado ~ 150g"). Truncado a 1000 chars.
+- `id` (String): Identificador único (UUID v4).
+- `name` (String): Nombre del ingrediente. Sanitizado a 255 chars máx.
+- `estimatedGrams` (double): Gramaje estimado. Clamped `[0.0, 50000.0]`.
+- `calories`, `protein`, `carbs`, `fat` (double): Clamped `[0.0, 9999.0]`.
+- `visualJustification` (String?): Razón volumétrica. Truncado a 1000 chars.
 
-### 2.3. Modelo `PantryItem`
-- Representa artículos de alacena o alimentos escaneados con soporte para marcas, categorías y favoritos (`isFavorite: bool`).
+### 2.3. Modelo `WeightLog`
+- `id` (String): UUID v4.
+- `weight` (double): Peso corporal en kilogramos. Clamped `[20.0, 500.0]`.
+- `date` (DateTime): Fecha y hora del registro.
+- `notes` (String?): Notas del registro. Truncado a 500 chars.
 
-### 2.4. Modelo `DailyGoals`
-- Almacena metas nutricionales del usuario con valores por defecto científicamente fundamentados (`calories: 2000.0`, `protein: 140.0`, `carbs: 220.0`, `fat: 65.0`). Clamped para evitar metas inconsistentes.
+### 2.4. Modelo `UserProfile`
+- `sex` (String): `'male'` o `'female'`.
+- `weight` (double): Peso actual en kg.
+- `height` (double): Altura en cm.
+- `age` (int): Edad en años.
+- `activityLevel` (ActivityLevel): Factor de actividad sedentario a muy activo.
+- `dailySteps` (int): Pasos diarios estimados.
+- `goal` (NutritionalGoal): Déficit, mantenimiento o superávit.
+- `masterPrompt` (String): Instrucciones contextualizadas inyectadas en Gemini Vision.
+
+### 2.5. Modelo `GeminiModelInfo`
+- `name` (String): Identificador de recurso (ej. `'models/gemini-2.5-flash'`).
+- `displayName` (String): Nombre amigable del modelo.
+- `description` (String): Descripción de capacidades.
+- `supportedGenerationMethods` (List<String>): Métodos habilitados (`generateContent`).
+- `inputTokenLimit` & `outputTokenLimit` (int): Límites de contexto.
+
+### 2.6. Modelo `UsdaFoodItem`
+- `fdcId` (int): Identificador en base de datos USDA.
+- `description` (String): Nombre oficial del alimento.
+- `brandOwner` (String?): Fabricante o marca comercial.
+- `calories`, `protein`, `carbs`, `fat` (double): Nutrientes normalizados por 100g.
+- `servingSize` (double?) & `servingSizeUnit` (String?): Ración estándar declarada.
 
 ---
 
-## 🤖 3. Contrato de Inferencia de Visión con Google Gemini
+## 🤖 3. Contratos de Inferencia y Descubrimiento Dinámico de Google Gemini
 
-### 3.1. Endpoint & Modelo
-- **Modelo:** `gemini-2.5-flash` (baja latencia y alta precisión visual).
-- **MIME Type de Respuesta:** `application/json`.
-- **Temperatura:** `0.2` (determinismo y estabilidad estructural).
+### 3.1. Descubrimiento Dinámico de Modelos (`GeminiModelService`)
+- **Endpoint:** `GET https://generativelanguage.googleapis.com/v1beta/models?key={API_KEY}`
+- **Criterio de Filtrado:** Modelos que contengan `'generateContent'` en `supportedGenerationMethods` y soporten modalidades multimodales de entrada.
+- **Categorización Semántica en UI:**
+  - *Recomendado (Rápido):* `gemini-2.5-flash`, `gemini-2.0-flash`.
+  - *Recomendado (Pro):* `gemini-1.5-pro`.
+  - *Equilibrado:* `gemini-1.5-flash`.
+
+### 3.2. Contrato de Inferencia de Visión (`GeminiVisionService`)
+- **MIME Type:** `application/json`.
+- **Temperatura:** `0.2` (determinismo).
+- **Inyección Contextual:** Se antepone el **Master Prompt** generado desde el perfil biométrico del usuario.
 - **Esquema JSON Obligatorio (`responseSchema`):**
   ```json
   {
@@ -158,36 +201,40 @@ CREATE INDEX IF NOT EXISTS idx_pantry_favorite ON pantry_items(is_favorite);
   }
   ```
 
-### 3.2. Reglas Clínicas Inyectadas en el System Prompt
-1. **Referencias Anatómicas de Volumen:**
-   - Puño cerrado ~ 1 taza de volumen (~150-200g de arroz, frijoles o pastas cocidas).
-   - Palma de la mano (grosor del meñique) ~ 100-130g de carne, pollo o pescado cocido.
-   - Pulgar / Falange distal ~ 1 cucharada o ~10-15g de aceite, mantequilla o grasa.
-   - Dos manos ahuecadas ~ 50-80g de ensalada de hojas crudas.
-2. **Conversión Cocido vs Crudo:**
-   - Arroz y pasta: multiplicar por 2.5 a 3 su peso en crudo.
-   - Carnes y aves: aplicar merma por cocción del 20% al 25%.
-   - Legumbres: absorben agua duplicando o triplicando peso.
-3. **Regla de Grasa Oculta:**
-   - En guisos, sofritos y salsas caseras latinoamericanas, añadir entre 5g y 10g adicionales de grasa oculta por ración.
-4. **Porciones Compartidas:**
-   - Si el usuario especifica fracción (ej. "me comí 1/3 de la fuente"), calcular únicamente la porción individual.
+---
+
+## 🏛️ 4. Contratos de Consulta Nutricional en Cascada
+
+### 4.1. USDA FoodData Central API (`UsdaFoodDataService`)
+- **Búsqueda por Código de Barras / UPC:**
+  - `GET https://api.nal.usda.gov/fdc/v1/foods/search?api_key={KEY}&query={UPC}&dataType=Branded,Foundation`
+- **Mapeo de Nutrientes Oficiales (Nutrient IDs):**
+  - Calorías: ID `1008` (`Energy` en kcal) o ID `1062` (`Energy` en kJ, convertida dividiendo por 4.184).
+  - Proteína: ID `1003`.
+  - Grasas totales: ID `1004`.
+  - Carbohidratos por diferencia: ID `1005`.
+- **Control de Frecuencia:** Limitador pasivo que respeta la cuota de 1.000 solicitudes por hora de la API del USDA.
+
+### 4.2. Fallback Transparente a Open Food Facts (`BarcodeLookupService`)
+- Cuando la búsqueda en USDA no arroja resultados (`totalHits == 0`) o la API Key no está configurada, el servicio conmuta automáticamente a `https://world.openfoodfacts.org/api/v2/product/{barcode}.json` garantizando cero fricción para el usuario.
 
 ---
 
-## 🏷️ 4. Contrato de Consulta Open Food Facts API v2
+## 🧮 5. Motor Metabólico Mifflin-St Jeor (`MetabolicCalculator`)
 
-- **URL Base:** `https://world.openfoodfacts.org/api/v2/product/{barcode}.json`
-- **Cabeceras:** `User-Agent: VictorEngineerFoodTracker - Flutter - Version 1.0`
-- **Timeout:** 10 segundos continuos (protección contra conexiones lentas).
-- **Mapeo de Nutrientes:**
-  - Extrae `energy-kcal_100g` (fallback a `energy-kcal` o `energy-kcal_serving`).
-  - Extrae `proteins_100g`, `carbohydrates_100g`, `fat_100g`.
-  - Normaliza los nombres multilingües con prioridad en español (`product_name_es` -> `product_name` -> `generic_name_es`).
+### 5.1. Ecuaciones Clínicas de TMB
+- **Hombres:** $TMB = (10 \times \text{peso}_{\text{kg}}) + (6.25 \times \text{altura}_{\text{cm}}) - (5 \times \text{edad}) + 5$
+- **Mujeres:** $TMB = (10 \times \text{peso}_{\text{kg}}) + (6.25 \times \text{altura}_{\text{cm}}) - (5 \times \text{edad}) - 161$
+
+### 5.2. Multiplicadores de TDEE y Pasos
+- Multiplicador base según actividad: Sedentario (1.2), Ligero (1.375), Moderado (1.55), Intenso (1.725), Muy Intenso (1.9).
+- Bonus por pasos: $\frac{\text{pasos}}{10000} \times 0.15$ al factor de actividad.
+- Ajuste por objetivo: Déficit (-500 kcal), Mantenimiento (0 kcal), Superávit (+350 kcal).
 
 ---
 
-## 💾 5. Contrato del Servicio de Respaldos (`BackupService`)
+## 💾 6. Contrato de Respaldo v2 (`BackupService`)
 
-- **Exportación:** Serializa la base de datos completa en JSON formateado con indentación de 2 espacios, conteniendo metadatos de aplicación, versión, fecha ISO y colecciones `meals` y `pantry_items`.
-- **Importación:** Valida la estructura del JSON y ejecuta una transacción atómica única (`txn.insert` con `ConflictAlgorithm.replace`) garantizando que si el archivo está corrupto, la base de datos no queda en estado inconsistente.
+- **Exportación:** Genera un JSON estructurado con `version: 2`, `timestamp` ISO 8601, metadatos de aplicación, y colecciones completas de `meals`, `pantry_items`, `weight_logs` y `user_profile`.
+- **Importación Atómica:** Ejecución en una única transacción SQLite (`txn.insert` con `ConflictAlgorithm.replace`), revirtiendo automáticamente cualquier cambio si el archivo JSON está truncado o corrompido.
+
