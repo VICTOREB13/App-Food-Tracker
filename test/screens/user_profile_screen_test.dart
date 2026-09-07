@@ -227,17 +227,18 @@ void main() {
         savedProfile = await DatabaseService.instance.getUserProfile();
       });
       expect(savedProfile, isNotNull);
-      expect(savedProfile!.name, equals('Victor Engineer'));
-      expect(savedProfile.bmr, greaterThan(1000.0));
-      expect(savedProfile.masterPrompt, isNotNull);
+      final profile = savedProfile!;
+      expect(profile.name, equals('Victor Engineer'));
+      expect(profile.bmr, greaterThan(1000.0));
+      expect(profile.masterPrompt, isNotNull);
 
       // Verifica persistencia en SecureStorage
       final onboardingDone = await SecureStorageService.instance.hasCompletedOnboarding();
       expect(onboardingDone, isTrue);
 
       final dailyGoals = await SecureStorageService.instance.getDailyGoals();
-      expect(dailyGoals.calories, equals(savedProfile.targetCalories));
-      expect(dailyGoals.protein, equals(savedProfile.targetProtein));
+      expect(dailyGoals.calories, equals(profile.targetCalories));
+      expect(dailyGoals.protein, equals(profile.targetProtein));
 
       final masterPrompt = await SecureStorageService.instance.getMasterPrompt();
       expect(masterPrompt, isNotNull);
