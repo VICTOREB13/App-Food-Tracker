@@ -175,6 +175,14 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
 
       if (!mounted) return;
       Navigator.of(context).pop();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al guardar comida: $e'),
+          backgroundColor: AppColors.primary,
+        ),
+      );
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -190,9 +198,19 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
     );
 
     if (confirmed == true && widget.initialMeal != null) {
-      await MealController.instance.deleteMeal(widget.initialMeal!);
-      if (!mounted) return;
-      Navigator.of(context).pop();
+      try {
+        await MealController.instance.deleteMeal(widget.initialMeal!);
+        if (!mounted) return;
+        Navigator.of(context).pop();
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al eliminar comida: $e'),
+            backgroundColor: AppColors.primary,
+          ),
+        );
+      }
     }
   }
 

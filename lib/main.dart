@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'screens/dashboard_screen.dart';
@@ -6,6 +7,17 @@ import 'services/theme_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Intercept uncaught framework and asynchronous errors to prevent native black screen crashes
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    debugPrint('FlutterError: ${details.exception}');
+  };
+
+  PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
+    debugPrint('PlatformDispatcher uncaught error: $error\n$stack');
+    return true; // Mark as handled to keep app running
+  };
 
   try {
     await initializeDateFormatting('es', null);

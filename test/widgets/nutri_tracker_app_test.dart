@@ -70,4 +70,13 @@ void main() {
     expect(find.byType(NutriTrackerApp), findsOneWidget);
     expect(ThemeManager.instance, isNotNull);
   });
+
+  testWidgets('NutriTrackerApp boots and renders gracefully even if database is closed or inaccessible', (tester) async {
+    await DatabaseService.instance.closeForTesting();
+
+    await tester.pumpWidget(const NutriTrackerApp());
+    await tester.pumpAndSettle();
+
+    expect(find.byType(NutriTrackerApp), findsOneWidget);
+  });
 }

@@ -167,28 +167,48 @@ class _DashboardScreenState extends State<DashboardScreen> {
       fat: 0,
       notes: 'Hidratación rápida (+250 ml)',
     );
-    await _mealController.saveMeal(waterMeal);
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('💧 +250 ml de agua registrados con éxito.'),
-        backgroundColor: AppColors.water,
-        duration: Duration(seconds: 2),
-      ),
-    );
+    try {
+      await _mealController.saveMeal(waterMeal);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('💧 +250 ml de agua registrados con éxito.'),
+          backgroundColor: AppColors.water,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al registrar agua: $e'),
+          backgroundColor: AppColors.primary,
+        ),
+      );
+    }
   }
 
   Future<void> _handleQuickMeal() async {
     final quickMeal = await showQuickMealDialog(context, date: _mealController.selectedDate);
     if (quickMeal != null) {
-      await _mealController.saveMeal(quickMeal);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('⚡ ${quickMeal.name} registrado (${quickMeal.calories.toInt()} kcal).'),
-          backgroundColor: AppColors.protein,
-        ),
-      );
+      try {
+        await _mealController.saveMeal(quickMeal);
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('⚡ ${quickMeal.name} registrado (${quickMeal.calories.toInt()} kcal).'),
+            backgroundColor: AppColors.protein,
+          ),
+        );
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al registrar comida rápida: $e'),
+            backgroundColor: AppColors.primary,
+          ),
+        );
+      }
     }
   }
 

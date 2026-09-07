@@ -99,6 +99,14 @@ jobs:
               }
           }
 
+          # Copiar MSVC CRT DLLs para asegurar portabilidad en PCs Windows limpios sin VC++ Redistributable
+          if ($env:VCToolsRedistDir -and (Test-Path $env:VCToolsRedistDir)) {
+              Write-Host "Copiando DLLs de MSVC CRT desde: $env:VCToolsRedistDir"
+              Get-ChildItem -Path "$env:VCToolsRedistDir\x64" -Recurse -Filter "*.dll" -ErrorAction SilentlyContinue | ForEach-Object {
+                  Copy-Item -Path $_.FullName -Destination $releasePath -Force -ErrorAction SilentlyContinue
+              }
+          }
+
           Write-Host "Archivos a empaquetar en: $releasePath"
           Get-ChildItem -Path $releasePath | Select-Object Name, Length, LastWriteTime | Format-Table -AutoSize
 

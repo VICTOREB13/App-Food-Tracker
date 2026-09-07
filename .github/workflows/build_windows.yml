@@ -57,8 +57,19 @@ jobs:
                   Write-Host "Copiando $($foundSqlite.FullName) a $releasePath"
                   Copy-Item -Path $foundSqlite.FullName -Destination $releasePath -Force
               } else {
-                  Write-Error "ERROR: sqlite3.dll no fue encontrado en ningun lugar de build\windows!"
-                  exit 1
+                  Write-Host "Descargando sqlite3.dll oficial (x64) para Windows..."
+                  Invoke-WebRequest -Uri "https://www.sqlite.org/2024/sqlite-dll-win-x64-3460100.zip" -OutFile "sqlite-dll.zip"
+                  Expand-Archive "sqlite-dll.zip" -DestinationPath "sqlite-tmp" -Force
+                  Copy-Item "sqlite-tmp\sqlite3.dll" -Destination "$releasePath\sqlite3.dll" -Force
+                  Write-Host "sqlite3.dll configurado con exito en $releasePath"
+              }
+          }
+
+          # Copiar MSVC CRT DLLs para asegurar portabilidad en PCs Windows limpios sin VC++ Redistributable
+          if ($env:VCToolsRedistDir -and (Test-Path $env:VCToolsRedistDir)) {
+              Write-Host "Copiando DLLs de MSVC CRT desde: $env:VCToolsRedistDir"
+              Get-ChildItem -Path "$env:VCToolsRedistDir\x64" -Recurse -Filter "*.dll" -ErrorAction SilentlyContinue | ForEach-Object {
+                  Copy-Item -Path $_.FullName -Destination $releasePath -Force -ErrorAction SilentlyContinue
               }
           }
 

@@ -59,14 +59,32 @@ class DatabaseService {
   Future<String> _getDatabasePath() async {
     if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
       final directory = await getApplicationDocumentsDirectory();
+      try {
+        final dir = Directory(directory.path);
+        if (!await dir.exists()) {
+          await dir.create(recursive: true);
+        }
+      } catch (_) {}
       return p.join(directory.path, 'app_food_tracker.db');
     } else {
       try {
         final databasesPath = await getDatabasesPath();
+        try {
+          final dir = Directory(databasesPath);
+          if (!await dir.exists()) {
+            await dir.create(recursive: true);
+          }
+        } catch (_) {}
         return p.join(databasesPath, 'app_food_tracker.db');
       } catch (e) {
         debugPrint('Warning: getDatabasesPath failed ($e), falling back to getApplicationDocumentsDirectory');
         final directory = await getApplicationDocumentsDirectory();
+        try {
+          final dir = Directory(directory.path);
+          if (!await dir.exists()) {
+            await dir.create(recursive: true);
+          }
+        } catch (_) {}
         return p.join(directory.path, 'app_food_tracker.db');
       }
     }
