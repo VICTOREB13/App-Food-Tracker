@@ -110,7 +110,7 @@ class AppTheme {
         onPrimary: Colors.white,
         onSurface: Color(0xFFFAFAFA),
       ),
-      cardTheme: CardThemeData(
+      cardTheme: CardTheme(
         color: const Color(0xFF121215),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppColors.cardRadius),
@@ -172,7 +172,7 @@ class AppTheme {
         onPrimary: Colors.white,
         onSurface: Color(0xFF09090B),
       ),
-      cardTheme: CardThemeData(
+      cardTheme: CardTheme(
         color: const Color(0xFFFFFFFF),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppColors.cardRadius),

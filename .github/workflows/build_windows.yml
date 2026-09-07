@@ -29,7 +29,7 @@ jobs:
         run: flutter doctor -v
 
       - name: Generar Archivos de Plataforma Windows
-        run: flutter create --platforms windows .
+        run: flutter create --project-name food_tracker --platforms windows .
 
       - name: Restaurar Dependencias
         run: flutter pub get

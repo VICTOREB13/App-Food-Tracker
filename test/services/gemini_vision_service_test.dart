@@ -102,7 +102,7 @@ void main() {
     });
 
     test('Instrucciones del sistema contienen reglas de cubicaje casero latinoamericano', () {
-      final prompt = GeminiVisionService.systemInstruction;
+      const prompt = GeminiVisionService.systemInstruction;
 
       expect(prompt, contains('Puño cerrado'));
       expect(prompt, contains('Palma de la mano'));

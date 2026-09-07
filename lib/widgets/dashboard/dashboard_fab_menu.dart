@@ -62,9 +62,10 @@ class _DashboardFabMenuState extends State<DashboardFabMenu>
               border: Border.all(color: AppColors.border(context)),
             ),
             child: SafeArea(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                   Center(
                     child: Container(
                       width: 36,
@@ -175,7 +176,8 @@ class _DashboardFabMenuState extends State<DashboardFabMenu>
               ),
             ),
           ),
-        );
+        ),
+      );
       },
     ).then((_) {
       if (mounted) _controller.reverse();

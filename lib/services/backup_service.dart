@@ -1,4 +1,5 @@
-﻿import 'dart:convert';
+import 'dart:convert';
+import 'package:sqflite/sqflite.dart';
 import '../models/meal.dart';
 import '../models/pantry_item.dart';
 import 'database_service.dart';

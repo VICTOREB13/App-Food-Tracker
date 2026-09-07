@@ -92,14 +92,14 @@ class _CaloriesRingPainter extends CustomPainter {
 
     if (progress > 0) {
       final sweepAngle = 2 * math.pi * progress;
-      final startAngle = -math.pi / 2;
+      const startAngle = -math.pi / 2;
 
       final rect = Rect.fromCircle(center: center, radius: radius);
       final gradient = SweepGradient(
         startAngle: 0.0,
         endAngle: 2 * math.pi,
         colors: [gradientStart, gradientEnd, gradientStart],
-        transform: GradientRotation(startAngle),
+        transform: const GradientRotation(startAngle),
       );
 
       final progressPaint = Paint()

@@ -63,7 +63,7 @@ jobs:
         run: flutter config --enable-windows-desktop
 
       - name: Generar Archivos de Plataforma Windows
-        run: flutter create --platforms windows .
+        run: flutter create --project-name food_tracker --platforms windows .
 
       - name: Restaurar Dependencias
         run: flutter pub get
@@ -114,7 +114,7 @@ jobs:
           cache: true
 
       - name: Generar Archivos de Plataforma Android
-        run: flutter create --platforms android .
+        run: flutter create --project-name food_tracker --platforms android .
 
       - name: Configurar Compatibilidad de Android SDK (compileSdk 36)
         run: |

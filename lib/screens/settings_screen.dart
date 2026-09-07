@@ -122,7 +122,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             currentApiKey: _controller.geminiApiKey,
             onSaveApiKey: (key) async {
               await _controller.saveApiKey(key);
-              if (!mounted) return;
+              if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(key.isEmpty ? 'API Key eliminada' : 'API Key guardada de forma segura'),
@@ -136,7 +136,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             initialGoals: _controller.dailyGoals,
             onSaveGoals: (goals) async {
               await _controller.saveDailyGoals(goals);
-              if (!mounted) return;
+              if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Metas nutricionales actualizadas con éxito'),
@@ -151,7 +151,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             isLoading: _controller.isLoading,
             onOptimize: () async {
               await _controller.optimizeDatabase();
-              if (!mounted) return;
+              if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Base de datos SQLite optimizada (VACUUM ejecutado)'),

@@ -142,7 +142,6 @@ Reglas obligatorias de cubicaje:
               'grasas_g': Schema.number(description: 'Grasas en gramos'),
               'justificacion_visual': Schema.string(description: 'Explicación volumétrica visual'),
             },
-            optionalProperties: [],
           ),
         ),
         'totales': Schema.object(
@@ -152,10 +151,8 @@ Reglas obligatorias de cubicaje:
             'carbohidratos_g': Schema.number(description: 'Total carbohidratos en gramos'),
             'grasas_g': Schema.number(description: 'Total grasas en gramos'),
           },
-          optionalProperties: [],
         ),
       },
-      optionalProperties: [],
     );
 
     final model = GenerativeModel(

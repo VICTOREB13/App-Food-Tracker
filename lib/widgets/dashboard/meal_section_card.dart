@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/meal.dart';
@@ -154,7 +154,7 @@ class MealSectionCard extends StatelessWidget {
                     children: [
                       MacroIndicatorChip(
                         label: 'Cal',
-                        value: '${meal.calories.toStringAsFixed(0)}',
+                        value: meal.calories.toStringAsFixed(0),
                         accentColor: AppColors.calories,
                         isCompact: true,
                       ),

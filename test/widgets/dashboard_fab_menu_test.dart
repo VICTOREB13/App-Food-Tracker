@@ -5,6 +5,13 @@ import 'package:food_tracker/widgets/dashboard/dashboard_fab_menu.dart';
 void main() {
   group('DashboardFabMenu Widget Tests', () {
     testWidgets('Tapping FAB opens speed dial modal with action grid', (tester) async {
+      tester.view.physicalSize = const Size(800, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
       bool aiPhotoClicked = false;
       bool barcodeClicked = false;
       bool manualClicked = false;
@@ -45,6 +52,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(quickWaterClicked, isTrue);
+      expect(aiPhotoClicked, isFalse);
+      expect(barcodeClicked, isFalse);
+      expect(manualClicked, isFalse);
+      expect(quickMealClicked, isFalse);
     });
   });
 }
