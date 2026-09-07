@@ -1,5 +1,5 @@
 name: food_tracker
-description: "Victor Engineer - Food Tracker (NutriTracker Local-First)"
+description: "Victor Engineer - Food Tracker"
 publish_to: 'none'
 
 version: 0.1.0-alpha+1

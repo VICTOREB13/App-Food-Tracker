@@ -218,8 +218,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     return Scaffold(
       appBar: VeAppBar(
-        title: 'NutriTracker',
-        subtitle: 'Registro Local-First sin Báscula',
+        title: 'Food Tracker',
+        subtitle: 'Victor Engineer',
         actions: [
           const Center(child: StreakBadge(streakDays: 3)),
           const SizedBox(width: 4),

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_card.dart';
@@ -84,7 +84,7 @@ class _ApiKeyInputCardState extends State<ApiKeyInputCard> {
           ),
           const SizedBox(height: 8),
           Text(
-            'NutriTracker opera 100% Local-First. Tu API Key de Google Gemini se almacena en el enclave seguro de tu dispositivo y se conecta directamente con Gemini 2.5 Flash.',
+            'Food Tracker opera 100% Local-First. Tu API Key de Google Gemini se almacena en el enclave seguro de tu dispositivo y se conecta directamente con los modelos de Google Gemini.',
             style: GoogleFonts.inter(
               fontSize: 12,
               color: AppColors.textSecondary(context),
