@@ -198,27 +198,27 @@ jobs:
         run: |
           mkdir -p ~/.gradle
           cat << 'EOF' > ~/.gradle/init.gradle
-allprojects {
-    configurations.all {
-        resolutionStrategy {
-            force 'androidx.core:core:1.13.1'
-            force 'androidx.core:core-ktx:1.13.1'
-            force 'androidx.activity:activity:1.9.3'
-            force 'androidx.activity:activity-ktx:1.9.3'
-            force 'androidx.fragment:fragment:1.8.5'
-            force 'androidx.fragment:fragment-ktx:1.8.5'
-        }
-    }
-    afterEvaluate { project ->
-        if (project.hasProperty('android')) {
-            project.android {
-                compileSdkVersion 34
-                buildToolsVersion "34.0.0"
-            }
-        }
-    }
-}
-EOF
+          allprojects {
+              configurations.all {
+                  resolutionStrategy {
+                      force 'androidx.core:core:1.13.1'
+                      force 'androidx.core:core-ktx:1.13.1'
+                      force 'androidx.activity:activity:1.9.3'
+                      force 'androidx.activity:activity-ktx:1.9.3'
+                      force 'androidx.fragment:fragment:1.8.5'
+                      force 'androidx.fragment:fragment-ktx:1.8.5'
+                  }
+              }
+              afterEvaluate { project ->
+                  if (project.hasProperty('android')) {
+                      project.android {
+                          compileSdkVersion 34
+                          buildToolsVersion "34.0.0"
+                      }
+                  }
+              }
+          }
+          EOF
           echo "compileSdkVersion=34" >> ~/.gradle/gradle.properties
           echo "compileSdk=34" >> ~/.gradle/gradle.properties
           echo "flutter.compileSdkVersion=34" >> ~/.gradle/gradle.properties
