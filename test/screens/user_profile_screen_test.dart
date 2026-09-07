@@ -118,9 +118,11 @@ void main() {
   }
 
   Future<void> pumpScreen(WidgetTester tester) async {
+    await tester.runAsync(() async {
+      await Future.delayed(const Duration(milliseconds: 100));
+    });
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 150));
-    await tester.pump(const Duration(milliseconds: 150));
+    await tester.pump(const Duration(milliseconds: 100));
   }
 
   group('UserProfileScreen Widget & Interaction Tests', () {
@@ -219,7 +221,10 @@ void main() {
       expect(find.text('Perfil metabólico y metas sincronizadas con éxito'), findsOneWidget);
 
       // Verifica persistencia en SQLite
-      final savedProfile = await DatabaseService.instance.getUserProfile();
+      UserProfile? savedProfile;
+      await tester.runAsync(() async {
+        savedProfile = await DatabaseService.instance.getUserProfile();
+      });
       expect(savedProfile, isNotNull);
       expect(savedProfile!.name, equals('Victor Engineer'));
       expect(savedProfile.bmr, greaterThan(1000.0));

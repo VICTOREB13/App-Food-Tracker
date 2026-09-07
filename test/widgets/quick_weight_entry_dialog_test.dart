@@ -160,8 +160,11 @@ void main() {
       await tester.enterText(textFields.at(1), 'En ayunas');
 
       await tester.tap(find.text('Guardar'));
+      await tester.runAsync(() async {
+        await Future.delayed(const Duration(milliseconds: 100));
+      });
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pump(const Duration(milliseconds: 200));
 
       expect(find.text('Registrar Peso'), findsNothing);
       expect(find.byType(SnackBar), findsOneWidget);

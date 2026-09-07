@@ -105,9 +105,11 @@ void main() {
         ),
       );
 
+      await tester.runAsync(() async {
+        await Future.delayed(const Duration(milliseconds: 100));
+      });
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 150));
-      await tester.pump(const Duration(milliseconds: 150));
+      await tester.pump(const Duration(milliseconds: 100));
 
       // Check App Bar
       expect(find.text('Métricas y Progreso'), findsOneWidget);
@@ -136,23 +138,29 @@ void main() {
         ),
       );
 
+      await tester.runAsync(() async {
+        await Future.delayed(const Duration(milliseconds: 100));
+      });
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 150));
-      await tester.pump(const Duration(milliseconds: 150));
+      await tester.pump(const Duration(milliseconds: 100));
 
       // Default is 30 days
       expect(MealController.instance.selectedWeightDays, equals(30));
 
       // Switch to 7 days
       await tester.tap(find.text('7 días'));
+      await tester.runAsync(() async {
+        await Future.delayed(const Duration(milliseconds: 100));
+      });
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 150));
       expect(MealController.instance.selectedWeightDays, equals(7));
 
       // Switch to 90 days
       await tester.tap(find.text('90 días'));
+      await tester.runAsync(() async {
+        await Future.delayed(const Duration(milliseconds: 100));
+      });
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 150));
       expect(MealController.instance.selectedWeightDays, equals(90));
     });
 
@@ -163,14 +171,16 @@ void main() {
         ),
       );
 
+      await tester.runAsync(() async {
+        await Future.delayed(const Duration(milliseconds: 100));
+      });
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 150));
-      await tester.pump(const Duration(milliseconds: 150));
+      await tester.pump(const Duration(milliseconds: 100));
 
       final fab = find.byType(FloatingActionButton);
       await tester.tap(fab);
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pump(const Duration(milliseconds: 200));
 
       expect(find.byType(QuickWeightEntryDialog), findsOneWidget);
       expect(find.text('PESO CORPORAL (KG)'), findsOneWidget);
