@@ -33,6 +33,13 @@ jobs:
 
       - name: Configurar Compatibilidad de Android SDK (compileSdk 34)
         run: |
+          # Redirigir android-35 a android-34 para evitar bug de AAPT2 con tabla de recursos
+          if [ -d "/usr/local/lib/android/sdk/platforms/android-35" ]; then
+            sudo rm -rf /usr/local/lib/android/sdk/platforms/android-35 2>/dev/null || true
+            sudo ln -sf /usr/local/lib/android/sdk/platforms/android-34 /usr/local/lib/android/sdk/platforms/android-35 2>/dev/null || true
+            echo "✅ android-35 redirigido a android-34 en SDK"
+          fi
+
           echo "compileSdkVersion=34" >> android/gradle.properties
           echo "flutter.compileSdkVersion=34" >> android/gradle.properties
           echo "flutter.compileSdkVersion=34" >> android/local.properties 2>/dev/null || true
@@ -44,6 +51,23 @@ jobs:
           if [ -f "android/app/build.gradle.kts" ]; then
             sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 34/' android/app/build.gradle.kts
             sed -i 's/compileSdk = [0-9]*/compileSdk = 34/' android/app/build.gradle.kts
+          fi
+
+          if [ -f "android/build.gradle" ]; then
+            sed -i "s/ext.kotlin_version = .*/ext.kotlin_version = '1.9.22'/" android/build.gradle 2>/dev/null || true
+            cat << 'EOF' >> android/build.gradle
+
+subprojects {
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            project.android {
+                compileSdkVersion 34
+                buildToolsVersion "34.0.0"
+            }
+        }
+    }
+}
+EOF
           fi
 
       - name: Configurar Nombre de Aplicación y Permisos
@@ -81,8 +105,11 @@ jobs:
 
           for cp in "$HOME/.pub-cache" "${PUB_CACHE:-$HOME/.pub-cache}"; do
             if [ -d "$cp" ]; then
-              find "$cp" -name "build.gradle" -exec sed -i -E 's/compileSdkVersion[ (].*/compileSdkVersion 34/g' {} + 2>/dev/null || true
-              find "$cp" -name "build.gradle" -exec sed -i -E 's/compileSdk [0-9]+/compileSdk 34/g' {} + 2>/dev/null || true
+              find "$cp" -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i -E 's/compileSdkVersion[ (].*/compileSdkVersion 34/g' {} + 2>/dev/null || true
+              find "$cp" -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i -E 's/compileSdk[ ]*=[ ]*[0-9]+/compileSdk = 34/g' {} + 2>/dev/null || true
+              find "$cp" -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i -E 's/compileSdk[ ]+[0-9]+/compileSdk 34/g' {} + 2>/dev/null || true
+              find "$cp" -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i -E 's/targetSdk[ ]*=[ ]*[0-9]+/targetSdk = 34/g' {} + 2>/dev/null || true
+              find "$cp" -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i -E 's/targetSdkVersion[ (].*/targetSdkVersion 34/g' {} + 2>/dev/null || true
             fi
           done
 

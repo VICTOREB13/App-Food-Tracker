@@ -62,7 +62,7 @@ jobs:
               }
           }
 
-          Write-Host "Archivos a empaquetar en $releasePath:"
+          Write-Host "Archivos a empaquetar en: $releasePath"
           Get-ChildItem -Path $releasePath | Select-Object Name, Length, LastWriteTime | Format-Table -AutoSize
 
           New-Item -ItemType Directory -Force -Path "dist"

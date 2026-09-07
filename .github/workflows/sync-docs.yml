@@ -26,8 +26,8 @@ jobs:
 
       - name: 🔄 Procesar, Renombrar y Copiar Artefactos
         run: |
-          PROYECTO="Food_Tracker"
-          PREFIJO="PRJ_VEFoodTracker_"
+          PROYECTO="App_Food_Tracker"
+          PREFIJO="PRJ_${PROYECTO}_"
           RUTA_OBSIDIAN="target-vault/01_Proyectos/PRJ_$PROYECTO"
           
           mkdir -p "$RUTA_OBSIDIAN"
