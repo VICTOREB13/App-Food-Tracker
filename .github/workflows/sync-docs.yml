@@ -23,6 +23,7 @@ jobs:
           repository: VICTOREB13/obsidian-obsidian-vault
           token: ${{ secrets.VAULT_PAT }}
           path: target-vault
+          ref: main
 
       - name: 🔄 Procesar, Renombrar y Copiar Artefactos
         run: |
@@ -32,21 +33,51 @@ jobs:
           
           mkdir -p "$RUTA_OBSIDIAN"
           
-          find source-repo/artifacts -type f -name "*.md" | while read -r archivo_origen; do
+          find source-repo/artifacts -type f \( -name "*.md" -o -name "*.html" \) ! -path "*/src/*" | while read -r archivo_origen; do
             nombre_base=$(basename "$archivo_origen")
             cp "$archivo_origen" "$RUTA_OBSIDIAN/${PREFIJO}${nombre_base}"
           done
           
           find "$RUTA_OBSIDIAN" -type f -name "*.md" | while read -r archivo_destino; do
+            sed -i "s/\[\[PLANTILLA_/\[\[${PREFIJO}/g" "$archivo_destino"
+            sed -i "s/\[\[architecture_diagram\.html\]\]/\[\[${PREFIJO}architecture_diagram.html|Diagrama de Arquitectura (Archify)\]\]/g" "$archivo_destino"
+            sed -i "s/\[\[architecture_diagram\.html|/\[\[${PREFIJO}architecture_diagram.html|/g" "$archivo_destino"
+            sed -i "s/\[\[architecture_diagram\]\]/\[\[${PREFIJO}architecture_diagram.html|Diagrama de Arquitectura (Archify)\]\]/g" "$archivo_destino"
+            sed -i "s/\[\[architecture_diagram|/\[\[${PREFIJO}architecture_diagram.html|/g" "$archivo_destino"
             sed -i "s/\[\[architecture\]\]/\[\[${PREFIJO}architecture|architecture\]\]/g" "$archivo_destino"
+            sed -i "s/\[\[architecture|/\[\[${PREFIJO}architecture|/g" "$archivo_destino"
+            sed -i "s/\[\[abstractions\]\]/\[\[${PREFIJO}abstractions|abstractions\]\]/g" "$archivo_destino"
+            sed -i "s/\[\[abstractions|/\[\[${PREFIJO}abstractions|/g" "$archivo_destino"
             sed -i "s/\[\[api_spec\]\]/\[\[${PREFIJO}api_spec|api_spec\]\]/g" "$archivo_destino"
-            sed -i "s/\[\[design_system\]\]/\[\[${PREFIJO}design_system|design_system\]\]/g" "$archivo_destino"
+            sed -i "s/\[\[api_spec|/\[\[${PREFIJO}api_spec|/g" "$archivo_destino"
             sed -i "s/\[\[implementation_plan\]\]/\[\[${PREFIJO}implementation_plan|implementation_plan\]\]/g" "$archivo_destino"
+            sed -i "s/\[\[implementation_plan|/\[\[${PREFIJO}implementation_plan|/g" "$archivo_destino"
             sed -i "s/\[\[task\]\]/\[\[${PREFIJO}task|task\]\]/g" "$archivo_destino"
-            sed -i "s/\[\[changelog_v1\]\]/\[\[${PREFIJO}changelog_v1|changelog_v1\]\]/g" "$archivo_destino"
-            sed -i "s/\[\[audit_report\]\]/\[\[${PREFIJO}audit_report|audit_report\]\]/g" "$archivo_destino"
+            sed -i "s/\[\[task|/\[\[${PREFIJO}task|/g" "$archivo_destino"
+            sed -i "s/\[\[project_overview\]\]/\[\[${PREFIJO}project_overview|project_overview\]\]/g" "$archivo_destino"
+            sed -i "s/\[\[project_overview|/\[\[${PREFIJO}project_overview|/g" "$archivo_destino"
+
+            find source-repo/artifacts -type f \( -name "*.md" -o -name "*.html" \) ! -path "*/src/*" | while read -r item_origen; do
+              item_base=$(basename "$item_origen")
+              case "$item_base" in
+                *.md)
+                  nombre_clave="${item_base%.md}"
+                  sed -i "s/\[\[${nombre_clave}\]\]/\[\[${PREFIJO}${nombre_clave}|${nombre_clave}\]\]/g" "$archivo_destino"
+                  sed -i "s/\[\[${nombre_clave}|/\[\[${PREFIJO}${nombre_clave}|/g" "$archivo_destino"
+                  ;;
+                *.html)
+                  sed -i "s/\[\[${item_base}\]\]/\[\[${PREFIJO}${item_base}|${item_base}\]\]/g" "$archivo_destino"
+                  sed -i "s/\[\[${item_base}|/\[\[${PREFIJO}${item_base}|/g" "$archivo_destino"
+                  ;;
+              esac
+            done
+
+            sed -i -E "s/\[\[(changelog_v[0-9]+)\]\]/\[\[${PREFIJO}\1|\1\]\]/g" "$archivo_destino"
+            sed -i -E "s/\[\[(changelog_v[0-9]+)\|/\[\[${PREFIJO}\1\|/g" "$archivo_destino"
+            sed -i -E "s/\[\[(audit_report[^]|]*)\]\]/\[\[${PREFIJO}\1|\1\]\]/g" "$archivo_destino"
+            sed -i -E "s/\[\[(audit_report[^]|]*)\|/\[\[${PREFIJO}\1\|/g" "$archivo_destino"
           done
-          
+
       - name: 🚀 Empujar a Obsidian Vault
         run: |
           cd target-vault
@@ -54,4 +85,4 @@ jobs:
           git config user.email "bot@victorengineer.fyi"
           git add .
           git commit -m "docs: 🤖 Actualización automática de artefactos para PRJ_$PROYECTO" || echo "No hay cambios nuevos en los documentos"
-          git push
+          git push origin main
