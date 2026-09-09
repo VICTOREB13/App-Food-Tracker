@@ -1,11 +1,10 @@
 ---
-title: Visión General del Proyecto: Victor Engineer - Food Tracker
-status: active
-tags: [proyecto, overview, victor-engineer, local-first, flutter, ai-vision, bento-grid, gemini, usda, mifflin-st-jeor]
-agent: project-planner
-project: App_Food_Tracker
+tipo: overview
+proyecto: App_Food_Tracker
 version: v0.2.0-alpha
-date: 2026-09-07
+estado: activo
+fecha: 2026-09-09
+tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid]
 ---
 
 # 🚀 Visión General del Proyecto: Victor Engineer - Food Tracker
@@ -59,15 +58,17 @@ date: 2026-09-07
 
 ## 🗺️ 2. Índice Oficial de Artefactos del Proyecto
 
-Todos los enlaces internos siguen estrictamente el estándar de Obsidian con el prefijo oficial del proyecto `[[PRJ_VEFoodTracker_{artefacto}|Alias]]`:
+Todos los enlaces internos siguen estrictamente el estándar de Obsidian con el prefijo oficial del proyecto `[[PRJ_App_Food_Tracker_{artefacto}|Alias]]`:
 
-- **Arquitectura del Sistema:** [[PRJ_VEFoodTracker_architecture|Arquitectura del Sistema]]
-- **Contrato de Datos y Especificación de API:** [[PRJ_VEFoodTracker_api_spec|Especificación de API, Esquema SQLite y Contratos Backend]]
-- **Sistema de Diseño y Tokens UI/UX:** [[PRJ_VEFoodTracker_design_system|Sistema de Diseño (DESIGN.md)]]
-- **Plan de Implementación Iterativa:** [[PRJ_VEFoodTracker_implementation_plan|Plan de Implementación]]
-- **Checklist de Tareas y Roles:** [[PRJ_VEFoodTracker_task|Checklist Maestro de Tareas de Agentes]]
-- **Historial de Versiones (Changelog):** [[PRJ_VEFoodTracker_changelog_v1|Registro de Cambios (Changelog)]]
-- **Reporte de Auditoría y Quality Gate:** [[PRJ_VEFoodTracker_audit_report|Reporte de Auditoría Integral y Quality Gate]]
+- **Arquitectura:** [[PRJ_App_Food_Tracker_architecture|Arquitectura del Sistema]]
+- **Diagrama Interactivo:** [[PRJ_App_Food_Tracker_architecture_diagram.html|Diagrama HTML (Archify)]]
+- **Abstracciones:** [[PRJ_App_Food_Tracker_abstractions|Abstracciones del Sistema y Arquitectura de Código]]
+- **Contrato de Datos (API):** [[PRJ_App_Food_Tracker_api_spec|Especificación de API y Modelos de Datos]]
+- **Sistema de Diseño:** [[PRJ_App_Food_Tracker_design_system|Sistema de Diseño (DESIGN.md)]]
+- **Plan de Implementación:** [[PRJ_App_Food_Tracker_implementation_plan|Plan de Implementación Actual]]
+- **Checklist de Tareas:** [[PRJ_App_Food_Tracker_task|Checklist de Tareas]]
+- **Historial de Cambios:** [[PRJ_App_Food_Tracker_changelog_v1|Registro de Versiones (Changelog)]]
+- **Último Reporte de Auditoría:** [[PRJ_App_Food_Tracker_audit_report|Reporte de Auditoría (Quality Gate)]]
 
 ---
 
@@ -75,8 +76,8 @@ Todos los enlaces internos siguen estrictamente el estándar de Obsidian con el 
 
 | Agente | Rol en el Proyecto | Principales Entregables |
 | :--- | :--- | :--- |
-| **Project-Planner** | Tech Lead & Orquestador Maestro | `project_overview.md`, `implementation_plan.md`, `task.md`, `changelog_v1.md`. |
-| **Backend-Architect** | Arquitecto de Datos y Servicios | `api_spec.md`, `architecture.md`, `DatabaseService` (SQLite v2), `GeminiModelService`, `UsdaFoodDataService`, `BarcodeLookupService`, `MetabolicCalculator`, sanitizadores y modelos inmutables Sentinel. |
-| **Frontend-UI** | Especialista de Interfaz y Tokens | `DESIGN.md`, `ThemeManager`, `DashboardScreen`, `MealDetailScreen`, `SettingsScreen`, `UserProfileScreen`, `MetricsScreen`, widgets atómicos (< 300 LoC), microinteracciones y `WeightLineChartPainter`. |
-| **Systems-Auditor** | Guardián del Quality Gate y Pruebas | `audit_report.md`, batería de pruebas automatizadas (37 suites, 237 pruebas unitarias/widgets/integración en verde), auditoría N+1, SecOps. |
+| **Project-Planner** | Tech Lead & Orquestador Maestro | `project_overview.md`, `implementation_plan.md`, `task.md`, `changelog_v1.md`, diagramas Archify. |
+| **Backend-Architect** | Arquitecto de Datos y Servicios | `api_spec.md`, `architecture.md`, `abstractions.md`, `DatabaseService` (SQLite v2), `GeminiModelService`, `UsdaFoodDataService`, `BarcodeLookupService`, `MetabolicCalculator`. |
+| **Frontend-UI** | Especialista de Interfaz y Tokens | `design_system.md`, `ThemeManager`, `DashboardScreen`, `MealDetailScreen`, `SettingsScreen`, `UserProfileScreen`, `MetricsScreen`, widgets atómicos (< 300 LoC), microinteracciones y `WeightLineChartPainter`. |
+| **Systems-Auditor** | Guardián del Quality Gate y Pruebas | `audit_report.md`, batería de pruebas automatizadas, auditoría N+1, WCAG, SecOps. |
 | **DevOps-Engineer** | Infraestructura, CI/CD y Releases | `.github/workflows/ci.yml`, `build_apk.yml`, `build_windows.yml`, `release.yml`, Keystore RSA permanente, empaquetado y publicación oficial. |

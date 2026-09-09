@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Victor Engineer - Food Tracker Architecture",
+    "output": "architecture_diagram.html",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "local-first-core",
+        "label": "Local-First Core",
+        "focus": ["flutter_ui", "controllers", "sqlite_db", "secure_storage"],
+        "note": "Zero-latency local CRUD operations and secure key custody."
+      },
+      {
+        "id": "ai-vision-pipeline",
+        "label": "AI Vision Pipeline",
+        "focus": ["flutter_ui", "controllers", "metabolic", "vision_engine", "gemini_api"],
+        "note": "Clinical biometric profile enrichment with Gemini multimodal inference."
+      },
+      {
+        "id": "barcode-cascade",
+        "label": "Barcode Nutritional Cascade",
+        "focus": ["flutter_ui", "controllers", "barcode_resolver", "usda_api", "openfood_api"],
+        "note": "Resilient lookup falling back from USDA FoodData to Open Food Facts."
+      }
+    ]
+  },
+  "components": [
+    { "id": "flutter_ui", "type": "frontend", "label": "Flutter UI", "sublabel": "Bento Grid & Views", "pos": [40, 250], "size": [130, 54] },
+    { "id": "controllers", "type": "frontend", "label": "State Controllers", "sublabel": "Meal & Settings Provider", "pos": [260, 250], "size": [130, 54] },
+    { "id": "secure_storage", "type": "security", "label": "Secure Storage", "sublabel": "AES Encrypted BYOK", "pos": [260, 360], "size": [130, 54] },
+    { "id": "metabolic", "type": "backend", "label": "Metabolic Engine", "sublabel": "Mifflin-St Jeor TDEE", "pos": [490, 40], "size": [140, 54] },
+    { "id": "vision_engine", "type": "backend", "label": "Gemini Vision", "sublabel": "Volumetric & Prompt", "pos": [490, 145], "size": [140, 54] },
+    { "id": "barcode_resolver", "type": "backend", "label": "Barcode Resolver", "sublabel": "Cascading Resolution", "pos": [490, 250], "size": [140, 54] },
+    { "id": "sqlite_db", "type": "database", "label": "SQLite DB v2", "sublabel": "WAL Mode & Index", "pos": [490, 360], "size": [140, 54] },
+    { "id": "gemini_api", "type": "cloud", "label": "Google Gemini API", "sublabel": "Dynamic Discovery", "pos": [730, 145], "size": [140, 54] },
+    { "id": "usda_api", "type": "external", "label": "USDA FoodData", "sublabel": "Primary Nutrient DB", "pos": [730, 250], "size": [140, 54] },
+    { "id": "openfood_api", "type": "external", "label": "Open Food Facts", "sublabel": "Fallback Barcode DB", "pos": [730, 360], "size": [140, 54] }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Client Runtime (Local-First)",
+      "wraps": ["flutter_ui", "controllers", "secure_storage", "metabolic", "vision_engine", "barcode_resolver", "sqlite_db"]
+    },
+    {
+      "kind": "region",
+      "label": "External Cloud Services (BYOK)",
+      "wraps": ["gemini_api", "usda_api", "openfood_api"]
+    }
+  ],
+  "connections": [
+    { "id": "ui-to-ctrl", "from": "flutter_ui", "to": "controllers", "label": "User Input", "variant": "emphasis" },
+    { "id": "ctrl-to-sec", "from": "controllers", "to": "secure_storage", "variant": "security", "fromSide": "bottom", "toSide": "top" },
+    { "id": "ctrl-to-meta", "from": "controllers", "to": "metabolic", "fromSide": "top", "toSide": "left" },
+    { "id": "ctrl-to-vis", "from": "controllers", "to": "vision_engine" },
+    { "id": "ctrl-to-bar", "from": "controllers", "to": "barcode_resolver" },
+    { "id": "ctrl-to-sql", "from": "controllers", "to": "sqlite_db", "label": "Persist" },
+    { "id": "meta-to-vis", "from": "metabolic", "to": "vision_engine", "label": "Master Prompt", "fromSide": "bottom", "toSide": "top", "labelDy": 24 },
+    { "id": "vis-to-gemini", "from": "vision_engine", "to": "gemini_api", "label": "Vision AI", "variant": "emphasis" },
+    { "id": "bar-to-usda", "from": "barcode_resolver", "to": "usda_api", "label": "Primary FDC" },
+    { "id": "bar-to-off", "from": "barcode_resolver", "to": "openfood_api", "label": "Fallback", "variant": "dashed" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Local-First Core",
+      "items": [
+        "Offline-first SQLite with WAL pragma mode",
+        "EncryptedSharedPreferences for API keys",
+        "Monolithic modular screens under 300 LoC"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "AI Vision Pipeline",
+      "items": [
+        "Live discovery of Gemini multimodal models",
+        "Mifflin-St Jeor Master Prompt injection",
+        "Defensive image resize to 1024x1024"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Nutritional Cascada",
+      "items": [
+        "USDA FoodData Central primary resolution",
+        "Open Food Facts automated fallback",
+        "Energy normalization from kJ to kcal"
+      ]
+    }
+  ]
+}

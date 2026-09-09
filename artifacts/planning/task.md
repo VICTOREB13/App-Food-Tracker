@@ -1,11 +1,10 @@
 ---
-title: Checklist Maestro de Tareas de Agentes (v0.2.0-alpha)
-status: completed
-tags: [proyecto, tasks, checklist, subagents, roles, gemini, usda, mifflin-st-jeor]
-agent: project-planner
-project: App_Food_Tracker
-version: v0.2.0-alpha
-date: 2026-09-07
+tipo: task_list
+proyecto: App_Food_Tracker
+iteracion: v0.2.0-alpha
+estado: activo
+fecha: 2026-09-09
+tags: [proyecto, tasks, checklist, v7-teamwork]
 ---
 
 # 📋 Checklist Maestro de Tareas de Agentes (v0.2.0-alpha)
@@ -89,4 +88,15 @@ date: 2026-09-07
 - [x] (DevOps-Engineer) Configurar `.github/workflows/release.yml` para empaquetado y firma con Keystore seguro mediante GitHub Secrets.
 - [x] (DevOps-Engineer) Publicar exitosamente el Release oficial `v0.2.0-alpha` con artefactos APK de Android y ZIP de Windows x64.
 - [x] (DevOps-Engineer) Asegurar versionamiento semántico `0.2.0-alpha+1` en `pubspec.yaml` y sincronización de documentación.
+
+---
+
+## 🏗️ 6. Migración a V7 Teamwork & Estandarización de Artefactos
+- [x] (Project-Planner) Estandarizar frontmatter YAML en todos los artefactos según `artifact-standards` (claves minúsculas, fechas ISO, propiedades planas).
+- [x] (Backend-Architect) Generar `artifacts/architecture/abstractions.md` documentando modelos inmutables, servicios, funciones puras y data seams.
+- [x] (Project-Planner) Convertir diagrama Mermaid a especificación Archify JSON (`artifacts/architecture/src/architecture_diagram.json`) y compilar diagrama interactivo (`artifacts/architecture/architecture_diagram.html`).
+- [x] (Project-Planner) Actualizar `artifacts/architecture/architecture.md` eliminando el bloque Mermaid y vinculando el diagrama Archify.
+- [x] (Project-Planner) Verificar estado y umbral de líneas de `artifacts/planning/changelog_v1.md` (< 300 LoC).
+- [x] (Systems-Auditor) Auditar el cumplimiento integral del Quality Gate y consistencia de artefactos en `artifacts/audit_reports/audit_report.md`.
+
 

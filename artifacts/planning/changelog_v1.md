@@ -1,11 +1,10 @@
 ---
-title: Registro de Cambios (Changelog) - Victor Engineer Food Tracker
-status: active
-tags: [proyecto, changelog, versiones, keepachangelog, semver, gemini, usda, mifflin-st-jeor]
-agent: project-planner
-project: App_Food_Tracker
-version: v0.2.0-alpha
-date: 2026-09-07
+tipo: changelog
+proyecto: App_Food_Tracker
+version: v1
+estado: activo
+fecha: 2026-09-09
+tags: [proyecto, changelog, versiones]
 ---
 
 # 📜 Registro de Cambios (Changelog) - Victor Engineer Food Tracker
@@ -16,6 +15,11 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 ---
 
 ## [Unreleased]
+
+### Changed
+- **Migración a Arquitectura V7 Teamwork:** Estandarización de frontmatter YAML en todos los artefactos (`artifact-standards`), claves planas en minúsculas y fechas ISO `YYYY-MM-DD`.
+- **Nuevo Artefacto de Abstracciones del Sistema:** Creación de `artifacts/architecture/abstractions.md` documentando modelos inmutables Sentinel, servicios de dominio, funciones puras y costuras de flujo de datos (data seams).
+- **Diagrama de Arquitectura Interactivo en Archify:** Sustitución de bloques estáticos Mermaid por diagrama HTML autónomo interactivo (`architecture_diagram.html`) y fuente JSON en `artifacts/architecture/src/architecture_diagram.json`.
 
 ### Planned
 - **Sincronización P2P Segura:** Replicación local cifrada punto a punto entre dispositivos en la misma red Wi-Fi sin intermediarios de nube.

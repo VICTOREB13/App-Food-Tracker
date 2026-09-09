@@ -1,11 +1,10 @@
 ---
-title: Especificación de API, Esquema SQLite v2 y Contratos Backend
-status: active
-tags: [proyecto, api, backend, database, sqlite, gemini, usda, contracts, mifflin-st-jeor]
-agent: backend-architect
-project: App_Food_Tracker
+tipo: api_spec
+proyecto: App_Food_Tracker
 version: v0.2.0-alpha
-date: 2026-09-07
+estado: activo
+fecha: 2026-09-09
+tags: [proyecto, api, backend, contratos, sqlite]
 ---
 
 # 📡 Especificación de Contrato de Datos, Esquema SQLite v2 y Servicios Backend

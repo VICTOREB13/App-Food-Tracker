@@ -1,11 +1,10 @@
 ---
-title: Plan de Implementación: Victor Engineer - Food Tracker
-status: completed
-tags: [proyecto, planning, mvp, local-first, evolutionary-prototyping, gemini, usda, mifflin-st-jeor]
-agent: project-planner
-project: App_Food_Tracker
-version: v0.2.0-alpha
-date: 2026-09-07
+tipo: implementation_plan
+proyecto: App_Food_Tracker
+iteracion: v0.2.0-alpha
+estado: activo
+fecha: 2026-09-09
+tags: [proyecto, planning, mvp, yagni, local-first]
 ---
 
 # 🎯 Plan de Implementación: Victor Engineer - Food Tracker (v0.2.0-alpha)

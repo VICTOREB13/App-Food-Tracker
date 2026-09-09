@@ -1,11 +1,10 @@
 ---
-title: Sistema de Diseño y Tokens UI/UX: Victor Engineer - Food Tracker
-status: approved
-tags: [design-system, ui-ux, flutter, bento-grid, cal-ai, vitalis, speed-dial, obsidian-zinc, victor-engineer, local-first, mifflin-st-jeor]
-agent: frontend-ui
-project: App_Food_Tracker
+tipo: design_system
+proyecto: App_Food_Tracker
 version: v0.2.0-alpha
-date: 2026-09-07
+estado: activo
+fecha: 2026-09-09
+tags: [proyecto, design-system, ui-ux, bento-grid, tokens]
 ---
 
 # 🎨 Especificación de Diseño: Victor Engineer - Food Tracker (v0.2.0-alpha)
