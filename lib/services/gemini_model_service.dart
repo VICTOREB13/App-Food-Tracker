@@ -204,12 +204,7 @@ class GeminiModelService {
       return false;
     }
 
-    // 3. Name must contain 'flash' or 'pro'
-    if (!rawName.contains('flash') && !rawName.contains('pro')) {
-      return false;
-    }
-
-    // 4. Prohibited keywords exclusion
+    // 3. Prohibited keywords exclusion
     const prohibitedKeywords = [
       'banana',
       'nano',
@@ -230,17 +225,29 @@ class GeminiModelService {
 
     for (final keyword in prohibitedKeywords) {
       if (rawName.contains(keyword)) {
+        if (keyword == 'custom' && rawName.contains('custom-case')) {
+          continue;
+        }
         return false;
       }
     }
 
-    // 5. If inputModalities is provided by Google API, verify IMAGE capability
+    // 4. Multimodal Verification:
+    // If inputModalities is provided by Google API, verify IMAGE capability.
+    // Otherwise, fall back to name heuristic requiring 'flash' or 'pro'.
     final modalities = (model['inputModalities'] as List<dynamic>?)
             ?.map((e) => e.toString().toUpperCase())
             .toList() ??
         [];
-    if (modalities.isNotEmpty && !modalities.contains('IMAGE')) {
-      return false;
+
+    if (modalities.isNotEmpty) {
+      if (!modalities.contains('IMAGE')) {
+        return false;
+      }
+    } else {
+      if (!rawName.contains('flash') && !rawName.contains('pro')) {
+        return false;
+      }
     }
 
     return true;
