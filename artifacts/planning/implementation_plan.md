@@ -83,5 +83,5 @@ tags: [proyecto, planning, v0-3-0-alpha, yagni, local-first, ui-ux]
 ### Fase 4: CI/CD y Empaquetado (`DevOps-Engineer`)
 1. Actualizar `pubspec.yaml` a `0.3.0-alpha+1`.
 2. Verificar que los pipelines de GitHub Actions compilen sin errores con el Keystore permanente.
-3. Publicar el Release `v0.3.0-alpha` con artefactos APK de Android y ZIP de Windows.
+3. Publicar el Release `v0.3.0-alpha` con artefacto APK de Android (plataforma móvil).
 

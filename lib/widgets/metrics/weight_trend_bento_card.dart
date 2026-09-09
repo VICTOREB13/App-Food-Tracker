@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../models/weight_log.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_card.dart';
-import 'quick_weight_entry_dialog.dart';
 import 'weight_line_chart_painter.dart';
 
 class WeightTrendBentoCard extends StatelessWidget {

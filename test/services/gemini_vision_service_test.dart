@@ -341,7 +341,7 @@ void main() {
 
       // 5. Generic fallback
       expect(
-        GeminiVisionService.userFriendlyErrorMessage(FormatException('Unexpected token')),
+        GeminiVisionService.userFriendlyErrorMessage(const FormatException('Unexpected token')),
         equals('Ocurrió un error al analizar la comida. Por favor, inténtalo nuevamente.'),
       );
     });

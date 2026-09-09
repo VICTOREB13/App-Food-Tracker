@@ -39,84 +39,6 @@ jobs:
       - name: Ejecutar Pruebas Automatizadas
         run: flutter test --coverage
 
-  build_windows:
-    name: Compilar Ejecutable Windows x64
-    needs: [quality_gate]
-    runs-on: windows-2022
-
-    steps:
-      - name: Descargar Código
-        uses: actions/checkout@v4
-
-      - name: Configurar Entorno Visual Studio C++ (MSVC)
-        uses: ilammy/msvc-dev-cmd@v1
-
-      - name: Configurar Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-          cache: true
-
-      - name: Habilitar Soporte de Windows Desktop
-        run: flutter config --enable-windows-desktop
-
-      - name: Generar Archivos de Plataforma Windows
-        run: flutter create --project-name food_tracker --platforms windows .
-
-      - name: Restaurar Dependencias
-        run: flutter pub get
-
-      - name: Compilar Aplicación para Windows
-        run: flutter build windows --release
-
-      - name: Empaquetar Binario en Archivo ZIP
-        shell: pwsh
-        run: |
-          $releasePath = if (Test-Path "build\windows\x64\runner\Release") { 
-              "build\windows\x64\runner\Release" 
-          } elseif (Test-Path "build\windows\runner\Release") { 
-              "build\windows\runner\Release" 
-          } else { 
-              Get-ChildItem -Path "build\windows" -Recurse -Filter "*.exe" | Select-Object -First 1 | ForEach-Object { $_.DirectoryName }
-          }
-          Write-Host "Directorio de release detectado: $releasePath"
-
-          # Verificar y asegurar que sqlite3.dll este presente en el directorio de release
-          if (-not (Test-Path "$releasePath\sqlite3.dll")) {
-              Write-Warning "sqlite3.dll no esta directamente en $releasePath. Buscando en build\windows..."
-              $foundSqlite = Get-ChildItem -Path "build\windows" -Recurse -Filter "sqlite3.dll" | Select-Object -First 1
-              if ($foundSqlite) {
-                  Write-Host "Copiando $($foundSqlite.FullName) a $releasePath"
-                  Copy-Item -Path $foundSqlite.FullName -Destination $releasePath -Force
-              } else {
-                  Write-Host "Descargando sqlite3.dll oficial (x64) para Windows..."
-                  Invoke-WebRequest -Uri "https://www.sqlite.org/2024/sqlite-dll-win-x64-3460100.zip" -OutFile "sqlite-dll.zip"
-                  Expand-Archive "sqlite-dll.zip" -DestinationPath "sqlite-tmp" -Force
-                  Copy-Item "sqlite-tmp\sqlite3.dll" -Destination "$releasePath\sqlite3.dll" -Force
-                  Write-Host "sqlite3.dll configurado con exito en $releasePath"
-              }
-          }
-
-          # Copiar MSVC CRT DLLs para asegurar portabilidad en PCs Windows limpios sin VC++ Redistributable
-          if ($env:VCToolsRedistDir -and (Test-Path $env:VCToolsRedistDir)) {
-              Write-Host "Copiando DLLs de MSVC CRT desde: $env:VCToolsRedistDir"
-              Get-ChildItem -Path "$env:VCToolsRedistDir\x64" -Recurse -Filter "*.dll" -ErrorAction SilentlyContinue | ForEach-Object {
-                  Copy-Item -Path $_.FullName -Destination $releasePath -Force -ErrorAction SilentlyContinue
-              }
-          }
-
-          Write-Host "Archivos a empaquetar en: $releasePath"
-          Get-ChildItem -Path $releasePath | Select-Object Name, Length, LastWriteTime | Format-Table -AutoSize
-
-          New-Item -ItemType Directory -Force -Path "dist"
-          Compress-Archive -Path "$releasePath\*" -DestinationPath "dist\Victor-Engineer-Food-Tracker-Windows-x64.zip" -Force
-          Write-Host "Archivo ZIP generado exitosamente en dist\Victor-Engineer-Food-Tracker-Windows-x64.zip"
-
-      - name: Subir Artifact Temporal de Windows
-        uses: actions/upload-artifact@v4
-        with:
-          name: Victor-Engineer-Food-Tracker-Windows-x64
-          path: dist/Victor-Engineer-Food-Tracker-Windows-x64.zip
 
   build_android:
     name: Compilar APK Android
@@ -256,8 +178,8 @@ jobs:
 
   publish_release:
     name: Publicar GitHub Release
-    needs: [quality_gate, build_windows, build_android]
-    if: always() && !cancelled() && needs.quality_gate.result == 'success' && needs.build_android.result == 'success' && needs.build_windows.result == 'success'
+    needs: [quality_gate, build_android]
+    if: always() && !cancelled() && needs.quality_gate.result == 'success' && needs.build_android.result == 'success'
     runs-on: ubuntu-latest
 
     steps:
@@ -283,4 +205,3 @@ jobs:
           fail_on_unmatched_files: true
           files: |
             dist/*.apk
-            dist/*.zip

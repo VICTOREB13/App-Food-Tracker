@@ -80,4 +80,4 @@ Todos los enlaces internos siguen estrictamente el estándar de Obsidian con el 
 | **Backend-Architect** | Arquitecto de Datos y Servicios | `api_spec.md`, `architecture.md`, `abstractions.md`, `DatabaseService` (SQLite v2), `GeminiModelService`, `UsdaFoodDataService`, `BarcodeLookupService`, `MetabolicCalculator`. |
 | **Frontend-UI** | Especialista de Interfaz y Tokens | `design_system.md`, `ThemeManager`, `DashboardScreen`, `MealDetailScreen`, `SettingsScreen`, `UserProfileScreen`, `MetricsScreen`, widgets atómicos (< 300 LoC), microinteracciones y `WeightLineChartPainter`. |
 | **Systems-Auditor** | Guardián del Quality Gate y Pruebas | `audit_report.md`, batería de pruebas automatizadas, auditoría N+1, WCAG, SecOps. |
-| **DevOps-Engineer** | Infraestructura, CI/CD y Releases | `.github/workflows/ci.yml`, `build_apk.yml`, `build_windows.yml`, `release.yml`, Keystore RSA permanente, empaquetado y publicación oficial. |
+| **DevOps-Engineer** | Infraestructura, CI/CD y Releases | `.github/workflows/ci.yml`, `build_apk.yml`, `release.yml`, Keystore RSA permanente, empaquetado y publicación oficial. |

@@ -63,7 +63,7 @@ tags: [proyecto, tasks, checklist, v7-teamwork, v0-3-0-alpha]
 ## 🚀 5. DevOps-Engineer (CI/CD, Versioning & Release)
 - [x] (DevOps-Engineer) Incrementar versión en `pubspec.yaml` a `0.3.0-alpha+1`.
 - [x] (DevOps-Engineer) Verificar prerequisito de Quality Gate (`veredicto: PASS` en `audit_report.md`).
-- [x] (DevOps-Engineer) Validar que los flujos de GitHub Actions (`ci.yml`, `build_apk.yml`, `build_windows.yml`, `release.yml`) se mantengan verdes.
+- [x] (DevOps-Engineer) Validar que los flujos de GitHub Actions (`ci.yml`, `build_apk.yml`, `release.yml`) se mantengan verdes.
 - [x] (DevOps-Engineer) Publicar el Release `v0.3.0-alpha` con artefactos compilados.
 
 

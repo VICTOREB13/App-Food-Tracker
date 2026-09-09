@@ -30,6 +30,7 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 - **Macros en Comida Rápida:** Soporte para registrar proteína, carbohidratos y grasas opcionales en `QuickMealDialog` sin necesidad de foto.
 
 ### Changed
+- **Enfoque Móvil Exclusivo y Retiro de Windows:** Eliminación completa de workflows y tareas de compilación para Windows Desktop (`build_windows.yml`, jobs y empaquetado ZIP en `release.yml`), enfocando la aplicación de forma nativa y exclusiva en dispositivos móviles (Android / iOS).
 - **Filtrado Estricto de Modelos Multimodales Gemini:** Exclusión rigurosa de modelos no aptos para visión nutricional (`nano-banana`, `transcribe`, `omni`, `robotics`, `computer-use`, etc.), limitando el catálogo a `flash` y `pro` multimodales.
 - **Directorio de Imágenes Estándar:** Migración del guardado de imágenes al directorio estándar `Pictures` del sistema operativo.
 - **Diseño de Métricas Bento:** Reorganización de tarjetas `CalorieComplianceBentoCard`, `StreakComplianceBentoCard` y `MacroDistributionBentoCard` para prevenir truncamientos y colisiones de texto.
