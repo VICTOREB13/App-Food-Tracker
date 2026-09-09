@@ -224,10 +224,12 @@ class GeminiModelService {
     ];
 
     for (final keyword in prohibitedKeywords) {
-      if (rawName.contains(keyword)) {
-        if (keyword == 'custom' && rawName.contains('custom-case')) {
-          continue;
+      if (keyword == 'custom') {
+        // Custom fine-tuned models end with 'custom' or '-custom' (e.g. 'models/gemini-flash-custom')
+        if (rawName.endsWith('custom') || rawName.endsWith('-custom')) {
+          return false;
         }
+      } else if (rawName.contains(keyword)) {
         return false;
       }
     }
