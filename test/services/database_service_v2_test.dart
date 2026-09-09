@@ -367,6 +367,23 @@ void main() {
       expect(logB2!.weight, equals(78.5));
     });
 
+    test('getAllWeightLogs retorna registros ordenados cronológicamente por date ASC', () async {
+      final service = DatabaseService.instance;
+      final log1 = WeightLog(id: 'w-asc-1', date: DateTime(2026, 9, 1), weight: 80.0);
+      final log2 = WeightLog(id: 'w-asc-2', date: DateTime(2026, 9, 5), weight: 79.5);
+      final log3 = WeightLog(id: 'w-asc-3', date: DateTime(2026, 9, 3), weight: 79.8);
+
+      await service.insertWeightLog(log2);
+      await service.insertWeightLog(log1);
+      await service.insertWeightLog(log3);
+
+      final all = await service.getAllWeightLogs();
+      expect(all.length, equals(3));
+      expect(all[0].id, equals('w-asc-1'));
+      expect(all[1].id, equals('w-asc-3'));
+      expect(all[2].id, equals('w-asc-2'));
+    });
+
     test('UserProfile CRUD y singleton de perfil en SQLite', () async {
       final service = DatabaseService.instance;
 

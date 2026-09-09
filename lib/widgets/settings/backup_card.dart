@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../services/theme_manager.dart';
@@ -149,6 +149,7 @@ class BackupCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'Exporta o importa tu historial completo de comidas y biblioteca de alimentos en formato JSON estándar.',
+            textAlign: TextAlign.justify,
             style: GoogleFonts.inter(
               fontSize: 12,
               color: AppColors.textSecondary(context),

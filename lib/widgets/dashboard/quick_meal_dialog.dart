@@ -21,12 +21,18 @@ class _QuickMealDialog extends StatefulWidget {
 class _QuickMealDialogState extends State<_QuickMealDialog> {
   final _nameController = TextEditingController(text: 'Comida rápida');
   final _caloriesController = TextEditingController(text: '300');
+  final _proteinController = TextEditingController();
+  final _carbsController = TextEditingController();
+  final _fatController = TextEditingController();
   String _mealType = 'Snack';
 
   @override
   void dispose() {
     _nameController.dispose();
     _caloriesController.dispose();
+    _proteinController.dispose();
+    _carbsController.dispose();
+    _fatController.dispose();
     super.dispose();
   }
 
@@ -35,15 +41,19 @@ class _QuickMealDialogState extends State<_QuickMealDialog> {
     final cal = double.tryParse(_caloriesController.text.trim()) ?? 0.0;
     if (name.isEmpty || cal <= 0) return;
 
+    final protein = double.tryParse(_proteinController.text.trim()) ?? 0.0;
+    final carbs = double.tryParse(_carbsController.text.trim()) ?? 0.0;
+    final fat = double.tryParse(_fatController.text.trim()) ?? 0.0;
+
     final meal = Meal(
       name: name,
       mealType: _mealType,
       date: widget.date,
       calories: cal,
-      protein: 0,
-      carbs: 0,
-      fat: 0,
-      notes: 'Registro rápido de calorías',
+      protein: protein,
+      carbs: carbs,
+      fat: fat,
+      notes: 'Registro rápido de comida',
     );
     Navigator.of(context).pop(meal);
   }
@@ -70,32 +80,71 @@ class _QuickMealDialogState extends State<_QuickMealDialog> {
           ),
         ],
       ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: _nameController,
-            decoration: const InputDecoration(labelText: 'Descripción / Nombre'),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _caloriesController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(labelText: 'Calorías estimadas (kcal) *'),
-          ),
-          const SizedBox(height: 12),
-          DropdownButtonFormField<String>(
-            initialValue: _mealType,
-            menuMaxHeight: 280,
-            decoration: const InputDecoration(labelText: 'Tipo de Comida'),
-            items: Meal.validMealTypes
-                .map((t) => DropdownMenuItem(value: t, child: Text(t)))
-                .toList(),
-            onChanged: (val) {
-              if (val != null) setState(() => _mealType = val);
-            },
-          ),
-        ],
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _nameController,
+              decoration: const InputDecoration(labelText: 'Descripción / Nombre'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _caloriesController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(labelText: 'Calorías estimadas (kcal) *'),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _proteinController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: const InputDecoration(
+                      labelText: 'Prot (g)',
+                      hintText: '0',
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: TextField(
+                    controller: _carbsController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: const InputDecoration(
+                      labelText: 'Carb (g)',
+                      hintText: '0',
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: TextField(
+                    controller: _fatController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: const InputDecoration(
+                      labelText: 'Grasa (g)',
+                      hintText: '0',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<String>(
+              initialValue: _mealType,
+              menuMaxHeight: 280,
+              decoration: const InputDecoration(labelText: 'Tipo de Comida'),
+              items: Meal.validMealTypes
+                  .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                  .toList(),
+              onChanged: (val) {
+                if (val != null) setState(() => _mealType = val);
+              },
+            ),
+          ],
+        ),
       ),
       actions: [
         TextButton(

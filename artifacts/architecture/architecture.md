@@ -1,7 +1,7 @@
 ---
 tipo: arquitectura
 proyecto: App_Food_Tracker
-version: v0.2.0-alpha
+version: v0.3.0-alpha
 estado: activo
 fecha: 2026-09-09
 stack_principal: [Flutter, SQLite WAL v2, Google Gemini API, USDA FoodData Central, Open Food Facts, FlutterSecureStorage]
@@ -9,7 +9,7 @@ diagrama_html: PRJ_App_Food_Tracker_architecture_diagram.html
 tags: [proyecto, arquitectura, tech-stack, archify, local-first]
 ---
 
-# 🏗️ Arquitectura del Sistema: Victor Engineer - Food Tracker (v0.2.0-alpha)
+# 🏗️ Arquitectura del Sistema: Victor Engineer - Food Tracker (v0.3.0-alpha)
 
 > **Mesa de Control & Backend-Architect:** Este documento establece los componentes fundamentales, el Tech Stack tecnológico, las decisiones arquitectónicas estructurales y el flujo de datos integral de la aplicación **Victor Engineer - Food Tracker**.
 

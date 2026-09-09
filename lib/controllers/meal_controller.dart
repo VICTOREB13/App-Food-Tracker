@@ -111,6 +111,11 @@ class MealController extends ChangeNotifier {
     await loadMeals();
   }
 
+  Future<void> upsertMeal(Meal meal) async {
+    await DatabaseService.instance.upsertMeal(meal);
+    await loadMeals();
+  }
+
   Future<void> updateMeal(Meal meal) async {
     await DatabaseService.instance.updateMeal(meal);
     await loadMeals();
@@ -124,10 +129,23 @@ class MealController extends ChangeNotifier {
     await loadMeals();
   }
 
+  /// Prunes photos older than retentionDays while keeping meal entries intact
+  Future<int> pruneOldPhotos(int retentionDays) async {
+    final count = await ImageProcessingService.instance.pruneOldMealPhotos(
+      retentionDays: retentionDays,
+    );
+    await loadMeals();
+    return count;
+  }
+
   Future<void> loadWeightLogs({int days = 30}) async {
     _selectedWeightDays = days;
     try {
-      _weightLogs = await DatabaseService.instance.getWeightLogsLastDays(days);
+      if (days <= 0) {
+        _weightLogs = await DatabaseService.instance.getAllWeightLogs();
+      } else {
+        _weightLogs = await DatabaseService.instance.getWeightLogsLastDays(days);
+      }
       _latestWeightLog = await DatabaseService.instance.getLatestWeightLog();
     } catch (e) {
       debugPrint('MealController: error loading weight logs: $e');

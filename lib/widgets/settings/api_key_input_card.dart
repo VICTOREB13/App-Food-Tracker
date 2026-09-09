@@ -85,6 +85,7 @@ class _ApiKeyInputCardState extends State<ApiKeyInputCard> {
           const SizedBox(height: 8),
           Text(
             'Food Tracker opera 100% Local-First. Tu API Key de Google Gemini se almacena en el enclave seguro de tu dispositivo y se conecta directamente con los modelos de Google Gemini.',
+            textAlign: TextAlign.justify,
             style: GoogleFonts.inter(
               fontSize: 12,
               color: AppColors.textSecondary(context),

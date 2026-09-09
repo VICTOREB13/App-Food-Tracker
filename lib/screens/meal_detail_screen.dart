@@ -154,11 +154,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
           ? mealWithDetails.recalculateFromItems(_items)
           : mealWithDetails;
 
-      if (widget.initialMeal != null) {
-        await MealController.instance.updateMeal(updated);
-      } else {
-        await MealController.instance.saveMeal(updated);
-      }
+      await MealController.instance.upsertMeal(updated);
 
       if (!mounted) return;
       Navigator.of(context).pop();

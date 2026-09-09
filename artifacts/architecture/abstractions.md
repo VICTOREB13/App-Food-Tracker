@@ -1,7 +1,7 @@
 ---
 tipo: abstracciones
 proyecto: App_Food_Tracker
-version: v0.2.0-alpha
+version: v0.3.0-alpha
 estado: activo
 fecha: 2026-09-09
 tags: [proyecto, arquitectura, abstracciones, backend]
@@ -110,23 +110,26 @@ lib/
 - **Responsabilidad:** Gestión del ciclo de vida de la base de datos SQLite v2, configuración de pragmas de alto rendimiento (`WAL`, `NORMAL`, `foreign_keys`), ejecución de migraciones deterministas y operaciones CRUD transaccionales.
 - **Métodos Clave:**
   - `init(): Future<void>`: Inicialización perezosa protegida contra carreras concurrentes mediante `_initFuture`.
-  - `insertMeal(Meal meal) / updateMeal(Meal meal) / deleteMeal(String id): Future<int>`
-  - `getMealsByDate(DateTime date) / getMealsByDateRange(DateTime start, DateTime end): Future<List<Meal>>`
+  - `insertMeal(Meal meal) / updateMeal(Meal meal) / upsertMeal(Meal meal) / deleteMeal(String id): Future<int>`: Garantiza la persistencia atómica mediante `ConflictAlgorithm.replace`.
+  - `getMealsForDay(DateTime day) / getAllMeals(): Future<List<Meal>>`
+  - `clearMealImagePath(String mealId): Future<int>`: Desvincula la imagen borrada del registro SQLite (`image_path = null`) durante la depuración de almacenamiento.
+  - `getMealsOlderThanWithImages(DateTime cutoffDate): Future<List<Meal>>`: Consulta comidas previas a la fecha de corte que conservan imagen en disco.
   - `insertPantryItem(PantryItem item) / updatePantryItem(PantryItem item) / deletePantryItem(String id): Future<int>`
-  - `insertWeightLog(WeightLog log) / getWeightLogsByDateRange(DateTime start, DateTime end): Future<List<WeightLog>>`
+  - `insertWeightLog(WeightLog log) / getWeightLogsByRange(DateTime start, DateTime end) / getAllWeightLogs(): Future<List<WeightLog>>`: `getAllWeightLogs()` recupera todos los registros ordenados cronológicamente por `date ASC`.
   - `saveUserProfile(UserProfile profile) / getUserProfile(): Future<UserProfile?>`
-  - `batchInsertMeals(List<Meal> meals) / batchInsertPantryItems(List<PantryItem> items): Future<void>`
+  - `batchUpsertWeightLogs(List<WeightLog> logs): Future<void>`
 
 ### 2. `GeminiVisionService`
 - **Ubicación:** `lib/services/gemini_vision_service.dart`
-- **Responsabilidad:** Orquestación de inferencia multimodal visual utilizando Google Generative AI SDK, inyección del Master Prompt biométrico y schema estructurado JSON forzado (`responseSchema`).
+- **Responsabilidad:** Orquestación de inferencia multimodal visual utilizando Google Generative AI SDK, inyección del Master Prompt biométrico, schema estructurado JSON forzado (`responseSchema`) y traducción defensiva de errores amigables al usuario.
 - **Dependencias:** `ImageProcessingService`, `ModelSanitizer`.
 - **Métodos Clave:**
-  - `analyzeMealImage(Uint8List imageBytes, {String? notes}): Future<MealAnalysisResult>`:
+  - `userFriendlyErrorMessage(dynamic error): String`: Mapea excepciones técnicas (SocketException, 401/403, 429 cuota, fallos de detección/seguridad) a mensajes claros y accionables en español.
+  - `analyzeMealPhoto({required Uint8List rawImageBytes, ...}) / analyzeMealImage(Uint8List imageBytes, ...): Future<MealAnalysisResult>`:
     1. Comprime y redimensiona la imagen a 1024x1024 píxeles (JPEG al 85% de calidad).
     2. Construye el modelo `GenerativeModel` con temperatura baja (`0.2`) y esquema estructurado.
     3. Concatena la instrucción clínica del sistema, el Master Prompt del usuario y las notas contextuales opcionales.
-    4. Ejecuta `generateContent` y deserializa defensivamente la respuesta JSON.
+    4. Ejecuta `generateContent` capturando excepciones y envolviéndolas mediante `userFriendlyErrorMessage`.
 
 ### 3. `GeminiModelService`
 - **Ubicación:** `lib/services/gemini_model_service.dart`
@@ -134,6 +137,8 @@ lib/
 - **Métodos Clave:**
   - `fetchAvailableModels(String apiKey, {Duration timeout}): Future<List<GeminiModelInfo>>`
   - `parseModelsResponse(String responseBody): List<GeminiModelInfo>`
+  - `isVisionCapableModel(Map<String, dynamic> model): bool`: Filtro estricto que exige 'gemini', presencia de 'flash' o 'pro', soporte de 'generateContent', y exclusión de lista negra (`banana`, `nano`, `transcribe`, `omni`, `computer-use`, `robotics`, `live`, `custom`, `preview-10-2025`, `embedding`, `imagen`, `tts`, `audio`, `veo`, `bison`).
+  - `_fallbackModels / fallbackModels`: Modelos canónicos de producción (`gemini-2.5-flash`, `gemini-1.5-flash`, `gemini-1.5-pro`, `gemini-2.0-flash`).
 
 ### 4. `UsdaFoodDataService`
 - **Ubicación:** `lib/services/usda_food_data_service.dart`
@@ -184,10 +189,11 @@ lib/
 
 ### 9. `ImageProcessingService`
 - **Ubicación:** `lib/services/image_processing_service.dart`
-- **Responsabilidad:** Compresión y redimensionamiento defensivo de fotografías de platos (máximo 1024x1024 px, JPEG 85%) y gestión del almacenamiento de archivos de imagen en la carpeta `meals/` de la aplicación.
+- **Responsabilidad:** Compresión y redimensionamiento defensivo de fotografías de platos (máximo 1024x1024 px, JPEG 85%), gestión del almacenamiento en la carpeta estándar `Pictures` del sistema operativo y depuración de almacenamiento por retención temporal.
 - **Métodos Clave:**
   - `compressAndResize(Uint8List rawBytes, {int targetMaxDimension = 1024, int quality = 85}): Uint8List`
-  - `saveMealImage(Uint8List imageBytes, String mealId): Future<String>`
+  - `saveMealImage(Uint8List imageBytes, String mealId): Future<String>`: Guarda en `Pictures/FoodTrackerMeals`.
+  - `pruneOldMealPhotos({required int retentionDays}): Future<int>`: Elimina archivos de imágenes con antigüedad mayor al umbral sin afectar registros SQLite.
   - `deleteMealImage(String? filePath): Future<void>`
 
 ### 10. `ThemeManager`
@@ -254,7 +260,7 @@ MealAnalysisResult.fromJsonString
 MealDetailScreen (Revisión interactiva y edición por el usuario)
        │
        ▼
-MealController.addMeal -> DatabaseService.insertMeal (SQLite WAL v2)
+MealController.upsertMeal -> DatabaseService.upsertMeal (SQLite WAL v2)
 ```
 
 ### 2. Cascada de Escaneo de Códigos de Barras:

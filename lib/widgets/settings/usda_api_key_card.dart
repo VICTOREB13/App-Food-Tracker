@@ -96,6 +96,7 @@ class _UsdaApiKeyCardState extends State<UsdaApiKeyCard> {
           const SizedBox(height: 8),
           Text(
             'Conexión oficial con USDA FoodData Central (https://fdc.nal.usda.gov) para enriquecer la biblioteca de alimentos y códigos de barras. Si se omite la clave o se agota la cuota (1,000 req/hr), el sistema utiliza Open Food Facts automáticamente como respaldo.',
+            textAlign: TextAlign.justify,
             style: GoogleFonts.inter(
               fontSize: 12,
               color: AppColors.textSecondary(context),

@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import '../models/food_item.dart';
@@ -132,82 +134,170 @@ Reglas obligatorias de cubicaje:
     this.masterPrompt,
   });
 
+  /// Maps technical API and network errors into clear, actionable messages for the user
+  static String userFriendlyErrorMessage(dynamic error) {
+    if (error == null) {
+      return 'Ocurrió un error al analizar la comida. Por favor, inténtalo nuevamente.';
+    }
+
+    final errString = error.toString().toLowerCase();
+
+    // Check if error is already a translated user-friendly string
+    if (error is String) {
+      if (error.startsWith('Se perdió la conexión') ||
+          error.startsWith('Tu API Key') ||
+          error.startsWith('Has alcanzado el límite') ||
+          error.startsWith('La IA no logró') ||
+          error.startsWith('Ocurrió un error')) {
+        return error;
+      }
+    }
+
+    // Network errors
+    if (error is SocketException ||
+        error is TimeoutException ||
+        errString.contains('socketexception') ||
+        errString.contains('timeoutexception') ||
+        errString.contains('clientexception') ||
+        errString.contains('network is unreachable') ||
+        errString.contains('failed host lookup') ||
+        errString.contains('connection refused') ||
+        errString.contains('connection reset') ||
+        errString.contains('connection closed') ||
+        errString.contains('timed out')) {
+      return 'Se perdió la conexión a internet. Por favor, verifica tu red e inténtalo de nuevo.';
+    }
+
+    // Auth & Permission errors
+    if (errString.contains('api key not valid') ||
+        errString.contains('api_key_invalid') ||
+        errString.contains('permission_denied') ||
+        errString.contains('unauthenticated') ||
+        errString.contains('401') ||
+        errString.contains('403') ||
+        (errString.contains('400') && !errString.contains('safety'))) {
+      return 'Tu API Key de Gemini no es válida o no tiene permisos suficientes. Verifícala en Ajustes.';
+    }
+
+    // Quota and rate limiting errors
+    if (errString.contains('429') ||
+        errString.contains('resource_exhausted') ||
+        errString.contains('quota') ||
+        errString.contains('rate limit')) {
+      return 'Has alcanzado el límite de solicitudes de Gemini. Por favor, espera unos segundos e inténtalo de nuevo.';
+    }
+
+    // Safety filter or unrecognized food errors
+    if (errString.contains('safety') ||
+        errString.contains('recitation') ||
+        errString.contains('blocked') ||
+        errString.contains('bloqueada') ||
+        errString.contains('respuesta vacía') ||
+        errString.contains('empty response') ||
+        errString.contains('no logr') ||
+        errString.contains('no food') ||
+        errString.contains('alimentos')) {
+      return 'La IA no logró identificar alimentos en la foto. Intenta con una toma más cercana, con mejor iluminación o ángulo superior.';
+    }
+
+    return 'Ocurrió un error al analizar la comida. Por favor, inténtalo nuevamente.';
+  }
+
+  /// Alias for analyzeMealPhoto conforming to backend contract
+  Future<MealAnalysisResult> analyzeMealImage(
+    Uint8List imageBytes, {
+    String? userContext,
+    String? overrideModel,
+    String? overrideMasterPrompt,
+  }) {
+    return analyzeMealPhoto(
+      rawImageBytes: imageBytes,
+      userContext: userContext,
+      overrideModel: overrideModel,
+      overrideMasterPrompt: overrideMasterPrompt,
+    );
+  }
+
   Future<MealAnalysisResult> analyzeMealPhoto({
     required Uint8List rawImageBytes,
     String? userContext,
     String? overrideModel,
     String? overrideMasterPrompt,
   }) async {
-    final compressedBytes = ImageProcessingService.instance.compressAndResize(
-      rawImageBytes,
-      targetMaxDimension: 1024,
-      quality: 85,
-    );
+    try {
+      final compressedBytes = ImageProcessingService.instance.compressAndResize(
+        rawImageBytes,
+        targetMaxDimension: 1024,
+        quality: 85,
+      );
 
-    final effectiveModel = (overrideModel != null && overrideModel.trim().isNotEmpty)
-        ? overrideModel.trim()
-        : modelName;
+      final effectiveModel = (overrideModel != null && overrideModel.trim().isNotEmpty)
+          ? overrideModel.trim()
+          : modelName;
 
-    final effectivePrompt = overrideMasterPrompt ?? masterPrompt;
-    final effectiveInstruction = buildSystemInstruction(effectivePrompt);
+      final effectivePrompt = overrideMasterPrompt ?? masterPrompt;
+      final effectiveInstruction = buildSystemInstruction(effectivePrompt);
 
-    final schema = Schema.object(
-      description: 'Desglose nutricional y volumétrico de comida casera',
-      properties: {
-        'plato': Schema.string(description: 'Nombre representativo del plato'),
-        'items': Schema.array(
-          description: 'Lista de ingredientes o alimentos identificados',
-          items: Schema.object(
+      final schema = Schema.object(
+        description: 'Desglose nutricional y volumétrico de comida casera',
+        properties: {
+          'plato': Schema.string(description: 'Nombre representativo del plato'),
+          'items': Schema.array(
+            description: 'Lista de ingredientes o alimentos identificados',
+            items: Schema.object(
+              properties: {
+                'alimento': Schema.string(description: 'Nombre del alimento o ingrediente'),
+                'gramos_estimados': Schema.number(description: 'Peso estimado en gramos'),
+                'calorias': Schema.number(description: 'Calorías estimadas'),
+                'proteinas_g': Schema.number(description: 'Proteínas en gramos'),
+                'carbohidratos_g': Schema.number(description: 'Carbohidratos en gramos'),
+                'grasas_g': Schema.number(description: 'Grasas en gramos'),
+                'justificacion_visual': Schema.string(description: 'Explicación volumétrica visual'),
+              },
+            ),
+          ),
+          'totales': Schema.object(
             properties: {
-              'alimento': Schema.string(description: 'Nombre del alimento o ingrediente'),
-              'gramos_estimados': Schema.number(description: 'Peso estimado en gramos'),
-              'calorias': Schema.number(description: 'Calorías estimadas'),
-              'proteinas_g': Schema.number(description: 'Proteínas en gramos'),
-              'carbohidratos_g': Schema.number(description: 'Carbohidratos en gramos'),
-              'grasas_g': Schema.number(description: 'Grasas en gramos'),
-              'justificacion_visual': Schema.string(description: 'Explicación volumétrica visual'),
+              'calorias': Schema.number(description: 'Total calorías del plato'),
+              'proteina_g': Schema.number(description: 'Total proteínas en gramos'),
+              'carbohidratos_g': Schema.number(description: 'Total carbohidratos en gramos'),
+              'grasas_g': Schema.number(description: 'Total grasas en gramos'),
             },
           ),
+        },
+      );
+
+      final model = GenerativeModel(
+        model: effectiveModel,
+        apiKey: apiKey,
+        systemInstruction: Content.system(effectiveInstruction),
+        generationConfig: GenerationConfig(
+          responseMimeType: 'application/json',
+          responseSchema: schema,
+          temperature: 0.2,
         ),
-        'totales': Schema.object(
-          properties: {
-            'calorias': Schema.number(description: 'Total calorías del plato'),
-            'proteina_g': Schema.number(description: 'Total proteínas en gramos'),
-            'carbohidratos_g': Schema.number(description: 'Total carbohidratos en gramos'),
-            'grasas_g': Schema.number(description: 'Total grasas en gramos'),
-          },
-        ),
-      },
-    );
+      );
 
-    final model = GenerativeModel(
-      model: effectiveModel,
-      apiKey: apiKey,
-      systemInstruction: Content.system(effectiveInstruction),
-      generationConfig: GenerationConfig(
-        responseMimeType: 'application/json',
-        responseSchema: schema,
-        temperature: 0.2,
-      ),
-    );
+      final promptBuffer = StringBuffer();
+      promptBuffer.writeln('Analiza esta comida casera y estima su desglose nutricional siguiendo las reglas volumétricas.');
+      if (userContext != null && userContext.trim().isNotEmpty) {
+        promptBuffer.writeln('Contexto y notas del comensal: ${userContext.trim()}');
+      }
 
-    final promptBuffer = StringBuffer();
-    promptBuffer.writeln('Analiza esta comida casera y estima su desglose nutricional siguiendo las reglas volumétricas.');
-    if (userContext != null && userContext.trim().isNotEmpty) {
-      promptBuffer.writeln('Contexto y notas del comensal: ${userContext.trim()}');
+      final content = Content.multi([
+        DataPart('image/jpeg', compressedBytes),
+        TextPart(promptBuffer.toString()),
+      ]);
+
+      final response = await model.generateContent([content]);
+      final text = response.text;
+      if (text == null || text.trim().isEmpty) {
+        throw Exception('Gemini devolvió una respuesta vacía');
+      }
+
+      return MealAnalysisResult.fromJsonString(text);
+    } catch (e) {
+      throw Exception(userFriendlyErrorMessage(e));
     }
-
-    final content = Content.multi([
-      DataPart('image/jpeg', compressedBytes),
-      TextPart(promptBuffer.toString()),
-    ]);
-
-    final response = await model.generateContent([content]);
-    final text = response.text;
-    if (text == null || text.trim().isEmpty) {
-      throw Exception('Gemini devolvió una respuesta vacía');
-    }
-
-    return MealAnalysisResult.fromJsonString(text);
   }
 }

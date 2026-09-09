@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/services/gemini_vision_service.dart';
 
@@ -286,6 +288,62 @@ void main() {
       );
       expect(serviceCustom.modelName, equals('gemini-2.5-pro'));
       expect(serviceCustom.masterPrompt, equals('Contexto de usuario'));
+    });
+
+    test('userFriendlyErrorMessage mapea errores de red, auth, cuota y seguridad correctamente', () {
+      // 1. Network errors
+      expect(
+        GeminiVisionService.userFriendlyErrorMessage(const SocketException('Failed host lookup')),
+        contains('Se perdió la conexión a internet'),
+      );
+      expect(
+        GeminiVisionService.userFriendlyErrorMessage(TimeoutException('Request timed out')),
+        contains('Se perdió la conexión a internet'),
+      );
+      expect(
+        GeminiVisionService.userFriendlyErrorMessage('ClientException: Network is unreachable'),
+        contains('Se perdió la conexión a internet'),
+      );
+
+      // 2. Auth / API Key errors
+      expect(
+        GeminiVisionService.userFriendlyErrorMessage('400 API key not valid'),
+        contains('Tu API Key de Gemini no es válida'),
+      );
+      expect(
+        GeminiVisionService.userFriendlyErrorMessage('PERMISSION_DENIED: 403 Forbidden'),
+        contains('Tu API Key de Gemini no es válida'),
+      );
+      expect(
+        GeminiVisionService.userFriendlyErrorMessage('401 Unauthorized: Invalid API Key'),
+        contains('Tu API Key de Gemini no es válida'),
+      );
+
+      // 3. Quota errors
+      expect(
+        GeminiVisionService.userFriendlyErrorMessage('429 RESOURCE_EXHAUSTED: quota exceeded'),
+        contains('Has alcanzado el límite de solicitudes de Gemini'),
+      );
+      expect(
+        GeminiVisionService.userFriendlyErrorMessage('rate limit reached'),
+        contains('Has alcanzado el límite de solicitudes de Gemini'),
+      );
+
+      // 4. Safety & detection failures
+      expect(
+        GeminiVisionService.userFriendlyErrorMessage('Candidate blocked due to SAFETY'),
+        contains('La IA no logró identificar alimentos en la foto'),
+      );
+      expect(
+        GeminiVisionService.userFriendlyErrorMessage('Gemini devolvió una respuesta vacía'),
+        contains('La IA no logró identificar alimentos en la foto'),
+      );
+
+      // 5. Generic fallback
+      expect(
+        GeminiVisionService.userFriendlyErrorMessage(FormatException('Unexpected token')),
+        equals('Ocurrió un error al analizar la comida. Por favor, inténtalo nuevamente.'),
+      );
     });
   });
 }

@@ -164,5 +164,27 @@ void main() {
 
       expect(selected, equals('gemini-2.5-pro'));
     });
+
+    testWidgets('Abrir ModelPickerBottomSheet al presionar Explorar y Cambiar Modelo', (tester) async {
+      await tester.pumpWidget(buildWidget(
+        apiKey: 'AIzaSyValidKey',
+        selectedModel: 'gemini-2.5-flash',
+        models: sampleModels,
+      ));
+      await tester.pumpAndSettle();
+
+      final openPickerBtn = find.text('Explorar y Cambiar Modelo');
+      expect(openPickerBtn, findsOneWidget);
+
+      await tester.tap(openPickerBtn);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Seleccionar Modelo Gemini'), findsOneWidget);
+      expect(find.byType(TextField), findsOneWidget);
+      expect(find.text('Todos'), findsOneWidget);
+      expect(find.text('Flash (Rápidos)'), findsOneWidget);
+      expect(find.text('Pro (Razonamiento)'), findsOneWidget);
+    });
   });
 }
+

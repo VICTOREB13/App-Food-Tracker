@@ -187,5 +187,74 @@ void main() {
       expect(stats['meals_count'], equals(1));
       expect(stats['pantry_count'], equals(1));
     });
+
+    test('upsertMeal inserta y reemplaza comidas de forma atómica', () async {
+      final service = DatabaseService.instance;
+      final meal = Meal(
+        id: 'upsert-1',
+        name: 'Plato Original',
+        calories: 300,
+        protein: 20,
+        carbs: 40,
+        fat: 10,
+      );
+
+      // Insert via upsert
+      await service.upsertMeal(meal);
+      var fetched = await service.getMealById('upsert-1');
+      expect(fetched, isNotNull);
+      expect(fetched!.name, equals('Plato Original'));
+
+      // Update via upsert
+      final updatedMeal = meal.copyWith(name: 'Plato Modificado', calories: 450);
+      await service.upsertMeal(updatedMeal);
+      fetched = await service.getMealById('upsert-1');
+      expect(fetched, isNotNull);
+      expect(fetched!.name, equals('Plato Modificado'));
+      expect(fetched.calories, equals(450));
+    });
+
+    test('clearMealImagePath y getMealsOlderThanWithImages gestionan la retención de fotos', () async {
+      final service = DatabaseService.instance;
+      final now = DateTime.now();
+      final oldDate = now.subtract(const Duration(days: 40));
+      final recentDate = now.subtract(const Duration(days: 5));
+
+      final oldWithImg = Meal(
+        id: 'old-img',
+        name: 'Vieja con Foto',
+        date: oldDate,
+        imagePath: '/path/to/old.jpg',
+      );
+      final recentWithImg = Meal(
+        id: 'recent-img',
+        name: 'Reciente con Foto',
+        date: recentDate,
+        imagePath: '/path/to/recent.jpg',
+      );
+      final oldWithoutImg = Meal(
+        id: 'old-no-img',
+        name: 'Vieja sin Foto',
+        date: oldDate,
+        imagePath: null,
+      );
+
+      await service.insertMeal(oldWithImg);
+      await service.insertMeal(recentWithImg);
+      await service.insertMeal(oldWithoutImg);
+
+      final cutoff = now.subtract(const Duration(days: 30));
+      final olderMeals = await service.getMealsOlderThanWithImages(cutoff);
+
+      expect(olderMeals.length, equals(1));
+      expect(olderMeals.first.id, equals('old-img'));
+
+      // Clear image path
+      await service.clearMealImagePath('old-img');
+      final cleared = await service.getMealById('old-img');
+      expect(cleared, isNotNull);
+      expect(cleared!.imagePath, isNull);
+      expect(cleared.name, equals('Vieja con Foto'));
+    });
   });
 }

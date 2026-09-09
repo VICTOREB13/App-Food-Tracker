@@ -10,6 +10,7 @@ import '../widgets/settings/backup_card.dart';
 import '../widgets/settings/daily_goals_card.dart';
 import '../widgets/settings/database_maintenance_card.dart';
 import '../widgets/settings/gemini_model_selector_card.dart';
+import '../widgets/settings/photo_pruning_card.dart';
 import '../widgets/settings/usda_api_key_card.dart';
 import 'user_profile_screen.dart';
 
@@ -215,6 +216,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               );
             },
           ),
+          const SizedBox(height: 16),
+          const PhotoPruningCard(),
           const SizedBox(height: 16),
           BackupCard(
             onExport: () => _controller.exportBackup(),

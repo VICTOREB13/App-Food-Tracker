@@ -9,6 +9,7 @@ import '../widgets/metrics/calorie_compliance_bento_card.dart';
 import '../widgets/metrics/macro_distribution_bento_card.dart';
 import '../widgets/metrics/quick_weight_entry_dialog.dart';
 import '../widgets/metrics/streak_compliance_bento_card.dart';
+import '../widgets/metrics/weight_history_bento_card.dart';
 import '../widgets/metrics/weight_trend_bento_card.dart';
 
 /// Dedicated screen with Bento Grid for historical analytics and progress tracking.
@@ -24,7 +25,7 @@ class _MetricsScreenState extends State<MetricsScreen> {
   int _selectedDays = 30;
   List<Meal> _rangeMeals = [];
 
-  static const List<int> _availableRanges = [7, 30, 90];
+  static const List<int> _availableRanges = [7, 30, 90, 0];
 
   @override
   void initState() {
@@ -47,11 +48,19 @@ class _MetricsScreenState extends State<MetricsScreen> {
     try {
       await _mealController.loadWeightLogs(days: _selectedDays);
       final allMeals = await DatabaseService.instance.getAllMeals();
-      final cutoff = DateTime.now().subtract(Duration(days: _selectedDays));
-      if (mounted) {
-        setState(() {
-          _rangeMeals = allMeals.where((m) => m.date.isAfter(cutoff)).toList();
-        });
+      if (_selectedDays == 0) {
+        if (mounted) {
+          setState(() {
+            _rangeMeals = allMeals;
+          });
+        }
+      } else {
+        final cutoff = DateTime.now().subtract(Duration(days: _selectedDays));
+        if (mounted) {
+          setState(() {
+            _rangeMeals = allMeals.where((m) => m.date.isAfter(cutoff)).toList();
+          });
+        }
       }
     } catch (_) {
       if (mounted) {
@@ -103,10 +112,6 @@ class _MetricsScreenState extends State<MetricsScreen> {
             // 2. Weight trend chart bento card
             WeightTrendBentoCard(
               logs: _mealController.weightLogs,
-              onAddWeight: () => showQuickWeightEntryDialog(
-                context,
-                initialWeight: _mealController.currentWeight,
-              ),
             ),
             const SizedBox(height: 14),
 
@@ -137,6 +142,12 @@ class _MetricsScreenState extends State<MetricsScreen> {
               meals: _rangeMeals,
               goals: _mealController.dailyGoals,
             ),
+            const SizedBox(height: 14),
+
+            // 5. Weight history bento card with notes
+            WeightHistoryBentoCard(
+              logs: _mealController.weightLogs,
+            ),
             const SizedBox(height: 80),
           ],
         ),
@@ -145,27 +156,28 @@ class _MetricsScreenState extends State<MetricsScreen> {
   }
 
   Widget _buildRangeSelector() {
-    return Row(
-      children: [
-        Text(
-          'PERÍODO:',
-          style: GoogleFonts.inter(
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.8,
-            color: AppColors.textSecondary(context),
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          Text(
+            'PERÍODO:',
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.8,
+              color: AppColors.textSecondary(context),
+            ),
           ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+          const SizedBox(width: 12),
+          Row(
             children: _availableRanges.map((days) {
               final isSelected = _selectedDays == days;
+              final label = days == 0 ? 'Histórico' : '$days días';
               return Padding(
-                padding: const EdgeInsets.only(left: 8),
+                padding: const EdgeInsets.only(left: 6),
                 child: ChoiceChip(
-                  label: Text('$days días'),
+                  label: Text(label),
                   selected: isSelected,
                   onSelected: (_) => _onSelectRange(days),
                   labelStyle: GoogleFonts.inter(
@@ -191,8 +203,8 @@ class _MetricsScreenState extends State<MetricsScreen> {
               );
             }).toList(),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

@@ -16,15 +16,29 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ## [Unreleased]
 
-### Changed
-- **Migración a Arquitectura V7 Teamwork:** Estandarización de frontmatter YAML en todos los artefactos (`artifact-standards`), claves planas en minúsculas y fechas ISO `YYYY-MM-DD`.
-- **Nuevo Artefacto de Abstracciones del Sistema:** Creación de `artifacts/architecture/abstractions.md` documentando modelos inmutables Sentinel, servicios de dominio, funciones puras y costuras de flujo de datos (data seams).
-- **Diagrama de Arquitectura Interactivo en Archify:** Sustitución de bloques estáticos Mermaid por diagrama HTML autónomo interactivo (`architecture_diagram.html`) y fuente JSON en `artifacts/architecture/src/architecture_diagram.json`.
+---
 
-### Planned
-- **Sincronización P2P Segura:** Replicación local cifrada punto a punto entre dispositivos en la misma red Wi-Fi sin intermediarios de nube.
-- **Exportación de Informes Clínicos:** Generación de informes en PDF y Excel para seguimiento nutricional con gráficos de evolución.
-- **Widgets de Escritorio y Bandeja:** Micro-widgets compactos para Windows y notificaciones enriquecidas de hidratación para Android.
+## [0.3.0-alpha] - 2026-09-09
+
+### Added
+- **Master Prompt Personalizable:** Editor interactivo en `MetabolicSummaryBentoCard` que permite al usuario modificar, guardar y restablecer las directrices inyectadas a Gemini Vision.
+- **Selector de Modelos con Búsqueda y Filtros:** `ModelPickerBottomSheet` con buscador reactivo y chips semánticos (`Todos`, `Flash`, `Pro`).
+- **Rango "Histórico" en Métricas:** Pestaña global para visualizar el progreso y peso desde el primer día de uso en `MetricsScreen`.
+- **Historial de Pesajes con Notas:** Sección para inspeccionar pesajes históricos y notas adjuntas.
+- **Vista Previa de Notas en Dashboard:** Indicador de notas en los tiles de comidas registradas (`MealSectionCard`).
+- **Política de Depuración de Fotos:** Selector de retención (`Para siempre`, `90 días`, `30 días`, `15 días`) para liberar almacenamiento en disco sin alterar estadísticas de SQLite.
+- **Macros en Comida Rápida:** Soporte para registrar proteína, carbohidratos y grasas opcionales en `QuickMealDialog` sin necesidad de foto.
+
+### Changed
+- **Filtrado Estricto de Modelos Multimodales Gemini:** Exclusión rigurosa de modelos no aptos para visión nutricional (`nano-banana`, `transcribe`, `omni`, `robotics`, `computer-use`, etc.), limitando el catálogo a `flash` y `pro` multimodales.
+- **Directorio de Imágenes Estándar:** Migración del guardado de imágenes al directorio estándar `Pictures` del sistema operativo.
+- **Diseño de Métricas Bento:** Reorganización de tarjetas `CalorieComplianceBentoCard`, `StreakComplianceBentoCard` y `MacroDistributionBentoCard` para prevenir truncamientos y colisiones de texto.
+- **Justificación Tipográfica:** Alineación justificada en textos explicativos en tarjetas de ajustes y modales.
+
+### Fixed
+- **Persistencia Crítica de Comidas Analizadas con IA:** Implementación de `upsertMeal` en `DatabaseService` y `MealDetailScreen` resolviendo el bug donde comidas nuevas se intentaban actualizar en lugar de insertar.
+- **Controlador de Edad en Perfil Metabólico:** Corrección del listener en `BiometricInputsCard` que reseteaba la edad involuntariamente al vaciar el campo para editar.
+- **Mapeo de Errores Amigables de IA:** Traducción de excepciones crudas de red, tokens y cuota en mensajes claros y empáticos en español.
 
 ---
 

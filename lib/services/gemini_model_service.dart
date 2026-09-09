@@ -30,7 +30,7 @@ class GeminiModelService {
   static final GeminiModelService instance = GeminiModelService();
 
   /// Curated offline fallback models used when device is offline or API fails
-  static const List<GeminiModelInfo> fallbackModels = [
+  static const List<GeminiModelInfo> _fallbackModels = [
     GeminiModelInfo(
       name: 'gemini-2.5-flash',
       displayName: 'Gemini 2.5 Flash',
@@ -38,24 +38,6 @@ class GeminiModelService {
       isRecommended: true,
       recommendationLabel: 'RECOMENDADO (Ultrarrápido)',
       inputTokenLimit: 1048576,
-      outputTokenLimit: 8192,
-    ),
-    GeminiModelInfo(
-      name: 'gemini-2.0-flash',
-      displayName: 'Gemini 2.0 Flash',
-      description: 'Modelo multimodal de producción estable y alta velocidad de inferencia.',
-      isRecommended: true,
-      recommendationLabel: 'ESTABLE (Alta Velocidad)',
-      inputTokenLimit: 1048576,
-      outputTokenLimit: 8192,
-    ),
-    GeminiModelInfo(
-      name: 'gemini-2.5-pro',
-      displayName: 'Gemini 2.5 Pro',
-      description: 'Modelo de razonamiento profundo para platos complejos, densos y mixtos.',
-      isRecommended: true,
-      recommendationLabel: 'MÁXIMA PRECISIÓN (Razonamiento)',
-      inputTokenLimit: 2097152,
       outputTokenLimit: 8192,
     ),
     GeminiModelInfo(
@@ -67,7 +49,27 @@ class GeminiModelService {
       inputTokenLimit: 1048576,
       outputTokenLimit: 8192,
     ),
+    GeminiModelInfo(
+      name: 'gemini-1.5-pro',
+      displayName: 'Gemini 1.5 Pro',
+      description: 'Modelo de razonamiento avanzado y amplio contexto multimodal.',
+      isRecommended: false,
+      recommendationLabel: 'HEREDADO (Razonamiento)',
+      inputTokenLimit: 2097152,
+      outputTokenLimit: 8192,
+    ),
+    GeminiModelInfo(
+      name: 'gemini-2.0-flash',
+      displayName: 'Gemini 2.0 Flash',
+      description: 'Modelo multimodal de producción estable y alta velocidad de inferencia.',
+      isRecommended: true,
+      recommendationLabel: 'ESTABLE (Alta Velocidad)',
+      inputTokenLimit: 1048576,
+      outputTokenLimit: 8192,
+    ),
   ];
+
+  static const List<GeminiModelInfo> fallbackModels = _fallbackModels;
 
   /// Queries Google Generative Language API and returns sorted, filtered models
   Future<List<GeminiModelInfo>> fetchAvailableModels(
@@ -184,7 +186,7 @@ class GeminiModelService {
     return filtered;
   }
 
-  /// Primary + fallback criteria to determine if model can perform image food analysis
+  /// Strict multimodal vision filtering for Google Gemini models
   static bool isVisionCapableModel(Map<String, dynamic> model) {
     // 1. Generation Method Filter: Must contain 'generateContent'
     final methods = (model['supportedGenerationMethods'] as List<dynamic>?)
@@ -197,35 +199,48 @@ class GeminiModelService {
 
     final rawName = (model['name'] ?? '').toString().toLowerCase();
 
-    // 2. Primary Check: If inputModalities is provided by Google API
-    final modalities = (model['inputModalities'] as List<dynamic>?)
-            ?.map((e) => e.toString().toUpperCase())
-            .toList() ??
-        [];
-    if (modalities.isNotEmpty) {
-      return modalities.contains('IMAGE');
-    }
-
-    // 3. Resilient Fallback Check: Name inspection if inputModalities is absent
-    if (!rawName.contains('gemini')) {
+    // 2. Name must contain 'gemini' (or start with 'models/gemini')
+    if (!rawName.contains('gemini') && !rawName.startsWith('models/gemini')) {
       return false;
     }
 
-    // Exclude explicit non-vision or specialized non-generalist prefixes
-    const excludedKeywords = [
+    // 3. Name must contain 'flash' or 'pro'
+    if (!rawName.contains('flash') && !rawName.contains('pro')) {
+      return false;
+    }
+
+    // 4. Prohibited keywords exclusion
+    const prohibitedKeywords = [
+      'banana',
+      'nano',
+      'transcribe',
+      'omni',
+      'computer-use',
+      'robotics',
+      'live',
+      'custom',
+      'preview-10-2025',
       'embedding',
       'imagen',
       'tts',
       'audio',
-      'text-bison',
-      'chat-bison',
-      'learnlm',
-      'aqa',
       'veo',
+      'bison',
     ];
 
-    for (final keyword in excludedKeywords) {
-      if (rawName.contains(keyword)) return false;
+    for (final keyword in prohibitedKeywords) {
+      if (rawName.contains(keyword)) {
+        return false;
+      }
+    }
+
+    // 5. If inputModalities is provided by Google API, verify IMAGE capability
+    final modalities = (model['inputModalities'] as List<dynamic>?)
+            ?.map((e) => e.toString().toUpperCase())
+            .toList() ??
+        [];
+    if (modalities.isNotEmpty && !modalities.contains('IMAGE')) {
+      return false;
     }
 
     return true;

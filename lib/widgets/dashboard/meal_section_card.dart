@@ -178,6 +178,31 @@ class MealSectionCard extends StatelessWidget {
                       ),
                     ],
                   ),
+                  if (meal.notes != null && meal.notes!.trim().isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.notes_rounded,
+                          size: 12,
+                          color: AppColors.textMuted(context),
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            meal.notes!.trim(),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.inter(
+                              fontSize: 11,
+                              fontStyle: FontStyle.italic,
+                              color: AppColors.textSecondary(context),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),

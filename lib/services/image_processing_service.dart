@@ -1,8 +1,9 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:image/image.dart' as img;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'database_service.dart';
 
 class ImageProcessingService {
   static final ImageProcessingService instance = ImageProcessingService._();
@@ -43,16 +44,66 @@ class ImageProcessingService {
   }
 
   Future<String> saveMealImage(Uint8List imageBytes, String mealId) async {
-    final appDir = await getApplicationDocumentsDirectory();
-    final mealsDir = Directory(p.join(appDir.path, 'meals'));
-    if (!await mealsDir.exists()) {
-      await mealsDir.create(recursive: true);
+    Directory? targetDir;
+
+    // On Android or platforms supporting external pictures storage
+    try {
+      if (Platform.isAndroid) {
+        final extDirs = await getExternalStorageDirectories(type: StorageDirectory.pictures);
+        if (extDirs != null && extDirs.isNotEmpty) {
+          targetDir = Directory(p.join(extDirs.first.path, 'FoodTrackerMeals'));
+        }
+      }
+    } catch (_) {}
+
+    // Fallback cleanly to getApplicationDocumentsDirectory()/Pictures/FoodTrackerMeals
+    if (targetDir == null) {
+      try {
+        final appDir = await getApplicationDocumentsDirectory();
+        targetDir = Directory(p.join(appDir.path, 'Pictures', 'FoodTrackerMeals'));
+      } catch (_) {
+        targetDir = Directory(p.join(Directory.systemTemp.path, 'FoodTrackerMeals'));
+      }
     }
 
-    final filePath = p.join(mealsDir.path, 'meal_${mealId}_${DateTime.now().millisecondsSinceEpoch}.jpg');
+    if (!await targetDir.exists()) {
+      await targetDir.create(recursive: true);
+    }
+
+    final filePath = p.join(
+      targetDir.path,
+      'meal_${mealId}_${DateTime.now().millisecondsSinceEpoch}.jpg',
+    );
     final file = File(filePath);
     await file.writeAsBytes(imageBytes, flush: true);
     return filePath;
+  }
+
+  /// Prunes photos older than retentionDays while preserving nutritional meal data in SQLite
+  Future<int> pruneOldMealPhotos({required int retentionDays}) async {
+    if (retentionDays <= 0) {
+      return 0;
+    }
+
+    final cutoffDate = DateTime.now().subtract(Duration(days: retentionDays));
+    final meals = await DatabaseService.instance.getMealsOlderThanWithImages(cutoffDate);
+
+    int deletedCount = 0;
+    for (final meal in meals) {
+      final path = meal.imagePath;
+      if (path != null && path.trim().isNotEmpty) {
+        try {
+          final file = File(path);
+          if (await file.exists()) {
+            await file.delete();
+            deletedCount++;
+          }
+        } catch (_) {}
+      }
+      await DatabaseService.instance.clearMealImagePath(meal.id);
+    }
+
+    return deletedCount;
   }
 
   Future<void> deleteMealImage(String? filePath) async {

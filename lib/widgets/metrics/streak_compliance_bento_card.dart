@@ -59,9 +59,10 @@ class StreakComplianceBentoCard extends StatelessWidget {
     final activeDays = activeDateSet.length;
     final streak = calculateStreak(meals);
 
-    final double consistencyFraction = days > 0
-        ? (activeDays / days).clamp(0.0, 1.0)
-        : 0.0;
+    final isAllTime = days <= 0;
+    final double consistencyFraction = isAllTime
+        ? (activeDays > 0 ? 1.0 : 0.0)
+        : (activeDays / days).clamp(0.0, 1.0);
     final int consistencyPercent = (consistencyFraction * 100).toInt();
 
     final String badgeText;
@@ -88,53 +89,51 @@ class StreakComplianceBentoCard extends StatelessWidget {
         children: [
           // Header
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 28,
-                    height: 28,
-                    decoration: BoxDecoration(
-                      color: AppColors.protein.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(7),
-                    ),
-                    child: const Icon(
-                      Icons.bolt_outlined,
-                      color: AppColors.protein,
-                      size: 16,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'CONSTANCIA',
-                    style: GoogleFonts.inter(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.8,
-                      color: AppColors.textSecondary(context),
-                    ),
-                  ),
-                ],
-              ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                width: 28,
+                height: 28,
                 decoration: BoxDecoration(
-                  color: badgeColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(6),
+                  color: AppColors.protein.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(7),
                 ),
+                child: const Icon(
+                  Icons.bolt_outlined,
+                  color: AppColors.protein,
+                  size: 16,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
                 child: Text(
-                  badgeText,
+                  'CONSTANCIA',
                   style: GoogleFonts.inter(
-                    fontSize: 10,
+                    fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: badgeColor,
+                    letterSpacing: 0.8,
+                    color: AppColors.textSecondary(context),
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+            decoration: BoxDecoration(
+              color: badgeColor.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              badgeText,
+              style: GoogleFonts.inter(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                color: badgeColor,
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
 
           // Big streak text
           Row(
@@ -163,7 +162,9 @@ class StreakComplianceBentoCard extends StatelessWidget {
           ),
           const SizedBox(height: 2),
           Text(
-            '$activeDays de $days días registrados ($consistencyPercent%)',
+            isAllTime
+                ? '$activeDays días registrados en total'
+                : '$activeDays de $days días registrados ($consistencyPercent%)',
             style: GoogleFonts.inter(
               fontSize: 11,
               color: AppColors.textSecondary(context),

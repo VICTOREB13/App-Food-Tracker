@@ -124,5 +124,30 @@ void main() {
       expect(controller.selectedDate.month, equals(now.month));
       expect(controller.selectedDate.year, equals(now.year));
     });
+
+    test('upsertMeal persiste comida y refresca el estado del día', () async {
+      final controller = MealController.instance;
+      final today = DateTime.now();
+      await controller.setSelectedDate(today);
+
+      final meal = Meal(id: 'c-upsert-1', name: 'Pollo Asado', calories: 400, date: today);
+      await controller.upsertMeal(meal);
+
+      expect(controller.meals.length, equals(1));
+      expect(controller.meals.first.name, equals('Pollo Asado'));
+
+      final updated = meal.copyWith(name: 'Pollo al Horno', calories: 420);
+      await controller.upsertMeal(updated);
+
+      expect(controller.meals.length, equals(1));
+      expect(controller.meals.first.name, equals('Pollo al Horno'));
+      expect(controller.meals.first.calories, equals(420));
+    });
+
+    test('pruneOldPhotos con retentionDays <= 0 retorna 0 sin modificar', () async {
+      final controller = MealController.instance;
+      final pruned = await controller.pruneOldPhotos(0);
+      expect(pruned, equals(0));
+    });
   });
 }

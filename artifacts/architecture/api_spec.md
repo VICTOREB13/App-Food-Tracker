@@ -1,7 +1,7 @@
 ---
 tipo: api_spec
 proyecto: App_Food_Tracker
-version: v0.2.0-alpha
+version: v0.3.0-alpha
 estado: activo
 fecha: 2026-09-09
 tags: [proyecto, api, backend, contratos, sqlite]
@@ -36,7 +36,23 @@ CREATE TABLE meals (
 );
 ```
 
-### 1.2. Tabla: `pantry_items`
+### 1.2. Tabla: `meal_items` (Desglose normalizado de items)
+Almacena opcionalmente los ingredientes atómicos de cada comida para persistencia relacional acoplada.
+
+```sql
+CREATE TABLE meal_items (
+  id TEXT PRIMARY KEY,
+  meal_id TEXT NOT NULL,
+  name TEXT NOT NULL,
+  calories REAL NOT NULL,
+  protein REAL NOT NULL,
+  carbs REAL NOT NULL,
+  fat REAL NOT NULL,
+  FOREIGN KEY (meal_id) REFERENCES meals (id) ON DELETE CASCADE
+);
+```
+
+### 1.3. Tabla: `pantry_items`
 Almacena alimentos frecuentes, ingredientes recurrentes y productos escaneados por código de barras.
 
 ```sql
@@ -89,6 +105,9 @@ CREATE INDEX IF NOT EXISTS idx_pantry_favorite ON pantry_items(is_favorite);
 
 -- Consultas de tendencias de peso por rangos (7, 30, 90 días):
 CREATE INDEX IF NOT EXISTS idx_weight_logs_date ON weight_logs(date);
+
+-- Cascada relacional de items de comida:
+CREATE INDEX IF NOT EXISTS idx_meal_items_meal_id ON meal_items(meal_id);
 ```
 
 ---

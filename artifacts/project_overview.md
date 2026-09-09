@@ -1,7 +1,7 @@
 ---
 tipo: overview
 proyecto: App_Food_Tracker
-version: v0.2.0-alpha
+version: v0.3.0-alpha
 estado: activo
 fecha: 2026-09-09
 tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid]

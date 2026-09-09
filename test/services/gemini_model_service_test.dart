@@ -241,10 +241,11 @@ void main() {
 
     test('Fallback models list is populated and contains standard models', () {
       const fallbacks = GeminiModelService.fallbackModels;
-      expect(fallbacks.length, greaterThanOrEqualTo(3));
+      expect(fallbacks.length, equals(4));
       expect(fallbacks.any((m) => m.name == 'gemini-2.5-flash'), isTrue);
+      expect(fallbacks.any((m) => m.name == 'gemini-1.5-flash'), isTrue);
+      expect(fallbacks.any((m) => m.name == 'gemini-1.5-pro'), isTrue);
       expect(fallbacks.any((m) => m.name == 'gemini-2.0-flash'), isTrue);
-      expect(fallbacks.any((m) => m.name == 'gemini-2.5-pro'), isTrue);
     });
 
     test('GeminiModelInfo serialization and sentinel copyWith', () {
@@ -268,6 +269,68 @@ void main() {
       final copied = model.copyWith(recommendationLabel: null);
       expect(copied.recommendationLabel, isNull);
       expect(copied.name, equals(model.name));
+    });
+
+    test('isVisionCapableModel blocks all prohibited keywords and requires flash or pro', () {
+      const prohibitedKeywords = [
+        'banana',
+        'nano',
+        'transcribe',
+        'omni',
+        'computer-use',
+        'robotics',
+        'live',
+        'custom',
+        'preview-10-2025',
+        'embedding',
+        'imagen',
+        'tts',
+        'audio',
+        'veo',
+        'bison',
+      ];
+
+      for (final keyword in prohibitedKeywords) {
+        final blockedModel = {
+          'name': 'models/gemini-flash-$keyword',
+          'supportedGenerationMethods': ['generateContent'],
+        };
+        expect(
+          GeminiModelService.isVisionCapableModel(blockedModel),
+          isFalse,
+          reason: 'Model containing "$keyword" should be blocked',
+        );
+      }
+
+      // Block model without flash or pro
+      final noFlashNoPro = {
+        'name': 'models/gemini-ultra',
+        'supportedGenerationMethods': ['generateContent'],
+      };
+      expect(GeminiModelService.isVisionCapableModel(noFlashNoPro), isFalse);
+
+      // Block model without generateContent
+      final noGenerate = {
+        'name': 'models/gemini-flash',
+        'supportedGenerationMethods': ['embedContent'],
+      };
+      expect(GeminiModelService.isVisionCapableModel(noGenerate), isFalse);
+
+      // Allow valid flash and pro models
+      expect(
+        GeminiModelService.isVisionCapableModel({
+          'name': 'models/gemini-2.5-flash',
+          'supportedGenerationMethods': ['generateContent'],
+        }),
+        isTrue,
+      );
+      expect(
+        GeminiModelService.isVisionCapableModel({
+          'name': 'models/gemini-1.5-pro',
+          'supportedGenerationMethods': ['generateContent'],
+        }),
+        isTrue,
+      );
     });
   });
 }

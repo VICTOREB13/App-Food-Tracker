@@ -173,6 +173,11 @@ void main() {
       await controller.loadWeightLogs(days: 90);
       expect(controller.selectedWeightDays, equals(90));
       expect(controller.weightLogs.length, equals(3));
+
+      // 4. Load days <= 0 (historical all records via getAllWeightLogs)
+      await controller.loadWeightLogs(days: 0);
+      expect(controller.selectedWeightDays, equals(0));
+      expect(controller.weightLogs.length, equals(3));
     });
 
     test('loadWeightLogs maneja errores de BD limpiando estado sin propagar excepción a la UI', () async {

@@ -10,13 +10,7 @@ class BiometricInputsCard extends StatefulWidget {
   final String initialGender;
   final double initialHeight;
   final double initialWeight;
-  final void Function({
-    String? name,
-    int? age,
-    String? gender,
-    double? height,
-    double? weight,
-  }) onChanged;
+  final void Function({String? name, int? age, String? gender, double? height, double? weight}) onChanged;
 
   const BiometricInputsCard({
     super.key,
@@ -44,37 +38,37 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
     super.initState();
     _selectedGender = widget.initialGender;
     _nameController = TextEditingController(text: widget.initialName ?? '');
-    _ageController = TextEditingController(text: widget.initialAge.toString());
-    _heightController = TextEditingController(
-      text: widget.initialHeight > 0 ? widget.initialHeight.toStringAsFixed(0) : '',
-    );
-    _weightController = TextEditingController(
-      text: widget.initialWeight > 0 ? widget.initialWeight.toStringAsFixed(1) : '',
-    );
+    _ageController = TextEditingController(text: widget.initialAge > 0 ? widget.initialAge.toString() : '');
+    _heightController = TextEditingController(text: widget.initialHeight > 0 ? widget.initialHeight.toStringAsFixed(0) : '');
+    _weightController = TextEditingController(text: widget.initialWeight > 0 ? widget.initialWeight.toStringAsFixed(1) : '');
   }
 
   @override
   void didUpdateWidget(covariant BiometricInputsCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.initialGender != widget.initialGender &&
-        _selectedGender != widget.initialGender) {
+    if (oldWidget.initialGender != widget.initialGender && _selectedGender != widget.initialGender) {
       _selectedGender = widget.initialGender;
     }
-    if (oldWidget.initialName != widget.initialName &&
-        _nameController.text != (widget.initialName ?? '')) {
-      _nameController.text = widget.initialName ?? '';
+    if (oldWidget.initialName != widget.initialName && widget.initialName != null && _nameController.text != widget.initialName) {
+      _nameController.text = widget.initialName!;
     }
-    if (oldWidget.initialAge != widget.initialAge &&
-        int.tryParse(_ageController.text) != widget.initialAge) {
-      _ageController.text = widget.initialAge.toString();
+    if (oldWidget.initialAge != widget.initialAge) {
+      final p = int.tryParse(_ageController.text.trim());
+      if (_ageController.text.isNotEmpty && p != null && p != widget.initialAge) {
+        _ageController.text = widget.initialAge.toString();
+      }
     }
-    if (oldWidget.initialHeight != widget.initialHeight &&
-        double.tryParse(_heightController.text) != widget.initialHeight) {
-      _heightController.text = widget.initialHeight.toStringAsFixed(0);
+    if (oldWidget.initialHeight != widget.initialHeight) {
+      final p = double.tryParse(_heightController.text.trim());
+      if (_heightController.text.isNotEmpty && p != null && p != widget.initialHeight) {
+        _heightController.text = widget.initialHeight.toStringAsFixed(0);
+      }
     }
-    if (oldWidget.initialWeight != widget.initialWeight &&
-        double.tryParse(_weightController.text) != widget.initialWeight) {
-      _weightController.text = widget.initialWeight.toStringAsFixed(1);
+    if (oldWidget.initialWeight != widget.initialWeight) {
+      final p = double.tryParse(_weightController.text.trim());
+      if (_weightController.text.isNotEmpty && p != null && p != widget.initialWeight) {
+        _weightController.text = widget.initialWeight.toStringAsFixed(1);
+      }
     }
   }
 
@@ -89,24 +83,18 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
 
   void _notifyChanges() {
     final name = _nameController.text.trim();
-    final age = int.tryParse(_ageController.text.trim()) ?? widget.initialAge;
-    final height = double.tryParse(_heightController.text.trim()) ?? widget.initialHeight;
-    final weight = double.tryParse(_weightController.text.trim()) ?? widget.initialWeight;
-
     widget.onChanged(
       name: name.isNotEmpty ? name : null,
-      age: age,
+      age: int.tryParse(_ageController.text.trim()),
       gender: _selectedGender,
-      height: height,
-      weight: weight,
+      height: double.tryParse(_heightController.text.trim()),
+      weight: double.tryParse(_weightController.text.trim()),
     );
   }
 
   void _setGender(String gender) {
     if (_selectedGender == gender) return;
-    setState(() {
-      _selectedGender = gender;
-    });
+    setState(() => _selectedGender = gender);
     _notifyChanges();
   }
 
@@ -134,14 +122,7 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
           const SizedBox(height: 16),
 
           // Name Input
-          Text(
-            'Nombre o Alias',
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: AppColors.textSecondary(context),
-            ),
-          ),
+          _buildFieldLabel(context, 'Nombre o Alias'),
           const SizedBox(height: 6),
           TextField(
             controller: _nameController,
@@ -156,14 +137,7 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
           const SizedBox(height: 16),
 
           // Biological Gender Selector
-          Text(
-            'Género Biológico (Mifflin-St Jeor)',
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: AppColors.textSecondary(context),
-            ),
-          ),
+          _buildFieldLabel(context, 'Género Biológico (Mifflin-St Jeor)'),
           const SizedBox(height: 6),
           Row(
             children: [
@@ -190,33 +164,21 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
 
           // Age, Height, Weight Row
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Age
               Expanded(
                 flex: 2,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Edad',
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textSecondary(context),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    TextField(
-                      controller: _ageController,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      onChanged: (_) => _notifyChanges(),
-                      style: GoogleFonts.inter(fontSize: 14, color: AppColors.textPrimary(context)),
-                      decoration: const InputDecoration(
-                        hintText: '28',
-                        suffixText: 'años',
-                      ),
-                    ),
+                child: _buildNumericInputColumn(
+                  context: context,
+                  label: 'Edad',
+                  controller: _ageController,
+                  hintText: '28',
+                  suffixText: 'años',
+                  keyboardType: TextInputType.number,
+                  formatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(3),
                   ],
                 ),
               ),
@@ -225,29 +187,13 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
               // Height (cm)
               Expanded(
                 flex: 3,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Estatura',
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textSecondary(context),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    TextField(
-                      controller: _heightController,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      onChanged: (_) => _notifyChanges(),
-                      style: GoogleFonts.inter(fontSize: 14, color: AppColors.textPrimary(context)),
-                      decoration: const InputDecoration(
-                        hintText: '175',
-                        suffixText: 'cm',
-                      ),
-                    ),
-                  ],
+                child: _buildNumericInputColumn(
+                  context: context,
+                  label: 'Estatura',
+                  controller: _heightController,
+                  hintText: '175',
+                  suffixText: 'cm',
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 ),
               ),
               const SizedBox(width: 10),
@@ -255,34 +201,55 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
               // Weight (kg)
               Expanded(
                 flex: 3,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Peso Actual',
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textSecondary(context),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    TextField(
-                      controller: _weightController,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      onChanged: (_) => _notifyChanges(),
-                      style: GoogleFonts.inter(fontSize: 14, color: AppColors.textPrimary(context)),
-                      decoration: const InputDecoration(
-                        hintText: '75.0',
-                        suffixText: 'kg',
-                      ),
-                    ),
-                  ],
+                child: _buildNumericInputColumn(
+                  context: context,
+                  label: 'Peso Actual',
+                  controller: _weightController,
+                  hintText: '75.0',
+                  suffixText: 'kg',
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 ),
               ),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildNumericInputColumn({
+    required BuildContext context,
+    required String label,
+    required TextEditingController controller,
+    required String hintText,
+    required String suffixText,
+    required TextInputType keyboardType,
+    List<TextInputFormatter>? formatters,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildFieldLabel(context, label),
+        const SizedBox(height: 6),
+        TextField(
+          controller: controller,
+          keyboardType: keyboardType,
+          inputFormatters: formatters,
+          onChanged: (_) => _notifyChanges(),
+          style: GoogleFonts.inter(fontSize: 14, color: AppColors.textPrimary(context)),
+          decoration: InputDecoration(hintText: hintText, suffixText: suffixText),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFieldLabel(BuildContext context, String label) {
+    return Text(
+      label,
+      style: GoogleFonts.inter(
+        fontSize: 12,
+        fontWeight: FontWeight.w500,
+        color: AppColors.textSecondary(context),
       ),
     );
   }
@@ -294,9 +261,7 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
     required bool isSelected,
   }) {
     final borderColor = isSelected ? AppColors.primary : AppColors.border(context);
-    final bgColor = isSelected
-        ? AppColors.primary.withValues(alpha: 0.12)
-        : AppColors.surfaceSubtle(context);
+    final bgColor = isSelected ? AppColors.primary.withValues(alpha: 0.12) : AppColors.surfaceSubtle(context);
 
     return InkWell(
       onTap: () => _setGender(value),
@@ -307,19 +272,12 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: borderColor,
-            width: isSelected ? 1.5 : 1.0,
-          ),
+          border: Border.all(color: borderColor, width: isSelected ? 1.5 : 1.0),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 18,
-              color: isSelected ? AppColors.primary : AppColors.textSecondary(context),
-            ),
+            Icon(icon, size: 18, color: isSelected ? AppColors.primary : AppColors.textSecondary(context)),
             const SizedBox(width: 6),
             Text(
               label,

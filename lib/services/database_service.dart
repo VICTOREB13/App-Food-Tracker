@@ -133,6 +133,7 @@ class DatabaseService {
 
   Future<void> _onCreate(Database db, int version) async {
     await _createMealsTable(db);
+    await _createMealItemsTable(db);
     await _createPantryTable(db);
     await _createWeightLogsTable(db);
     await _createUserProfileTable(db);
@@ -163,6 +164,22 @@ class DatabaseService {
         ai_breakdown_json TEXT
       )
     ''');
+  }
+
+  Future<void> _createMealItemsTable(DatabaseExecutor db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS meal_items (
+        id TEXT PRIMARY KEY,
+        meal_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        calories REAL NOT NULL,
+        protein REAL NOT NULL,
+        carbs REAL NOT NULL,
+        fat REAL NOT NULL,
+        FOREIGN KEY (meal_id) REFERENCES meals (id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_meal_items_meal_id ON meal_items(meal_id);');
   }
 
   Future<void> _createPantryTable(DatabaseExecutor db) async {
@@ -239,6 +256,38 @@ class DatabaseService {
     );
   }
 
+  Future<int> upsertMeal(Meal meal) async {
+    final db = await database;
+    return await db.transaction((txn) async {
+      final tableCheck = await txn.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'meal_items';",
+      );
+      if (tableCheck.isNotEmpty) {
+        await txn.delete('meal_items', where: 'meal_id = ?', whereArgs: [meal.id]);
+        for (final item in meal.items) {
+          await txn.insert(
+            'meal_items',
+            {
+              'id': item.id,
+              'meal_id': meal.id,
+              'name': item.name,
+              'calories': item.calories,
+              'protein': item.protein,
+              'carbs': item.carbs,
+              'fat': item.fat,
+            },
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+        }
+      }
+      return await txn.insert(
+        'meals',
+        meal.toSqliteMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    });
+  }
+
   Future<int> updateMeal(Meal meal) async {
     final db = await database;
     return await db.update(
@@ -283,6 +332,27 @@ class DatabaseService {
   Future<List<Meal>> getAllMeals() async {
     final db = await database;
     final results = await db.query('meals', orderBy: 'date DESC');
+    return results.map((m) => Meal.fromSqliteMap(m)).toList();
+  }
+
+  Future<int> clearMealImagePath(String mealId) async {
+    final db = await database;
+    return await db.update(
+      'meals',
+      {'image_path': null},
+      where: 'id = ?',
+      whereArgs: [mealId],
+    );
+  }
+
+  Future<List<Meal>> getMealsOlderThanWithImages(DateTime cutoffDate) async {
+    final db = await database;
+    final results = await db.query(
+      'meals',
+      where: 'date < ? AND image_path IS NOT NULL',
+      whereArgs: [cutoffDate.toIso8601String()],
+      orderBy: 'date ASC',
+    );
     return results.map((m) => Meal.fromSqliteMap(m)).toList();
   }
 
@@ -402,7 +472,7 @@ class DatabaseService {
     try {
       final results = await db.query(
         'weight_logs',
-        orderBy: 'date DESC',
+        orderBy: 'date ASC',
       );
       return results.map((m) => WeightLog.fromSqliteMap(m)).toList();
     } catch (_) {

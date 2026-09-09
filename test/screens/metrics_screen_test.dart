@@ -9,13 +9,16 @@ import 'package:food_tracker/widgets/metrics/calorie_compliance_bento_card.dart'
 import 'package:food_tracker/widgets/metrics/macro_distribution_bento_card.dart';
 import 'package:food_tracker/widgets/metrics/quick_weight_entry_dialog.dart';
 import 'package:food_tracker/widgets/metrics/streak_compliance_bento_card.dart';
+import 'package:food_tracker/widgets/metrics/weight_history_bento_card.dart';
 import 'package:food_tracker/widgets/metrics/weight_trend_bento_card.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
-  setUpAll(() {
+  setUpAll(() async {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfiNoIsolate;
+    await initializeDateFormatting('es', null);
   });
 
   late Database testDb;
@@ -114,12 +117,14 @@ void main() {
       expect(find.text('7 días'), findsOneWidget);
       expect(find.text('30 días'), findsOneWidget);
       expect(find.text('90 días'), findsOneWidget);
+      expect(find.text('Histórico'), findsOneWidget);
 
       // Check Bento Cards
       expect(find.byType(WeightTrendBentoCard), findsOneWidget);
       expect(find.byType(CalorieComplianceBentoCard), findsOneWidget);
       expect(find.byType(StreakComplianceBentoCard), findsOneWidget);
       expect(find.byType(MacroDistributionBentoCard), findsOneWidget);
+      expect(find.byType(WeightHistoryBentoCard), findsOneWidget);
 
       // Check FAB
       expect(find.byType(FloatingActionButton), findsOneWidget);
@@ -146,6 +151,11 @@ void main() {
       await tester.tap(find.text('90 días'));
       await tester.pumpAndSettle();
       expect(MealController.instance.selectedWeightDays, equals(90));
+
+      // Switch to Histórico (0 days)
+      await tester.tap(find.text('Histórico'));
+      await tester.pumpAndSettle();
+      expect(MealController.instance.selectedWeightDays, equals(0));
     });
 
     testWidgets('tapping FAB opens QuickWeightEntryDialog', (tester) async {
