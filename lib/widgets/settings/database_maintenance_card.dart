@@ -85,7 +85,7 @@ class DatabaseMaintenanceCard extends StatelessWidget {
                     )
                   : const Icon(Icons.cleaning_services_outlined, size: 16),
               label: Text(
-                isLoading ? 'Optimizando...' : 'Optimizar y Compactar (VACUUM)',
+                isLoading ? 'Optimizando...' : 'Optimizar y Compactar',
                 style: GoogleFonts.inter(fontWeight: FontWeight.w600),
               ),
             ),
@@ -97,6 +97,7 @@ class DatabaseMaintenanceCard extends StatelessWidget {
 
   Widget _buildStatTile(BuildContext context, {required String label, required String value}) {
     return Container(
+      alignment: Alignment.center
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
       decoration: BoxDecoration(
         color: AppColors.surfaceSubtle(context),
@@ -104,15 +105,20 @@ class DatabaseMaintenanceCard extends StatelessWidget {
         border: Border.all(color: AppColors.border(context)),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
             label,
-            style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary(context)),
+            textAlign: TextAlign.center
+            style: GoogleFonts.inter(
+              fontSize: 11, 
+              color: AppColors.textSecondary(context)),
           ),
           const SizedBox(height: 2),
           Text(
             value,
+            textAlign: TextAlign.center
             style: GoogleFonts.outfit(
               fontSize: 15,
               fontWeight: FontWeight.w700,

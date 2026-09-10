@@ -72,17 +72,25 @@ class FoodItem {
   factory FoodItem.fromJson(Map<String, dynamic> json) {
     return FoodItem(
       id: json['id']?.toString(),
-      name: (json['alimento'] ?? json['name'] ?? 'Alimento').toString(),
+      name: (json['alimento'] ?? json['nombre'] ?? json['name'] ?? json['ingrediente'] ?? json['item'] ?? 'Alimento').toString(),
       estimatedGrams: ModelSanitizer.clampDouble(
-        json['gramos_estimados'] ?? json['estimated_grams'],
+        json['gramos_estimados'] ?? json['gramos'] ?? json['estimated_grams'] ?? json['grams'] ?? json['peso_g'] ?? json['peso'],
         min: 0.0,
         max: 50000.0,
       ),
-      calories: ModelSanitizer.clampDouble(json['calorias'] ?? json['calories']),
-      protein: ModelSanitizer.clampDouble(json['proteinas_g'] ?? json['protein']),
-      carbs: ModelSanitizer.clampDouble(json['carbohidratos_g'] ?? json['carbs']),
-      fat: ModelSanitizer.clampDouble(json['grasas_g'] ?? json['fat']),
-      visualJustification: (json['justificacion_visual'] ?? json['visual_justification'])?.toString(),
+      calories: ModelSanitizer.clampDouble(
+        json['calorias'] ?? json['calories'] ?? json['kcal'] ?? json['total_calorias'],
+      ),
+      protein: ModelSanitizer.clampDouble(
+        json['proteinas_g'] ?? json['proteina_g'] ?? json['protein'] ?? json['proteins_g'] ?? json['proteina'],
+      ),
+      carbs: ModelSanitizer.clampDouble(
+        json['carbohidratos_g'] ?? json['carbohidratos'] ?? json['carbs'] ?? json['carbohydrates_g'] ?? json['carbohidrato_g'] ?? json['carbohidrato'],
+      ),
+      fat: ModelSanitizer.clampDouble(
+        json['grasas_g'] ?? json['grasa_g'] ?? json['fat'] ?? json['fats_g'] ?? json['lipidos_g'] ?? json['lipidos'] ?? json['grasas'],
+      ),
+      visualJustification: (json['justificacion_visual'] ?? json['justificacion'] ?? json['visual_justification'] ?? json['notas'] ?? json['justification'] ?? json['nota'])?.toString(),
     );
   }
 

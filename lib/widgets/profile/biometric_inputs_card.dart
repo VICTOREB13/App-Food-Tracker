@@ -31,6 +31,10 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
   late final TextEditingController _ageController;
   late final TextEditingController _heightController;
   late final TextEditingController _weightController;
+  late final FocusNode _nameFocus;
+  late final FocusNode _ageFocus;
+  late final FocusNode _heightFocus;
+  late final FocusNode _weightFocus;
   late String _selectedGender;
 
   @override
@@ -41,6 +45,10 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
     _ageController = TextEditingController(text: widget.initialAge > 0 ? widget.initialAge.toString() : '');
     _heightController = TextEditingController(text: widget.initialHeight > 0 ? widget.initialHeight.toStringAsFixed(0) : '');
     _weightController = TextEditingController(text: widget.initialWeight > 0 ? widget.initialWeight.toStringAsFixed(1) : '');
+    _nameFocus = FocusNode();
+    _ageFocus = FocusNode();
+    _heightFocus = FocusNode();
+    _weightFocus = FocusNode();
   }
 
   @override
@@ -49,25 +57,25 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
     if (oldWidget.initialGender != widget.initialGender && _selectedGender != widget.initialGender) {
       _selectedGender = widget.initialGender;
     }
-    if (oldWidget.initialName != widget.initialName && widget.initialName != null && _nameController.text != widget.initialName) {
+    if (oldWidget.initialName != widget.initialName && widget.initialName != null && _nameController.text != widget.initialName && !_nameFocus.hasFocus) {
       _nameController.text = widget.initialName!;
     }
     if (oldWidget.initialAge != widget.initialAge) {
       final p = int.tryParse(_ageController.text.trim());
-      if (_ageController.text.isNotEmpty && p != null && p != widget.initialAge) {
-        _ageController.text = widget.initialAge.toString();
+      if (p != widget.initialAge && !_ageFocus.hasFocus) {
+        _ageController.text = widget.initialAge > 0 ? widget.initialAge.toString() : '';
       }
     }
     if (oldWidget.initialHeight != widget.initialHeight) {
       final p = double.tryParse(_heightController.text.trim());
-      if (_heightController.text.isNotEmpty && p != null && p != widget.initialHeight) {
-        _heightController.text = widget.initialHeight.toStringAsFixed(0);
+      if (p != widget.initialHeight && !_heightFocus.hasFocus) {
+        _heightController.text = widget.initialHeight > 0 ? widget.initialHeight.toStringAsFixed(0) : '';
       }
     }
     if (oldWidget.initialWeight != widget.initialWeight) {
       final p = double.tryParse(_weightController.text.trim());
-      if (_weightController.text.isNotEmpty && p != null && p != widget.initialWeight) {
-        _weightController.text = widget.initialWeight.toStringAsFixed(1);
+      if (p != widget.initialWeight && !_weightFocus.hasFocus) {
+        _weightController.text = widget.initialWeight > 0 ? widget.initialWeight.toStringAsFixed(1) : '';
       }
     }
   }
@@ -78,6 +86,10 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
     _ageController.dispose();
     _heightController.dispose();
     _weightController.dispose();
+    _nameFocus.dispose();
+    _ageFocus.dispose();
+    _heightFocus.dispose();
+    _weightFocus.dispose();
     super.dispose();
   }
 
@@ -137,7 +149,9 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
           const SizedBox(height: 16),
 
           // Biological Gender Selector
-          _buildFieldLabel(context, 'Género Biológico (Mifflin-St Jeor)'),
+          Center(
+            child: _buildFieldLabel(context, 'Género Biológico (Mifflin-St Jeor)', textAlign: TextAlign.center),
+          ),
           const SizedBox(height: 6),
           Row(
             children: [
@@ -168,11 +182,11 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
             children: [
               // Age
               Expanded(
-                flex: 2,
                 child: _buildNumericInputColumn(
                   context: context,
                   label: 'Edad',
                   controller: _ageController,
+                  focusNode: _ageFocus,
                   hintText: '28',
                   suffixText: 'años',
                   keyboardType: TextInputType.number,
@@ -182,29 +196,29 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
                   ],
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
 
               // Height (cm)
               Expanded(
-                flex: 3,
                 child: _buildNumericInputColumn(
                   context: context,
                   label: 'Estatura',
                   controller: _heightController,
+                  focusNode: _heightFocus,
                   hintText: '175',
                   suffixText: 'cm',
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
 
               // Weight (kg)
               Expanded(
-                flex: 3,
                 child: _buildNumericInputColumn(
                   context: context,
                   label: 'Peso Actual',
                   controller: _weightController,
+                  focusNode: _weightFocus,
                   hintText: '75.0',
                   suffixText: 'kg',
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -221,31 +235,53 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
     required BuildContext context,
     required String label,
     required TextEditingController controller,
+    FocusNode? focusNode,
     required String hintText,
     required String suffixText,
     required TextInputType keyboardType,
     List<TextInputFormatter>? formatters,
   }) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        _buildFieldLabel(context, label),
+        Center(
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textSecondary(context),
+            ),
+          ),
+        ),
         const SizedBox(height: 6),
         TextField(
           controller: controller,
+          focusNode: focusNode,
+          textAlign: TextAlign.center,
           keyboardType: keyboardType,
           inputFormatters: formatters,
           onChanged: (_) => _notifyChanges(),
           style: GoogleFonts.inter(fontSize: 14, color: AppColors.textPrimary(context)),
-          decoration: InputDecoration(hintText: hintText, suffixText: suffixText),
+          decoration: InputDecoration(
+            hintText: hintText,
+            suffixText: suffixText,
+            suffixStyle: GoogleFonts.inter(
+              fontSize: 11,
+              color: AppColors.textMuted(context),
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildFieldLabel(BuildContext context, String label) {
+  Widget _buildFieldLabel(BuildContext context, String label, {TextAlign textAlign = TextAlign.start}) {
     return Text(
       label,
+      textAlign: textAlign,
       style: GoogleFonts.inter(
         fontSize: 12,
         fontWeight: FontWeight.w500,

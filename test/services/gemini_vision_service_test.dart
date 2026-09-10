@@ -103,6 +103,45 @@ void main() {
       expect(result.totalFat, equals(4.1));
     });
 
+    test('MealAnalysisResult deserializa fielmente cuando Gemini usa claves en español (ingredientes / alimentos)', () {
+      const spanishKeysJson = '''
+      {
+        "nombre": "Ceviche Mixto",
+        "ingredientes": [
+          {
+            "alimento": "Pescado blanco marinado",
+            "gramos_estimados": 150,
+            "calorias": 140,
+            "proteinas_g": 28.0,
+            "carbohidratos_g": 1.0,
+            "grasas_g": 2.0
+          },
+          {
+            "alimento": "Camote cocido",
+            "gramos_estimados": 80,
+            "calorias": 70,
+            "proteinas_g": 1.5,
+            "carbohidratos_g": 16.0,
+            "grasas_g": 0.2
+          }
+        ],
+        "totales": {
+          "calorias": 210,
+          "proteina_g": 29.5,
+          "carbohidratos_g": 17.0,
+          "grasas_g": 2.2
+        }
+      }
+      ''';
+
+      final result = MealAnalysisResult.fromJsonString(spanishKeysJson);
+      expect(result.dishName, equals('Ceviche Mixto'));
+      expect(result.items.length, equals(2));
+      expect(result.items.first.name, equals('Pescado blanco marinado'));
+      expect(result.totalCalories, equals(210.0));
+      expect(result.totalProtein, equals(29.5));
+    });
+
     test('Instrucciones del sistema contienen reglas de cubicaje casero latinoamericano', () {
       const prompt = GeminiVisionService.systemInstruction;
 

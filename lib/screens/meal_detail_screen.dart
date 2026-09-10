@@ -1,46 +1,40 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
 import '../controllers/meal_controller.dart';
 import '../models/food_item.dart';
 import '../models/meal.dart';
-import '../services/image_processing_service.dart';
+import '../services/gemini_vision_service.dart';
+import '../services/secure_storage_service.dart';
 import '../services/theme_manager.dart';
-import '../widgets/common/confirmation_dialog.dart';
 import '../widgets/common/ve_app_bar.dart';
 import '../widgets/meal_detail/food_item_editor_dialog.dart';
 import '../widgets/meal_detail/food_items_list_card.dart';
+import '../widgets/meal_detail/meal_ai_reanalyze_button.dart';
+import '../widgets/meal_detail/meal_detail_actions.dart';
 import '../widgets/meal_detail/meal_form_fields.dart';
 import '../widgets/meal_detail/meal_image_card.dart';
+import '../widgets/meal_detail/meal_image_picker.dart';
 import '../widgets/meal_detail/meal_macro_chips_row.dart';
+import '../widgets/meal_detail/meal_save_button.dart';
 
 class MealDetailScreen extends StatefulWidget {
   final Meal? initialMeal;
   final String? defaultMealType;
 
-  const MealDetailScreen({
-    super.key,
-    this.initialMeal,
-    this.defaultMealType,
-  });
+  const MealDetailScreen({super.key, this.initialMeal, this.defaultMealType});
 
   @override
   State<MealDetailScreen> createState() => _MealDetailScreenState();
 }
 
 class _MealDetailScreenState extends State<MealDetailScreen> {
-  late final TextEditingController _nameController;
-  late final TextEditingController _notesController;
+  late final TextEditingController _nameController, _notesController;
   late String _mealType;
   late DateTime _date;
   String? _imagePath;
   List<FoodItem> _items = [];
-
-  double _calories = 0.0;
-  double _protein = 0.0;
-  double _carbs = 0.0;
-  double _fat = 0.0;
-  bool _isSaving = false;
+  double _calories = 0.0, _protein = 0.0, _carbs = 0.0, _fat = 0.0;
+  bool _isSaving = false, _isReanalyzing = false;
 
   @override
   void initState() {
@@ -85,116 +79,157 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
   }
 
   Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final source = await showModalBottomSheet<ImageSource>(
+    final savedPath = await pickAndSaveMealImage(
       context: context,
-      backgroundColor: AppColors.surface(context),
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.camera_alt_outlined),
-              title: const Text('Cámara'),
-              onTap: () => Navigator.of(ctx).pop(ImageSource.camera),
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library_outlined),
-              title: const Text('Galería'),
-              onTap: () => Navigator.of(ctx).pop(ImageSource.gallery),
-            ),
-          ],
-        ),
-      ),
+      mealType: _mealType,
+      date: _date,
+      mealId: widget.initialMeal?.id,
+      currentPath: _imagePath,
     );
-
-    if (source == null) return;
-    final file = await picker.pickImage(source: source);
-    if (file == null) return;
-
-    final bytes = await file.readAsBytes();
-    final compressed = ImageProcessingService.instance.compressAndResize(bytes);
-    final savedPath = await ImageProcessingService.instance.saveMealImage(
-      compressed,
-      widget.initialMeal?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
-    );
-    setState(() => _imagePath = savedPath);
+    if (savedPath != null) setState(() => _imagePath = savedPath);
   }
 
-  Future<void> _saveMeal() async {
-    final name = _nameController.text.trim();
-    if (name.isEmpty) {
+  Future<void> _reanalyzeWithAi() async {
+    if (_isSaving || _isReanalyzing) return;
+    final path = _imagePath;
+    if (path == null) return;
+    final file = File(path);
+    if (!file.existsSync()) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No se encontró el archivo de imagen en disco.')),
+        );
+      }
+      return;
+    }
+
+    final apiKey = await SecureStorageService.instance.getGeminiApiKey();
+    if (apiKey == null || apiKey.trim().isEmpty) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor ingresa un nombre para el plato.')),
+        const SnackBar(
+          content: Text('Configura tu API Key de Gemini en Perfil para re-analizar.'),
+          backgroundColor: AppColors.primary,
+        ),
       );
       return;
     }
 
-    setState(() => _isSaving = true);
+    setState(() => _isReanalyzing = true);
     try {
-      final notes = _notesController.text.trim().isNotEmpty ? _notesController.text.trim() : null;
-      final mealWithDetails = (widget.initialMeal ?? Meal(
-        name: name,
-        mealType: _mealType,
-        date: _date,
-      )).copyWith(
-        name: name,
-        mealType: _mealType,
-        date: _date,
-        imagePath: _imagePath,
-        calories: _calories,
-        protein: _protein,
-        carbs: _carbs,
-        fat: _fat,
-        notes: notes,
+      final selectedModel = await SecureStorageService.instance.getSelectedGeminiModel();
+      final masterPrompt = await SecureStorageService.instance.getMasterPrompt();
+      final gemini = GeminiVisionService(
+        apiKey: apiKey,
+        modelName: selectedModel ?? GeminiVisionService.defaultModel,
+        masterPrompt: masterPrompt,
       );
 
-      final updated = _items.isNotEmpty
-          ? mealWithDetails.recalculateFromItems(_items)
-          : mealWithDetails;
+      final bytes = await file.readAsBytes();
+      final currentPlato = _nameController.text.trim();
+      final currentNotes = _notesController.text.trim();
+      final itemsSummary = _items.isNotEmpty
+          ? _items.map((e) => '${e.name}: ${e.estimatedGrams.toStringAsFixed(0)}g').join(', ')
+          : 'sin ingredientes';
 
-      await MealController.instance.upsertMeal(updated);
+      final userContext = 'El comensal corrigió ingredientes del plato: '
+          'Plato: "$currentPlato", Notas: "$currentNotes", Ingredientes: $itemsSummary. '
+          'Recalcula los gramos y macronutrientes inteligentemente con esta corrección.';
+
+      final analysis = await gemini.analyzeMealPhoto(
+        rawImageBytes: bytes,
+        userContext: userContext,
+      );
 
       if (!mounted) return;
-      Navigator.of(context).pop();
+
+      setState(() {
+        if (_nameController.text.trim().isEmpty && analysis.dishName.isNotEmpty) {
+          _nameController.text = analysis.dishName;
+        }
+        _items = List.from(analysis.items);
+        _calories = analysis.totalCalories;
+        _protein = analysis.totalProtein;
+        _carbs = analysis.totalCarbs;
+        _fat = analysis.totalFat;
+      });
+      if (_items.isNotEmpty) {
+        _recalculateTotals();
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Plato re-analizado y actualizado con IA.'),
+          backgroundColor: AppColors.success,
+        ),
+      );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error al guardar comida: $e'),
+          content: Text('Error al re-analizar imagen: $e'),
           backgroundColor: AppColors.primary,
         ),
       );
     } finally {
-      if (mounted) setState(() => _isSaving = false);
+      if (mounted) setState(() => _isReanalyzing = false);
     }
   }
 
-  Future<void> _deleteMeal() async {
-    final confirmed = await showVeConfirmationDialog(
-      context,
-      title: '¿Eliminar Comida?',
-      message: 'Esta acción eliminará el registro de forma permanente de tu SQLite local.',
-      confirmLabel: 'Eliminar',
-      isDestructive: true,
-    );
+  Future<void> _saveMeal() async {
+    if (_isSaving || _isReanalyzing) return;
+    final name = _nameController.text.trim();
+    final rawNotes = _notesController.text.trim();
+    final notes = rawNotes.isNotEmpty ? rawNotes : null;
 
-    if (confirmed == true && widget.initialMeal != null) {
-      try {
-        await MealController.instance.deleteMeal(widget.initialMeal!);
-        if (!mounted) return;
-        Navigator.of(context).pop();
-      } catch (e) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error al eliminar comida: $e'),
-            backgroundColor: AppColors.primary,
-          ),
-        );
+    setState(() => _isSaving = true);
+    final saved = await saveMealEntry(
+      context: context,
+      initialMeal: widget.initialMeal,
+      name: name,
+      mealType: _mealType,
+      date: _date,
+      imagePath: _imagePath,
+      calories: _calories,
+      protein: _protein,
+      carbs: _carbs,
+      fat: _fat,
+      notes: notes,
+      items: _items,
+    );
+    if (mounted) setState(() => _isSaving = false);
+    if (saved && mounted) Navigator.of(context).pop();
+  }
+
+  Future<void> _deleteMeal() async {
+    final meal = widget.initialMeal;
+    if (meal == null) return;
+    final deleted = await confirmAndDeleteMeal(context, meal);
+    if (deleted && mounted) Navigator.of(context).pop();
+  }
+
+  Future<void> _addItem() async {
+    final newItem = await showFoodItemEditorDialog(context);
+    if (newItem != null) {
+      setState(() => _items.add(newItem));
+      _recalculateTotals();
+    }
+  }
+
+  Future<void> _editItem(FoodItem item) async {
+    final edited = await showFoodItemEditorDialog(context, initialItem: item);
+    if (edited != null) {
+      final idx = _items.indexWhere((e) => e.id == item.id);
+      if (idx != -1) {
+        setState(() => _items[idx] = edited);
+        _recalculateTotals();
       }
     }
+  }
+
+  void _deleteItem(FoodItem item) {
+    setState(() => _items.removeWhere((e) => e.id == item.id));
+    _recalculateTotals();
   }
 
   @override
@@ -217,6 +252,13 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         children: [
           MealImageCard(imagePath: _imagePath, onPickImage: _pickImage),
+          if (_imagePath != null) ...[
+            const SizedBox(height: 10),
+            MealAiReanalyzeButton(
+              isReanalyzing: _isReanalyzing,
+              onPressed: _reanalyzeWithAi,
+            ),
+          ],
           const SizedBox(height: 16),
           MealMacroChipsRow(
             calories: _calories,
@@ -236,44 +278,15 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
           const SizedBox(height: 16),
           FoodItemsListCard(
             items: _items,
-            onAddItem: () async {
-              final newItem = await showFoodItemEditorDialog(context);
-              if (newItem != null) {
-                setState(() => _items.add(newItem));
-                _recalculateTotals();
-              }
-            },
-            onEditItem: (item) async {
-              final edited = await showFoodItemEditorDialog(context, initialItem: item);
-              if (edited != null) {
-                final idx = _items.indexWhere((e) => e.id == item.id);
-                if (idx != -1) {
-                  setState(() => _items[idx] = edited);
-                  _recalculateTotals();
-                }
-              }
-            },
-            onDeleteItem: (item) {
-              setState(() => _items.removeWhere((e) => e.id == item.id));
-              _recalculateTotals();
-            },
+            onAddItem: _addItem,
+            onEditItem: _editItem,
+            onDeleteItem: _deleteItem,
           ),
           const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: _isSaving ? null : _saveMeal,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              minimumSize: const Size.fromHeight(48),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            ),
-            icon: _isSaving
-                ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                : const Icon(Icons.save_outlined),
-            label: Text(
-              _isSaving ? 'Guardando...' : (isEditing ? 'Actualizar Comida' : 'Registrar Comida'),
-              style: GoogleFonts.outfit(fontWeight: FontWeight.w700, fontSize: 16),
-            ),
+          MealSaveButton(
+            isSaving: _isSaving,
+            isEditing: isEditing,
+            onSave: _saveMeal,
           ),
           const SizedBox(height: 24),
         ],

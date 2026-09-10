@@ -36,7 +36,7 @@ class GeminiModelService {
       displayName: 'Gemini 2.5 Flash',
       description: 'Modelo multimodal de última generación, ultrarrápido y de alta precisión visual.',
       isRecommended: true,
-      recommendationLabel: 'RECOMENDADO (Ultrarrápido)',
+      recommendationLabel: 'Fast',
       inputTokenLimit: 1048576,
       outputTokenLimit: 8192,
     ),
@@ -45,7 +45,7 @@ class GeminiModelService {
       displayName: 'Gemini 1.5 Flash',
       description: 'Modelo heredado rápido con amplia compatibilidad.',
       isRecommended: false,
-      recommendationLabel: 'HEREDADO (Compatibilidad)',
+      recommendationLabel: 'Fast',
       inputTokenLimit: 1048576,
       outputTokenLimit: 8192,
     ),
@@ -54,7 +54,7 @@ class GeminiModelService {
       displayName: 'Gemini 1.5 Pro',
       description: 'Modelo de razonamiento avanzado y amplio contexto multimodal.',
       isRecommended: false,
-      recommendationLabel: 'HEREDADO (Razonamiento)',
+      recommendationLabel: 'Think',
       inputTokenLimit: 2097152,
       outputTokenLimit: 8192,
     ),
@@ -63,7 +63,7 @@ class GeminiModelService {
       displayName: 'Gemini 2.0 Flash',
       description: 'Modelo multimodal de producción estable y alta velocidad de inferencia.',
       isRecommended: true,
-      recommendationLabel: 'ESTABLE (Alta Velocidad)',
+      recommendationLabel: 'Fast',
       inputTokenLimit: 1048576,
       outputTokenLimit: 8192,
     ),
@@ -186,9 +186,21 @@ class GeminiModelService {
     return filtered;
   }
 
-  /// Strict multimodal vision filtering for Google Gemini models
+  /// Strict multimodal vision filtering for Google Gemini models.
+  /// Allows ONLY official multimodal Gemini Flash and Pro models, strictly rejecting
+  /// custom / fine-tuned models created in Google AI Studio, and non-vision models.
   static bool isVisionCapableModel(Map<String, dynamic> model) {
-    // 1. Generation Method Filter: Must contain 'generateContent'
+    // 1. Exclude tuned models or models created in Google AI Studio
+    if (model.containsKey('baseModel') || model.containsKey('tunedModelSource')) {
+      return false;
+    }
+
+    final rawName = (model['name'] ?? '').toString().toLowerCase();
+    if (rawName.startsWith('tunedmodels/') || rawName.contains('tuned') || rawName.contains('tuning')) {
+      return false;
+    }
+
+    // 2. Generation Method Filter: Must contain 'generateContent'
     final methods = (model['supportedGenerationMethods'] as List<dynamic>?)
             ?.map((e) => e.toString())
             .toList() ??
@@ -197,14 +209,31 @@ class GeminiModelService {
       return false;
     }
 
-    final rawName = (model['name'] ?? '').toString().toLowerCase();
-
-    // 2. Name must contain 'gemini' (or start with 'models/gemini')
-    if (!rawName.contains('gemini') && !rawName.startsWith('models/gemini')) {
+    // 3. Name must be an official Gemini model
+    final cleanName = rawName.startsWith('models/') ? rawName.substring(7) : rawName;
+    if (!cleanName.startsWith('gemini-')) {
       return false;
     }
 
-    // 3. Prohibited keywords exclusion
+    // 4. Must strictly contain 'flash' or 'pro' in cleanName
+    if (!cleanName.contains('flash') && !cleanName.contains('pro')) {
+      return false;
+    }
+
+    // 5. Display name check:
+    // Reject custom tuned names (e.g. '2', 'Nano Banana Pro', or names not containing 'gemini')
+    final displayName = (model['displayName'] ?? '').toString().toLowerCase();
+    if (displayName.isNotEmpty) {
+      if (!displayName.contains('gemini')) {
+        return false;
+      }
+      if (!displayName.contains('flash') && !displayName.contains('pro')) {
+        return false;
+      }
+    }
+
+    // 6. Prohibited keywords exclusion across name, displayName, and description
+    final description = (model['description'] ?? '').toString().toLowerCase();
     const prohibitedKeywords = [
       'banana',
       'nano',
@@ -221,35 +250,35 @@ class GeminiModelService {
       'audio',
       'veo',
       'bison',
+      'tuned',
+      'tuning',
     ];
 
     for (final keyword in prohibitedKeywords) {
       if (keyword == 'custom') {
-        // Custom fine-tuned models end with 'custom' or '-custom' (e.g. 'models/gemini-flash-custom')
-        if (rawName.endsWith('custom') || rawName.endsWith('-custom')) {
+        if (cleanName.endsWith('custom') ||
+            cleanName.endsWith('-custom') ||
+            displayName.contains('custom')) {
           return false;
         }
-      } else if (rawName.contains(keyword)) {
-        return false;
+      } else {
+        if (cleanName.contains(keyword) ||
+            displayName.contains(keyword) ||
+            description.contains(keyword)) {
+          return false;
+        }
       }
     }
 
-    // 4. Multimodal Verification:
+    // 7. Multimodal Verification:
     // If inputModalities is provided by Google API, verify IMAGE capability.
-    // Otherwise, fall back to name heuristic requiring 'flash' or 'pro'.
     final modalities = (model['inputModalities'] as List<dynamic>?)
             ?.map((e) => e.toString().toUpperCase())
             .toList() ??
         [];
 
-    if (modalities.isNotEmpty) {
-      if (!modalities.contains('IMAGE')) {
-        return false;
-      }
-    } else {
-      if (!rawName.contains('flash') && !rawName.contains('pro')) {
-        return false;
-      }
+    if (modalities.isNotEmpty && !modalities.contains('IMAGE')) {
+      return false;
     }
 
     return true;
@@ -288,24 +317,16 @@ class GeminiModelService {
     return 99;
   }
 
-  /// Assigns semantic badge label displayed in UI
+  /// Assigns compact semantic badge label displayed in UI ('Fast' or 'Think')
   static String? _calculateRecommendationLabel(String modelName) {
-    final rank = _calculateTierRank(modelName);
-    switch (rank) {
-      case 1:
-        return 'RECOMENDADO (Ultrarrápido)';
-      case 2:
-        return 'ESTABLE (Alta Velocidad)';
-      case 3:
-        return 'MÁXIMA PRECISIÓN (Razonamiento)';
-      case 4:
-        return 'LIGERO / ECONÓMICO';
-      case 5:
-      case 6:
-        return 'HEREDADO (Compatibilidad)';
-      default:
-        return null;
+    final lower = modelName.toLowerCase();
+    if (lower.contains('pro')) {
+      return 'Think';
     }
+    if (lower.contains('flash')) {
+      return 'Fast';
+    }
+    return null;
   }
 
   /// Resolves the effective model ID to use given the available models and stored preference

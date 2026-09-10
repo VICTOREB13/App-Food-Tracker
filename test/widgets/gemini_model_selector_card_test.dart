@@ -10,7 +10,7 @@ void main() {
       displayName: 'Gemini 2.5 Flash',
       description: 'Ultrarrápido y recomendado para comidas caseras',
       isRecommended: true,
-      recommendationLabel: 'RECOMENDADO (Ultrarrápido)',
+      recommendationLabel: 'Fast',
       inputTokenLimit: 1048576,
     ),
     GeminiModelInfo(
@@ -18,7 +18,7 @@ void main() {
       displayName: 'Gemini 2.0 Flash',
       description: 'Estable y probado en producción',
       isRecommended: true,
-      recommendationLabel: 'ESTABLE (Alta Velocidad)',
+      recommendationLabel: 'Fast',
       inputTokenLimit: 1048576,
     ),
     GeminiModelInfo(
@@ -26,7 +26,7 @@ void main() {
       displayName: 'Gemini 2.5 Pro',
       description: 'Máxima precisión con razonamiento profundo',
       isRecommended: true,
-      recommendationLabel: 'MÁXIMA PRECISIÓN (Razonamiento)',
+      recommendationLabel: 'Think',
       inputTokenLimit: 2097152,
     ),
   ];
@@ -67,7 +67,7 @@ void main() {
         find.text('Ingresa tu Gemini API Key para descubrir y seleccionar modelos'),
         findsOneWidget,
       );
-      expect(find.text('MODELO DE IA (VISIÓN)'), findsOneWidget);
+      expect(find.text('MODELO DE IA'), findsOneWidget);
       expect(find.byType(DropdownButtonFormField<String>), findsNothing);
       expect(find.byIcon(Icons.refresh), findsNothing);
     });
@@ -85,12 +85,11 @@ void main() {
       expect(find.text('Modelos en línea desde Google AI Studio'), findsOneWidget);
 
       // Verifica título y selector
-      expect(find.text('MODELO DE IA (VISIÓN)'), findsOneWidget);
-      expect(find.byType(DropdownButtonFormField<String>), findsOneWidget);
+      expect(find.text('MODELO DE IA'), findsOneWidget);
       expect(find.byIcon(Icons.refresh), findsOneWidget);
 
       // Verifica presencia del badge recomendado en la tarjeta activa
-      expect(find.text('RECOMENDADO (Ultrarrápido)'), findsWidgets);
+      expect(find.text('Fast'), findsWidgets);
       expect(find.text('ID: gemini-2.5-flash'), findsOneWidget);
       expect(find.text('Ultrarrápido y recomendado para comidas caseras'), findsOneWidget);
     });
@@ -105,7 +104,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Modo offline (modelos por defecto)'), findsOneWidget);
-      expect(find.text('ESTABLE (Alta Velocidad)'), findsWidgets);
+      expect(find.text('Fast'), findsWidgets);
       expect(find.text('ID: gemini-2.0-flash'), findsOneWidget);
     });
 
@@ -142,7 +141,7 @@ void main() {
       expect(refreshed, isTrue);
     });
 
-    testWidgets('Seleccionar modelo distinto en dropdown invoca callback onSelectModel', (tester) async {
+    testWidgets('Seleccionar modelo distinto en modal invoca callback onSelectModel', (tester) async {
       String? selected;
 
       await tester.pumpWidget(buildWidget(
@@ -153,8 +152,8 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      // Abrir dropdown
-      await tester.tap(find.byType(DropdownButtonFormField<String>));
+      // Abrir modal picker
+      await tester.tap(find.text('Explorar y Cambiar Modelo'));
       await tester.pumpAndSettle();
 
       // Seleccionar gemini-2.5-pro

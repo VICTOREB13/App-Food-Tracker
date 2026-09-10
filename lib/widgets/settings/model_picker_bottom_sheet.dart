@@ -65,19 +65,20 @@ class _ModelPickerBottomSheetState extends State<ModelPickerBottomSheet> {
       : (count >= 1024 ? '${(count / 1024).round()}k' : (count > 0 ? '$count' : '--'));
 
   Color _badgeColor(String label) {
-    if (label.contains('Rápido') || label.contains('Flash') || label.contains('Ultrarrápido')) return AppColors.protein;
-    if (label.contains('Pro') || label.contains('Razonamiento') || label.contains('PRECISIÓN')) return AppColors.primary;
+    final lower = label.toLowerCase();
+    if (lower.contains('think') || lower.contains('pro')) return AppColors.primary;
+    if (lower.contains('fast') || lower.contains('flash')) return AppColors.protein;
     return AppColors.carbs;
   }
 
   String _resolveBadgeLabel(GeminiModelInfo model) {
-    if (model.recommendationLabel != null && model.recommendationLabel!.isNotEmpty) return model.recommendationLabel!;
     final lower = model.name.toLowerCase();
-    if (lower.contains('2.5-flash')) return 'Recomendado Rápido';
-    if (lower.contains('2.5-pro')) return 'Recomendado Pro';
-    if (lower.contains('flash')) return 'Equilibrado Flash';
-    if (lower.contains('pro')) return 'Razonamiento Pro';
-    return 'Multimodal';
+    if (lower.contains('pro')) return 'Think';
+    if (lower.contains('flash')) return 'Fast';
+    if (model.recommendationLabel != null && model.recommendationLabel!.isNotEmpty) {
+      return model.recommendationLabel!;
+    }
+    return 'Fast';
   }
 
   @override

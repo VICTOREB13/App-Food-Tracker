@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:food_tracker/controllers/meal_controller.dart';
 import 'package:food_tracker/models/food_item.dart';
 import 'package:food_tracker/models/meal.dart';
 
@@ -125,6 +126,128 @@ void main() {
       expect(updated.protein, equals(20.0));
       expect(updated.carbs, equals(50.0));
       expect(updated.fat, equals(12.0));
+    });
+
+    test('Meal constructor con items inicializa aiBreakdownJson y expone items correctamente', () {
+      final items = [
+        FoodItem(name: 'Huevos revueltos', estimatedGrams: 100, calories: 150, protein: 12.0, carbs: 1.0, fat: 10.0),
+        FoodItem(name: 'Pan tostado', estimatedGrams: 50, calories: 130, protein: 4.0, carbs: 24.0, fat: 1.5),
+      ];
+      final meal = Meal(
+        name: 'Desayuno Proteico',
+        items: items,
+        calories: 280,
+        protein: 16.0,
+        carbs: 25.0,
+        fat: 11.5,
+      );
+      expect(meal.items.length, equals(2));
+      expect(meal.items[0].name, equals('Huevos revueltos'));
+      expect(meal.items[1].name, equals('Pan tostado'));
+      expect(meal.aiBreakdownJson, isNotNull);
+    });
+
+    test('copyWith pasando aiBreakdownJson null limpia items completamente sin resurrección', () {
+      final items = [
+        FoodItem(name: 'Ensalada César', estimatedGrams: 150, calories: 200, protein: 5.0, carbs: 10.0, fat: 12.0),
+      ];
+      final mealWithItems = Meal(name: 'Almuerzo', items: items);
+      expect(mealWithItems.items.length, equals(1));
+
+      final cleared = mealWithItems.copyWith(aiBreakdownJson: null);
+      expect(cleared.items, isEmpty);
+      expect(cleared.aiBreakdownJson, isNull);
+    });
+  });
+
+  group('MealController calculateStreakFromDates Tests', () {
+    final now = DateTime.now();
+    String formatDate(DateTime d) =>
+        '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+    final todayStr = formatDate(now);
+    final yesterdayStr = formatDate(now.subtract(const Duration(days: 1)));
+    final dayBeforeYesterdayStr = formatDate(now.subtract(const Duration(days: 2)));
+    final threeDaysAgoStr = formatDate(now.subtract(const Duration(days: 3)));
+    final fourDaysAgoStr = formatDate(now.subtract(const Duration(days: 4)));
+
+    test('returns 0 for empty dates list', () {
+      expect(MealController.calculateStreakFromDates([]), equals(0));
+    });
+
+    test('returns 1 when only today has a meal', () {
+      expect(MealController.calculateStreakFromDates([todayStr]), equals(1));
+    });
+
+    test('returns 1 when only yesterday has a meal (today not logged yet)', () {
+      expect(MealController.calculateStreakFromDates([yesterdayStr]), equals(1));
+    });
+
+    test('returns 2 when today and yesterday have meals', () {
+      expect(
+        MealController.calculateStreakFromDates([todayStr, yesterdayStr]),
+        equals(2),
+      );
+    });
+
+    test('returns 4 for consecutive days ending today', () {
+      expect(
+        MealController.calculateStreakFromDates([
+          todayStr,
+          yesterdayStr,
+          dayBeforeYesterdayStr,
+          threeDaysAgoStr,
+        ]),
+        equals(4),
+      );
+    });
+
+    test('returns 4 for consecutive days ending yesterday', () {
+      expect(
+        MealController.calculateStreakFromDates([
+          yesterdayStr,
+          dayBeforeYesterdayStr,
+          threeDaysAgoStr,
+          fourDaysAgoStr,
+        ]),
+        equals(4),
+      );
+    });
+
+    test('returns 0 when streak was broken (neither today nor yesterday logged)', () {
+      expect(
+        MealController.calculateStreakFromDates([
+          dayBeforeYesterdayStr,
+          threeDaysAgoStr,
+          fourDaysAgoStr,
+        ]),
+        equals(0),
+      );
+    });
+
+    test('stops counting at the first gap in dates', () {
+      expect(
+        MealController.calculateStreakFromDates([
+          todayStr,
+          yesterdayStr,
+          threeDaysAgoStr,
+          fourDaysAgoStr,
+        ]),
+        equals(2),
+      );
+    });
+
+    test('handles duplicate dates and unsorted input', () {
+      expect(
+        MealController.calculateStreakFromDates([
+          yesterdayStr,
+          todayStr,
+          yesterdayStr,
+          todayStr,
+          dayBeforeYesterdayStr,
+        ]),
+        equals(3),
+      );
     });
   });
 }

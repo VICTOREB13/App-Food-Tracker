@@ -18,11 +18,13 @@ class MealController extends ChangeNotifier {
   List<WeightLog> _weightLogs = [];
   WeightLog? _latestWeightLog;
   int _selectedWeightDays = 30;
+  int _currentStreak = 0;
 
   DateTime get selectedDate => _selectedDate;
   List<Meal> get meals => List.unmodifiable(_meals);
   bool get isLoading => _isLoading;
   DailyGoals get dailyGoals => _dailyGoals;
+  int get currentStreak => _currentStreak;
 
   List<WeightLog> get weightLogs => List.unmodifiable(_weightLogs);
   WeightLog? get latestWeightLog => _latestWeightLog;
@@ -67,7 +69,48 @@ class MealController extends ChangeNotifier {
   Future<void> init() async {
     await refreshGoals();
     await loadMeals();
+    await refreshStreak();
     await loadWeightLogs();
+  }
+
+  Future<void> refreshStreak() async {
+    try {
+      final dates = await DatabaseService.instance.getDistinctMealDates();
+      _currentStreak = calculateStreakFromDates(dates);
+    } catch (_) {
+      _currentStreak = 0;
+    }
+  }
+
+  static int calculateStreakFromDates(List<String> dates) {
+    if (dates.isEmpty) return 0;
+    final dateSet = dates.toSet();
+
+    final now = DateTime.now();
+    final todayStr = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+    final yesterday = now.subtract(const Duration(days: 1));
+    final yesterdayStr = '${yesterday.year}-${yesterday.month.toString().padLeft(2, '0')}-${yesterday.day.toString().padLeft(2, '0')}';
+
+    DateTime checkDate;
+    if (dateSet.contains(todayStr)) {
+      checkDate = now;
+    } else if (dateSet.contains(yesterdayStr)) {
+      checkDate = yesterday;
+    } else {
+      return 0;
+    }
+
+    int streak = 0;
+    while (true) {
+      final key = '${checkDate.year}-${checkDate.month.toString().padLeft(2, '0')}-${checkDate.day.toString().padLeft(2, '0')}';
+      if (dateSet.contains(key)) {
+        streak++;
+        checkDate = checkDate.subtract(const Duration(days: 1));
+      } else {
+        break;
+      }
+    }
+    return streak;
   }
 
   Future<void> refreshGoals() async {
@@ -98,6 +141,7 @@ class MealController extends ChangeNotifier {
     notifyListeners();
     try {
       _meals = await DatabaseService.instance.getMealsForDay(_selectedDate);
+      await refreshStreak();
     } catch (_) {
       _meals = [];
     } finally {

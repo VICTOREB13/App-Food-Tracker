@@ -335,6 +335,17 @@ class DatabaseService {
     return results.map((m) => Meal.fromSqliteMap(m)).toList();
   }
 
+  Future<List<String>> getDistinctMealDates() async {
+    final db = await database;
+    final results = await db.rawQuery(
+      'SELECT DISTINCT substr(date, 1, 10) as meal_date FROM meals ORDER BY meal_date DESC',
+    );
+    return results
+        .map((r) => r['meal_date'] as String?)
+        .whereType<String>()
+        .toList();
+  }
+
   Future<int> clearMealImagePath(String mealId) async {
     final db = await database;
     return await db.update(

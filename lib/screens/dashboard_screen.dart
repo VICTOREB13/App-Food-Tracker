@@ -98,21 +98,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
         masterPrompt: masterPrompt,
       );
       final analysis = await gemini.analyzeMealPhoto(rawImageBytes: bytes);
+      final inferredMealType = ImageProcessingService.inferMealTypeByTime();
+      final compressed = ImageProcessingService.instance.compressAndResize(bytes);
       final savedPath = await ImageProcessingService.instance.saveMealImage(
-        bytes,
-        DateTime.now().millisecondsSinceEpoch.toString(),
+        compressed,
+        mealType: inferredMealType,
+        date: _mealController.selectedDate,
       );
 
       final meal = Meal(
         name: analysis.dishName,
+        mealType: inferredMealType,
         date: _mealController.selectedDate,
         imagePath: savedPath,
         calories: analysis.totalCalories,
         protein: analysis.totalProtein,
         carbs: analysis.totalCarbs,
         fat: analysis.totalFat,
+        items: analysis.items,
         aiBreakdownJson: analysis.rawJson,
-      );
+      ).recalculateFromItems(analysis.items);
 
       if (!mounted) return;
       Navigator.of(context).pop();
@@ -161,9 +166,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _openManualEntry({String? defaultType}) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => MealDetailScreen(defaultMealType: defaultType)),
-    );
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => MealDetailScreen(defaultMealType: defaultType),
+    ));
   }
 
   Future<void> _handleQuickWater() async {
@@ -223,7 +228,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         title: 'Food Tracker',
         subtitle: 'Victor Engineer',
         actions: [
-          const Center(child: StreakBadge(streakDays: 3)),
+          Center(child: StreakBadge(streakDays: _mealController.currentStreak)),
           IconButton(
             icon: const Icon(Icons.insights_outlined),
             tooltip: 'Métricas',

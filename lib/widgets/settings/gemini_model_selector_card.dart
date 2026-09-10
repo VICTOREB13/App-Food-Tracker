@@ -28,23 +28,18 @@ class GeminiModelSelectorCard extends StatelessWidget {
 
   Color _getBadgeColor(String? label) {
     if (label == null) return AppColors.primary;
-    if (label.contains('Ultrarrápido') || label.contains('RECOMENDADO')) return AppColors.protein;
-    if (label.contains('Alta Velocidad') || label.contains('ESTABLE')) return AppColors.fat;
-    if (label.contains('Razonamiento') || label.contains('PRECISIÓN')) return AppColors.primary;
+    final lower = label.toLowerCase();
+    if (lower.contains('think') || lower.contains('pro')) return AppColors.primary;
+    if (lower.contains('fast') || lower.contains('flash')) return AppColors.protein;
     return AppColors.carbs;
   }
 
   String? _resolveBadgeLabel(GeminiModelInfo model) {
+    final lower = model.name.toLowerCase();
+    if (lower.contains('pro')) return 'Think';
+    if (lower.contains('flash')) return 'Fast';
     if (model.recommendationLabel != null && model.recommendationLabel!.isNotEmpty) {
       return model.recommendationLabel;
-    }
-    final lower = model.name.toLowerCase();
-    if (lower.contains('2.5-flash') || (lower.contains('3') && lower.contains('flash'))) {
-      return 'RECOMENDADO (Ultrarrápido)';
-    }
-    if (lower.contains('2.0-flash')) return 'ESTABLE (Alta Velocidad)';
-    if (lower.contains('2.5-pro') || (lower.contains('3') && lower.contains('pro'))) {
-      return 'MÁXIMA PRECISIÓN (Razonamiento)';
     }
     return null;
   }
@@ -63,7 +58,7 @@ class GeminiModelSelectorCard extends StatelessWidget {
                 const Icon(Icons.psychology_outlined, size: 20, color: AppColors.primary),
                 const SizedBox(width: 8),
                 Text(
-                  'MODELO DE IA (VISIÓN)',
+                  'MODELO DE IA',
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -126,7 +121,7 @@ class GeminiModelSelectorCard extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'MODELO DE IA (VISIÓN)',
+                  'MODELO DE IA',
                   style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1.0, color: AppColors.textSecondary(context)),
                 ),
               ),
@@ -155,46 +150,84 @@ class GeminiModelSelectorCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          // Dropdown selector
-          DropdownButtonFormField<String>(
-            initialValue: effectiveSelected,
-            isExpanded: true,
-            dropdownColor: AppColors.surface(context),
-            decoration: InputDecoration(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: AppColors.border(context))),
-            ),
-            items: effectiveList.map((model) {
-              final badge = _resolveBadgeLabel(model);
-              final badgeColor = _getBadgeColor(badge);
-              return DropdownMenuItem<String>(
-                value: model.name,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        model.displayName.isNotEmpty ? model.displayName : model.name,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary(context)),
-                      ),
-                    ),
-                    if (badge != null) ...[
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(color: badgeColor.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(4), border: Border.all(color: badgeColor.withValues(alpha: 0.3), width: 0.5)),
-                        child: Text(badge, style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w700, color: badgeColor)),
-                      ),
-                    ],
-                  ],
-                ),
+          // Active Model Details Panel (tap opens picker modal)
+          InkWell(
+            onTap: () async {
+              final selected = await ModelPickerBottomSheet.show(
+                context,
+                currentModel: effectiveSelected,
+                models: effectiveList,
               );
-            }).toList(),
-            onChanged: (val) {
-              if (val != null && onSelectModel != null) {
-                onSelectModel!(val);
+              if (selected != null && onSelectModel != null) {
+                onSelectModel!(selected);
               }
             },
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceSubtle(context),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppColors.border(context)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          currentModelInfo.displayName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary(context)),
+                        ),
+                      ),
+                      if (activeBadge != null) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: activeBadgeColor.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: activeBadgeColor.withValues(alpha: 0.3), width: 0.5),
+                          ),
+                          child: Text(activeBadge, style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w700, color: activeBadgeColor)),
+                        ),
+                      ],
+                    ],
+                  ),
+                  if (currentModelInfo.description.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      currentModelInfo.description,
+                      textAlign: TextAlign.justify,
+                      style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary(context), height: 1.3),
+                    ),
+                  ],
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'ID: ${currentModelInfo.name}',
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.jetBrainsMono(fontSize: 10, color: AppColors.textMuted(context)),
+                        ),
+                      ),
+                      if (currentModelInfo.inputTokenLimit > 0) ...[
+                        const SizedBox(width: 8),
+                        Text(
+                          'Ventana: ${(currentModelInfo.inputTokenLimit / 1024).round()}k tokens',
+                          style: GoogleFonts.inter(fontSize: 10, color: AppColors.textMuted(context)),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
           const SizedBox(height: 10),
           // Interactive Modal Selector Button
@@ -218,73 +251,6 @@ class GeminiModelSelectorCard extends StatelessWidget {
               ),
               icon: const Icon(Icons.tune_rounded, size: 16, color: AppColors.primary),
               label: Text('Explorar y Cambiar Modelo', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
-            ),
-          ),
-          const SizedBox(height: 12),
-          // Active Model Details Panel with collision & overflow protection
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.surfaceSubtle(context),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AppColors.border(context)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        currentModelInfo.displayName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary(context)),
-                      ),
-                    ),
-                    if (activeBadge != null) ...[
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: activeBadgeColor.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: activeBadgeColor.withValues(alpha: 0.3), width: 0.5),
-                        ),
-                        child: Text(activeBadge, style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w700, color: activeBadgeColor)),
-                      ),
-                    ],
-                  ],
-                ),
-                if (currentModelInfo.description.isNotEmpty) ...[
-                  const SizedBox(height: 6),
-                  Text(
-                    currentModelInfo.description,
-                    textAlign: TextAlign.justify,
-                    style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary(context), height: 1.3),
-                  ),
-                ],
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'ID: ${currentModelInfo.name}',
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.jetBrainsMono(fontSize: 10, color: AppColors.textMuted(context)),
-                      ),
-                    ),
-                    if (currentModelInfo.inputTokenLimit > 0) ...[
-                      const SizedBox(width: 8),
-                      Text(
-                        'Ventana: ${(currentModelInfo.inputTokenLimit / 1024).round()}k tokens',
-                        style: GoogleFonts.inter(fontSize: 10, color: AppColors.textMuted(context)),
-                      ),
-                    ],
-                  ],
-                ),
-              ],
             ),
           ),
         ],

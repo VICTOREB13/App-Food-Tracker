@@ -46,8 +46,9 @@ class MealAnalysisResult {
     final String dish = (data['plato'] ?? data['nombre'] ?? data['dish'] ?? data['name'] ?? 'Comida Analizada').toString();
 
     final List<FoodItem> parsedItems = [];
-    if (data['items'] is List) {
-      for (final itemMap in (data['items'] as List)) {
+    final itemsList = data['items'] ?? data['ingredientes'] ?? data['alimentos'];
+    if (itemsList is List) {
+      for (final itemMap in itemsList) {
         if (itemMap is Map<String, dynamic>) {
           parsedItems.add(FoodItem.fromJson(itemMap));
         }

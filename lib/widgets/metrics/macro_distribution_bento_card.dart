@@ -136,7 +136,7 @@ class MacroDistributionBentoCard extends StatelessWidget {
                   context,
                   label: 'Proteína',
                   grams: avgProtein,
-                  percentage: pctProtein,
+                  distributionPct: pctProtein,
                   targetGrams: effectiveGoals.protein,
                   color: colorProtein,
                 ),
@@ -152,7 +152,7 @@ class MacroDistributionBentoCard extends StatelessWidget {
                   context,
                   label: 'Carbos',
                   grams: avgCarbs,
-                  percentage: pctCarbs,
+                  distributionPct: pctCarbs,
                   targetGrams: effectiveGoals.carbs,
                   color: colorCarbs,
                 ),
@@ -168,7 +168,7 @@ class MacroDistributionBentoCard extends StatelessWidget {
                   context,
                   label: 'Grasas',
                   grams: avgFat,
-                  percentage: pctFat,
+                  distributionPct: pctFat,
                   targetGrams: effectiveGoals.fat,
                   color: colorFat,
                 ),
@@ -184,10 +184,12 @@ class MacroDistributionBentoCard extends StatelessWidget {
     BuildContext context, {
     required String label,
     required double grams,
-    required double percentage,
+    required double distributionPct,
     required double targetGrams,
     required Color color,
   }) {
+    final goalPercent = targetGrams > 0 ? (grams / targetGrams * 100) : 0.0;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6),
       child: Column(
@@ -241,11 +243,12 @@ class MacroDistributionBentoCard extends StatelessWidget {
             ],
           ),
           Text(
-            '${percentage.toStringAsFixed(0)}% · Meta: ${targetGrams.toStringAsFixed(0)}g',
+            '${goalPercent.toStringAsFixed(0)}% · Meta: ${targetGrams.toStringAsFixed(0)}g',
             style: GoogleFonts.inter(
               fontSize: 10,
               color: AppColors.textMuted(context),
             ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),

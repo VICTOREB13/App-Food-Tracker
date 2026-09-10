@@ -1,9 +1,9 @@
 ---
 tipo: abstracciones
 proyecto: App_Food_Tracker
-version: v0.3.0-alpha
+version: v0.4.0-alpha
 estado: activo
-fecha: 2026-09-09
+fecha: 2026-09-10
 tags: [proyecto, arquitectura, abstracciones, backend]
 ---
 
@@ -189,12 +189,20 @@ lib/
 
 ### 9. `ImageProcessingService`
 - **Ubicación:** `lib/services/image_processing_service.dart`
-- **Responsabilidad:** Compresión y redimensionamiento defensivo de fotografías de platos (máximo 1024x1024 px, JPEG 85%), gestión del almacenamiento en la carpeta estándar `Pictures` del sistema operativo y depuración de almacenamiento por retención temporal.
+- **Responsabilidad:** Compresión y redimensionamiento defensivo de fotografías de platos (máximo 1024x1024 px, JPEG 85%), gestión del almacenamiento en la carpeta pública visible del usuario (`/storage/emulated/0/Pictures/FoodTracker/images`) con cascada de fallbacks a almacenamiento de aplicación y documentos, y depuración de almacenamiento por retención temporal sin afectar registros SQLite.
 - **Métodos Clave:**
   - `compressAndResize(Uint8List rawBytes, {int targetMaxDimension = 1024, int quality = 85}): Uint8List`
-  - `saveMealImage(Uint8List imageBytes, String mealId): Future<String>`: Guarda en `Pictures/FoodTrackerMeals`.
-  - `pruneOldMealPhotos({required int retentionDays}): Future<int>`: Elimina archivos de imágenes con antigüedad mayor al umbral sin afectar registros SQLite.
-  - `deleteMealImage(String? filePath): Future<void>`
+  - `saveMealImage(Uint8List imageBytes, {String? mealType, DateTime? date, String? mealId, int? index, Directory? customDirectory}): Future<String>`: Guarda la fotografía siguiendo la nomenclatura estricta `YYYY_MM_DD_{TYPE}_{INDEX}.jpg` (ej: `2026_06_30_B_01.jpg`), resolviendo índices secuenciales automáticamente y previniendo colisiones en la ruta pública visible de Android `/storage/emulated/0/Pictures/FoodTracker/images` (o cascada de fallbacks).
+  - `generateMealImageFileName({DateTime? date, String? mealType, Directory? directory, int? explicitIndex}): Future<String>`: Genera el nombre de archivo estandarizado `YYYY_MM_DD_{TYPE}_{INDEX}.jpg` resolviendo o infiriendo tipos y secuenciales.
+  - `getMealTypeCode(String? mealType): String`: Mapea categorías a códigos (`B`: Breakfast/Desayuno, `L`: Lunch/Almuerzo, `D`: Dinner/Cena, `S`: Snack/Merienda/Snarck/Botana, `O`: Fallback/Otro).
+  - `getMealTypeFromCode(String code): String`: Deserializa el código de comida a su nombre canónico en español.
+  - `inferMealTypeByTime([DateTime? time]): String`: Infiere automáticamente el tipo de comida sugerido según la hora actual del día.
+  - `parseMealImageFileName(String pathOrFileName): MealImageFileInfo?`: Descompone nombres de archivo según la nomenclatura validando estrictamente el calendario gregoriano (días reales de cada mes y bisiestos) y extrayendo metadatos.
+  - `filterMealImages(List<String> filePaths, {DateTime? date, int? year, int? month, int? day, String? mealType}): List<MealImageFileInfo>`: Filtra colecciones de fotografías por criterios temporales y de tipo de comida.
+  - `listMealImages({required Directory directory, DateTime? date, int? year, int? month, int? day, String? mealType}): Future<List<MealImageFileInfo>>`: Escanea un directorio en disco y retorna todas las fotos de comida conformes que coincidan con los filtros.
+  - `normalizeFilePath(String pathOrUri): String`: Normaliza rutas directas y esquemas `file://` a rutas absolutas válidas del sistema de archivos.
+  - `pruneOldMealPhotos({required int retentionDays}): Future<int>`: Elimina archivos de imágenes con antigüedad mayor al umbral sin importar la ruta donde residan, manteniendo intactos los registros SQLite (`image_path = null`).
+  - `deleteMealImage(String? filePath): Future<void>`: Elimina la fotografía del plato en disco de forma segura.
 
 ### 10. `ThemeManager`
 - **Ubicación:** `lib/services/theme_manager.dart`

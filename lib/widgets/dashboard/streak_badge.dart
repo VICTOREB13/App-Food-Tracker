@@ -7,7 +7,7 @@ class StreakBadge extends StatelessWidget {
 
   const StreakBadge({
     super.key,
-    this.streakDays = 3,
+    this.streakDays = 0,
   });
 
   @override
@@ -28,7 +28,7 @@ class StreakBadge extends StatelessWidget {
           const Text('🔥', style: TextStyle(fontSize: 12)),
           const SizedBox(width: 4),
           Text(
-            '$streakDays días',
+            streakDays == 1 ? '1 día' : '$streakDays días',
             style: GoogleFonts.inter(
               fontSize: 12,
               fontWeight: FontWeight.w700,

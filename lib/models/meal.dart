@@ -37,6 +37,7 @@ class Meal {
     num? fat,
     String? notes,
     String? aiBreakdownJson,
+    List<FoodItem>? items,
   })  : id = ModelSanitizer.truncate(id, 128, fallback: const Uuid().v4()),
         name = ModelSanitizer.truncate(name, ModelSanitizer.maxNameLength, fallback: 'Comida'),
         mealType = _sanitizeMealType(mealType),
@@ -47,7 +48,42 @@ class Meal {
         carbs = ModelSanitizer.clampDouble(carbs),
         fat = ModelSanitizer.clampDouble(fat),
         notes = ModelSanitizer.truncateNullable(notes, ModelSanitizer.maxNotesLength),
-        aiBreakdownJson = ModelSanitizer.truncateNullable(aiBreakdownJson, ModelSanitizer.maxJsonLength);
+        aiBreakdownJson = ModelSanitizer.truncateNullable(
+          _resolveBreakdownJson(
+            rawJson: aiBreakdownJson,
+            items: items,
+            name: name,
+            calories: calories,
+            protein: protein,
+            carbs: carbs,
+            fat: fat,
+          ),
+          ModelSanitizer.maxJsonLength,
+        );
+
+  static String? _resolveBreakdownJson({
+    String? rawJson,
+    List<FoodItem>? items,
+    required String name,
+    num? calories,
+    num? protein,
+    num? carbs,
+    num? fat,
+  }) {
+    if (items != null && items.isNotEmpty) {
+      return json.encode({
+        'plato': name,
+        'items': items.map((e) => e.toJson()).toList(),
+        'totales': {
+          'calorias': ModelSanitizer.clampDouble(calories),
+          'proteina_g': ModelSanitizer.clampDouble(protein),
+          'carbohidratos_g': ModelSanitizer.clampDouble(carbs),
+          'grasas_g': ModelSanitizer.clampDouble(fat),
+        }
+      });
+    }
+    return rawJson;
+  }
 
   static String _sanitizeMealType(String? raw) {
     if (raw == null) return 'Almuerzo';
@@ -63,17 +99,37 @@ class Meal {
       return const [];
     }
     try {
-      final decoded = json.decode(aiBreakdownJson!);
+      var raw = aiBreakdownJson!.trim();
+      final fenceMatch = RegExp(r'```(?:json)?\s*([\s\S]*?)\s*```').firstMatch(raw);
+      if (fenceMatch != null) {
+        raw = fenceMatch.group(1)!.trim();
+      } else {
+        final firstBrace = raw.indexOf('{');
+        final lastBrace = raw.lastIndexOf('}');
+        final firstBracket = raw.indexOf('[');
+        final lastBracket = raw.lastIndexOf(']');
+        if (firstBrace != -1 && lastBrace != -1 && lastBrace > firstBrace &&
+            (firstBracket == -1 || firstBrace < firstBracket)) {
+          raw = raw.substring(firstBrace, lastBrace + 1).trim();
+        } else if (firstBracket != -1 && lastBracket != -1 && lastBracket > firstBracket) {
+          raw = raw.substring(firstBracket, lastBracket + 1).trim();
+        }
+      }
+
+      final decoded = json.decode(raw);
       if (decoded is List) {
         return decoded
             .whereType<Map<String, dynamic>>()
             .map((e) => FoodItem.fromJson(e))
             .toList();
-      } else if (decoded is Map<String, dynamic> && decoded['items'] is List) {
-        return (decoded['items'] as List)
-            .whereType<Map<String, dynamic>>()
-            .map((e) => FoodItem.fromJson(e))
-            .toList();
+      } else if (decoded is Map<String, dynamic>) {
+        final itemsList = decoded['items'] ?? decoded['ingredientes'] ?? decoded['alimentos'];
+        if (itemsList is List) {
+          return itemsList
+              .whereType<Map<String, dynamic>>()
+              .map((e) => FoodItem.fromJson(e))
+              .toList();
+        }
       }
     } catch (_) {}
     return const [];

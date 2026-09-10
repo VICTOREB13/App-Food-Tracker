@@ -106,63 +106,117 @@ class _FoodItemEditorDialogState extends State<_FoodItemEditorDialog> {
             children: [
               TextField(
                 controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Nombre del alimento *'),
+                style: GoogleFonts.inter(fontSize: 14, color: AppColors.textPrimary(context)),
+                decoration: InputDecoration(
+                  labelText: 'Nombre del alimento *',
+                  labelStyle: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textSecondary(context),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                ),
               ),
               const SizedBox(height: 10),
               Row(
                 children: [
                   Expanded(
-                    child: TextField(
-                      controller: _gramsController,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      decoration: const InputDecoration(labelText: 'Gramos (g)'),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Gramos',
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textSecondary(context),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        TextField(
+                          controller: _gramsController,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          style: GoogleFonts.inter(fontSize: 14, color: AppColors.textPrimary(context)),
+                          decoration: const InputDecoration(
+                            suffixText: 'g',
+                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 12),
                   Expanded(
-                    child: TextField(
-                      controller: _caloriesController,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      decoration: const InputDecoration(labelText: 'Calorías (kcal)'),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Calorías',
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.calories,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        TextField(
+                          controller: _caloriesController,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          style: GoogleFonts.inter(fontSize: 14, color: AppColors.textPrimary(context)),
+                          decoration: const InputDecoration(
+                            suffixText: 'kcal',
+                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 14),
               Row(
                 children: [
                   Expanded(
-                    child: TextField(
+                    child: _buildMacroInputField(
+                      context: context,
+                      label: 'Proteína',
                       controller: _proteinController,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      decoration: const InputDecoration(labelText: 'Prot (g)'),
+                      color: AppColors.protein,
                     ),
                   ),
-                  const SizedBox(width: 6),
+                  const SizedBox(width: 12),
                   Expanded(
-                    child: TextField(
+                    child: _buildMacroInputField(
+                      context: context,
+                      label: 'Carbohidratos',
                       controller: _carbsController,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      decoration: const InputDecoration(labelText: 'Carb (g)'),
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: TextField(
-                      controller: _fatController,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      decoration: const InputDecoration(labelText: 'Gras (g)'),
+                      color: AppColors.carbs,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
+              _buildMacroInputField(
+                context: context,
+                label: 'Grasas',
+                controller: _fatController,
+                color: AppColors.fat,
+              ),
+              const SizedBox(height: 14),
               TextField(
                 controller: _justificationController,
                 maxLines: 2,
-                decoration: const InputDecoration(
+                style: GoogleFonts.inter(fontSize: 14, color: AppColors.textPrimary(context)),
+                decoration: InputDecoration(
                   labelText: 'Justificación volumétrica / Notas',
+                  labelStyle: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textSecondary(context),
+                  ),
                   hintText: 'Ej. Volumen aprox. 1 taza cocida',
+                  hintStyle: GoogleFonts.inter(fontSize: 12, color: AppColors.textMuted(context)),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                 ),
               ),
             ],
@@ -186,6 +240,59 @@ class _FoodItemEditorDialogState extends State<_FoodItemEditorDialog> {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
           child: Text('Guardar', style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMacroInputField({
+    required BuildContext context,
+    required String label,
+    required TextEditingController controller,
+    required Color color,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        TextField(
+          controller: controller,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          style: GoogleFonts.inter(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary(context),
+          ),
+          decoration: InputDecoration(
+            suffixText: 'g',
+            suffixStyle: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textMuted(context),
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          ),
         ),
       ],
     );

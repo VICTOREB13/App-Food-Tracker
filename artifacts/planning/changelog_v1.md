@@ -3,7 +3,7 @@ tipo: changelog
 proyecto: App_Food_Tracker
 version: v1
 estado: activo
-fecha: 2026-09-09
+fecha: 2026-09-10
 tags: [proyecto, changelog, versiones]
 ---
 
@@ -15,6 +15,27 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 ---
 
 ## [Unreleased]
+
+---
+
+## [0.4.0-alpha] - 2026-09-10
+
+### Added
+- **Detección y Carga Automática de Ingredientes IA:** Sincronización en `DashboardScreen._handleAiPhotoScan` inicializando `Meal` con `items: analysis.items` y `recalculateFromItems`, garantizando que todos los ingredientes volumétricos detectados por Gemini Vision se carguen de inmediato en `MealDetailScreen`.
+- **Re-análisis Inteligente con Correcciones (`_reanalyzeWithAi`):** Motor de ajuste nutricional en `MealDetailScreen` que re-envía la foto original a Gemini Vision incorporando correcciones del usuario (nombre, notas, lista de alimentos editados) para un cálculo volumétrico refinado.
+- **Botón Accesible de Re-análisis IA (`MealAiReanalyzeButton`):** Componente interactivo `OutlinedButton.icon` con `Icons.auto_awesome` y feedback de progreso visual (`CircularProgressIndicator`) activo cuando hay foto del plato.
+- **Constructor `Meal` con Inyección de `items`:** Soporte de primer orden para `Meal(items: ...)` con serialización robusta hacia `aiBreakdownJson` y totalizadores coherentes.
+- **Módulos de UI y Lógica Desacoplados:** `MealAiReanalyzeButton`, `MealSaveButton`, `meal_image_picker` y `meal_detail_actions` para mantener las pantallas maestras estrictamente por debajo de 300 LoC.
+
+### Changed
+- **Rediseño Ergonómico de Macros en `FoodItemEditorDialog`:** Sustitución de la fila comprimida de 3 campos por una distribución en dos filas: Fila 1 (Proteína y Carbohidratos) y Fila 2 (Grasas a ancho completo).
+- **Tipografía y Padding Móvil Confortable:** Etiquetas elevadas a 13px con padding vertical y horizontal holgado (12px) garantizando cumplimiento de ergonomía táctil en Android/iOS.
+- **Optimización Modular de `MealDetailScreen`:** Descomposición modular estricta alcanzando 296 LoC, 100% alineada con las directrices de ingeniería Flutter (< 300 LoC).
+
+### Fixed
+- **Resurrección de Ingredientes Eliminados:** Corrección en `saveMealEntry` para asignar explícitamente `aiBreakdownJson: null` cuando el usuario vacía la lista de ingredientes, evitando que persistan datos previos.
+- **Soporte de Claves Multilingües en Inferencia IA:** Extensión en `MealAnalysisResult.fromJsonString` para aceptar claves en español (`ingredientes` y `alimentos`) además de `items`, garantizando cero pérdida de alimentos identificados por Gemini.
+- **Seguridad en Ciclo de Vida y Concurrencia:** Inyección de verificación `mounted` antes de emitir SnackBars de archivos no encontrados y bloqueos contra ejecuciones simultáneas en `_reanalyzeWithAi` y `_saveMeal`.
 
 ---
 

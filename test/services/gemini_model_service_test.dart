@@ -109,22 +109,22 @@ void main() {
       // 1. gemini-2.5-flash (rank 1)
       expect(models[0].name, equals('gemini-2.5-flash'));
       expect(models[0].isRecommended, isTrue);
-      expect(models[0].recommendationLabel, equals('RECOMENDADO (Ultrarrápido)'));
+      expect(models[0].recommendationLabel, equals('Fast'));
 
       // 2. gemini-2.0-flash (rank 2)
       expect(models[1].name, equals('gemini-2.0-flash'));
       expect(models[1].isRecommended, isTrue);
-      expect(models[1].recommendationLabel, equals('ESTABLE (Alta Velocidad)'));
+      expect(models[1].recommendationLabel, equals('Fast'));
 
       // 3. gemini-2.5-pro (rank 3)
       expect(models[2].name, equals('gemini-2.5-pro'));
       expect(models[2].isRecommended, isTrue);
-      expect(models[2].recommendationLabel, equals('MÁXIMA PRECISIÓN (Razonamiento)'));
+      expect(models[2].recommendationLabel, equals('Think'));
 
       // 4. gemini-1.5-flash (rank 5)
       expect(models[3].name, equals('gemini-1.5-flash'));
       expect(models[3].isRecommended, isFalse);
-      expect(models[3].recommendationLabel, equals('HEREDADO (Compatibilidad)'));
+      expect(models[3].recommendationLabel, equals('Fast'));
     });
 
     test('isVisionCapableModel fallback heuristic filters non-vision when inputModalities is absent', () {
@@ -330,6 +330,62 @@ void main() {
           'supportedGenerationMethods': ['generateContent'],
         }),
         isTrue,
+      );
+    });
+
+    test('isVisionCapableModel strictly blocks Google AI Studio tuned models and custom models', () {
+      // 1. Tuned model with tunedModels/ prefix
+      expect(
+        GeminiModelService.isVisionCapableModel({
+          'name': 'tunedModels/nano-banana-pro',
+          'displayName': 'Nano Banana Pro',
+          'supportedGenerationMethods': ['generateContent'],
+          'inputModalities': ['TEXT', 'IMAGE'],
+        }),
+        isFalse,
+      );
+
+      // 2. Tuned model named "2"
+      expect(
+        GeminiModelService.isVisionCapableModel({
+          'name': 'tunedModels/2',
+          'displayName': '2',
+          'supportedGenerationMethods': ['generateContent'],
+          'inputModalities': ['TEXT', 'IMAGE'],
+        }),
+        isFalse,
+      );
+
+      // 3. Model with baseModel or tunedModelSource
+      expect(
+        GeminiModelService.isVisionCapableModel({
+          'name': 'models/gemini-1.5-flash-tuned',
+          'baseModel': 'models/gemini-1.5-flash',
+          'supportedGenerationMethods': ['generateContent'],
+        }),
+        isFalse,
+      );
+
+      // 4. Custom model named "gemini-2" without flash or pro even with IMAGE modality
+      expect(
+        GeminiModelService.isVisionCapableModel({
+          'name': 'models/gemini-2',
+          'displayName': 'Gemini 2',
+          'supportedGenerationMethods': ['generateContent'],
+          'inputModalities': ['TEXT', 'IMAGE'],
+        }),
+        isFalse,
+      );
+
+      // 5. Custom model with displayName "Nano Banana Pro"
+      expect(
+        GeminiModelService.isVisionCapableModel({
+          'name': 'models/gemini-1.5-flash-custom',
+          'displayName': 'Nano Banana Pro',
+          'supportedGenerationMethods': ['generateContent'],
+          'inputModalities': ['TEXT', 'IMAGE'],
+        }),
+        isFalse,
       );
     });
   });
