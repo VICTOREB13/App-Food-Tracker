@@ -4,6 +4,7 @@ import '../models/gemini_model_info.dart';
 import '../services/backup_service.dart';
 import '../services/database_service.dart';
 import '../services/gemini_model_service.dart';
+import '../services/metabolic_calculator.dart';
 import '../services/secure_storage_service.dart';
 import 'meal_controller.dart';
 
@@ -168,9 +169,32 @@ class SettingsController extends ChangeNotifier {
     }
   }
 
+  Future<void> refreshDailyGoals([DailyGoals? goals]) async {
+    _dailyGoals = goals ?? await SecureStorageService.instance.getDailyGoals();
+    notifyListeners();
+  }
+
   Future<void> saveDailyGoals(DailyGoals goals) async {
     await SecureStorageService.instance.setDailyGoals(goals);
     _dailyGoals = goals;
+
+    try {
+      final profile = await DatabaseService.instance.getUserProfile();
+      if (profile != null) {
+        final updated = profile.copyWith(
+          targetCalories: goals.calories,
+          targetProtein: goals.protein,
+          targetCarbs: goals.carbs,
+          targetFat: goals.fat,
+          updatedAt: DateTime.now(),
+        );
+        final newPrompt = MetabolicCalculator.generateMasterPrompt(updated);
+        final finalProfile = updated.copyWith(masterPrompt: newPrompt);
+        await DatabaseService.instance.saveUserProfile(finalProfile);
+        await SecureStorageService.instance.setMasterPrompt(newPrompt);
+      }
+    } catch (_) {}
+
     await MealController.instance.refreshGoals();
     notifyListeners();
   }

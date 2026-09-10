@@ -167,7 +167,8 @@ lib/
   - `calculateMacros({required double targetCalories, required double weightKg, required String bodyGoal}): MacroDistribution`
   - `generateMasterPrompt(UserProfile profile): String`
   - `calculateProfile(...): UserProfile`
-  - `syncUserProfileToDailyGoals(UserProfile profile): Future<void>`
+  - `saveAndSynchronizeProfile(UserProfile profile): Future<UserProfile>`: Persiste en SQLite, sincroniza DailyGoals y Master Prompt en SecureStorage, actualiza reactivamente `MealController` y sincroniza en memoria `SettingsController`.
+  - `calculateAndSaveProfile(...): Future<UserProfile>`
 
 ### 7. `SecureStorageService` (Singleton)
 - **Ubicación:** `lib/services/secure_storage_service.dart`

@@ -5,6 +5,7 @@ import 'package:http/testing.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:food_tracker/controllers/settings_controller.dart';
 import 'package:food_tracker/models/daily_goals.dart';
+import 'package:food_tracker/models/user_profile.dart';
 import 'package:food_tracker/services/database_service.dart';
 import 'package:food_tracker/services/gemini_model_service.dart';
 import 'package:food_tracker/services/secure_storage_service.dart';
@@ -286,6 +287,69 @@ void main() {
       expect(controller.dailyGoals.protein, equals(160));
       final storedGoals = await SecureStorageService.instance.getDailyGoals();
       expect(storedGoals.calories, equals(2500));
+    });
+
+    test('saveDailyGoals() synchronizes UserProfile in SQLite and updates Master Prompt when profile exists', () async {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS user_profile (
+          id TEXT PRIMARY KEY,
+          name TEXT,
+          age INTEGER NOT NULL,
+          gender TEXT NOT NULL,
+          height REAL NOT NULL,
+          weight REAL NOT NULL,
+          activity_level TEXT NOT NULL,
+          body_goal TEXT NOT NULL,
+          estimated_steps INTEGER NOT NULL DEFAULT 8000,
+          bmr REAL NOT NULL,
+          tdee REAL NOT NULL,
+          target_calories REAL NOT NULL,
+          target_protein REAL NOT NULL,
+          target_carbs REAL NOT NULL,
+          target_fat REAL NOT NULL,
+          master_prompt TEXT,
+          updated_at TEXT NOT NULL
+        )
+      ''');
+
+      final initialProfile = UserProfile(
+        name: 'Victor Test',
+        age: 29,
+        gender: 'male',
+        height: 177.0,
+        weight: 75.0,
+        activityLevel: 'moderate',
+        bodyGoal: 'fat_loss',
+        bmr: 1700.0,
+        tdee: 2500.0,
+        targetCalories: 2000.0,
+        targetProtein: 150.0,
+        targetCarbs: 200.0,
+        targetFat: 60.0,
+      );
+      await DatabaseService.instance.saveUserProfile(initialProfile);
+
+      const modifiedGoals = DailyGoals(
+        calories: 2200,
+        protein: 165,
+        carbs: 230,
+        fat: 65,
+      );
+
+      await controller.saveDailyGoals(modifiedGoals);
+
+      // Verify UserProfile was updated in SQLite
+      final updatedProfile = await DatabaseService.instance.getUserProfile();
+      expect(updatedProfile, isNotNull);
+      expect(updatedProfile!.targetCalories, equals(2200.0));
+      expect(updatedProfile.targetProtein, equals(165.0));
+      expect(updatedProfile.targetCarbs, equals(230.0));
+      expect(updatedProfile.targetFat, equals(65.0));
+      expect(updatedProfile.masterPrompt, contains('2200 kcal/día'));
+
+      // Verify Master Prompt was updated in SecureStorage
+      final storedPrompt = await SecureStorageService.instance.getMasterPrompt();
+      expect(storedPrompt, contains('2200 kcal/día'));
     });
   });
 }

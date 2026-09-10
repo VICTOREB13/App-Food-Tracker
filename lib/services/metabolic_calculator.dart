@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import '../controllers/meal_controller.dart';
+import '../controllers/settings_controller.dart';
 import '../models/daily_goals.dart';
 import '../models/user_profile.dart';
 import 'database_service.dart';
@@ -340,6 +341,11 @@ class MetabolicCalculator {
     // 5. Refresh reactive goals in MealController if loaded
     try {
       await MealController.instance.refreshGoals();
+    } catch (_) {}
+
+    // 6. Synchronize in-memory SettingsController state
+    try {
+      await SettingsController.instance.refreshDailyGoals(profile.dailyGoals);
     } catch (_) {}
 
     return profile;

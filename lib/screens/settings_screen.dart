@@ -12,6 +12,7 @@ import '../widgets/settings/database_maintenance_card.dart';
 import '../widgets/settings/gemini_model_selector_card.dart';
 import '../widgets/settings/photo_pruning_card.dart';
 import '../widgets/settings/usda_api_key_card.dart';
+import 'onboarding_screen.dart';
 import 'user_profile_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -170,21 +171,42 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 16),
           VeCard(
-            child: ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.person_outline, color: AppColors.primary),
-              title: Text(
-                'Perfil Nutricional y Metas (Mifflin-St Jeor)',
-                style: GoogleFonts.outfit(fontWeight: FontWeight.w600),
-              ),
-              subtitle: Text(
-                'Parámetros biológicos, TDEE y Master Prompt',
-                style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary(context)),
-              ),
-              trailing: const Icon(Icons.chevron_right, size: 20),
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const UserProfileScreen()),
-              ),
+            child: Column(
+              children: [
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.person_outline, color: AppColors.primary),
+                  title: Text(
+                    'Perfil Nutricional y Metas (Mifflin-St Jeor)',
+                    style: GoogleFonts.outfit(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: Text(
+                    'Parámetros biológicos, TDEE y Master Prompt',
+                    style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary(context)),
+                  ),
+                  trailing: const Icon(Icons.chevron_right, size: 20),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const UserProfileScreen()),
+                  ),
+                ),
+                Divider(color: AppColors.border(context), height: 1),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.auto_fix_high_rounded, color: AppColors.carbs),
+                  title: Text(
+                    'Asistente de Inicio / Reconfigurar Perfil',
+                    style: GoogleFonts.outfit(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: Text(
+                    'Volver a ejecutar el paso a paso guiado de 4 pasos',
+                    style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary(context)),
+                  ),
+                  trailing: const Icon(Icons.chevron_right, size: 20),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 16),

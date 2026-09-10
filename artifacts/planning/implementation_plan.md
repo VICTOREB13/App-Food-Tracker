@@ -70,3 +70,21 @@ tags: [proyecto, planning, v0-4-0-alpha, yagni, local-first, ui-ux, gemini-ai]
    - Inyectar la configuración formal `signingConfigs.release` en `android/app/build.gradle.kts` (y `build.gradle`), configurando `storeFile = file("release.keystore")`, `storeType = "PKCS12"`, `keyAlias = "androiddebugkey"`, `keyPassword = "android"`, `storePassword = "android"`, y asociándolo a `buildTypes.release.signingConfig = signingConfigs.getByName("release")`.
    - Incluir `lib/assets/keystore/release.keystore` en el control de versiones como fallback permanente para que el fingerprint SHA-256 (`3af69b6dc7c40fdfd42b27591d8b525b37bc30caf15d10650a5f4303583106b8`) sea 100% determinista e inmutable en todas las actualizaciones de la app.
 
+### Fase 6: Flujo de Inicio y Onboarding Nutricional Personalizado (`Frontend-UI`)
+1. **Detección de Primer Arranque (`lib/main.dart`):**
+   - Comprobar en el arranque `await SecureStorageService.instance.hasCompletedOnboarding()`.
+   - Si no se ha completado (`false`), desplegar `OnboardingScreen` como pantalla inicial.
+   - Si ya se completó (`true`), dirigir de inmediato a `DashboardScreen`.
+2. **Pantalla de Bienvenida y Asistente por Pasos (`lib/screens/onboarding_screen.dart`):**
+   - Implementar flujo guiado mediante `PageView` interactivo con barra de progreso superior e indicadores de paso:
+     - **Paso 1 (Bienvenida & Identidad):** Logo VE, mensaje introductorio y campo de Nombre del usuario.
+     - **Paso 2 (Biometría Clínica):** Género Biológico (Mifflin-St Jeor), Edad (años), Estatura (cm), Peso Actual (kg).
+     - **Paso 3 (Actividad & Pasos):** Nivel de actividad física (Sedentario a Muy Activo) y Pasos diarios estimados (6,000 a 12,000).
+     - **Paso 4 (Objetivo & Plan Nutricional):** Meta corporal (Pérdida de Grasa, Mantenimiento, Ganancia Muscular) con cálculo instantáneo en vivo de BMR, TDEE, Presupuesto Calórico y distribución de Macros.
+     - **Paso 5 (Confirmación y Comienzo):** Resumen de metas calculadas y botón principal de guardado.
+3. **Persistencia y Transición:**
+   - Invocar `MetabolicCalculator.calculateAndSaveProfile(...)`, persistir en SQLite, sincronizar `DailyGoals` en SecureStorage, marcar `hasCompletedOnboarding = true` y ejecutar `Navigator.of(context).pushReplacement` hacia `DashboardScreen`.
+4. **Revisita desde Ajustes:**
+   - Añadir en `SettingsScreen` la opción de reiniciar o volver a ejecutar el onboarding para reconfigurar el perfil si el usuario lo desea.
+
+

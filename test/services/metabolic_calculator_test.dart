@@ -1,6 +1,59 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:food_tracker/controllers/settings_controller.dart';
 import 'package:food_tracker/models/user_profile.dart';
+import 'package:food_tracker/services/database_service.dart';
 import 'package:food_tracker/services/metabolic_calculator.dart';
+import 'package:food_tracker/services/secure_storage_service.dart';
+
+class FakeFlutterSecureStorage extends Fake implements FlutterSecureStorage {
+  final Map<String, String> _data = {};
+
+  @override
+  Future<String?> read({
+    required String key,
+    AppleOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    MacOsOptions? mOptions,
+    WindowsOptions? wOptions,
+  }) async {
+    return _data[key];
+  }
+
+  @override
+  Future<void> write({
+    required String key,
+    required String? value,
+    AppleOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    MacOsOptions? mOptions,
+    WindowsOptions? wOptions,
+  }) async {
+    if (value != null) {
+      _data[key] = value;
+    } else {
+      _data.remove(key);
+    }
+  }
+
+  @override
+  Future<void> delete({
+    required String key,
+    AppleOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    MacOsOptions? mOptions,
+    WindowsOptions? wOptions,
+  }) async {
+    _data.remove(key);
+  }
+}
 
 void main() {
   group('MetabolicCalculator - Mifflin-St Jeor BMR Tests', () {
@@ -314,6 +367,73 @@ void main() {
       expect(goals.protein, equals(profile.targetProtein));
       expect(goals.carbs, equals(profile.targetCarbs));
       expect(goals.fat, equals(profile.targetFat));
+    });
+
+    test('saveAndSynchronizeProfile persiste en SQLite, SecureStorage y sincroniza SettingsController', () async {
+      sqfliteFfiInit();
+      databaseFactory = databaseFactoryFfi;
+      final db = await databaseFactoryFfi.openDatabase(
+        inMemoryDatabasePath,
+        options: OpenDatabaseOptions(
+          version: 2,
+          onCreate: (db, version) async {
+            await db.execute('''
+              CREATE TABLE IF NOT EXISTS user_profile (
+                id TEXT PRIMARY KEY,
+                name TEXT,
+                age INTEGER NOT NULL,
+                gender TEXT NOT NULL,
+                height REAL NOT NULL,
+                weight REAL NOT NULL,
+                activity_level TEXT NOT NULL,
+                body_goal TEXT NOT NULL,
+                estimated_steps INTEGER NOT NULL DEFAULT 8000,
+                bmr REAL NOT NULL,
+                tdee REAL NOT NULL,
+                target_calories REAL NOT NULL,
+                target_protein REAL NOT NULL,
+                target_carbs REAL NOT NULL,
+                target_fat REAL NOT NULL,
+                master_prompt TEXT,
+                updated_at TEXT NOT NULL
+              )
+            ''');
+          },
+        ),
+      );
+      DatabaseService.instance.setDatabaseForTesting(db);
+
+      final fakeStorage = FakeFlutterSecureStorage();
+      SecureStorageService.setMockInstance(SecureStorageService.withStorage(fakeStorage));
+      SettingsController.resetInstance();
+
+      final profile = MetabolicCalculator.calculateProfile(
+        name: 'Carlos',
+        age: 32,
+        gender: 'male',
+        height: 180.0,
+        weight: 85.0,
+        activityLevel: 'moderate',
+        bodyGoal: 'fat_loss',
+      );
+
+      await MetabolicCalculator.saveAndSynchronizeProfile(profile);
+
+      // Verify SQLite
+      final inDb = await DatabaseService.instance.getUserProfile();
+      expect(inDb, isNotNull);
+      expect(inDb!.name, equals('Carlos'));
+      expect(inDb.targetCalories, equals(profile.targetCalories));
+
+      // Verify SecureStorage
+      final inStorage = await SecureStorageService.instance.getDailyGoals();
+      expect(inStorage.calories, equals(profile.targetCalories));
+
+      // Verify SettingsController
+      expect(SettingsController.instance.dailyGoals.calories, equals(profile.targetCalories));
+      expect(SettingsController.instance.dailyGoals.protein, equals(profile.targetProtein));
+
+      await DatabaseService.instance.closeForTesting();
     });
   });
 }

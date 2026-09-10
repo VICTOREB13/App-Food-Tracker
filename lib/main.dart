@@ -2,7 +2,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'screens/dashboard_screen.dart';
+import 'screens/onboarding_screen.dart';
 import 'services/database_service.dart';
+import 'services/secure_storage_service.dart';
 import 'services/theme_manager.dart';
 
 void main() async {
@@ -37,11 +39,23 @@ void main() async {
     debugPrint('Theme initialization warning: $e\n$stack');
   }
 
-  runApp(const NutriTrackerApp());
+  bool hasCompletedOnboarding = false;
+  try {
+    hasCompletedOnboarding = await SecureStorageService.instance.hasCompletedOnboarding();
+  } catch (e, stack) {
+    debugPrint('Onboarding check warning: $e\n$stack');
+  }
+
+  runApp(NutriTrackerApp(hasCompletedOnboarding: hasCompletedOnboarding));
 }
 
 class NutriTrackerApp extends StatelessWidget {
-  const NutriTrackerApp({super.key});
+  final bool hasCompletedOnboarding;
+
+  const NutriTrackerApp({
+    super.key,
+    this.hasCompletedOnboarding = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +68,9 @@ class NutriTrackerApp extends StatelessWidget {
           themeMode: ThemeManager.instance.themeMode,
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
-          home: const DashboardScreen(),
+          home: hasCompletedOnboarding
+              ? const DashboardScreen()
+              : const OnboardingScreen(),
         );
       },
     );

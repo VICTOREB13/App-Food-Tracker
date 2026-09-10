@@ -26,6 +26,7 @@ tags: [proyecto, tasks, checklist, v7-teamwork, v0-4-0-alpha]
 - [x] (Backend-Architect) Extender el constructor del modelo `Meal` (`lib/models/meal.dart`) para aceptar parámetro opcional `items: List<FoodItem>?`, codificando automáticamente `aiBreakdownJson`.
 - [x] (Backend-Architect) Sincronizar `DashboardScreen._handleAiPhotoScan` pasando `items: analysis.items` y encadenando `.recalculateFromItems(analysis.items)` para poblar automáticamente los ingredientes analizados en `MealDetailScreen`.
 - [x] (Backend-Architect) Añadir prueba unitaria en `test/models/meal_model_test.dart` verificando que `Meal(items: ...)` preserve y exponga fielmente los alimentos.
+- [x] (Backend-Architect) Implementar sincronización bidireccional reactiva entre Metas Nutricionales Diarias (`SettingsController.saveDailyGoals`) y Perfil / Resumen Metabólico (`MetabolicCalculator.saveAndSynchronizeProfile`).
 
 ---
 
@@ -64,4 +65,17 @@ tags: [proyecto, tasks, checklist, v7-teamwork, v0-4-0-alpha]
 - [x] (DevOps-Engineer) Probar y verificar que la firma de release sea aplicada fielmente sin regeneración efímera.
 - [x] (DevOps-Engineer) Actualizar `pubspec.yaml` a `0.4.0-alpha+2` (o re-tag) y publicar release verificado para pruebas de actualización sin colisiones.
 
+---
 
+## 🚀 7. Frontend-UI & Systems-Auditor (Flujo de Inicio y Onboarding de Primer Uso)
+- [x] (Frontend-UI) Crear `lib/screens/onboarding_screen.dart` (< 300 LoC) con navegación interactiva por pasos (`PageView`), barra de progreso superior, feedback táctil y animaciones suaves.
+- [x] (Frontend-UI) Diseñar subcomponentes modulares en `lib/widgets/onboarding/` (< 300 LoC cada uno):
+  - `onboarding_welcome_step.dart`: Bienvenida visual, presentación de Food Tracker e ingreso de nombre.
+  - `onboarding_biometrics_step.dart`: Selector de género biológico (Mifflin-St Jeor), edad, estatura y peso.
+  - `onboarding_activity_step.dart`: Nivel de actividad física diaria y meta estimada de pasos.
+  - `onboarding_goal_step.dart`: Objetivo corporal (pérdida de grasa, mantenimiento, hipertrofia) y cálculo dinámico de BMR, TDEE, calorías y macros.
+- [x] (Frontend-UI) Conectar la persistencia con `MetabolicCalculator.calculateAndSaveProfile(...)`, marcando `SecureStorageService.instance.setCompletedOnboarding(true)` y navegando al `DashboardScreen`.
+- [x] (Frontend-UI) Modificar `lib/main.dart` para verificar `hasCompletedOnboarding()` al arrancar la app y redirigir condicionalmente a `OnboardingScreen` o `DashboardScreen`.
+- [x] (Frontend-UI) Añadir botón de reinicio/revisita del Asistente de Inicio en `SettingsScreen` o `UserProfileScreen`.
+- [x] (Systems-Auditor) Crear suite de pruebas `test/screens/onboarding_screen_test.dart` verificando la navegación por pasos, validaciones y guardado del perfil.
+- [x] (Systems-Auditor) Asegurar que todos los tests continúen pasando y cero advertencias de linter.
