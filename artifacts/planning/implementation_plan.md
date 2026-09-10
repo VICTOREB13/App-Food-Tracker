@@ -1,15 +1,15 @@
 ---
 tipo: implementation_plan
 proyecto: App_Food_Tracker
-iteracion: v0.4.0-alpha
-estado: activo
+iteracion: v1.0.1
+estado: completado
 fecha: 2026-09-10
-tags: [proyecto, planning, v0-4-0-alpha, yagni, local-first, ui-ux, gemini-ai]
+tags: [proyecto, planning, v1-0-1, yagni, local-first, ui-ux, gemini-ai]
 ---
 
-# 🎯 Plan de Implementación: Victor Engineer - Food Tracker (v0.4.0-alpha)
+# 🎯 Plan de Implementación: Victor Engineer - Food Tracker (v1.0.1)
 
-> **Mesa de Control (Project-Planner):** Este plan formaliza la construcción y cierre de la iteración **v0.4.0-alpha**, enfocada en la detección y carga automática de ingredientes desde Gemini Vision, el re-análisis inteligente de fotos con correcciones de usuario, el rediseño ergonómico del editor de macronutrientes para móvil y la modularización estricta de pantallas (< 300 LoC).
+> **Mesa de Control (Project-Planner):** Este plan formaliza la construcción y cierre de la versión **v1.0.1**, enfocada en el inicio completamente limpio (Clean Slate Onboarding), la sincronización bidireccional total de macros (calorías + proteínas, carbohidratos y grasas), la auto-actualización del peso biométrico desde métricas, la deduplicación de gramos en ingredientes y la corrección del guardado transaccional de comidas.
 
 ---
 

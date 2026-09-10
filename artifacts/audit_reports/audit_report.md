@@ -20,12 +20,12 @@ tags: [proyecto, audit, quality-gate, v1-0-1, v7-teamwork]
 =====================================================
           QUALITY GATE VERDICT: STATUS: PASS
 =====================================================
- [✓] 44 Suites de Pruebas Automatizadas Verificadas (100% PASS / 312 Tests)
+ [✓] 45 Suites de Pruebas Automatizadas Verificadas (100% PASS / 315 Tests)
  [✓] Asistente Guiado de Inicio (Onboarding Clean Slate) & Enrutamiento de Primer Uso
  [✓] Sincronización Bidireccional Total: Metas Diarias y Perfil / Resumen Metabólico (Calorías + Macros)
  [✓] Detección Automática de Ingredientes IA Integrada (analysis.items)
  [✓] Re-análisis Inteligente con IA ante Corrección de Alimentos
- [✓] Píldora Visual & Chip Violeta para Gramos en Lista de Ingredientes (AppColors.portion)
+ [✓] Deduplicación Visual de Gramos en Lista de Ingredientes: Consolidado en Chip Violeta (AppColors.portion)
  [✓] Persistencia Transaccional & SQLite WAL v2 Verificada (upsertMeal & updateMeal)
  [✓] Cero Desbordamientos Visuales (OnboardingBottomNav con FittedBox)
  [✓] Sincronización Automática de Registro de Peso a Perfil Biométrico (MealController.recordWeight)
@@ -104,6 +104,7 @@ Se auditó la totalidad de la suite de pruebas del proyecto (`test/`), constatan
 | `quick_meal_dialog_test.dart` | Diálogo express para añadir comidas estimadas con soporte opcional de macros. | 1 | **PASS** |
 | `meal_image_card_test.dart` | Tarjeta visual de foto de plato con zoom y controles de reemplazo. | 2 | **PASS** |
 | `meal_section_card_test.dart` | Agrupador de comidas por sección con badge de notas y cálculo calórico. | 3 | **PASS** |
+| `food_items_list_card_test.dart` | Desglose de ingredientes, deduplicación de gramos, macro chips y callbacks reactivos. | 3 | **PASS** |
 
 
 

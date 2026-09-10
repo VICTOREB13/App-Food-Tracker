@@ -1,13 +1,13 @@
 ---
 tipo: design_system
 proyecto: App_Food_Tracker
-version: v0.3.0-alpha
+version: v1.0.1
 estado: activo
-fecha: 2026-09-09
+fecha: 2026-09-10
 tags: [proyecto, design-system, ui-ux, bento-grid, tokens]
 ---
 
-# 🎨 Especificación de Diseño: Victor Engineer - Food Tracker (v0.3.0-alpha)
+# 🎨 Especificación de Diseño: Victor Engineer - Food Tracker (v1.0.1)
 
 Documento maestro de interfaz de usuario (UI), experiencia de usuario (UX), sistema de tokens visuales y animaciones fluidas para la aplicación móvil y de escritorio **Victor Engineer - Food Tracker**.
 

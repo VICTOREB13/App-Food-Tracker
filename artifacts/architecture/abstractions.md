@@ -1,7 +1,7 @@
 ---
 tipo: abstracciones
 proyecto: App_Food_Tracker
-version: v0.4.0-alpha
+version: v1.0.1
 estado: activo
 fecha: 2026-09-10
 tags: [proyecto, arquitectura, abstracciones, backend]

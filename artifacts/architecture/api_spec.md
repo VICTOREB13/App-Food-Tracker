@@ -1,9 +1,9 @@
 ---
 tipo: api_spec
 proyecto: App_Food_Tracker
-version: v0.3.0-alpha
+version: v1.0.1
 estado: activo
-fecha: 2026-09-09
+fecha: 2026-09-10
 tags: [proyecto, api, backend, contratos, sqlite]
 ---
 

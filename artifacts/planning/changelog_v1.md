@@ -28,7 +28,7 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ### Added
 - **Sincronización Automática Registro de Peso ⟷ Perfil Biométrico:** Vinculación reactiva en `MealController.recordWeight` y `MealController.addWeightLog` para actualizar automáticamente el peso del `UserProfile` en SQLite, recalcular BMR/TDEE y Master Prompt, y notificar a los oyentes tras persistir en base de datos para reflejar el cambio inmediato en tarjetas y campos biométricos sin reingreso manual.
-- **Visualización Clara de Gramos en Lista de Ingredientes:** Inclusión de chip distintivo color violeta (`AppColors.portion`) en la lista de macros y píldora de peso al lado del nombre del ingrediente en `FoodItemsListCard`.
+- **Deduplicación Visual de Gramos en Lista de Ingredientes:** Eliminación de la píldora/badge duplicada al lado del nombre del ingrediente en `FoodItemsListCard`, consolidando la visualización de gramos de forma única y limpia en el chip de macronutrientes (`MacroIndicatorChip(label: 'Gramos')`, `AppColors.portion`) junto con Cal, P, C y G.
 - **Onboarding de Pizarra Limpia (Clean Slate):** Inicialización de todos los campos de entrada de usuario (`nombre`, `edad`, `estatura`, `peso`) completamente vacíos con placeholders ilustrativos (`Ej: Carlos`, `Ej: 25`, `Ej: 175`, `Ej: 75`), eliminando datos pre-poblados personales y reforzando validaciones estrictas antes de avanzar o completar.
 
 ---
