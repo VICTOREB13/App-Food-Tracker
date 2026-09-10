@@ -18,6 +18,31 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [1.0.0] - 2026-09-10
+
+### Added
+- **Flujo de Inicio y Onboarding de Primer Uso (`OnboardingScreen`):** Asistente interactivo guiado de 4 pasos para nuevos usuarios:
+  - *Paso 1 (Bienvenida & Identidad):* Presentación de privacidad local-first y campo de nombre del comensal.
+  - *Paso 2 (Biometría Clínica):* Selector de género biológico (Mifflin-St Jeor), edad, estatura y peso.
+  - *Paso 3 (Actividad & Movimiento):* Selector de nivel de actividad (1.2x a 1.725x) y chips de pasos diarios estimados (6,000 a 15,000).
+  - *Paso 4 (Objetivo & Plan Metabólico):* Meta corporal con cálculo dinámico en tiempo real de BMR, TDEE, presupuesto calórico diario y desglose de macronutrientes (proteínas, carbohidratos, grasas).
+- **Enrutamiento Inteligente de Primer Arranque:** Detección en `lib/main.dart` mediante `SecureStorageService.hasCompletedOnboarding()`, asegurando que la pantalla inicial aparezca una sola vez y dirija fluidamente al dashboard tras completarse.
+- **Acceso a Reconfiguración en Ajustes:** Botón en `SettingsScreen` para relanzar o reconfigurar el perfil metabólico con el asistente en cualquier momento.
+- **Visor de Inspección de Comida en Pantalla Completa (`FoodImageViewerScreen`):** Visualizador inmersivo con zoom táctil y pan (`InteractiveViewer`, 0.5x a 5.0x) accesible desde `MealImageCard`.
+- **Nomenclatura Dinámica de Fotos:** Algoritmo en `ImageProcessingService` que renombra y sincroniza automáticamente las imágenes (`YYYY_MM_DD_{Type}_{Index}`) al cambiar el tipo de comida (Desayuno `B`, Almuerzo `L`, Cena `D`, Snack `S`).
+
+### Changed
+- **Sincronización Bidireccional Total (Metas Diarias ⟷ Resumen Metabólico):** Conexión reactiva entre `SettingsController.saveDailyGoals` (que actualiza `UserProfile`, `MasterPrompt` y SQLite) y `MetabolicCalculator.saveAndSynchronizeProfile` (que actualiza `SettingsController.dailyGoals` en memoria de inmediato).
+- **Nuevo Icono Oficial del Sistema (Launcher Icon):** Diseño exterior exclusivo con plato fitness balanceado (filete sellado, mitades de aguacate con cavidad, tajadas de plátano y puré con hierbas) sobre squircle carmesí (`#C31723`) con canal alfa antialiased en todas las densidades mipmap de Android (`mdpi` a `xxxhdpi`).
+- **Nombre Oficial en Android:** Actualizado el nombre de la app en el sistema Android a `"Food Tracker"`.
+- **Consolidación de Assets:** Eliminación de la carpeta raíz `assets/` y centralización exclusiva en `lib/assets/` (`images/`, `keystore/`, `launcher_icons/`).
+- **Cohesión Visual en Dashboard:** Eliminación de la línea divisoria gris redundante en `MealSectionCard` para una integración visual limpia.
+
+### Security
+- **Firma Permanente Inmutable de Android:** Inyección de `release.keystore` permanente en pipelines de CI/CD para compilaciones y actualizaciones continuas de APK sin conflicto de paquetes (SHA-256 inmutable `3af69b6d...`).
+- **Custodia de Marca Personal:** Preservación estricta del logo de marca personal `VE` (`icon.svg`, `VeLogo`) en los componentes internos de la aplicación.
+
+
 ## [0.4.0-alpha] - 2026-09-10
 
 ### Added
