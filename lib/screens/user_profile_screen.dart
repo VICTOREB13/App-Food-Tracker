@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/meal_controller.dart';
-import '../controllers/settings_controller.dart';
 import '../models/user_profile.dart';
 import '../services/database_service.dart';
 import '../services/metabolic_calculator.dart';
@@ -64,7 +63,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   Future<void> _loadProfile() async {
     try {
       final saved = await DatabaseService.instance.getUserProfile();
-      final dailyGoals = SettingsController.instance.dailyGoals;
       if (saved != null) {
         _name = saved.name ?? _name;
         _age = saved.age;
@@ -74,31 +72,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         _activityLevel = saved.activityLevel;
         _bodyGoal = saved.bodyGoal;
         _estimatedSteps = saved.estimatedSteps;
-
-        var profileToUse = saved;
-        if (dailyGoals.calories > 0 &&
-            (dailyGoals.calories != saved.targetCalories ||
-             dailyGoals.protein != saved.targetProtein ||
-             dailyGoals.carbs != saved.targetCarbs ||
-             dailyGoals.fat != saved.targetFat)) {
-          profileToUse = saved.copyWith(
-            targetCalories: dailyGoals.calories,
-            targetProtein: dailyGoals.protein,
-            targetCarbs: dailyGoals.carbs,
-            targetFat: dailyGoals.fat,
-          );
-        }
-        _calculatedProfile = profileToUse;
+        _calculatedProfile = saved;
       } else {
         _recalculate();
-        if (dailyGoals.calories > 0 && _calculatedProfile != null) {
-          _calculatedProfile = _calculatedProfile!.copyWith(
-            targetCalories: dailyGoals.calories,
-            targetProtein: dailyGoals.protein,
-            targetCarbs: dailyGoals.carbs,
-            targetFat: dailyGoals.fat,
-          );
-        }
       }
     } catch (_) {
       _recalculate();

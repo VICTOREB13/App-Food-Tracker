@@ -1,11 +1,24 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:food_tracker/controllers/meal_controller.dart';
 import 'package:food_tracker/models/weight_log.dart';
 import 'package:food_tracker/services/database_service.dart';
 import 'package:food_tracker/services/metabolic_calculator.dart';
+import 'package:food_tracker/services/secure_storage_service.dart';
+
+class _FakeSecureStorage extends Fake implements FlutterSecureStorage {
+  final Map<String, String> _data = {};
+  @override
+  Future<String?> read({required String key, AppleOptions? iOptions, AndroidOptions? aOptions, LinuxOptions? lOptions, WebOptions? webOptions, MacOsOptions? mOptions, WindowsOptions? wOptions}) async => _data[key];
+  @override
+  Future<void> write({required String key, required String? value, AppleOptions? iOptions, AndroidOptions? aOptions, LinuxOptions? lOptions, WebOptions? webOptions, MacOsOptions? mOptions, WindowsOptions? wOptions}) async {
+    if (value != null) { _data[key] = value; } else { _data.remove(key); }
+  }
+}
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(() {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
@@ -85,12 +98,14 @@ void main() {
       ),
     );
 
+    SecureStorageService.setMockInstance(SecureStorageService.withStorage(_FakeSecureStorage()));
     DatabaseService.instance.setDatabaseForTesting(db);
   });
 
   tearDown(() async {
     await db.close();
     await DatabaseService.instance.closeForTesting();
+    SecureStorageService.resetInstance();
   });
 
   group('MealController Weight Tracking State & Reactivity Tests', () {

@@ -234,8 +234,11 @@ class MetabolicCalculator {
     buffer.writeln('- **Nombre**: ${profile.name?.trim().isNotEmpty == true ? profile.name : 'Comensal'}');
     buffer.writeln('- **Edad**: ${profile.age} años');
     buffer.writeln('- **Género Biológico**: $genderDisplay');
+    final weightDisplay = (profile.weight % 1 == 0)
+        ? profile.weight.toStringAsFixed(1)
+        : profile.weight.toString();
     buffer.writeln('- **Estatura**: ${profile.height.toStringAsFixed(1)} cm');
-    buffer.writeln('- **Peso Actual**: ${profile.weight.toStringAsFixed(1)} kg');
+    buffer.writeln('- **Peso Actual**: $weightDisplay kg');
     buffer.writeln();
     buffer.writeln('## 2. Nivel de Actividad y Gasto Energético');
     buffer.writeln('- **Nivel de Actividad**: $activityDisplay');
