@@ -107,6 +107,7 @@ void main() {
     });
 
     test('MealImageFileInfo implements value equality, hashCode, and holds filePath', () {
+      final date = DateTime(2026, 6, 30);
       final info1 = MealImageFileInfo(
         date: date,
         year: '2026',
