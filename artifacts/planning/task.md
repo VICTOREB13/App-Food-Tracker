@@ -51,5 +51,8 @@ tags: [proyecto, tasks, checklist, v7-teamwork, v0-4-0-alpha]
 ## 🚀 5. DevOps-Engineer (CI/CD, Versioning & Release)
 - [x] (DevOps-Engineer) Incrementar versión en `pubspec.yaml` a `0.4.0-alpha+1`.
 - [x] (DevOps-Engineer) Verificar integridad del árbol de trabajo para el cierre oficial de la versión `0.4.0-alpha`.
+- [x] (DevOps-Engineer) Resolver advertencias de linter y desbordamiento de widgets en el Quality Gate de GitHub Actions.
+- [x] (DevOps-Engineer) Compilar, firmar y empaquetar APK release `Victor-Engineer-Food-Tracker-Android.apk`.
+- [x] (DevOps-Engineer) Publicar exitosamente el release oficial `v0.4.0-alpha` en GitHub Releases.
 
 
