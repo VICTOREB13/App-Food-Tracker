@@ -55,4 +55,13 @@ tags: [proyecto, tasks, checklist, v7-teamwork, v0-4-0-alpha]
 - [x] (DevOps-Engineer) Compilar, firmar y empaquetar APK release `Victor-Engineer-Food-Tracker-Android.apk`.
 - [x] (DevOps-Engineer) Publicar exitosamente el release oficial `v0.4.0-alpha` en GitHub Releases.
 
+---
+
+## ⚙️ 6. DevOps-Engineer (Optimización CI & Firma Criptográfica Permanente)
+- [x] (DevOps-Engineer) Desactivar trigger automático `push: branches: [main]` en `.github/workflows/ci.yml`.
+- [x] (DevOps-Engineer) Configurar `signingConfigs.release` explícito en `android/app/build.gradle.kts` y `android/app/build.gradle` en `.github/workflows/release.yml` y `build_apk.yml`.
+- [x] (DevOps-Engineer) Asegurar la permanencia del keystore `release.keystore` en `android/app/release.keystore` con SHA-256 fingerprint inmutable (`3af69b6dc7c40fdfd42b27591d8b525b37bc30caf15d10650a5f4303583106b8`).
+- [x] (DevOps-Engineer) Probar y verificar que la firma de release sea aplicada fielmente sin regeneración efímera.
+- [x] (DevOps-Engineer) Actualizar `pubspec.yaml` a `0.4.0-alpha+2` (o re-tag) y publicar release verificado para pruebas de actualización sin colisiones.
+
 

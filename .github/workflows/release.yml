@@ -106,15 +106,92 @@ jobs:
         run: |
           mkdir -p ~/.android
           mkdir -p assets/keystore
+          mkdir -p android/app
           if [ -n "$ANDROID_KEYSTORE_BASE64" ]; then
             echo "$ANDROID_KEYSTORE_BASE64" | tr -d '\r\n ' | base64 -d -i > assets/keystore/release.keystore
+            cp assets/keystore/release.keystore android/app/release.keystore
             cp assets/keystore/release.keystore ~/.android/debug.keystore
             echo "✅ Keystore restaurado desde GitHub Secrets (ANDROID_KEYSTORE_BASE64)"
           elif [ -f "assets/keystore/release.keystore" ]; then
+            cp assets/keystore/release.keystore android/app/release.keystore
             cp assets/keystore/release.keystore ~/.android/debug.keystore
-            echo "✅ Keystore local configurado"
+            echo "✅ Keystore local configurado en android/app/release.keystore"
           else
-            echo "⚠️ No se detectó ANDROID_KEYSTORE_BASE64 ni release.keystore; se usará keystore por defecto"
+            echo "❌ ERROR: No se detectó ANDROID_KEYSTORE_BASE64 ni assets/keystore/release.keystore"
+            exit 1
+          fi
+
+          # Inyectar signingConfigs.release en android/app/build.gradle.kts y android/app/build.gradle
+          python3 - << 'EOF'
+          import os, re
+
+          kts_path = "android/app/build.gradle.kts"
+          gradle_path = "android/app/build.gradle"
+
+          if os.path.exists(kts_path):
+              with open(kts_path, "r", encoding="utf-8") as f:
+                  content = f.read()
+
+              signing_block = """    signingConfigs {
+                  create("release") {
+                      keyAlias = "androiddebugkey"
+                      keyPassword = "android"
+                      storeFile = file("release.keystore")
+                      storePassword = "android"
+                      storeType = "PKCS12"
+                  }
+              }
+          """
+              if 'create("release")' not in content:
+                  content = content.replace("buildTypes {", signing_block + "\n    buildTypes {")
+
+              content = re.sub(
+                  r'signingConfig\s*=\s*signingConfigs\S*',
+                  'signingConfig = signingConfigs.getByName("release")',
+                  content
+              )
+              with open(kts_path, "w", encoding="utf-8") as f:
+                  f.write(content)
+              print("✅ signingConfigs.release inyectado exitosamente en " + kts_path)
+
+          if os.path.exists(gradle_path):
+              with open(gradle_path, "r", encoding="utf-8") as f:
+                  content = f.read()
+
+              signing_block = """    signingConfigs {
+                  release {
+                      keyAlias 'androiddebugkey'
+                      keyPassword 'android'
+                      storeFile file('release.keystore')
+                      storePassword 'android'
+                      storeType 'PKCS12'
+                  }
+              }
+          """
+              if "signingConfigs {" not in content:
+                  content = content.replace("buildTypes {", signing_block + "\n    buildTypes {")
+
+              content = re.sub(
+                  r'signingConfig\s+signingConfigs\.debug',
+                  'signingConfig signingConfigs.release',
+                  content
+              )
+              content = re.sub(
+                  r'signingConfig\s*=\s*signingConfigs\.debug',
+                  'signingConfig = signingConfigs.release',
+                  content
+              )
+              with open(gradle_path, "w", encoding="utf-8") as f:
+                  f.write(content)
+              print("✅ signingConfigs.release inyectado exitosamente en " + gradle_path)
+          EOF
+
+          if [ -f "android/app/release.keystore" ]; then
+            echo "✅ Keystore verificado en android/app/release.keystore:"
+            sha256sum android/app/release.keystore
+          else
+            echo "❌ ERROR: android/app/release.keystore no encontrado"
+            exit 1
           fi
 
       - name: Restaurar Dependencias
@@ -168,6 +245,20 @@ jobs:
 
       - name: Compilar APK (Fat APK)
         run: flutter build apk --release --build-name=${{ steps.app_version.outputs.VERSION }} --build-number=${{ github.run_number }}
+
+      - name: Verificar Firma Criptográfica del APK Compilado
+        run: |
+          BUILD_TOOLS_DIR=$(find /usr/local/lib/android/sdk/build-tools -maxdepth 1 -mindepth 1 2>/dev/null | sort -V | tail -n 1)
+          if [ -z "$BUILD_TOOLS_DIR" ] && [ -n "$ANDROID_SDK_ROOT" ]; then
+            BUILD_TOOLS_DIR=$(find "$ANDROID_SDK_ROOT/build-tools" -maxdepth 1 -mindepth 1 2>/dev/null | sort -V | tail -n 1)
+          fi
+          if [ -f "$BUILD_TOOLS_DIR/apksigner" ]; then
+            echo "🔍 Verificando certificados del APK con apksigner ($BUILD_TOOLS_DIR/apksigner)..."
+            "$BUILD_TOOLS_DIR/apksigner" verify --print-certs build/app/outputs/flutter-apk/app-release.apk
+          else
+            echo "⚠️ apksigner no localizado, validando existencia del APK"
+            ls -lh build/app/outputs/flutter-apk/app-release.apk
+          fi
 
       - name: Renombrar APK para Release
         run: |

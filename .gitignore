@@ -46,4 +46,7 @@ local.properties
 *.pem
 *.keystore
 *.jks
-assets/keystore/
+!assets/keystore/release.keystore
+
+# Test APKs
+test_apks/

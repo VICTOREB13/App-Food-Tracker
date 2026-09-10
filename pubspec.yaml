@@ -2,7 +2,7 @@ name: food_tracker
 description: "Victor Engineer - Food Tracker"
 publish_to: 'none'
 
-version: 0.4.0-alpha+1
+version: 0.4.0-alpha+2
 
 environment:
   sdk: '>=3.4.0 <4.0.0'
