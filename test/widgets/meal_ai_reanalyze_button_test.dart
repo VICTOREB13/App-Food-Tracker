@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/widgets/meal_detail/meal_ai_reanalyze_button.dart';
 
@@ -46,6 +46,7 @@ void main() {
 
       final button = tester.widget<OutlinedButton>(find.byType(OutlinedButton));
       expect(button.onPressed, isNull);
+      expect(pressed, isFalse);
     });
   });
 }

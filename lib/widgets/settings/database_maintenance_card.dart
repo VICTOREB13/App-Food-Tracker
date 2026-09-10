@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_card.dart';
@@ -97,7 +97,7 @@ class DatabaseMaintenanceCard extends StatelessWidget {
 
   Widget _buildStatTile(BuildContext context, {required String label, required String value}) {
     return Container(
-      alignment: Alignment.center
+      alignment: Alignment.center,
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
       decoration: BoxDecoration(
         color: AppColors.surfaceSubtle(context),
@@ -105,20 +105,21 @@ class DatabaseMaintenanceCard extends StatelessWidget {
         border: Border.all(color: AppColors.border(context)),
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
             label,
-            textAlign: TextAlign.center
+            textAlign: TextAlign.center,
             style: GoogleFonts.inter(
-              fontSize: 11, 
-              color: AppColors.textSecondary(context)),
+              fontSize: 11,
+              color: AppColors.textSecondary(context),
+            ),
           ),
           const SizedBox(height: 2),
           Text(
             value,
-            textAlign: TextAlign.center
+            textAlign: TextAlign.center,
             style: GoogleFonts.outfit(
               fontSize: 15,
               fontWeight: FontWeight.w700,

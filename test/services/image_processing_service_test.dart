@@ -2,8 +2,6 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
-import 'package:path/path.dart' as p;
-import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:food_tracker/models/meal.dart';
 import 'package:food_tracker/services/database_service.dart';
@@ -108,9 +106,8 @@ void main() {
     });
 
     test('MealImageFileInfo implements value equality, hashCode, and holds filePath', () {
-      final date = DateTime(2026, 6, 30);
-      const info1 = MealImageFileInfo(
-        date: DateTime(2026, 6, 30),
+      final info1 = MealImageFileInfo(
+        date: date,
         year: '2026',
         month: '06',
         day: '30',

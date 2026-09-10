@@ -434,7 +434,7 @@ class ImageProcessingService {
     final month = effectiveDate.month.toString().padLeft(2, '0');
     final day = effectiveDate.day.toString().padLeft(2, '0');
     final effectiveMealType =
-        mealType ?? (mealId != null ? mealId : inferMealTypeByTime(effectiveDate));
+        mealType ?? mealId ?? inferMealTypeByTime(effectiveDate);
     final typeCode = getMealTypeCode(effectiveMealType);
 
     final candidateDirs = <Directory>[];
