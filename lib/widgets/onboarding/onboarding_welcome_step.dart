@@ -94,7 +94,7 @@ class _OnboardingWelcomeStepState extends State<OnboardingWelcomeStep> {
                   textCapitalization: TextCapitalization.words,
                   style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
                   decoration: InputDecoration(
-                    hintText: 'Tu nombre o apodo...',
+                    hintText: 'Ej: Carlos',
                     prefixIcon: const Icon(Icons.person_outline, size: 20),
                     filled: true,
                     fillColor: AppColors.surfaceSubtle(context),

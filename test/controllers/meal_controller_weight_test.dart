@@ -1,8 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:food_tracker/controllers/meal_controller.dart';
+import 'package:food_tracker/models/user_profile.dart';
 import 'package:food_tracker/models/weight_log.dart';
 import 'package:food_tracker/services/database_service.dart';
+import 'package:food_tracker/services/metabolic_calculator.dart';
 
 void main() {
   setUpAll(() {
@@ -190,6 +192,72 @@ void main() {
       await controller.loadWeightLogs();
       expect(controller.weightLogs, isEmpty);
       expect(controller.latestWeightLog, isNull);
+    });
+
+    test('recordWeight y addWeightLog sincronizan automáticamente UserProfile y recalculan BMR/TDEE', () async {
+      final controller = MealController.instance;
+
+      // Seed initial UserProfile in SQLite
+      final initialProfile = MetabolicCalculator.calculateProfile(
+        name: 'Test Comensal',
+        age: 30,
+        gender: 'male',
+        height: 180.0,
+        weight: 85.0,
+        activityLevel: 'moderate',
+        bodyGoal: 'maintenance',
+      );
+      await DatabaseService.instance.saveUserProfile(initialProfile);
+
+      // Record a new weight via addWeightLog alias
+      await controller.addWeightLog(82.0, notes: 'Progreso de pesaje');
+
+      // Verify UserProfile in SQLite was automatically updated with new weight and recalculated BMR/TDEE
+      final updatedProfile = await DatabaseService.instance.getUserProfile();
+      expect(updatedProfile, isNotNull);
+      expect(updatedProfile!.weight, equals(82.0));
+      expect(updatedProfile.bmr, equals(MetabolicCalculator.calculateBmr(
+        gender: 'male',
+        weightKg: 82.0,
+        heightCm: 180.0,
+        age: 30,
+      )));
+      expect(updatedProfile.masterPrompt, contains('82.0 kg'));
+    });
+
+    test('recordWeight con peso decimal (74.85 kg) preserva metas personalizadas (1597 kcal) sin deriva', () async {
+      final controller = MealController.instance;
+
+      // Seed initial UserProfile with custom daily goals in SQLite
+      final initialProfile = MetabolicCalculator.calculateProfile(
+        name: 'Carlos Custom',
+        age: 28,
+        gender: 'male',
+        height: 175.0,
+        weight: 76.0,
+        activityLevel: 'moderate',
+        bodyGoal: 'fat_loss',
+      ).copyWith(
+        targetCalories: 1597.0,
+        targetProtein: 145.0,
+        targetCarbs: 160.0,
+        targetFat: 42.0,
+      );
+      await DatabaseService.instance.saveUserProfile(initialProfile);
+
+      // Record decimal weight
+      await controller.recordWeight(74.85, notes: 'Pesaje matutino preciso');
+
+      // Verify UserProfile in SQLite preserves custom goals exactly and updates weight without float drift
+      final updatedProfile = await DatabaseService.instance.getUserProfile();
+      expect(updatedProfile, isNotNull);
+      expect(updatedProfile!.weight, equals(74.85));
+      expect(updatedProfile.targetCalories, equals(1597.0));
+      expect(updatedProfile.targetProtein, equals(145.0));
+      expect(updatedProfile.targetCarbs, equals(160.0));
+      expect(updatedProfile.targetFat, equals(42.0));
+      expect(updatedProfile.masterPrompt, contains('74.85 kg'));
+      expect(updatedProfile.masterPrompt, contains('1597 kcal'));
     });
   });
 }

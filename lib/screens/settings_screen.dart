@@ -269,7 +269,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const VeLogo(size: 36, borderRadius: 10),
                 const SizedBox(height: 10),
                 Text(
-                  'Victor Engineer - Food Tracker v1.0.0\nArquitectura 100% Local-First & BYOK',
+                  'Victor Engineer - Food Tracker v1.0.1\nArquitectura 100% Local-First & BYOK',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.inter(
                     fontSize: 11,

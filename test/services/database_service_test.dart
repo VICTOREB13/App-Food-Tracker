@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:food_tracker/models/food_item.dart';
 import 'package:food_tracker/models/meal.dart';
 import 'package:food_tracker/models/pantry_item.dart';
 import 'package:food_tracker/services/database_service.dart';
@@ -212,6 +213,63 @@ void main() {
       expect(fetched, isNotNull);
       expect(fetched!.name, equals('Plato Modificado'));
       expect(fetched.calories, equals(450));
+    });
+
+    test('upsertMeal con items no falla por FOREIGN KEY y guarda items correctamente', () async {
+      final service = DatabaseService.instance;
+      final item = FoodItem(
+        id: 'item-1',
+        name: 'Banano pelado',
+        estimatedGrams: 200,
+        calories: 105,
+        protein: 1.3,
+        carbs: 27.0,
+        fat: 0.3,
+      );
+      final meal = Meal(
+        id: 'meal-with-items',
+        name: 'Banano Snack',
+        items: [item],
+        calories: 105,
+        protein: 1.3,
+        carbs: 27.0,
+        fat: 0.3,
+      );
+
+      await service.upsertMeal(meal);
+      final fetched = await service.getMealById('meal-with-items');
+      expect(fetched, isNotNull);
+      expect(fetched!.items.length, equals(1));
+      expect(fetched.items.first.name, equals('Banano pelado'));
+      expect(fetched.items.first.estimatedGrams, equals(200));
+    });
+
+    test('updateMeal con items delega en upsertMeal y actualiza items correctamente', () async {
+      final service = DatabaseService.instance;
+      final initialMeal = Meal(
+        id: 'meal-update-test',
+        name: 'Plato Inicial',
+        calories: 300,
+      );
+      await service.insertMeal(initialMeal);
+
+      final updatedItem = FoodItem(
+        id: 'item-update-1',
+        name: 'Manzana verde',
+        estimatedGrams: 150,
+        calories: 80,
+      );
+      final updatedMeal = initialMeal.copyWith(
+        name: 'Plato con Manzana',
+        calories: 380,
+      ).recalculateFromItems([updatedItem]);
+
+      await service.updateMeal(updatedMeal);
+      final fetched = await service.getMealById('meal-update-test');
+      expect(fetched, isNotNull);
+      expect(fetched!.name, equals('Plato con Manzana'));
+      expect(fetched.items.length, equals(1));
+      expect(fetched.items.first.name, equals('Manzana verde'));
     });
 
     test('clearMealImagePath y getMealsOlderThanWithImages gestionan la retención de fotos', () async {

@@ -6,6 +6,7 @@ import '../services/metabolic_calculator.dart';
 import '../services/theme_manager.dart';
 import '../widgets/onboarding/onboarding_activity_step.dart';
 import '../widgets/onboarding/onboarding_biometrics_step.dart';
+import '../widgets/onboarding/onboarding_bottom_nav.dart';
 import '../widgets/onboarding/onboarding_goal_step.dart';
 import '../widgets/onboarding/onboarding_welcome_step.dart';
 import 'dashboard_screen.dart';
@@ -23,12 +24,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   int _currentStep = 0;
   bool _isSaving = false;
 
-  // Profile fields state
-  String _name = 'Victor';
+  // Profile fields state - empty for clean new user onboarding
+  String _name = '';
   String _gender = 'male';
-  int _age = 28;
-  double _height = 175.0;
-  double _weight = 75.0;
+  int _age = 0;
+  double _height = 0.0;
+  double _weight = 0.0;
   String _activityLevel = 'moderate';
   int _estimatedSteps = 8000;
   String _bodyGoal = 'fat_loss';
@@ -70,14 +71,38 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _recalculate() {
     _calculatedProfile = MetabolicCalculator.calculateProfile(
       name: _name.trim().isEmpty ? 'Comensal' : _name.trim(),
-      age: _age,
+      age: _age > 0 ? _age : 25,
       gender: _gender,
-      height: _height,
-      weight: _weight,
+      height: _height > 0 ? _height : 170.0,
+      weight: _weight > 0 ? _weight : 70.0,
       activityLevel: _activityLevel,
       bodyGoal: _bodyGoal,
       estimatedSteps: _estimatedSteps,
     );
+  }
+
+  bool get _isCurrentStepValid {
+    if (_currentStep == 0) return _name.trim().isNotEmpty;
+    if (_currentStep == 1) {
+      return _age >= 10 && _age <= 120 && _height >= 80 && _height <= 250 && _weight >= 30 && _weight <= 300;
+    }
+    return true;
+  }
+
+  void _handleContinue() {
+    if (_currentStep == 0 && _name.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor, ingresa tu nombre para continuar.'), backgroundColor: AppColors.primary),
+      );
+      return;
+    }
+    if (_currentStep == 1 && !_isCurrentStepValid) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor, completa tus datos corporales válidos para continuar.'), backgroundColor: AppColors.primary),
+      );
+      return;
+    }
+    _nextPage();
   }
 
   void _nextPage() {
@@ -214,76 +239,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ],
               ),
             ),
-            _buildBottomNav(context),
+            OnboardingBottomNav(
+              currentStep: _currentStep,
+              isSaving: _isSaving,
+              isValid: _isCurrentStepValid,
+              onPrev: _prevPage,
+              onNext: _nextPage,
+              onFinish: _finishOnboarding,
+              onInvalidTap: _handleContinue,
+            ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildBottomNav(BuildContext context) {
-    final isLastStep = _currentStep == 3;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      decoration: BoxDecoration(
-        color: AppColors.surface(context),
-        border: Border(top: BorderSide(color: AppColors.border(context))),
-      ),
-      child: Row(
-        children: [
-          if (_currentStep > 0) ...[
-            OutlinedButton(
-              onPressed: _prevPage,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.textSecondary(context),
-                side: BorderSide(color: AppColors.border(context)),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              ),
-              child: Text(
-                'Atrás',
-                style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 14),
-              ),
-            ),
-            const SizedBox(width: 12),
-          ],
-          Expanded(
-            child: ElevatedButton(
-              onPressed: _isSaving ? null : (isLastStep ? _finishOnboarding : _nextPage),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-              ),
-              child: _isSaving
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                    )
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          isLastStep ? 'Guardar y Empezar a Registrar' : 'Continuar',
-                          style: GoogleFonts.outfit(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 15,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Icon(
-                          isLastStep ? Icons.rocket_launch_rounded : Icons.arrow_forward_rounded,
-                          size: 18,
-                        ),
-                      ],
-                    ),
-            ),
-          ),
-        ],
       ),
     );
   }

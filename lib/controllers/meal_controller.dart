@@ -4,7 +4,9 @@ import '../models/meal.dart';
 import '../models/weight_log.dart';
 import '../services/database_service.dart';
 import '../services/image_processing_service.dart';
+import '../services/metabolic_calculator.dart';
 import '../services/secure_storage_service.dart';
+import 'settings_controller.dart';
 
 class MealController extends ChangeNotifier {
   static final MealController instance = MealController._();
@@ -206,8 +208,41 @@ class MealController extends ChangeNotifier {
       date: date ?? DateTime.now(),
     );
     await DatabaseService.instance.insertWeightLog(log);
+
+    try {
+      final profile = await DatabaseService.instance.getUserProfile();
+      if (profile != null) {
+        final newBmr = MetabolicCalculator.calculateBmr(
+          gender: profile.gender,
+          weightKg: weight,
+          heightCm: profile.height,
+          age: profile.age,
+        );
+        final newTdee = MetabolicCalculator.calculateTdee(
+          bmr: newBmr,
+          activityLevel: profile.activityLevel,
+        );
+        final updatedProfile = profile.copyWith(
+          weight: weight,
+          bmr: newBmr,
+          tdee: newTdee,
+          updatedAt: DateTime.now(),
+        );
+        final newPrompt = MetabolicCalculator.generateMasterPrompt(updatedProfile);
+        final finalProfile = updatedProfile.copyWith(masterPrompt: newPrompt);
+        await DatabaseService.instance.saveUserProfile(finalProfile);
+        await SecureStorageService.instance.setMasterPrompt(newPrompt);
+        SettingsController.instance.notifyProfileUpdated();
+      }
+    } catch (e) {
+      debugPrint('MealController: error syncing weight to UserProfile: $e');
+    }
+
     await loadWeightLogs(days: _selectedWeightDays);
   }
+
+  Future<void> addWeightLog(double weight, {String? notes, DateTime? date}) =>
+      recordWeight(weight, notes: notes, date: date);
 
   Future<void> deleteWeight(String id) async {
     await DatabaseService.instance.deleteWeightLog(id);

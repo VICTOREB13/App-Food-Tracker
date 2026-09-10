@@ -119,7 +119,7 @@ class _MetabolicSummaryBentoCardState extends State<MetabolicSummaryBentoCard> {
               children: [
                 const Icon(Icons.fingerprint_rounded, size: 14, color: AppColors.primary),
                 const SizedBox(width: 6),
-                Text('${profile.age} años • ${profile.height.toStringAsFixed(0)} cm • ${profile.weight.toStringAsFixed(1)} kg • $genderText', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary(context))),
+                Text('${profile.age} años • ${(profile.height % 1 == 0) ? profile.height.toInt() : profile.height} cm • ${(profile.weight % 1 == 0) ? profile.weight.toInt() : profile.weight} kg • $genderText', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary(context))),
               ],
             ),
           ),

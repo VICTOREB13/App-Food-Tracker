@@ -179,23 +179,33 @@ class SettingsController extends ChangeNotifier {
     _dailyGoals = goals;
 
     try {
-      final profile = await DatabaseService.instance.getUserProfile();
-      if (profile != null) {
-        final updated = profile.copyWith(
-          targetCalories: goals.calories,
-          targetProtein: goals.protein,
-          targetCarbs: goals.carbs,
-          targetFat: goals.fat,
-          updatedAt: DateTime.now(),
-        );
-        final newPrompt = MetabolicCalculator.generateMasterPrompt(updated);
-        final finalProfile = updated.copyWith(masterPrompt: newPrompt);
-        await DatabaseService.instance.saveUserProfile(finalProfile);
-        await SecureStorageService.instance.setMasterPrompt(newPrompt);
-      }
+      var profile = await DatabaseService.instance.getUserProfile();
+      profile ??= MetabolicCalculator.calculateProfile(
+        age: 25,
+        gender: 'male',
+        height: 175,
+        weight: 70,
+        activityLevel: 'moderate',
+        bodyGoal: 'maintenance',
+      );
+      final updated = profile.copyWith(
+        targetCalories: goals.calories,
+        targetProtein: goals.protein,
+        targetCarbs: goals.carbs,
+        targetFat: goals.fat,
+        updatedAt: DateTime.now(),
+      );
+      final newPrompt = MetabolicCalculator.generateMasterPrompt(updated);
+      final finalProfile = updated.copyWith(masterPrompt: newPrompt);
+      await DatabaseService.instance.saveUserProfile(finalProfile);
+      await SecureStorageService.instance.setMasterPrompt(newPrompt);
     } catch (_) {}
 
     await MealController.instance.refreshGoals();
+    notifyListeners();
+  }
+
+  void notifyProfileUpdated() {
     notifyListeners();
   }
 

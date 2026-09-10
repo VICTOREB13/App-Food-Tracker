@@ -211,6 +211,14 @@ void main() {
       ));
       await pumpScreen(tester);
 
+      // Ingrese datos en los campos limpios
+      final fields = find.byType(TextField);
+      await tester.enterText(fields.at(0), 'Victor Engineer');
+      await tester.enterText(fields.at(1), '28');
+      await tester.enterText(fields.at(2), '175');
+      await tester.enterText(fields.at(3), '75');
+      await pumpScreen(tester);
+
       // Tocar botón de guardar
       final saveBtn = find.text('Guardar Perfil y Sincronizar Metas');
       await tester.tap(saveBtn);
@@ -241,6 +249,34 @@ void main() {
       final masterPrompt = await SecureStorageService.instance.getMasterPrompt();
       expect(masterPrompt, isNotNull);
       expect(masterPrompt, contains('Victor Engineer'));
+    });
+
+    testWidgets('Al cargar perfil existente con metas personalizadas (1597 kcal), no son sobrescritas con la fórmula teórica', (tester) async {
+      // Seed UserProfile with custom targets in SQLite
+      await DatabaseService.instance.saveUserProfile(
+        UserProfile(
+          name: 'Comensal Custom',
+          age: 28,
+          gender: 'male',
+          height: 175.0,
+          weight: 75.0,
+          activityLevel: 'moderate',
+          bodyGoal: 'fat_loss',
+          bmr: 1700.0,
+          tdee: 2600.0,
+          targetCalories: 1597.0,
+          targetProtein: 140.0,
+          targetCarbs: 155.0,
+          targetFat: 45.0,
+          updatedAt: DateTime.now(),
+        ),
+      );
+
+      await tester.pumpWidget(createTestWidget());
+      await pumpScreen(tester);
+
+      // Verify custom target 1597 kcal is displayed and preserved
+      expect(find.text('1597'), findsOneWidget);
     });
   });
 }

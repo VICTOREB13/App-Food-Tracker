@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../controllers/meal_controller.dart';
+import '../controllers/settings_controller.dart';
 import '../models/user_profile.dart';
 import '../services/database_service.dart';
 import '../services/metabolic_calculator.dart';
@@ -27,12 +29,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   bool _isLoading = true;
   bool _isSaving = false;
 
-  // Form State
-  String? _name = 'Victor Engineer';
-  int _age = 28;
+  // Form State - start clean without pre-populated personal data
+  String? _name;
+  int _age = 0;
   String _gender = 'male';
-  double _height = 175.0;
-  double _weight = 75.0;
+  double _height = 0.0;
+  double _weight = 0.0;
   String _activityLevel = 'moderate';
   String _bodyGoal = 'fat_loss';
   int _estimatedSteps = 8000;
@@ -43,11 +45,26 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   void initState() {
     super.initState();
     _loadProfile();
+    MealController.instance.addListener(_onMealControllerChanged);
+  }
+
+  @override
+  void dispose() {
+    MealController.instance.removeListener(_onMealControllerChanged);
+    super.dispose();
+  }
+
+  void _onMealControllerChanged() {
+    final currentWeight = MealController.instance.currentWeight;
+    if (currentWeight != null && currentWeight > 0 && currentWeight != _weight && mounted) {
+      _loadProfile();
+    }
   }
 
   Future<void> _loadProfile() async {
     try {
       final saved = await DatabaseService.instance.getUserProfile();
+      final dailyGoals = SettingsController.instance.dailyGoals;
       if (saved != null) {
         _name = saved.name ?? _name;
         _age = saved.age;
@@ -57,26 +74,61 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         _activityLevel = saved.activityLevel;
         _bodyGoal = saved.bodyGoal;
         _estimatedSteps = saved.estimatedSteps;
-      }
-    } catch (_) {}
 
-    _recalculate();
-    if (mounted) {
-      setState(() => _isLoading = false);
+        var profileToUse = saved;
+        if (dailyGoals.calories > 0 &&
+            (dailyGoals.calories != saved.targetCalories ||
+             dailyGoals.protein != saved.targetProtein ||
+             dailyGoals.carbs != saved.targetCarbs ||
+             dailyGoals.fat != saved.targetFat)) {
+          profileToUse = saved.copyWith(
+            targetCalories: dailyGoals.calories,
+            targetProtein: dailyGoals.protein,
+            targetCarbs: dailyGoals.carbs,
+            targetFat: dailyGoals.fat,
+          );
+        }
+        _calculatedProfile = profileToUse;
+      } else {
+        _recalculate();
+        if (dailyGoals.calories > 0 && _calculatedProfile != null) {
+          _calculatedProfile = _calculatedProfile!.copyWith(
+            targetCalories: dailyGoals.calories,
+            targetProtein: dailyGoals.protein,
+            targetCarbs: dailyGoals.carbs,
+            targetFat: dailyGoals.fat,
+          );
+        }
+      }
+    } catch (_) {
+      _recalculate();
     }
+
+    if (mounted) setState(() => _isLoading = false);
   }
 
-  void _recalculate() {
-    _calculatedProfile = MetabolicCalculator.calculateProfile(
+  void _recalculate({bool preserveCustomTargets = false}) {
+    final prev = _calculatedProfile;
+    final calculated = MetabolicCalculator.calculateProfile(
       name: _name,
-      age: _age,
+      age: _age > 0 ? _age : 25,
       gender: _gender,
-      height: _height,
-      weight: _weight,
+      height: _height > 0 ? _height : 170.0,
+      weight: _weight > 0 ? _weight : 70.0,
       activityLevel: _activityLevel,
       bodyGoal: _bodyGoal,
       estimatedSteps: _estimatedSteps,
     );
+    if (preserveCustomTargets && prev != null && prev.targetCalories > 0) {
+      _calculatedProfile = calculated.copyWith(
+        targetCalories: prev.targetCalories,
+        targetProtein: prev.targetProtein,
+        targetCarbs: prev.targetCarbs,
+        targetFat: prev.targetFat,
+      );
+    } else {
+      _calculatedProfile = calculated;
+    }
   }
 
   void _onBiometricsChanged({
@@ -111,6 +163,16 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   Future<void> _saveProfile() async {
     if (_calculatedProfile == null || _isSaving) return;
+
+    if (_age < 10 || _age > 120 || _height < 80 || _height > 250 || _weight < 30 || _weight > 300) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor, ingresa datos corporales válidos antes de guardar.'),
+          backgroundColor: AppColors.primary,
+        ),
+      );
+      return;
+    }
 
     setState(() => _isSaving = true);
     try {
@@ -198,33 +260,19 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
                       elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                     ),
                     child: _isSaving
-                        ? const SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.5,
-                              color: Colors.white,
-                            ),
-                          )
+                        ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
                         : Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               const Icon(Icons.sync_rounded, size: 20),
                               const SizedBox(width: 8),
                               Text(
-                                widget.isOnboarding
-                                    ? 'Completar Onboarding y Guardar Metas'
-                                    : 'Guardar Perfil y Sincronizar Metas',
-                                style: GoogleFonts.outfit(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
-                                ),
+                                widget.isOnboarding ? 'Completar Onboarding y Guardar Metas' : 'Guardar Perfil y Sincronizar Metas',
+                                style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w700),
                               ),
                             ],
                           ),

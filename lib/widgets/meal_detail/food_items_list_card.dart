@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/food_item.dart';
 import '../../services/theme_manager.dart';
@@ -92,24 +92,40 @@ class FoodItemsListCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Text(
-                  item.name,
-                  style: GoogleFonts.outfit(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary(context),
-                  ),
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        item.name,
+                        style: GoogleFonts.outfit(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary(context),
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (item.estimatedGrams > 0) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppColors.portion.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          '${item.estimatedGrams.toStringAsFixed(0)}g',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.portion,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
-              Text(
-                '${item.estimatedGrams.toStringAsFixed(0)}g',
-                style: GoogleFonts.inter(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textSecondary(context),
-                ),
-              ),
-              const SizedBox(width: 4),
               IconButton(
                 icon: const Icon(Icons.edit_outlined, size: 16),
                 onPressed: () => onEditItem(item),
@@ -131,6 +147,13 @@ class FoodItemsListCard extends StatelessWidget {
             spacing: 6,
             runSpacing: 4,
             children: [
+              if (item.estimatedGrams > 0)
+                MacroIndicatorChip(
+                  label: 'Gramos',
+                  value: '${item.estimatedGrams.toStringAsFixed(0)}g',
+                  accentColor: AppColors.portion,
+                  isCompact: true,
+                ),
               MacroIndicatorChip(
                 label: 'Cal',
                 value: '${item.calories.toStringAsFixed(0)} kcal',

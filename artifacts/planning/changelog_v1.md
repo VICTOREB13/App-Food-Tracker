@@ -18,6 +18,21 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [1.0.1] - 2026-09-10
+
+### Fixed
+- **Error Crítico de Foreign Key al Guardar Comidas:** Corrección del orden transaccional en `DatabaseService.upsertMeal`, `insertMeal` y `updateMeal` insertando la tupla de `meals` antes de sus ingredientes `meal_items`, eliminando el fallo `DatabaseException(FOREIGN KEY constraint failed (code 787 SQLITE_CONSTRAINT_FOREIGNKEY))`.
+- **Desbordamiento de Texto en Botón de Onboarding:** Rediseño responsivo en `OnboardingBottomNav` con `FittedBox(fit: BoxFit.scaleDown)` y texto conciso `"Guardar y Comenzar"`, evitando desbordamientos en pantallas móviles estrechas.
+- **Sobrescritura Involuntaria de Metas Personalizadas:** Corrección en `UserProfileScreen._loadProfile` y `_onMealControllerChanged` para respetar los objetivos calóricos y de macronutrientes personalizados previamente guardados, impidiendo que se recalculen automáticamente con la fórmula teórica de Mifflin-St Jeor salvo modificación explícita de biometría.
+- **Fluidez y Precisión en Entradas Numéricas Decimales:** Corrección de `didUpdateWidget` y soporte de separador decimal en `OnboardingBiometricsStep` y `BiometricInputsCard`, evitando saltos de cursor y permitiendo registrar pesos con alta precisión (ej. 74.85 kg) sin truncamiento.
+
+### Added
+- **Sincronización Automática Registro de Peso ⟷ Perfil Biométrico:** Vinculación reactiva en `MealController.recordWeight` y `MealController.addWeightLog` para actualizar automáticamente el peso del `UserProfile` en SQLite, recalcular BMR/TDEE y Master Prompt, y notificar a los oyentes tras persistir en base de datos para reflejar el cambio inmediato en tarjetas y campos biométricos sin reingreso manual.
+- **Visualización Clara de Gramos en Lista de Ingredientes:** Inclusión de chip distintivo color violeta (`AppColors.portion`) en la lista de macros y píldora de peso al lado del nombre del ingrediente en `FoodItemsListCard`.
+- **Onboarding de Pizarra Limpia (Clean Slate):** Inicialización de todos los campos de entrada de usuario (`nombre`, `edad`, `estatura`, `peso`) completamente vacíos con placeholders ilustrativos (`Ej: Carlos`, `Ej: 25`, `Ej: 175`, `Ej: 75`), eliminando datos pre-poblados personales y reforzando validaciones estrictas antes de avanzar o completar.
+
+---
+
 ## [1.0.0] - 2026-09-10
 
 ### Added

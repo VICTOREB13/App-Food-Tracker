@@ -27,15 +27,11 @@ class BiometricInputsCard extends StatefulWidget {
 }
 
 class _BiometricInputsCardState extends State<BiometricInputsCard> {
-  late final TextEditingController _nameController;
-  late final TextEditingController _ageController;
-  late final TextEditingController _heightController;
-  late final TextEditingController _weightController;
-  late final FocusNode _nameFocus;
-  late final FocusNode _ageFocus;
-  late final FocusNode _heightFocus;
-  late final FocusNode _weightFocus;
+  late final TextEditingController _nameController, _ageController, _heightController, _weightController;
+  late final FocusNode _nameFocus, _ageFocus, _heightFocus, _weightFocus;
   late String _selectedGender;
+
+  static String _formatNum(double val) => (val % 1 == 0) ? val.toInt().toString() : val.toString();
 
   @override
   void initState() {
@@ -43,12 +39,10 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
     _selectedGender = widget.initialGender;
     _nameController = TextEditingController(text: widget.initialName ?? '');
     _ageController = TextEditingController(text: widget.initialAge > 0 ? widget.initialAge.toString() : '');
-    _heightController = TextEditingController(text: widget.initialHeight > 0 ? widget.initialHeight.toStringAsFixed(0) : '');
-    _weightController = TextEditingController(text: widget.initialWeight > 0 ? widget.initialWeight.toStringAsFixed(1) : '');
-    _nameFocus = FocusNode();
-    _ageFocus = FocusNode();
-    _heightFocus = FocusNode();
-    _weightFocus = FocusNode();
+    _heightController = TextEditingController(text: widget.initialHeight > 0 ? _formatNum(widget.initialHeight) : '');
+    _weightController = TextEditingController(text: widget.initialWeight > 0 ? _formatNum(widget.initialWeight) : '');
+    _nameFocus = FocusNode(); _ageFocus = FocusNode();
+    _heightFocus = FocusNode(); _weightFocus = FocusNode();
   }
 
   @override
@@ -57,39 +51,28 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
     if (oldWidget.initialGender != widget.initialGender && _selectedGender != widget.initialGender) {
       _selectedGender = widget.initialGender;
     }
-    if (oldWidget.initialName != widget.initialName && widget.initialName != null && _nameController.text != widget.initialName && !_nameFocus.hasFocus) {
+    if (oldWidget.initialName != widget.initialName && widget.initialName != null && !_nameFocus.hasFocus) {
       _nameController.text = widget.initialName!;
     }
-    if (oldWidget.initialAge != widget.initialAge) {
-      final p = int.tryParse(_ageController.text.trim());
-      if (p != widget.initialAge && !_ageFocus.hasFocus) {
-        _ageController.text = widget.initialAge > 0 ? widget.initialAge.toString() : '';
-      }
+    if (oldWidget.initialAge != widget.initialAge && !_ageFocus.hasFocus) {
+      _ageController.text = widget.initialAge > 0 ? widget.initialAge.toString() : '';
     }
-    if (oldWidget.initialHeight != widget.initialHeight) {
-      final p = double.tryParse(_heightController.text.trim());
-      if (p != widget.initialHeight && !_heightFocus.hasFocus) {
-        _heightController.text = widget.initialHeight > 0 ? widget.initialHeight.toStringAsFixed(0) : '';
-      }
+    if (oldWidget.initialHeight != widget.initialHeight && !_heightFocus.hasFocus) {
+      _heightController.text = widget.initialHeight > 0 ? _formatNum(widget.initialHeight) : '';
     }
-    if (oldWidget.initialWeight != widget.initialWeight) {
-      final p = double.tryParse(_weightController.text.trim());
-      if (p != widget.initialWeight && !_weightFocus.hasFocus) {
-        _weightController.text = widget.initialWeight > 0 ? widget.initialWeight.toStringAsFixed(1) : '';
-      }
+    if (oldWidget.initialWeight != widget.initialWeight && !_weightFocus.hasFocus) {
+      _weightController.text = widget.initialWeight > 0 ? _formatNum(widget.initialWeight) : '';
     }
   }
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _ageController.dispose();
-    _heightController.dispose();
-    _weightController.dispose();
-    _nameFocus.dispose();
-    _ageFocus.dispose();
-    _heightFocus.dispose();
-    _weightFocus.dispose();
+    for (final c in [_nameController, _ageController, _heightController, _weightController]) {
+      c.dispose();
+    }
+    for (final f in [_nameFocus, _ageFocus, _heightFocus, _weightFocus]) {
+      f.dispose();
+    }
     super.dispose();
   }
 
@@ -99,8 +82,8 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
       name: name.isNotEmpty ? name : null,
       age: int.tryParse(_ageController.text.trim()),
       gender: _selectedGender,
-      height: double.tryParse(_heightController.text.trim()),
-      weight: double.tryParse(_weightController.text.trim()),
+      height: double.tryParse(_heightController.text.trim().replaceAll(',', '.')),
+      weight: double.tryParse(_weightController.text.trim().replaceAll(',', '.')),
     );
   }
 
@@ -122,12 +105,7 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
               const SizedBox(width: 8),
               Text(
                 'DATOS BIOMÉTRICOS',
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.0,
-                  color: AppColors.textSecondary(context),
-                ),
+                style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1.0, color: AppColors.textSecondary(context)),
               ),
             ],
           ),
@@ -142,7 +120,7 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
             textCapitalization: TextCapitalization.words,
             style: GoogleFonts.inter(fontSize: 14, color: AppColors.textPrimary(context)),
             decoration: const InputDecoration(
-              hintText: 'Ej. Victor Engineer',
+              hintText: 'Ej: Carlos',
               prefixIcon: Icon(Icons.person_outline, size: 20),
             ),
           ),
@@ -187,7 +165,7 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
                   label: 'Edad',
                   controller: _ageController,
                   focusNode: _ageFocus,
-                  hintText: '28',
+                  hintText: 'Ej: 25',
                   suffixText: 'años',
                   keyboardType: TextInputType.number,
                   formatters: [
@@ -205,7 +183,7 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
                   label: 'Estatura',
                   controller: _heightController,
                   focusNode: _heightFocus,
-                  hintText: '175',
+                  hintText: 'Ej: 175',
                   suffixText: 'cm',
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 ),
@@ -219,7 +197,7 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
                   label: 'Peso Actual',
                   controller: _weightController,
                   focusNode: _weightFocus,
-                  hintText: '75.0',
+                  hintText: 'Ej: 75',
                   suffixText: 'kg',
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 ),
@@ -278,17 +256,8 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
     );
   }
 
-  Widget _buildFieldLabel(BuildContext context, String label, {TextAlign textAlign = TextAlign.start}) {
-    return Text(
-      label,
-      textAlign: textAlign,
-      style: GoogleFonts.inter(
-        fontSize: 12,
-        fontWeight: FontWeight.w500,
-        color: AppColors.textSecondary(context),
-      ),
-    );
-  }
+  Widget _buildFieldLabel(BuildContext context, String label, {TextAlign textAlign = TextAlign.start}) =>
+      Text(label, textAlign: textAlign, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textSecondary(context)));
 
   Widget _buildGenderOption({
     required String label,
@@ -298,31 +267,19 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
   }) {
     final borderColor = isSelected ? AppColors.primary : AppColors.border(context);
     final bgColor = isSelected ? AppColors.primary.withValues(alpha: 0.12) : AppColors.surfaceSubtle(context);
-
     return InkWell(
       onTap: () => _setGender(value),
       borderRadius: BorderRadius.circular(10),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: borderColor, width: isSelected ? 1.5 : 1.0),
-        ),
+        decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(10), border: Border.all(color: borderColor, width: isSelected ? 1.5 : 1.0)),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, size: 18, color: isSelected ? AppColors.primary : AppColors.textSecondary(context)),
             const SizedBox(width: 6),
-            Text(
-              label,
-              style: GoogleFonts.inter(
-                fontSize: 13,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                color: isSelected ? AppColors.textPrimary(context) : AppColors.textSecondary(context),
-              ),
-            ),
+            Text(label, style: GoogleFonts.inter(fontSize: 13, fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400, color: isSelected ? AppColors.textPrimary(context) : AppColors.textSecondary(context))),
           ],
         ),
       ),

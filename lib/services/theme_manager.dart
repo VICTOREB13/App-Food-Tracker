@@ -92,6 +92,7 @@ class AppColors {
   static const Color fatSapphire = Color(0xFF3B82F6);
   static const Color water = Color(0xFF06B6D4);
   static const Color success = Color(0xFF10B981);
+  static const Color portion = Color(0xFF8B5CF6);
 
   static const double cardRadius = 20.0;
   static const double pillRadius = 32.0;

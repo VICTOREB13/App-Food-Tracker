@@ -34,12 +34,31 @@ class _OnboardingBiometricsStepState extends State<OnboardingBiometricsStep> {
   late final TextEditingController _heightController;
   late final TextEditingController _weightController;
 
+  static String _formatNum(double val) => (val % 1 == 0) ? val.toInt().toString() : val.toString();
+
   @override
   void initState() {
     super.initState();
-    _ageController = TextEditingController(text: widget.age.toString());
-    _heightController = TextEditingController(text: widget.height.toStringAsFixed(0));
-    _weightController = TextEditingController(text: widget.weight.toStringAsFixed(1));
+    _ageController = TextEditingController(text: widget.age > 0 ? widget.age.toString() : '');
+    _heightController = TextEditingController(text: widget.height > 0 ? _formatNum(widget.height) : '');
+    _weightController = TextEditingController(text: widget.weight > 0 ? _formatNum(widget.weight) : '');
+  }
+
+  @override
+  void didUpdateWidget(covariant OnboardingBiometricsStep oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final parsedAge = int.tryParse(_ageController.text.trim());
+    if (widget.age > 0 && parsedAge != widget.age) {
+      _ageController.text = widget.age.toString();
+    }
+    final parsedHeight = double.tryParse(_heightController.text.trim().replaceAll(',', '.'));
+    if (widget.height > 0 && parsedHeight != widget.height) {
+      _heightController.text = _formatNum(widget.height);
+    }
+    final parsedWeight = double.tryParse(_weightController.text.trim().replaceAll(',', '.'));
+    if (widget.weight > 0 && parsedWeight != widget.weight) {
+      _weightController.text = _formatNum(widget.weight);
+    }
   }
 
   @override
@@ -52,23 +71,17 @@ class _OnboardingBiometricsStepState extends State<OnboardingBiometricsStep> {
 
   void _onAgeChanged(String val) {
     final parsed = int.tryParse(val.trim());
-    if (parsed != null && parsed >= 10 && parsed <= 120) {
-      widget.onChanged(age: parsed);
-    }
+    widget.onChanged(age: (parsed != null && parsed >= 10 && parsed <= 120) ? parsed : 0);
   }
 
   void _onHeightChanged(String val) {
-    final parsed = double.tryParse(val.trim());
-    if (parsed != null && parsed >= 80 && parsed <= 250) {
-      widget.onChanged(height: parsed);
-    }
+    final parsed = double.tryParse(val.trim().replaceAll(',', '.'));
+    widget.onChanged(height: (parsed != null && parsed >= 80 && parsed <= 250) ? parsed : 0.0);
   }
 
   void _onWeightChanged(String val) {
-    final parsed = double.tryParse(val.trim());
-    if (parsed != null && parsed >= 30 && parsed <= 300) {
-      widget.onChanged(weight: parsed);
-    }
+    final parsed = double.tryParse(val.trim().replaceAll(',', '.'));
+    widget.onChanged(weight: (parsed != null && parsed >= 30 && parsed <= 300) ? parsed : 0.0);
   }
 
   @override
@@ -152,11 +165,11 @@ class _OnboardingBiometricsStepState extends State<OnboardingBiometricsStep> {
                   style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.0, color: AppColors.textSecondary(context)),
                 ),
                 const SizedBox(height: 16),
-                _buildNumericField(context, controller: _ageController, label: 'Edad', suffix: 'años', icon: Icons.cake_outlined, onChanged: _onAgeChanged, keyboardType: TextInputType.number),
+                _buildNumericField(context, controller: _ageController, label: 'Edad', suffix: 'años', hintText: 'Ej: 25', icon: Icons.cake_outlined, onChanged: _onAgeChanged, keyboardType: TextInputType.number),
                 const SizedBox(height: 14),
-                _buildNumericField(context, controller: _heightController, label: 'Estatura', suffix: 'cm', icon: Icons.height_rounded, onChanged: _onHeightChanged, keyboardType: const TextInputType.numberWithOptions(decimal: true)),
+                _buildNumericField(context, controller: _heightController, label: 'Estatura', suffix: 'cm', hintText: 'Ej: 175', icon: Icons.height_rounded, onChanged: _onHeightChanged, keyboardType: const TextInputType.numberWithOptions(decimal: true)),
                 const SizedBox(height: 14),
-                _buildNumericField(context, controller: _weightController, label: 'Peso Actual', suffix: 'kg', icon: Icons.monitor_weight_outlined, onChanged: _onWeightChanged, keyboardType: const TextInputType.numberWithOptions(decimal: true)),
+                _buildNumericField(context, controller: _weightController, label: 'Peso Actual', suffix: 'kg', hintText: 'Ej: 75', icon: Icons.monitor_weight_outlined, onChanged: _onWeightChanged, keyboardType: const TextInputType.numberWithOptions(decimal: true)),
               ],
             ),
           ),
@@ -199,6 +212,7 @@ class _OnboardingBiometricsStepState extends State<OnboardingBiometricsStep> {
     required TextEditingController controller,
     required String label,
     required String suffix,
+    String? hintText,
     required IconData icon,
     required ValueChanged<String> onChanged,
     required TextInputType keyboardType,
@@ -226,6 +240,8 @@ class _OnboardingBiometricsStepState extends State<OnboardingBiometricsStep> {
             style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary(context)),
             onChanged: onChanged,
             decoration: InputDecoration(
+              hintText: hintText,
+              hintStyle: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w400, color: AppColors.textMuted(context)),
               suffixText: suffix,
               suffixStyle: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textSecondary(context)),
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),

@@ -248,17 +248,17 @@ class DatabaseService {
   // ==========================================
 
   Future<int> insertMeal(Meal meal) async {
-    final db = await database;
-    return await db.insert(
-      'meals',
-      meal.toSqliteMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    return await upsertMeal(meal);
   }
 
   Future<int> upsertMeal(Meal meal) async {
     final db = await database;
     return await db.transaction((txn) async {
+      final result = await txn.insert(
+        'meals',
+        meal.toSqliteMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
       final tableCheck = await txn.rawQuery(
         "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'meal_items';",
       );
@@ -280,22 +280,12 @@ class DatabaseService {
           );
         }
       }
-      return await txn.insert(
-        'meals',
-        meal.toSqliteMap(),
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
+      return result;
     });
   }
 
   Future<int> updateMeal(Meal meal) async {
-    final db = await database;
-    return await db.update(
-      'meals',
-      meal.toSqliteMap(),
-      where: 'id = ?',
-      whereArgs: [meal.id],
-    );
+    return await upsertMeal(meal);
   }
 
   Future<int> deleteMeal(String id) async {

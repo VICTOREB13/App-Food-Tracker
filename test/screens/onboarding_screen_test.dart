@@ -139,6 +139,10 @@ void main() {
     expect(find.text('PASO 1 DE 4'), findsOneWidget);
     expect(find.text('Continuar'), findsOneWidget);
 
+    // Enter Name (clean slate requirement)
+    await tester.enterText(find.byType(TextField).first, 'Victor');
+    await tester.pumpAndSettle();
+
     // Tap Continuar -> Step 1: Biometrics
     await tester.tap(find.text('Continuar'));
     await tester.pumpAndSettle();
@@ -146,6 +150,13 @@ void main() {
     expect(find.text('Parámetros Biológicos'), findsOneWidget);
     expect(find.text('PASO 2 DE 4'), findsOneWidget);
     expect(find.text('Atrás'), findsOneWidget);
+
+    // Enter Biometrics (clean slate requirement)
+    final fields = find.byType(TextField);
+    await tester.enterText(fields.at(0), '28');
+    await tester.enterText(fields.at(1), '175');
+    await tester.enterText(fields.at(2), '75');
+    await tester.pumpAndSettle();
 
     // Tap Continuar -> Step 2: Activity
     await tester.tap(find.text('Continuar'));
@@ -160,11 +171,11 @@ void main() {
 
     expect(find.text('Objetivo y Plan Metabólico'), findsOneWidget);
     expect(find.text('PASO 4 DE 4'), findsOneWidget);
-    expect(find.text('Guardar y Empezar a Registrar'), findsOneWidget);
+    expect(find.text('Guardar y Comenzar'), findsOneWidget);
     expect(find.text('RESUMEN METABÓLICO EN VIVO'), findsOneWidget);
 
     // Tap Save and Finish
-    await tester.tap(find.text('Guardar y Empezar a Registrar'));
+    await tester.tap(find.text('Guardar y Comenzar'));
     await tester.pumpAndSettle();
 
     // Verify persistence

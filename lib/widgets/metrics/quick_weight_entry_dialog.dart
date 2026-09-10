@@ -38,7 +38,7 @@ class _QuickWeightEntryDialogState extends State<QuickWeightEntryDialog> {
   void initState() {
     super.initState();
     final initVal = widget.initialWeight != null && widget.initialWeight! > 0
-        ? widget.initialWeight!.toStringAsFixed(1)
+        ? (widget.initialWeight! % 1 == 0 ? widget.initialWeight!.toInt().toString() : widget.initialWeight!.toString())
         : '';
     _weightController = TextEditingController(text: initVal);
     _notesController = TextEditingController();
@@ -118,7 +118,7 @@ class _QuickWeightEntryDialogState extends State<QuickWeightEntryDialog> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('⚖️ Peso guardado: ${weight.toStringAsFixed(1)} kg'),
+          content: Text('⚖️ Peso guardado: ${weight % 1 == 0 ? weight.toInt().toString() : weight.toString()} kg'),
           backgroundColor: AppColors.primary,
           duration: const Duration(seconds: 2),
         ),
