@@ -73,7 +73,11 @@ class MealAnalysisResult {
     } else if (itemsList is Map<String, dynamic>) {
       for (final entry in itemsList.entries) {
         if (entry.value is Map<String, dynamic>) {
-          parsedItems.add(FoodItem.fromJson(entry.value as Map<String, dynamic>));
+          final map = Map<String, dynamic>.from(entry.value as Map<String, dynamic>);
+          if (!map.containsKey('alimento') && !map.containsKey('nombre') && !map.containsKey('name')) {
+            map['alimento'] = entry.key;
+          }
+          parsedItems.add(FoodItem.fromJson(map));
         } else {
           parsedItems.add(FoodItem(
             name: entry.key,
