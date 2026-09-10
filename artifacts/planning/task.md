@@ -1,24 +1,22 @@
----
+---
 tipo: task_list
 proyecto: App_Food_Tracker
-iteracion: v0.4.0-alpha
-estado: activo
+iteracion: v1.0.1
+estado: completado
 fecha: 2026-09-10
-tags: [proyecto, tasks, checklist, v7-teamwork, v0-4-0-alpha]
+tags: [proyecto, tasks, checklist, v7-teamwork, v1-0-1]
 ---
 
-# 📋 Checklist Maestro de Tareas de Agentes (v0.4.0-alpha)
+# 📋 Checklist Maestro de Tareas de Agentes (v1.0.1)
 
-> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v0.4.0-alpha. Cada tarea completada se marca con `[x]`.
+> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.0.1. Cada tarea completada se marca con `[x]`.
 
 ---
 
 ## 🧭 1. Project-Planner (Master Tech Lead)
-- [x] (Project-Planner) Identificar y priorizar requerimientos finales para el cierre de la versión 0.4.0-alpha.
-- [x] (Project-Planner) Actualizar visión de proyecto en `artifacts/project_overview.md` a v0.4.0-alpha.
-- [x] (Project-Planner) Formalizar el plan de implementación en `artifacts/planning/implementation_plan.md`.
-- [x] (Project-Planner) Mantener actualizado el checklist maestro en `artifacts/planning/task.md`.
-- [x] (Project-Planner) Registrar los cambios en `artifacts/planning/changelog_v1.md` bajo `[0.4.0-alpha] - 2026-09-10`.
+- [x] (Project-Planner) Identificar y priorizar requerimientos de la iteración v1.0.1.
+- [x] (Project-Planner) Supervisar resolución de static analysis en Quality Gate y compilación de release.
+- [x] (Project-Planner) Verificar publicación exitosa del Fat APK v1.0.1 en GitHub Releases.
 
 ---
 
