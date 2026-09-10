@@ -188,9 +188,9 @@ class _FoodItemEditorDialogState extends State<_FoodItemEditorDialog> {
                   Expanded(
                     child: _buildMacroInputField(
                       context: context,
-                      label: 'Carbohidratos',
-                      controller: _carbsController,
-                      color: AppColors.carbs,
+                      label: 'Grasas',
+                      controller: _fatController,
+                      color: AppColors.fat,
                     ),
                   ),
                 ],
@@ -198,9 +198,9 @@ class _FoodItemEditorDialogState extends State<_FoodItemEditorDialog> {
               const SizedBox(height: 12),
               _buildMacroInputField(
                 context: context,
-                label: 'Grasas',
-                controller: _fatController,
-                color: AppColors.fat,
+                label: 'Carbohidratos',
+                controller: _carbsController,
+                color: AppColors.carbs,
               ),
               const SizedBox(height: 14),
               TextField(
@@ -209,11 +209,7 @@ class _FoodItemEditorDialogState extends State<_FoodItemEditorDialog> {
                 style: GoogleFonts.inter(fontSize: 14, color: AppColors.textPrimary(context)),
                 decoration: InputDecoration(
                   labelText: 'Justificación volumétrica / Notas',
-                  labelStyle: GoogleFonts.inter(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textSecondary(context),
-                  ),
+                  labelStyle: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary(context)),
                   hintText: 'Ej. Volumen aprox. 1 taza cocida',
                   hintStyle: GoogleFonts.inter(fontSize: 12, color: AppColors.textMuted(context)),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
@@ -226,17 +222,14 @@ class _FoodItemEditorDialogState extends State<_FoodItemEditorDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(
-            'Cancelar',
-            style: GoogleFonts.inter(color: AppColors.textSecondary(context)),
-          ),
+          child: Text('Cancelar', style: GoogleFonts.inter(color: AppColors.textSecondary(context))),
         ),
         ElevatedButton(
           onPressed: _onSave,
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
+            backgroundColor: AppColors.crimson,
             foregroundColor: Colors.white,
-            elevation: 0,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
           child: Text('Guardar', style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
@@ -255,6 +248,7 @@ class _FoodItemEditorDialogState extends State<_FoodItemEditorDialog> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Container(
               width: 8,
@@ -265,12 +259,16 @@ class _FoodItemEditorDialogState extends State<_FoodItemEditorDialog> {
               ),
             ),
             const SizedBox(width: 6),
-            Text(
-              label,
-              style: GoogleFonts.inter(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: color,
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: color,
+                ),
               ),
             ),
           ],

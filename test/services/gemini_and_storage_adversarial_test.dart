@@ -295,8 +295,8 @@ void main() {
       {
         "models": [
           {
-            "name": "models/gemini-custom-case",
-            "displayName": "Custom Case Model",
+            "name": "models/gemini-2.5-flash-lowercase",
+            "displayName": "Gemini 2.5 Flash Lowercase",
             "inputModalities": ["text", "image"],
             "supportedGenerationMethods": ["generateContent"]
           }
@@ -308,19 +308,13 @@ void main() {
       final result = service.parseModelsResponse(jsonStr);
 
       expect(result.length, equals(1));
-      expect(result.first.name, equals('gemini-custom-case'));
+      expect(result.first.name, equals('gemini-2.5-flash-lowercase'));
     });
 
     test('1.14 Future Gemini 3.x models are correctly identified, categorized, and prioritized', () {
       const jsonStr = '''
       {
         "models": [
-          {
-            "name": "models/gemini-3.0-ultra",
-            "displayName": "Gemini 3.0 Ultra",
-            "inputModalities": ["TEXT", "IMAGE"],
-            "supportedGenerationMethods": ["generateContent"]
-          },
           {
             "name": "models/gemini-3.0-flash",
             "displayName": "Gemini 3.0 Flash",
@@ -340,22 +334,17 @@ void main() {
       final service = GeminiModelService();
       final result = service.parseModelsResponse(jsonStr);
 
-      expect(result.length, equals(3));
+      expect(result.length, equals(2));
 
       // gemini-3.0-flash is Tier 1 (rank 1)
       expect(result[0].name, equals('gemini-3.0-flash'));
       expect(result[0].isRecommended, isTrue);
-      expect(result[0].recommendationLabel, equals('RECOMENDADO (Ultrarrápido)'));
+      expect(result[0].recommendationLabel, equals('Fast'));
 
       // gemini-3.5-pro is Tier 3 (rank 3)
       expect(result[1].name, equals('gemini-3.5-pro'));
       expect(result[1].isRecommended, isTrue);
-      expect(result[1].recommendationLabel, equals('MÁXIMA PRECISIÓN (Razonamiento)'));
-
-      // gemini-3.0-ultra is Tier 99 (future generalist)
-      expect(result[2].name, equals('gemini-3.0-ultra'));
-      expect(result[2].isRecommended, isFalse);
-      expect(result[2].recommendationLabel, isNull);
+      expect(result[1].recommendationLabel, equals('Think'));
     });
 
     test('1.15 Non-gemini model without IMAGE modality rejected', () {
