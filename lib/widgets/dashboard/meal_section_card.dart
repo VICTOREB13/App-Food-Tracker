@@ -88,8 +88,6 @@ class MealSectionCard extends StatelessWidget {
             )
           else ...[
             const SizedBox(height: 8),
-            const Divider(),
-            const SizedBox(height: 4),
             ListView.separated(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),

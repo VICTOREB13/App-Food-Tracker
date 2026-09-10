@@ -123,12 +123,31 @@ class Meal {
             .map((e) => FoodItem.fromJson(e))
             .toList();
       } else if (decoded is Map<String, dynamic>) {
-        final itemsList = decoded['items'] ?? decoded['ingredientes'] ?? decoded['alimentos'];
+        final dynamic itemsList = decoded['items'] ??
+            decoded['ingredientes'] ??
+            decoded['alimentos'] ??
+            decoded['ingredients'] ??
+            decoded['componentes'] ??
+            decoded['desglose'] ??
+            decoded['food_items'] ??
+            decoded['foods'];
         if (itemsList is List) {
-          return itemsList
-              .whereType<Map<String, dynamic>>()
-              .map((e) => FoodItem.fromJson(e))
-              .toList();
+          final List<FoodItem> parsed = [];
+          for (final entry in itemsList) {
+            if (entry is Map<String, dynamic>) {
+              parsed.add(FoodItem.fromJson(entry));
+            } else if (entry is String && entry.trim().isNotEmpty) {
+              parsed.add(FoodItem(
+                name: entry.trim(),
+                estimatedGrams: 100,
+                calories: 0,
+                protein: 0,
+                carbs: 0,
+                fat: 0,
+              ));
+            }
+          }
+          return parsed;
         }
       }
     } catch (_) {}

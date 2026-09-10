@@ -106,6 +106,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         date: _mealController.selectedDate,
       );
 
+      final ingredientsSummary = analysis.items.isNotEmpty
+          ? 'Ingredientes: ${analysis.items.map((e) => '${e.name} (${e.estimatedGrams.toStringAsFixed(0)}g)').join(', ')}'
+          : null;
+
       final meal = Meal(
         name: analysis.dishName,
         mealType: inferredMealType,
@@ -115,6 +119,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         protein: analysis.totalProtein,
         carbs: analysis.totalCarbs,
         fat: analysis.totalFat,
+        notes: ingredientsSummary,
         items: analysis.items,
         aiBreakdownJson: analysis.rawJson,
       ).recalculateFromItems(analysis.items);
@@ -144,20 +149,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final foodItem = FoodItem(
       name: item.name,
       estimatedGrams: 100,
-      calories: item.calories,
-      protein: item.protein,
-      carbs: item.carbs,
-      fat: item.fat,
+      calories: item.calories, protein: item.protein, carbs: item.carbs, fat: item.fat,
       visualJustification: 'Escaneado por código de barras (100g base)',
     );
 
     final meal = Meal(
       name: item.name,
       date: _mealController.selectedDate,
-      calories: item.calories,
-      protein: item.protein,
-      carbs: item.carbs,
-      fat: item.fat,
+      calories: item.calories, protein: item.protein, carbs: item.carbs, fat: item.fat,
     ).recalculateFromItems([foodItem]);
 
     Navigator.of(context).push(
@@ -176,10 +175,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       name: 'Agua (+250 ml)',
       mealType: 'Snack',
       date: _mealController.selectedDate,
-      calories: 0,
-      protein: 0,
-      carbs: 0,
-      fat: 0,
+      calories: 0, protein: 0, carbs: 0, fat: 0,
       notes: 'Hidratación rápida (+250 ml)',
     );
     try {

@@ -645,5 +645,82 @@ void main() {
       final updated = await dbService.getMealById('meal-uri-1');
       expect(updated!.imagePath, isNull);
     });
+
+    test('renameMealImage dynamically renames photo when changing from Lunch to Breakfast or Snack', () async {
+      final service = ImageProcessingService.instance;
+      final date = DateTime(2026, 9, 10);
+
+      // Create an initial Lunch photo: 2026_09_10_L_01.jpg
+      final initialLunchFile = File(p.join(tempTestDir.path, '2026_09_10_L_01.jpg'));
+      await initialLunchFile.writeAsString('lunch_image_data');
+      expect(await initialLunchFile.exists(), isTrue);
+
+      // Dynamically rename to Desayuno (Breakfast -> B)
+      final renamedToBreakfast = await service.renameMealImage(
+        currentPath: initialLunchFile.path,
+        newMealType: 'Desayuno',
+        date: date,
+      );
+
+      expect(p.basename(renamedToBreakfast), equals('2026_09_10_B_01.jpg'));
+      expect(await File(renamedToBreakfast).exists(), isTrue);
+      expect(await initialLunchFile.exists(), isFalse);
+
+      // Dynamically rename from Breakfast to Snack (S)
+      final renamedToSnack = await service.renameMealImage(
+        currentPath: renamedToBreakfast,
+        newMealType: 'Snack',
+        date: date,
+      );
+
+      expect(p.basename(renamedToSnack), equals('2026_09_10_S_01.jpg'));
+      expect(await File(renamedToSnack).exists(), isTrue);
+      expect(await File(renamedToBreakfast).exists(), isFalse);
+    });
+
+    test('renameMealImage handles index collision by incrementing sequential index', () async {
+      final service = ImageProcessingService.instance;
+      final date = DateTime(2026, 9, 10);
+
+      // Existing breakfast file: 2026_09_10_B_01.jpg
+      final existingB1 = File(p.join(tempTestDir.path, '2026_09_10_B_01.jpg'));
+      await existingB1.writeAsString('existing_b1');
+
+      // Lunch file to be renamed to Breakfast: 2026_09_10_L_01.jpg
+      final lunchFile = File(p.join(tempTestDir.path, '2026_09_10_L_01.jpg'));
+      await lunchFile.writeAsString('lunch_image');
+
+      final renamed = await service.renameMealImage(
+        currentPath: lunchFile.path,
+        newMealType: 'Desayuno',
+        date: date,
+      );
+
+      // Should safely advance index to B_02
+      expect(p.basename(renamed), equals('2026_09_10_B_02.jpg'));
+      expect(await File(renamed).exists(), isTrue);
+      expect(await existingB1.exists(), isTrue);
+    });
+
+    test('renameMealImage returns currentPath if file already matches target meal type or does not exist', () async {
+      final service = ImageProcessingService.instance;
+      final date = DateTime(2026, 9, 10);
+
+      final existingFile = File(p.join(tempTestDir.path, '2026_09_10_B_01.jpg'));
+      await existingFile.writeAsString('b1');
+
+      final noopResult = await service.renameMealImage(
+        currentPath: existingFile.path,
+        newMealType: 'Desayuno',
+        date: date,
+      );
+      expect(noopResult, equals(existingFile.path));
+
+      final nonExistentResult = await service.renameMealImage(
+        currentPath: p.join(tempTestDir.path, 'non_existent.jpg'),
+        newMealType: 'Desayuno',
+      );
+      expect(nonExistentResult, equals(p.join(tempTestDir.path, 'non_existent.jpg')));
+    });
   });
 }

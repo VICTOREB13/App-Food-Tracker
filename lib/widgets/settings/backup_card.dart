@@ -136,7 +136,7 @@ class BackupCard extends StatelessWidget {
               const Icon(Icons.sync_alt_outlined, size: 20, color: AppColors.protein),
               const SizedBox(width: 8),
               Text(
-                'RESPALDO Y MIGRACIÓN JSON',
+                'RESPALDO Y MIGRACIÓN',
                 style: GoogleFonts.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
@@ -166,7 +166,7 @@ class BackupCard extends StatelessWidget {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   icon: const Icon(Icons.file_upload_outlined, size: 16),
-                  label: Text('Exportar JSON', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                  label: Text('Exportar', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
                 ),
               ),
               const SizedBox(width: 8),
@@ -178,7 +178,7 @@ class BackupCard extends StatelessWidget {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   icon: const Icon(Icons.file_download_outlined, size: 16),
-                  label: Text('Importar JSON', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                  label: Text('Importar', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
                 ),
               ),
             ],

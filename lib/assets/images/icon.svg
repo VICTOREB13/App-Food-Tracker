@@ -1,4 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="8" fill="#dc2626"/>
-  <text x="16" y="21.5" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="13" fill="#ffffff" text-anchor="middle" letter-spacing="-0.5">VE</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <rect x="2" y="2" width="96" height="96" rx="22" fill="#C31723" stroke="#910E17" stroke-width="3"/>
+  <g fill="#FFFFFF">
+    <path d="M 40 25 C 38 21, 41 18, 39 14" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+    <path d="M 50 22 C 48 18, 51 15, 49 11" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+    <path d="M 60 25 C 58 21, 61 18, 59 14" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+    <ellipse cx="49" cy="74" rx="33" ry="5"/>
+    <path d="M 21 73 Q 49 78 77 73" fill="none" stroke="#C31723" stroke-width="1.5"/>
+    <ellipse cx="45" cy="58" rx="20" ry="13"/>
+    <ellipse cx="43" cy="50" rx="14" ry="12"/>
+    <ellipse cx="32" cy="57" rx="9" ry="10"/>
+    <path d="M 36 53 Q 43 47 50 54" fill="none" stroke="#C31723" stroke-width="1.8" stroke-linecap="round"/>
+    <ellipse cx="63" cy="57" rx="10.5" ry="9.5"/>
+    <line x1="68" y1="54" x2="79" y2="44" stroke="#FFFFFF" stroke-width="3.2" stroke-linecap="round"/>
+    <circle cx="77.5" cy="42" r="2.2"/>
+    <circle cx="80.5" cy="45" r="2.2"/>
+  </g>
 </svg>

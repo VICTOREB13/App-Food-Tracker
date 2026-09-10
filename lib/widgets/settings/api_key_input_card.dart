@@ -54,7 +54,7 @@ class _ApiKeyInputCardState extends State<ApiKeyInputCard> {
               const Icon(Icons.key_outlined, size: 20, color: AppColors.primary),
               const SizedBox(width: 8),
               Text(
-                'GEMINI API KEY (BYOK)',
+                'GEMINI API KEY',
                 style: GoogleFonts.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,

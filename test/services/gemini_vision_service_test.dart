@@ -384,5 +384,74 @@ void main() {
         equals('Ocurrió un error al analizar la comida. Por favor, inténtalo nuevamente.'),
       );
     });
+
+    test('MealAnalysisResult soporta claves adicionales como ingredients, desglose, componentes y strings', () {
+      const jsonWithEnglishAndStrings = '''
+      {
+        "dish": "Arroz con Pollo y Aguacate",
+        "ingredients": [
+          {
+            "name": "Arroz blanco",
+            "grams": 180,
+            "calories": 230,
+            "protein": 4.0,
+            "carbs": 50.0,
+            "fat": 0.5
+          },
+          "Aguacate maduro",
+          {
+            "name": "Pechuga de pollo",
+            "grams": 120,
+            "calories": 165,
+            "protein": 31.0,
+            "carbs": 0.0,
+            "fat": 3.6
+          }
+        ],
+        "totals": {
+          "calories": 480,
+          "protein": 37,
+          "carbs": 52,
+          "fat": 8
+        }
+      }
+      ''';
+
+      final result = MealAnalysisResult.fromJsonString(jsonWithEnglishAndStrings);
+      expect(result.dishName, equals('Arroz con Pollo y Aguacate'));
+      expect(result.items.length, equals(3));
+      expect(result.items[0].name, equals('Arroz blanco'));
+      expect(result.items[1].name, equals('Aguacate maduro'));
+      expect(result.items[2].name, equals('Pechuga de pollo'));
+    });
+
+    test('MealAnalysisResult genera item de respaldo cuando la IA no desglosa items pero devuelve totales', () {
+      const jsonWithoutItems = '''
+      {
+        "plato": "Arroz blanco con pollo asado y aguacate",
+        "items": [],
+        "totales": {
+          "calorias": 585.0,
+          "proteina_g": 38.0,
+          "carbohidratos_g": 62.0,
+          "grasas_g": 19.0
+        }
+      }
+      ''';
+
+      final result = MealAnalysisResult.fromJsonString(jsonWithoutItems);
+      expect(result.dishName, equals('Arroz blanco con pollo asado y aguacate'));
+      expect(result.items.isNotEmpty, isTrue);
+      expect(result.items.length, equals(1));
+      expect(result.items.first.name, equals('Arroz blanco con pollo asado y aguacate'));
+      expect(result.items.first.calories, equals(585.0));
+      expect(result.items.first.protein, equals(38.0));
+    });
+
+    test('Instrucciones del sistema contienen regla obligatoria de desglose de ingredientes', () {
+      final prompt = GeminiVisionService.systemInstruction;
+      expect(prompt, contains('Desglose obligatorio de ingredientes en \'items\''));
+      expect(prompt, contains('NUNCA devuelvas \'items\' como un arreglo vacío'));
+    });
   });
 }

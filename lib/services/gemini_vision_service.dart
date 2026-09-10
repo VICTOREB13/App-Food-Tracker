@@ -46,11 +46,28 @@ class MealAnalysisResult {
     final String dish = (data['plato'] ?? data['nombre'] ?? data['dish'] ?? data['name'] ?? 'Comida Analizada').toString();
 
     final List<FoodItem> parsedItems = [];
-    final itemsList = data['items'] ?? data['ingredientes'] ?? data['alimentos'];
+    final dynamic itemsList = data['items'] ??
+        data['ingredientes'] ??
+        data['alimentos'] ??
+        data['ingredients'] ??
+        data['componentes'] ??
+        data['desglose'] ??
+        data['food_items'] ??
+        data['foods'];
     if (itemsList is List) {
       for (final itemMap in itemsList) {
         if (itemMap is Map<String, dynamic>) {
           parsedItems.add(FoodItem.fromJson(itemMap));
+        } else if (itemMap is String && itemMap.trim().isNotEmpty) {
+          parsedItems.add(FoodItem(
+            name: itemMap.trim(),
+            estimatedGrams: 100,
+            calories: 0,
+            protein: 0,
+            carbs: 0,
+            fat: 0,
+            visualJustification: 'Ingrediente identificado por IA',
+          ));
         }
       }
     }
@@ -73,6 +90,18 @@ class MealAnalysisResult {
         carbs += item.carbs;
         fat += item.fat;
       }
+    }
+
+    if (parsedItems.isEmpty && (cal > 0 || prot > 0 || carbs > 0 || fat > 0)) {
+      parsedItems.add(FoodItem(
+        name: dish,
+        estimatedGrams: 200,
+        calories: cal,
+        protein: prot,
+        carbs: carbs,
+        fat: fat,
+        visualJustification: 'Porción completa del plato estimada por IA',
+      ));
     }
 
     return MealAnalysisResult(
@@ -111,7 +140,12 @@ Reglas obligatorias de cubicaje:
    - En platos caseros tradicionales (guisos, sofritos, arroz con aderezo, estofados), añade siempre entre 5g y 10g adicionales de grasa (aceite/sofrito) por ración que no se ven a simple vista pero están integrados en la salsa o preparación.
 4. Porciones compartidas:
    - Si el usuario indica en el contexto que la foto es de una fuente, olla o plato compartido y especifica su porción (ej. "me comí 1/3"), calcula exclusivamente la porción consumida por el usuario.
-5. Formato estricto:
+5. Desglose obligatorio de ingredientes en 'items':
+   - Es ESTRICTAMENTE OBLIGATORIO desglosar de forma individual cada alimento, guarnición e ingrediente que compone el plato dentro de la lista 'items'.
+   - NUNCA devuelvas 'items' como un arreglo vacío cuando haya alimentos visibles en la foto. Cada elemento debe ser una porción identificable (ej. "Arroz blanco cocido", "Pechuga de pollo asada", "Aguacate", "Grasa oculta de sofrito/aceite").
+   - Para cada alimento en 'items', estima con precisión sus gramos, calorías, proteínas, carbohidratos y grasas específicos.
+   - La suma de las calorías y macronutrientes de los 'items' individuales debe coincidir con 'totales'.
+6. Formato estricto:
    - Responde únicamente con el JSON definido en el esquema.
 ''';
 
@@ -244,10 +278,10 @@ Reglas obligatorias de cubicaje:
         properties: {
           'plato': Schema.string(description: 'Nombre representativo del plato'),
           'items': Schema.array(
-            description: 'Lista de ingredientes o alimentos identificados',
+            description: 'Lista obligatoria con el desglose detallado de cada ingrediente o alimento individual identificado en el plato',
             items: Schema.object(
               properties: {
-                'alimento': Schema.string(description: 'Nombre del alimento o ingrediente'),
+                'alimento': Schema.string(description: 'Nombre del alimento o ingrediente individual'),
                 'gramos_estimados': Schema.number(description: 'Peso estimado en gramos'),
                 'calorias': Schema.number(description: 'Calorías estimadas'),
                 'proteinas_g': Schema.number(description: 'Proteínas en gramos'),
@@ -281,6 +315,7 @@ Reglas obligatorias de cubicaje:
 
       final promptBuffer = StringBuffer();
       promptBuffer.writeln('Analiza esta comida casera y estima su desglose nutricional siguiendo las reglas volumétricas.');
+      promptBuffer.writeln('IMPORTANTE: Identifica y desglosa OBLIGATORIAMENTE cada uno de los ingredientes y alimentos individuales que componen el plato en la lista "items" con sus gramos y macronutrientes correspondientes. NUNCA devuelvas la lista de items vacía.');
       if (userContext != null && userContext.trim().isNotEmpty) {
         promptBuffer.writeln('Contexto y notas del comensal: ${userContext.trim()}');
       }

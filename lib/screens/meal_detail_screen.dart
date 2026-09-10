@@ -4,6 +4,7 @@ import '../controllers/meal_controller.dart';
 import '../models/food_item.dart';
 import '../models/meal.dart';
 import '../services/gemini_vision_service.dart';
+import '../services/image_processing_service.dart';
 import '../services/secure_storage_service.dart';
 import '../services/theme_manager.dart';
 import '../widgets/common/ve_app_bar.dart';
@@ -86,91 +87,45 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
       mealId: widget.initialMeal?.id,
       currentPath: _imagePath,
     );
-    if (savedPath != null) setState(() => _imagePath = savedPath);
+    if (savedPath != null && mounted) {
+      setState(() => _imagePath = savedPath);
+      final apiKey = await SecureStorageService.instance.getGeminiApiKey();
+      if (apiKey != null && apiKey.trim().isNotEmpty && mounted) {
+        await _reanalyzeWithAi();
+      }
+    }
   }
 
   Future<void> _reanalyzeWithAi() async {
-    if (_isSaving || _isReanalyzing) return;
-    final path = _imagePath;
-    if (path == null) return;
-    final file = File(path);
-    if (!file.existsSync()) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se encontró el archivo de imagen en disco.')),
-        );
-      }
-      return;
-    }
-
-    final apiKey = await SecureStorageService.instance.getGeminiApiKey();
-    if (apiKey == null || apiKey.trim().isEmpty) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Configura tu API Key de Gemini en Perfil para re-analizar.'),
-          backgroundColor: AppColors.primary,
-        ),
-      );
-      return;
-    }
-
+    if (_isSaving || _isReanalyzing || _imagePath == null) return;
     setState(() => _isReanalyzing = true);
     try {
-      final selectedModel = await SecureStorageService.instance.getSelectedGeminiModel();
-      final masterPrompt = await SecureStorageService.instance.getMasterPrompt();
-      final gemini = GeminiVisionService(
-        apiKey: apiKey,
-        modelName: selectedModel ?? GeminiVisionService.defaultModel,
-        masterPrompt: masterPrompt,
+      final analysis = await reanalyzeMealWithAi(
+        context: context,
+        imagePath: _imagePath,
+        currentDishName: _nameController.text.trim(),
+        currentNotes: _notesController.text.trim(),
+        currentItems: _items,
       );
-
-      final bytes = await file.readAsBytes();
-      final currentPlato = _nameController.text.trim();
-      final currentNotes = _notesController.text.trim();
-      final itemsSummary = _items.isNotEmpty
-          ? _items.map((e) => '${e.name}: ${e.estimatedGrams.toStringAsFixed(0)}g').join(', ')
-          : 'sin ingredientes';
-
-      final userContext = 'El comensal corrigió ingredientes del plato: '
-          'Plato: "$currentPlato", Notas: "$currentNotes", Ingredientes: $itemsSummary. '
-          'Recalcula los gramos y macronutrientes inteligentemente con esta corrección.';
-
-      final analysis = await gemini.analyzeMealPhoto(
-        rawImageBytes: bytes,
-        userContext: userContext,
-      );
-
-      if (!mounted) return;
-
-      setState(() {
-        if (_nameController.text.trim().isEmpty && analysis.dishName.isNotEmpty) {
-          _nameController.text = analysis.dishName;
+      if (analysis != null && mounted) {
+        setState(() {
+          if (_nameController.text.trim().isEmpty && analysis.dishName.isNotEmpty) {
+            _nameController.text = analysis.dishName;
+          }
+          if (_notesController.text.trim().isEmpty && analysis.items.isNotEmpty) {
+            final summary = analysis.items.map((e) => '${e.name} (${e.estimatedGrams.toStringAsFixed(0)}g)').join(', ');
+            _notesController.text = 'Ingredientes: $summary';
+          }
+          _items = List.from(analysis.items);
+          _calories = analysis.totalCalories;
+          _protein = analysis.totalProtein;
+          _carbs = analysis.totalCarbs;
+          _fat = analysis.totalFat;
+        });
+        if (_items.isNotEmpty) {
+          _recalculateTotals();
         }
-        _items = List.from(analysis.items);
-        _calories = analysis.totalCalories;
-        _protein = analysis.totalProtein;
-        _carbs = analysis.totalCarbs;
-        _fat = analysis.totalFat;
-      });
-      if (_items.isNotEmpty) {
-        _recalculateTotals();
       }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Plato re-analizado y actualizado con IA.'),
-          backgroundColor: AppColors.success,
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error al re-analizar imagen: $e'),
-          backgroundColor: AppColors.primary,
-        ),
-      );
     } finally {
       if (mounted) setState(() => _isReanalyzing = false);
     }
@@ -251,7 +206,11 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         children: [
-          MealImageCard(imagePath: _imagePath, onPickImage: _pickImage),
+          MealImageCard(
+            imagePath: _imagePath,
+            dishName: _nameController.text,
+            onPickImage: _pickImage,
+          ),
           if (_imagePath != null) ...[
             const SizedBox(height: 10),
             MealAiReanalyzeButton(
@@ -271,8 +230,20 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
             nameController: _nameController,
             notesController: _notesController,
             mealType: _mealType,
-            onMealTypeChanged: (val) {
-              if (val != null) setState(() => _mealType = val);
+            onMealTypeChanged: (val) async {
+              if (val != null && val != _mealType) {
+                setState(() => _mealType = val);
+                if (_imagePath != null) {
+                  final renamed = await ImageProcessingService.instance.renameMealImage(
+                    currentPath: _imagePath!,
+                    newMealType: val,
+                    date: _date,
+                  );
+                  if (mounted && renamed != _imagePath) {
+                    setState(() => _imagePath = renamed);
+                  }
+                }
+              }
             },
           ),
           const SizedBox(height: 16),

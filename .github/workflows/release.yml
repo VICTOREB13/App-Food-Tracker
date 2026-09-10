@@ -62,7 +62,9 @@ jobs:
           cache: true
 
       - name: Generar Archivos de Plataforma Android
-        run: flutter create --project-name food_tracker --platforms android .
+        run: |
+          flutter create --project-name food_tracker --platforms android .
+          cp -rf lib/assets/launcher_icons/android/* android/app/src/main/res/ 2>/dev/null || true
 
       - name: Configurar Compatibilidad de Android SDK (compileSdk 34)
         run: |
@@ -92,7 +94,7 @@ jobs:
 
       - name: Configurar Nombre y Permisos
         run: |
-          sed -i 's/android:label=".*"/android:label="VE Food Tracker"/' android/app/src/main/AndroidManifest.xml
+          sed -i 's/android:label=".*"/android:label="Food Tracker"/' android/app/src/main/AndroidManifest.xml
           sed -i '/<manifest/a \    <uses-permission android:name="android.permission.INTERNET" />' android/app/src/main/AndroidManifest.xml
           sed -i '/<manifest/a \    <uses-permission android:name="android.permission.CAMERA" />' android/app/src/main/AndroidManifest.xml
           sed -i '/<manifest/a \    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />' android/app/src/main/AndroidManifest.xml

@@ -556,4 +556,65 @@ class ImageProcessingService {
       }
     } catch (_) {}
   }
+
+  /// Renames an existing meal image file so that its filename dynamically reflects
+  /// the updated [newMealType] and optional [date], adhering to the `YYYY_MM_DD_{TYPE}_{INDEX}.jpg` standard.
+  ///
+  /// For example, moving a photo from Lunch (L) to Breakfast (B) renames `2026_09_10_L_01.jpg`
+  /// into `2026_09_10_B_01.jpg` (or the next available sequential index).
+  Future<String> renameMealImage({
+    required String currentPath,
+    required String newMealType,
+    DateTime? date,
+  }) async {
+    try {
+      final cleanPath = normalizeFilePath(currentPath);
+      final file = File(cleanPath);
+      if (!await file.exists()) {
+        return currentPath;
+      }
+
+      final info = parseMealImageFileName(cleanPath);
+      final effectiveDate = date ?? info?.date ?? DateTime.now();
+      final year = effectiveDate.year.toString().padLeft(4, '0');
+      final month = effectiveDate.month.toString().padLeft(2, '0');
+      final day = effectiveDate.day.toString().padLeft(2, '0');
+      final targetTypeCode = getMealTypeCode(newMealType);
+
+      // If the file already matches target date and meal type, no rename needed
+      if (info != null &&
+          info.year == year &&
+          info.month == month &&
+          info.day == day &&
+          info.typeCode == targetTypeCode) {
+        return currentPath;
+      }
+
+      final dir = file.parent;
+      int targetIndex = await getNextMealImageIndex(
+        directory: dir,
+        year: year,
+        month: month,
+        day: day,
+        typeCode: targetTypeCode,
+      );
+
+      String candidateFileName =
+          '${year}_${month}_${day}_${targetTypeCode}_${targetIndex.toString().padLeft(2, '0')}.jpg';
+      String newPath = p.join(dir.path, candidateFileName);
+
+      while (await File(newPath).exists() ||
+          await File(p.join(dir.path, '${year}_${month}_${day}_${targetTypeCode}_${targetIndex.toString().padLeft(2, '0')}.jpeg')).exists()) {
+        targetIndex++;
+        candidateFileName =
+            '${year}_${month}_${day}_${targetTypeCode}_${targetIndex.toString().padLeft(2, '0')}.jpg';
+        newPath = p.join(dir.path, candidateFileName);
+      }
+
+      final renamedFile = await file.rename(newPath);
+      return renamedFile.path;
+    } catch (_) {
+      return currentPath;
+    }
+  }
 }
