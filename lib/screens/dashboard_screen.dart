@@ -165,8 +165,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _openManualEntry({String? defaultType}) {
+    final type = defaultType ?? ImageProcessingService.inferMealTypeByTime(_mealController.selectedDate);
     Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => MealDetailScreen(defaultMealType: defaultType),
+      builder: (_) => MealDetailScreen(defaultMealType: type),
     ));
   }
 

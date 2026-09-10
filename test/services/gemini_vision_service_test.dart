@@ -448,6 +448,62 @@ void main() {
       expect(result.items.first.protein, equals(38.0));
     });
 
+    test('MealAnalysisResult soporta items como Map y distribuye totales cuando los items tienen 0 calorias', () {
+      const jsonWithMapItems = '''
+      {
+        "plato": "Desayuno Andino",
+        "items": {
+          "Huevos revueltos": {
+            "calorias": 140,
+            "proteinas_g": 12,
+            "carbohidratos_g": 1,
+            "grasas_g": 10
+          },
+          "Arepa de maiz": {
+            "calorias": 160,
+            "proteinas_g": 3,
+            "carbohidratos_g": 32,
+            "grasas_g": 2
+          }
+        },
+        "totales": {
+          "calorias": 300,
+          "proteina_g": 15,
+          "carbohidratos_g": 33,
+          "grasas_g": 12
+        }
+      }
+      ''';
+
+      final result = MealAnalysisResult.fromJsonString(jsonWithMapItems);
+      expect(result.dishName, equals('Desayuno Andino'));
+      expect(result.items.length, equals(2));
+      expect(result.items.any((e) => e.name == 'Huevos revueltos'), isTrue);
+      expect(result.totalCalories, equals(300.0));
+    });
+
+    test('MealAnalysisResult distribuye proporcionalmente totales a items de texto con 0 calorías', () {
+      const jsonWithStringList = '''
+      {
+        "plato": "Piqueo Snack",
+        "items": ["Manzana", "Nueces"],
+        "totales": {
+          "calorias": 200,
+          "proteina_g": 4,
+          "carbohidratos_g": 26,
+          "grasas_g": 10
+        }
+      }
+      ''';
+
+      final result = MealAnalysisResult.fromJsonString(jsonWithStringList);
+      expect(result.items.length, equals(2));
+      expect(result.items[0].calories, equals(100.0));
+      expect(result.items[1].calories, equals(100.0));
+      expect(result.items[0].protein, equals(2.0));
+      expect(result.items[1].protein, equals(2.0));
+    });
+
     test('Instrucciones del sistema contienen regla obligatoria de desglose de ingredientes', () {
       const prompt = GeminiVisionService.systemInstruction;
       expect(prompt, contains('Desglose obligatorio de ingredientes en \'items\''));

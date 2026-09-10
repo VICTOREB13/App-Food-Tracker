@@ -611,8 +611,18 @@ class ImageProcessingService {
         newPath = p.join(dir.path, candidateFileName);
       }
 
-      final renamedFile = await file.rename(newPath);
-      return renamedFile.path;
+      try {
+        final renamedFile = await file.rename(newPath);
+        return renamedFile.path;
+      } catch (_) {
+        try {
+          await file.copy(newPath);
+          await file.delete();
+          return newPath;
+        } catch (_) {
+          return currentPath;
+        }
+      }
     } catch (_) {
       return currentPath;
     }

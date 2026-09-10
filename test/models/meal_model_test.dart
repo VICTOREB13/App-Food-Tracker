@@ -158,6 +158,38 @@ void main() {
       expect(cleared.items, isEmpty);
       expect(cleared.aiBreakdownJson, isNull);
     });
+
+    test('recalculateFromItems no resetea calorias existentes si los items tienen 0 calorias', () {
+      final meal = Meal(name: 'Almuerzo Proteico', calories: 500, protein: 40, carbs: 50, fat: 15);
+      final itemsWithZeroMacros = [
+        FoodItem(name: 'Arroz blanco', estimatedGrams: 150, calories: 0, protein: 0, carbs: 0, fat: 0),
+        FoodItem(name: 'Pollo', estimatedGrams: 120, calories: 0, protein: 0, carbs: 0, fat: 0),
+      ];
+
+      final updated = meal.recalculateFromItems(itemsWithZeroMacros);
+      expect(updated.calories, equals(500.0));
+      expect(updated.protein, equals(40.0));
+      expect(updated.carbs, equals(50.0));
+      expect(updated.fat, equals(15.0));
+      expect(updated.items.length, equals(2));
+    });
+
+    test('Meal.items parsea fielmente listas de strings y objetos map en aiBreakdownJson', () {
+      final mealWithStringList = Meal(
+        name: 'Comida simple',
+        aiBreakdownJson: '{"items": ["Arroz", "Lentejas"]}',
+      );
+      expect(mealWithStringList.items.length, equals(2));
+      expect(mealWithStringList.items[0].name, equals('Arroz'));
+      expect(mealWithStringList.items[1].name, equals('Lentejas'));
+
+      final mealWithMap = Meal(
+        name: 'Comida map',
+        aiBreakdownJson: '{"items": {"Pollo": {"calorias": 150}}}',
+      );
+      expect(mealWithMap.items.length, equals(1));
+      expect(mealWithMap.items.first.name, equals('Pollo'));
+    });
   });
 
   group('MealController calculateStreakFromDates Tests', () {

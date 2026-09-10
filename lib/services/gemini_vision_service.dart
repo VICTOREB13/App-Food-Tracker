@@ -70,6 +70,35 @@ class MealAnalysisResult {
           ));
         }
       }
+    } else if (itemsList is Map<String, dynamic>) {
+      for (final entry in itemsList.entries) {
+        if (entry.value is Map<String, dynamic>) {
+          parsedItems.add(FoodItem.fromJson(entry.value as Map<String, dynamic>));
+        } else {
+          parsedItems.add(FoodItem(
+            name: entry.key,
+            estimatedGrams: 100,
+            calories: 0,
+            protein: 0,
+            carbs: 0,
+            fat: 0,
+            visualJustification: 'Ingrediente identificado por IA',
+          ));
+        }
+      }
+    } else if (itemsList is String && itemsList.trim().isNotEmpty) {
+      final parts = itemsList.split(RegExp(r'[,;\n]')).map((e) => e.trim()).where((e) => e.isNotEmpty);
+      for (final part in parts) {
+        parsedItems.add(FoodItem(
+          name: part,
+          estimatedGrams: 100,
+          calories: 0,
+          protein: 0,
+          carbs: 0,
+          fat: 0,
+          visualJustification: 'Ingrediente identificado por IA',
+        ));
+      }
     }
 
     double cal = 0.0;
@@ -89,6 +118,20 @@ class MealAnalysisResult {
         prot += item.protein;
         carbs += item.carbs;
         fat += item.fat;
+      }
+    }
+
+    // If items were parsed without individual macros but totals exist, distribute totals evenly
+    final itemsCalSum = parsedItems.fold(0.0, (acc, e) => acc + e.calories);
+    if (itemsCalSum == 0.0 && parsedItems.isNotEmpty && cal > 0) {
+      final count = parsedItems.length;
+      for (int i = 0; i < parsedItems.length; i++) {
+        parsedItems[i] = parsedItems[i].copyWith(
+          calories: cal / count,
+          protein: prot / count,
+          carbs: carbs / count,
+          fat: fat / count,
+        );
       }
     }
 

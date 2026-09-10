@@ -39,10 +39,10 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
   void initState() {
     super.initState();
     final meal = widget.initialMeal;
+    _date = meal?.date ?? MealController.instance.selectedDate;
+    _mealType = meal?.mealType ?? widget.defaultMealType ?? ImageProcessingService.inferMealTypeByTime(_date);
     _nameController = TextEditingController(text: meal?.name ?? '');
     _notesController = TextEditingController(text: meal?.notes ?? '');
-    _mealType = meal?.mealType ?? widget.defaultMealType ?? 'Almuerzo';
-    _date = meal?.date ?? MealController.instance.selectedDate;
     _imagePath = meal?.imagePath;
 
     if (meal != null) {

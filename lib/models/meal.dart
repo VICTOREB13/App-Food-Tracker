@@ -148,6 +148,37 @@ class Meal {
             }
           }
           return parsed;
+        } else if (itemsList is Map<String, dynamic>) {
+          final List<FoodItem> parsed = [];
+          for (final entry in itemsList.entries) {
+            if (entry.value is Map<String, dynamic>) {
+              parsed.add(FoodItem.fromJson(entry.value as Map<String, dynamic>));
+            } else {
+              parsed.add(FoodItem(
+                name: entry.key,
+                estimatedGrams: 100,
+                calories: 0,
+                protein: 0,
+                carbs: 0,
+                fat: 0,
+              ));
+            }
+          }
+          return parsed;
+        } else if (itemsList is String && itemsList.trim().isNotEmpty) {
+          return itemsList
+              .split(RegExp(r'[,;\n]'))
+              .map((e) => e.trim())
+              .where((e) => e.isNotEmpty)
+              .map((name) => FoodItem(
+                    name: name,
+                    estimatedGrams: 100,
+                    calories: 0,
+                    protein: 0,
+                    carbs: 0,
+                    fat: 0,
+                  ))
+              .toList();
         }
       }
     } catch (_) {}
@@ -170,22 +201,27 @@ class Meal {
       totalFat += item.fat;
     }
 
+    final effectiveCal = (totalCalories == 0.0 && calories > 0) ? calories : totalCalories;
+    final effectiveProt = (totalProtein == 0.0 && protein > 0) ? protein : totalProtein;
+    final effectiveCarbs = (totalCarbs == 0.0 && carbs > 0) ? carbs : totalCarbs;
+    final effectiveFat = (totalFat == 0.0 && fat > 0) ? fat : totalFat;
+
     final newBreakdown = json.encode({
       'plato': name,
       'items': newItems.map((e) => e.toJson()).toList(),
       'totales': {
-        'calorias': totalCalories,
-        'proteina_g': totalProtein,
-        'carbohidratos_g': totalCarbs,
-        'grasas_g': totalFat,
+        'calorias': effectiveCal,
+        'proteina_g': effectiveProt,
+        'carbohidratos_g': effectiveCarbs,
+        'grasas_g': effectiveFat,
       }
     });
 
     return copyWith(
-      calories: totalCalories,
-      protein: totalProtein,
-      carbs: totalCarbs,
-      fat: totalFat,
+      calories: effectiveCal,
+      protein: effectiveProt,
+      carbs: effectiveCarbs,
+      fat: effectiveFat,
       aiBreakdownJson: newBreakdown,
     );
   }
