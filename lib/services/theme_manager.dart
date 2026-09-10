@@ -80,6 +80,7 @@ class AppColors {
   static const Color primary = Color(0xFFDC2626);
   static const Color primaryLight = Color(0xFFEF4444);
   static const Color primaryDark = Color(0xFF991B1B);
+  static const Color crimson = Color(0xFFDC2626);
 
   static const Color calories = Color(0xFFDC2626);
   static const Color caloriesFlame = Color(0xFFF97316);

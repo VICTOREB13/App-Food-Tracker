@@ -227,7 +227,7 @@ class _FoodItemEditorDialogState extends State<_FoodItemEditorDialog> {
         ElevatedButton(
           onPressed: _onSave,
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.crimson,
+            backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
