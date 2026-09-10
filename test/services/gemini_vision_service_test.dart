@@ -449,7 +449,7 @@ void main() {
     });
 
     test('Instrucciones del sistema contienen regla obligatoria de desglose de ingredientes', () {
-      final prompt = GeminiVisionService.systemInstruction;
+      const prompt = GeminiVisionService.systemInstruction;
       expect(prompt, contains('Desglose obligatorio de ingredientes en \'items\''));
       expect(prompt, contains('NUNCA devuelvas \'items\' como un arreglo vacío'));
     });

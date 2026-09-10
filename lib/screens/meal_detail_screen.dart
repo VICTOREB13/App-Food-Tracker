@@ -1,9 +1,7 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import '../controllers/meal_controller.dart';
 import '../models/food_item.dart';
 import '../models/meal.dart';
-import '../services/gemini_vision_service.dart';
 import '../services/image_processing_service.dart';
 import '../services/secure_storage_service.dart';
 import '../services/theme_manager.dart';
