@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:food_tracker/controllers/meal_controller.dart';
-import 'package:food_tracker/models/user_profile.dart';
 import 'package:food_tracker/models/weight_log.dart';
 import 'package:food_tracker/services/database_service.dart';
 import 'package:food_tracker/services/metabolic_calculator.dart';

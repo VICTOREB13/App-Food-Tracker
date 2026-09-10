@@ -48,6 +48,7 @@ class OnboardingGoalStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final heightDisplay = (profile.height % 1 == 0) ? profile.height.toInt().toString() : profile.height.toString();
     final weightDisplay = (profile.weight % 1 == 0) ? profile.weight.toInt().toString() : profile.weight.toString();
+    final genderStr = profile.gender == 'female' ? 'Femenino' : 'Masculino';
     final biometricsPill = '${profile.age} años • $heightDisplay cm • $weightDisplay kg • $genderStr';
 
     return SingleChildScrollView(
