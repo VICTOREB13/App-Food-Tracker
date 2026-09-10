@@ -68,5 +68,5 @@ tags: [proyecto, planning, v0-4-0-alpha, yagni, local-first, ui-ux, gemini-ai]
 2. **Firma Criptográfica Permanente de Release (Resolución de Conflicto de Paquete):**
    - Eliminar la dependencia en `~/.android/debug.keystore` (el cual AGP regeneraba con una clave efímera aleatoria en cada runner de Ubuntu debido a que el subject no era `CN=Android Debug`).
    - Inyectar la configuración formal `signingConfigs.release` en `android/app/build.gradle.kts` (y `build.gradle`), configurando `storeFile = file("release.keystore")`, `storeType = "PKCS12"`, `keyAlias = "androiddebugkey"`, `keyPassword = "android"`, `storePassword = "android"`, y asociándolo a `buildTypes.release.signingConfig = signingConfigs.getByName("release")`.
-   - Incluir `assets/keystore/release.keystore` en el control de versiones como fallback permanente para que el fingerprint SHA-256 (`3af69b6dc7c40fdfd42b27591d8b525b37bc30caf15d10650a5f4303583106b8`) sea 100% determinista e inmutable en todas las actualizaciones de la app.
+   - Incluir `lib/assets/keystore/release.keystore` en el control de versiones como fallback permanente para que el fingerprint SHA-256 (`3af69b6dc7c40fdfd42b27591d8b525b37bc30caf15d10650a5f4303583106b8`) sea 100% determinista e inmutable en todas las actualizaciones de la app.
 
