@@ -3,7 +3,7 @@ tipo: changelog
 proyecto: App_Food_Tracker
 version: v1
 estado: activo
-fecha: 2026-09-10
+fecha: 2026-09-13
 tags: [proyecto, changelog, versiones]
 ---
 

@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/main.dart';
 import 'package:food_tracker/services/database_service.dart';

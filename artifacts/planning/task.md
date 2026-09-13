@@ -7,9 +7,10 @@ fecha: 2026-09-13
 tags: [proyecto, tasks, checklist, v7-teamwork, v1-0-4]
 ---
 
-# 📋 Checklist Maestro de Tareas de Agentes (v1.0.3)
+# 📋 Checklist Maestro de Tareas de Agentes (v1.0.4)
 
-> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.0.2. Cada tarea completada se marca con `[x]`.
+> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.0.4. Cada tarea completada se marca con `[x]`.
+
 
 ---
 

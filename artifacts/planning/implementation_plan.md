@@ -1,105 +1,79 @@
 ---
 tipo: implementation_plan
 proyecto: App_Food_Tracker
-iteracion: v1.0.2
+iteracion: v1.0.4
 estado: completado
-fecha: 2026-09-12
-tags: [proyecto, planning, v1-0-2, yagni, local-first, ui-ux, gemini-ai]
+fecha: 2026-09-13
+tags: [proyecto, planning, v1-0-4, yagni, local-first, ui-ux, gemini-ai, get-it, daos, l10n, result-pattern]
 ---
 
-# 🎯 Plan de Implementación: Victor Engineer - Food Tracker (v1.0.2)
+# 🎯 Plan de Implementación: Victor Engineer - Food Tracker (v1.0.4)
 
-> **Mesa de Control (Project-Planner):** Este plan formaliza la construcción y cierre de la versión **v1.0.1**, enfocada en el inicio completamente limpio (Clean Slate Onboarding), la sincronización bidireccional total de macros (calorías + proteínas, carbohidratos y grasas), la auto-actualización del peso biométrico desde métricas, la deduplicación de gramos en ingredientes y la corrección del guardado transaccional de comidas.
-
----
-
-## 🎯 1. Objetivos de la Iteración v0.4.0-alpha
-
-1. **Detección Automática de Ingredientes IA (`DashboardScreen`):**
-   - Asegurar que `Meal` se inicialice con `items: analysis.items` y `recalculateFromItems(analysis.items)` en `_handleAiPhotoScan`.
-   - Garantizar que la lista de ingredientes identificados por la IA aparezca automáticamente en la lista de `MealDetailScreen` sin requerir reingreso manual.
-2. **Re-análisis Inteligente con Correcciones de Usuario (`MealDetailScreen`):**
-   - Implementar `_reanalyzeWithAi()`: si `_imagePath != null`, leer bytes, obtener la API key de `SecureStorageService` y llamar a `gemini.analyzeMealPhoto` inyectando el contexto de correcciones (plato, notas e ingredientes corregidos).
-   - Actualizar reactivamente `_items`, macros y totales al recibir el resultado de Gemini.
-3. **Botón Accesible de Re-análisis IA (`MealAiReanalyzeButton`):**
-   - Diseñar componente accesible `OutlinedButton.icon` con `Icons.auto_awesome` y spinner reactivo cuando la comida tiene foto asociada.
-4. **Rediseño Ergonómico de Macros (`FoodItemEditorDialog`):**
-   - Desglosar la fila de 3 macros en dos filas confortables:
-     - Fila 1: Proteína (`Expanded`) y Carbohidratos (`Expanded`) con espaciado amplio.
-     - Fila 2: Grasas (ancho completo con indicador circular y sufijo 'g').
-   - Incrementar fuente de etiquetas a 13px y padding cómodo (12px) para máxima legibilidad móvil.
-5. **Modularización Arquitectónica (< 300 LoC):**
-   - Mantener las pantallas maestras (`MealDetailScreen` a 298 LoC y `DashboardScreen` a 298 LoC) desacoplando lógica y componentes auxiliares (`meal_image_picker.dart`, `meal_detail_actions.dart`, `meal_save_button.dart`, `meal_ai_reanalyze_button.dart`).
-6. **Incremento de Versión y Cierre:**
-   - Elevar versión de `pubspec.yaml` a `0.4.0-alpha+1`.
-   - Formalizar notas de versión en `changelog_v1.md` y sincronizar artefactos maestros.
+> **Mesa de Control (Project-Planner):** Este plan formaliza la evolución progresiva hacia el estado de excelencia técnica y de arquitectura (calificación 10/10), incorporando la inyección de dependencias con GetIt, DAOs especializados bajo el límite estricto de < 300 LoC, soporte multi-idioma (l10n) y manejo funcional de errores con Result pattern.
 
 ---
 
-## 🛠️ 2. Fases de Construcción para Subagentes
+## 🎯 1. Objetivos Maestros del Sistema
 
-### Fase 1: Datos y Modelos (`Backend-Architect`)
-1. **Constructor `Meal` con Soporte de `items`:**
-   - Habilitar parámetro opcional `items` en el constructor de `Meal` con serialización automática a `aiBreakdownJson`.
-2. **Sincronización en `DashboardScreen`:**
-   - Inyectar `items: analysis.items` y encadenar `.recalculateFromItems(analysis.items)` en el scan fotográfico.
+1. **Estimación Volumétrica Visual Asistida por IA (Gemini Multimodal Dinámico):**
+   - Detección precisa de comidas mediante inferencia multimodal y cálculo volumétrico clínico.
+   - Desglose anatómico individual de ingredientes sin valores genéricos (cero 200g).
+   - Re-análisis inteligente incorporando correcciones del usuario.
+2. **Procesamiento Asíncrono en Segundo Plano (`AnalysisQueueService` & `VeLoadingRing`):**
+   - Despacho no bloqueante de capturas fotográficas hacia una cola persistente en SQLite.
+   - Componente visual interactivo de anillo de carga con `CustomPainter` a 60 FPS.
+   - Banner reactivo en el Dashboard con visualización de avance por etapas.
+3. **Inyección de Dependencias Formal y Arquitectura Desacoplada (`GetIt`):**
+   - Service Locator centralizado con contratos abstractos (`IDatabaseService`, `IImageProcessingService`, DAOs).
+   - Inyección por constructor en controladores para testing hermético con mocks.
+4. **Persistencia Local-First & DAOs Modulares (< 300 LoC):**
+   - Descomposición de la base de datos en DAOs especializados: `MealDao`, `WeightLogDao`, `UserProfileDao`, `PantryDao`.
+   - Separación de conexión (`DatabaseConnectionFactory`) y esquema/migraciones (`DatabaseSchema`).
+5. **Manejo Funcional de Errores (Result / Either):**
+   - Tipo suma sellado en Dart 3 `Result<T, Failure>` con combinadores funcionales (`fold`, `map`, `guardAsync`).
+6. **Internacionalización y Localización Multi-idioma (`AppLocalizations`):**
+   - Catálogos bilingües oficiales en español (`app_es.arb`) e inglés (`app_en.arb`).
 
-### Fase 2: Interfaz, Componentes y Modularización (`Frontend-UI`)
-1. **Rediseño de `FoodItemEditorDialog`:**
-   - Distribuir campos en 2 filas y tipografía a 13px.
-2. **Motor de Re-análisis y Botón IA en `MealDetailScreen`:**
-   - Desarrollar `_reanalyzeWithAi` y el widget `MealAiReanalyzeButton`.
-3. **Desacoplamiento Modular:**
-   - Extraer `pickAndSaveMealImage`, `confirmAndDeleteMeal`, `saveMealEntry` y `MealSaveButton` para garantizar pantallas < 300 LoC.
+---
 
-### Fase 3: Pruebas y Validación (`Systems-Auditor`)
-1. Actualizar pruebas unitarias en `meal_model_test.dart` verificando la instanciación de `Meal(items: ...)` y la prevención de resurrección de items al vaciar.
-2. Extender pruebas en `gemini_vision_service_test.dart` verificando claves multilingües (`ingredientes`, `alimentos`).
-3. Crear pruebas de widgets en `meal_ai_reanalyze_button_test.dart` y `food_item_editor_dialog_test.dart`.
-4. Asegurar ausencia de errores de linter y sintaxis.
+## 🛠️ 2. Fases Históricas y Evolución de Construcción
 
-### Fase 4: Despliegue y Release (`DevOps-Engineer`)
-1. Actualizar `pubspec.yaml` a `0.4.0-alpha+1`.
-2. Formalizar changelog y actualizar checklist de tareas.
+### Fase 1 a 4: Núcleo MVP y Refinamiento (v0.1.0 – v0.4.0)
+- Modelos inmutables con Sentinel y sanitizador centralizado (`ModelSanitizer`).
+- Integración multimodal con Google Gemini API y cascada nutricional (USDA + Open Food Facts).
+- Rediseño ergonómico de macros en `FoodItemEditorDialog` y extracción modular de widgets.
 
 ### Fase 5: Optimización de CI y Firma Permanente de Release (`DevOps-Engineer`)
-1. **Desactivación de CI en push a `main` (`.github/workflows/ci.yml`):**
-   - Eliminar `push: branches: [main]` para evitar ejecuciones redundantes de CI en cada commit a la rama principal, manteniendo el Quality Gate unificado dentro del pipeline de release oficial (`release.yml`) y en `pull_request`.
-2. **Firma Criptográfica Permanente de Release (Resolución de Conflicto de Paquete):**
-   - Eliminar la dependencia en `~/.android/debug.keystore` (el cual AGP regeneraba con una clave efímera aleatoria en cada runner de Ubuntu debido a que el subject no era `CN=Android Debug`).
-   - Inyectar la configuración formal `signingConfigs.release` en `android/app/build.gradle.kts` (y `build.gradle`), configurando `storeFile = file("release.keystore")`, `storeType = "PKCS12"`, `keyAlias = "androiddebugkey"`, `keyPassword = "android"`, `storePassword = "android"`, y asociándolo a `buildTypes.release.signingConfig = signingConfigs.getByName("release")`.
-   - Incluir `lib/assets/keystore/release.keystore` en el control de versiones como fallback permanente para que el fingerprint SHA-256 (`3af69b6dc7c40fdfd42b27591d8b525b37bc30caf15d10650a5f4303583106b8`) sea 100% determinista e inmutable en todas las actualizaciones de la app.
+- Keystore permanente RSA 2048 (`release.keystore`) con SHA-256 inmutable (`3af69b6dc7c40fdfd42b27591d8b525b37bc30caf15d10650a5f4303583106b8`).
+- Pipeline unificado de Quality Gate y compilación de release APK en GitHub Actions.
 
 ### Fase 6: Flujo de Inicio y Onboarding Nutricional Personalizado (`Frontend-UI`)
-1. **Detección de Primer Arranque (`lib/main.dart`):**
-   - Comprobar en el arranque `await SecureStorageService.instance.hasCompletedOnboarding()`.
-   - Si no se ha completado (`false`), desplegar `OnboardingScreen` como pantalla inicial.
-   - Si ya se completó (`true`), dirigir de inmediato a `DashboardScreen`.
-2. **Pantalla de Bienvenida y Asistente por Pasos (`lib/screens/onboarding_screen.dart`):**
-   - Implementar flujo guiado mediante `PageView` interactivo con barra de progreso superior e indicadores de paso:
-     - **Paso 1 (Bienvenida & Identidad):** Logo VE, mensaje introductorio y campo de Nombre del usuario.
-     - **Paso 2 (Biometría Clínica):** Género Biológico (Mifflin-St Jeor), Edad (años), Estatura (cm), Peso Actual (kg).
-     - **Paso 3 (Actividad & Pasos):** Nivel de actividad física (Sedentario a Muy Activo) y Pasos diarios estimados (6,000 a 12,000).
-     - **Paso 4 (Objetivo & Plan Nutricional):** Meta corporal (Pérdida de Grasa, Mantenimiento, Ganancia Muscular) con cálculo instantáneo en vivo de BMR, TDEE, Presupuesto Calórico y distribución de Macros.
-     - **Paso 5 (Confirmación y Comienzo):** Resumen de metas calculadas y botón principal de guardado.
-3. **Persistencia y Transición:**
-   - Invocar `MetabolicCalculator.calculateAndSaveProfile(...)`, persistir en SQLite, sincronizar `DailyGoals` en SecureStorage, marcar `hasCompletedOnboarding = true` y ejecutar `Navigator.of(context).pushReplacement` hacia `DashboardScreen`.
-4. **Revisita desde Ajustes:**
-   - Añadir en `SettingsScreen` la opción de reiniciar o volver a ejecutar el onboarding para reconfigurar el perfil si el usuario lo desea.
+- Pantalla guiada `OnboardingScreen` con 4 pasos interactivos y cálculo dinámico Mifflin-St Jeor.
+- Inicio de pizarra limpia (Clean Slate) con campos vacíos y validaciones estrictas.
+- Sincronización bidireccional entre metas nutricionales y perfil metabólico.
 
-### Fase 7: Desglose Fino de Ingredientes, Sin 200g y Detección Asíncrona con Anillo (v1.0.2)
-1. **Reglas Volumétricas Estrictas en `GeminiVisionService`:**
-   - Prohibición explícita de unificar el plato como un solo ingrediente en `items` o duplicar el título del plato.
-   - Prohibición estricta de asignar 200g genéricos; estimación anatómica y por densidad calórica de porciones reales (40g a 220g por componente).
-2. **Cola Asíncrona y Worker en SQLite (`AnalysisQueueService`):**
-   - Servicio desacoplado con persistencia en tabla `analysis_queue`.
-   - Transición por etapas con actualización de progreso: preparación (20%), conexión con Gemini (40%), cubicaje y desglose (65%), macros y guardado (88%), completado (100%).
-   - Guardado automático del `Meal` en base de datos SQLite y recarga reactiva del `MealController`.
-3. **Anillo de Carga Animado Premium (`VeLoadingRing`):**
-   - Widget con `CustomPainter`, terminales redondeadas (`StrokeCap.round`), rotación continua suave y arco dinámico pulsante inspirado en los videos boceto (`anillo de carga.mp4`).
-4. **Dashboard y Detalle No Bloqueantes:**
-   - Banner interactivo `AnalysisProgressBanner` en Dashboard para monitoreo en vivo sin congelar la app.
-   - Superposición con `VeLoadingRing` y avance de etapas paso a paso en `MealImageCard` y `MealDetailScreen`.
-5. **Calidad y Modularidad:**
-   - Cobertura de pruebas unitarias y de widgets para todos los componentes nuevos.
-   - Preservación del límite < 300 LoC por archivo.
+### Fase 7: Desglose Fino de Ingredientes y Detección Asíncrona con Anillo (v1.0.2)
+- Erradicación del comodín plano de 200g y de la duplicación del nombre del plato en ingredientes.
+- Cola asíncrona y worker en SQLite (`AnalysisQueueService`) desacoplada del hilo de UI.
+- Anillo animado de carga `VeLoadingRing` y banner interactivo `AnalysisProgressBanner`.
+
+### Fase 8: Robustez de Análisis, Resiliencia y Precisión Clínica (v1.0.3)
+- **H-01:** Coincidencia exacta GTIN (14 dígitos) en USDA y fallback transparente a Open Food Facts.
+- **H-02:** Compresión asíncrona de fotos en Isolate secundario (`compressAndResizeAsync`) y bypass si $\le 1024$ px.
+- **H-03:** Sincronización metabólica al registrar peso (`recordWeight`) recalculando macros y actualizando metas.
+- **H-04:** Salvaguarda de condimentos, hierbas y especias (`isSeasoningOrHerb`) contra acaparamiento de macros.
+- **H-05:** Ecuación de Peso Corporal Ajustado ($ABW = IBW + 0.4 \times (TBW - IBW)$) para usuarios con IMC $\ge 30$.
+- **H-06:** Robustez en cola de análisis con ID determinista de comidas y método `retryTask(taskId)`.
+- **H-08:** Algoritmo resiliente de rescate de JSON truncado (`JsonRepairHelper`).
+- **H-09:** Consulta SQLite por rango de fechas `getMealsByRange(start, end)` para mitigar uso de memoria RAM.
+- **H-14:** Timeout defensivo de 35 segundos en llamadas de red a Gemini Vision.
+
+### Fase 9: Arquitectura de Calificación 10/10: Inyección de Dependencias, DAOs Modulares, l10n y Result Type (v1.0.4)
+- **Inyección de Dependencias con GetIt (`lib/core/di/service_locator.dart`):** Registro de interfaces abstractas (`IDatabaseService`, `IImageProcessingService`, `IMealDao`, `IWeightLogDao`, `IUserProfileDao`, `IPantryDao`), permitiendo inyección por constructor y preservando compatibilidad con `.instance`.
+- **Modularización Estricta de Servicios (< 300 LoC):**
+  - Descomposición de `DatabaseService` en DAOs especializados: `MealDao` (220 LoC), `WeightLogDao` (185 LoC), `UserProfileDao` (83 LoC), `PantryDao` (119 LoC), `DatabaseConnectionFactory` (81 LoC) y `DatabaseSchema` (116 LoC).
+  - Descomposición de `ImageProcessingService` en `MealImageFileNamer` (229 LoC) y `MealImageStorageResolver` (153 LoC).
+  - 100% de los archivos del proyecto por debajo del límite estricto de 300 líneas (< 300 LoC).
+- **Internacionalización Nativa (`l10n` / `i18n`):** Creación de diccionarios `app_es.arb` y `app_en.arb`, contratos en `AppLocalizations` e integración en `NutriTrackerApp`.
+- **Manejo Funcional de Errores con Patrón Result:** Implementación de `Result<T, Failure>` y jerarquía sellada `Failure` en Dart 3 con combinadores funcionales y APIs en todos los DAOs.
+- **Batería de Pruebas Automatizadas:** 53 suites de prueba (367 tests), logrando un veredicto de 100% PASS en el Quality Gate.
