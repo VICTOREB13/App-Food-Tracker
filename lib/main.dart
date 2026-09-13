@@ -69,6 +69,14 @@ class NutriTrackerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Locale? effectiveLocale;
+    if (locale != null) {
+      final isSupported = AppLocalizations.supportedLocales.any(
+        (s) => s.languageCode == locale!.languageCode,
+      );
+      effectiveLocale = isSupported ? locale : const Locale('es');
+    }
+
     return ListenableBuilder(
       listenable: ThemeManager.instance,
       builder: (context, _) {
@@ -80,9 +88,9 @@ class NutriTrackerApp extends StatelessWidget {
           darkTheme: AppTheme.darkTheme,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          locale: locale,
+          locale: effectiveLocale,
           localeResolutionCallback: (deviceLocale, supportedLocales) {
-            if (locale != null) return locale;
+            if (effectiveLocale != null) return effectiveLocale;
             if (deviceLocale != null) {
               for (final supported in supportedLocales) {
                 if (supported.languageCode == deviceLocale.languageCode) {
