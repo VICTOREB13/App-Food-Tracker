@@ -16,12 +16,9 @@ class MealAnalysisResult {
   final String rawJson;
 
   const MealAnalysisResult({
-    required this.dishName,
-    required this.items,
-    required this.totalCalories,
-    required this.totalProtein,
-    required this.totalCarbs,
-    required this.totalFat,
+    required this.dishName, required this.items,
+    required this.totalCalories, required this.totalProtein,
+    required this.totalCarbs, required this.totalFat,
     required this.rawJson,
   });
 
@@ -46,11 +43,15 @@ class MealAnalysisResult {
   /// Identifies seasonings, spices, and herbs to protect macro allocation
   static bool isSeasoningOrHerb(String name) {
     final s = name.toLowerCase();
-    if (s.contains('salmon') || s.contains('salmón') || s.contains('salchicha') ||
-        s.contains('salsa') || s.contains('ensalada') || s.contains('saltead')) return false;
+    const exclusions = ['salmon', 'salmón', 'salchicha', 'salsa', 'ensalada', 'saltead'];
+    if (exclusions.any((e) => s.contains(e))) {
+      return false;
+    }
     const keys = ['romero', 'perejil', 'orégano', 'oregano', 'cilantro', 'pimienta',
       'laurel', 'albahaca', 'comino', 'tomillo', 'especi', 'condimento', 'hierba', 'eneldo', 'curry', 'canela'];
-    if (keys.any((k) => s.contains(k))) return true;
+    if (keys.any((k) => s.contains(k))) {
+      return true;
+    }
     final words = s.split(RegExp(r'[\s,.;:()/\-]+'));
     return words.contains('sal') || words.contains('ajo');
   }
