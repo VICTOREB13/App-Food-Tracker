@@ -52,6 +52,10 @@ abstract class AppLocalizations {
   String get edit;
   String get confirm;
   String get saveAndStart;
+  String get back;
+  String get continueButton;
+  String get quickMeal;
+  String get quickMealTitle;
   String get streak;
   String get days;
   String get weight;

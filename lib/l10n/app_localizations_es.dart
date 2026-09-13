@@ -45,6 +45,14 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get saveAndStart => 'Guardar y Comenzar';
   @override
+  String get back => 'Atrás';
+  @override
+  String get continueButton => 'Continuar';
+  @override
+  String get quickMeal => 'Comida rápida';
+  @override
+  String get quickMealTitle => 'Registro Rápido de Comida';
+  @override
   String get streak => 'Racha';
   @override
   String get days => 'días';

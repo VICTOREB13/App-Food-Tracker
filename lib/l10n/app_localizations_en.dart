@@ -45,6 +45,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get saveAndStart => 'Save and Start';
   @override
+  String get back => 'Back';
+  @override
+  String get continueButton => 'Continue';
+  @override
+  String get quickMeal => 'Quick Meal';
+  @override
+  String get quickMealTitle => 'Quick Meal Entry';
+  @override
   String get streak => 'Streak';
   @override
   String get days => 'days';
