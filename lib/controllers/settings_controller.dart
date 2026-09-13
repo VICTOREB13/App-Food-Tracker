@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../core/interfaces/database_service_interface.dart';
 import '../models/daily_goals.dart';
 import '../models/gemini_model_info.dart';
 import '../services/backup_service.dart';
@@ -9,9 +10,8 @@ import '../services/secure_storage_service.dart';
 import 'meal_controller.dart';
 
 class SettingsController extends ChangeNotifier {
-  static SettingsController _instance = SettingsController._();
+  static SettingsController _instance = SettingsController();
   static SettingsController get instance => _instance;
-  SettingsController._();
 
   @visibleForTesting
   static void setMockInstance(SettingsController mock) {
@@ -20,13 +20,27 @@ class SettingsController extends ChangeNotifier {
 
   @visibleForTesting
   static void resetInstance() {
-    _instance = SettingsController._();
+    _instance = SettingsController();
   }
 
   @visibleForTesting
-  factory SettingsController.forTesting() => SettingsController._();
+  factory SettingsController.forTesting({
+    IDatabaseService? databaseService,
+    GeminiModelService? geminiModelService,
+  }) =>
+      SettingsController(
+        databaseService: databaseService,
+        geminiModelService: geminiModelService,
+      );
 
-  GeminiModelService _geminiModelService = GeminiModelService.instance;
+  final IDatabaseService _db;
+  GeminiModelService _geminiModelService;
+
+  SettingsController({
+    IDatabaseService? databaseService,
+    GeminiModelService? geminiModelService,
+  })  : _db = databaseService ?? DatabaseService.instance,
+        _geminiModelService = geminiModelService ?? GeminiModelService.instance;
 
   @visibleForTesting
   void setGeminiModelServiceForTesting(GeminiModelService service) {
@@ -66,7 +80,7 @@ class SettingsController extends ChangeNotifier {
       _selectedGeminiModel = await SecureStorageService.instance.getSelectedGeminiModel();
       _usdaApiKey = await SecureStorageService.instance.getUsdaApiKey();
       _dailyGoals = await SecureStorageService.instance.getDailyGoals();
-      _dbStats = await DatabaseService.instance.getDatabaseStats();
+      _dbStats = await _db.getDatabaseStats();
 
       if (_geminiApiKey != null && _geminiApiKey!.trim().isNotEmpty) {
         await loadAvailableGeminiModels();
@@ -101,20 +115,9 @@ class SettingsController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> saveSelectedGeminiModel(String model) async {
-    final trimmed = model.trim();
-    if (trimmed.isEmpty) {
-      await SecureStorageService.instance.deleteSelectedGeminiModel();
-      _selectedGeminiModel = null;
-    } else {
-      await SecureStorageService.instance.setSelectedGeminiModel(trimmed);
-      _selectedGeminiModel = trimmed;
-    }
-    notifyListeners();
-  }
-
-  Future<void> loadUsdaApiKey() async {
-    _usdaApiKey = await SecureStorageService.instance.getUsdaApiKey();
+  Future<void> saveSelectedGeminiModel(String modelName) async {
+    await SecureStorageService.instance.setSelectedGeminiModel(modelName);
+    _selectedGeminiModel = modelName;
     notifyListeners();
   }
 
@@ -162,7 +165,8 @@ class SettingsController extends ChangeNotifier {
         availableModels: _availableGeminiModels,
         savedSelection: _selectedGeminiModel,
       );
-      if (_selectedGeminiModel == null || !_availableGeminiModels.any((m) => m.name == _selectedGeminiModel)) {
+      if (_selectedGeminiModel == null ||
+          !_availableGeminiModels.any((m) => m.name == _selectedGeminiModel)) {
         _selectedGeminiModel = effective;
       }
       notifyListeners();
@@ -179,7 +183,7 @@ class SettingsController extends ChangeNotifier {
     _dailyGoals = goals;
 
     try {
-      var profile = await DatabaseService.instance.getUserProfile();
+      var profile = await _db.getUserProfile();
       profile ??= MetabolicCalculator.calculateProfile(
         age: 25,
         gender: 'male',
@@ -197,7 +201,7 @@ class SettingsController extends ChangeNotifier {
       );
       final newPrompt = MetabolicCalculator.generateMasterPrompt(updated);
       final finalProfile = updated.copyWith(masterPrompt: newPrompt);
-      await DatabaseService.instance.saveUserProfile(finalProfile);
+      await _db.saveUserProfile(finalProfile);
       await SecureStorageService.instance.setMasterPrompt(newPrompt);
     } catch (_) {}
 
@@ -213,8 +217,8 @@ class SettingsController extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
-      await DatabaseService.instance.executeVacuum();
-      _dbStats = await DatabaseService.instance.getDatabaseStats();
+      await _db.executeVacuum();
+      _dbStats = await _db.getDatabaseStats();
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -230,7 +234,7 @@ class SettingsController extends ChangeNotifier {
     notifyListeners();
     try {
       final res = await BackupService.instance.importFromJsonString(jsonContent);
-      _dbStats = await DatabaseService.instance.getDatabaseStats();
+      _dbStats = await _db.getDatabaseStats();
       await MealController.instance.loadMeals();
       return res;
     } finally {

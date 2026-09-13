@@ -1,10 +1,10 @@
 ---
 tipo: abstracciones
 proyecto: App_Food_Tracker
-version: v1.0.3
+version: v1.0.4
 estado: activo
 fecha: 2026-09-13
-tags: [proyecto, arquitectura, abstracciones, backend, v1-0-3]
+tags: [proyecto, arquitectura, abstracciones, backend, v1-0-4]
 ---
 
 # Abstracciones del Sistema y Arquitectura de Código: Victor Engineer - Food Tracker
@@ -37,9 +37,26 @@ tags: [proyecto, arquitectura, abstracciones, backend, v1-0-3]
 
 ```text
 lib/
-├── controllers/          # Controladores de Estado Reactivo (ChangeNotifier)
+├── controllers/          # Controladores de Estado Reactivo con Inyección por Constructor
 │   ├── meal_controller.dart
-│   └── settings_controller.dart
+│   ├── settings_controller.dart
+│   └── streak_calculator.dart
+├── core/                 # Infraestructura Transversal y Contratos
+│   ├── di/
+│   │   └── service_locator.dart
+│   ├── errors/
+│   │   ├── failures.dart
+│   │   └── result.dart
+│   └── interfaces/
+│       ├── daos_interfaces.dart
+│       ├── database_service_interface.dart
+│       └── image_processing_service_interface.dart
+├── l10n/                 # Localización e Internacionalización Multi-idioma
+│   ├── app_en.arb
+│   ├── app_es.arb
+│   ├── app_localizations.dart
+│   ├── app_localizations_en.dart
+│   └── app_localizations_es.dart
 ├── models/               # Modelos de Dominio Inmutables & Sanitizadores
 │   ├── daily_goals.dart
 │   ├── food_item.dart
@@ -47,25 +64,35 @@ lib/
 │   ├── json_repair_helper.dart
 │   ├── meal.dart
 │   ├── meal_analysis_result.dart
+│   ├── meal_image_file_info.dart
 │   ├── model_sanitizer.dart
 │   ├── pantry_item.dart
 │   ├── usda_food_item.dart
 │   ├── user_profile.dart
 │   └── weight_log.dart
-├── services/             # Servicios de Negocio, Clientes API y Persistencia
+├── services/             # Servicios de Negocio, Clientes API y Orquestación
 │   ├── analysis_queue_service.dart
 │   ├── backup_service.dart
 │   ├── barcode_lookup_service.dart
+│   ├── daos/             # Capa de Acceso a Datos Especializada (<300 LoC)
+│   │   ├── database_connection_factory.dart
+│   │   ├── database_schema.dart
+│   │   ├── meal_dao.dart
+│   │   ├── pantry_dao.dart
+│   │   ├── user_profile_dao.dart
+│   │   └── weight_log_dao.dart
 │   ├── database_service.dart
 │   ├── gemini_model_service.dart
 │   ├── gemini_vision_service.dart
 │   ├── image_processing_service.dart
+│   ├── meal_image_file_namer.dart
+│   ├── meal_image_storage_resolver.dart
 │   ├── metabolic_calculator.dart
 │   ├── open_food_facts_service.dart
 │   ├── secure_storage_service.dart
 │   ├── theme_manager.dart
 │   └── usda_food_data_service.dart
-└── widgets/              # Componentes de UI Atómicos y Modulares
+└── widgets/              # Componentes de UI Atómicos y Modulares (<300 LoC)
     ├── common/           # VeLoadingRing, VeAppBar, VeCard, VeLogo...
     ├── dashboard/        # AnalysisProgressBanner, DailyCalorieSummary...
     ├── meal_detail/      # MealImageCard con overlay de análisis...
@@ -324,3 +351,33 @@ MetabolicCalculator.calculateProfile
        ├── SecureStorageService.setMasterPrompt (Custodia para IA)
        └── MealController.updateGoals (Sincronización reactiva del Dashboard)
 ```
+
+---
+
+## 🏛️ Nuevas Abstracciones de Arquitectura (v1.0.4)
+
+### 1. Inyección de Dependencias y Service Locator (`lib/core/di/service_locator.dart`)
+- **`GetIt getIt`**: Instancia central del Service Locator para desacoplar implementaciones concretas de sus contratos.
+- **`setupServiceLocator({bool isTesting = false})`**: Registra `IDatabaseService`, `IImageProcessingService`, DAOs (`IMealDao`, `IWeightLogDao`, etc.) y controladores.
+- **`resetServiceLocator()`**: Limpia los registros para garantizar aislamiento total entre pruebas unitarias.
+
+### 2. Manejo Funcional de Errores: Patrón Result / Either (`lib/core/errors/`)
+- **`Result<T, E extends Failure>`**: Tipo suma sellado (`sealed class`) en Dart 3 con subtipos `Success<T, E>` y `FailureResult<T, E>`.
+- **Métodos Funcionales**: `fold(onSuccess, onFailure)`, `map(fn)`, `flatMap(fn)`, `mapError(fn)`, `getOrThrow()`, `getOrDefault(def)`.
+- **Captura Segura**: `Result.guard(() => syncCode)` y `Result.guardAsync(() => asyncCode)` capturan excepciones y las transforman en fallos de dominio.
+- **Jerarquía `Failure`**: `DatabaseFailure`, `AiServiceFailure`, `NetworkFailure`, `ValidationFailure`, `StorageFailure`, `ImageProcessingFailure`, `UnknownFailure`.
+
+### 3. Capa de DAOs Especializados (`lib/services/daos/`)
+- **`MealDao`**: Manejo de persistencia de comidas y alimentos asociados (`meal_items`).
+- **`WeightLogDao`**: Control de registros de peso corporal, time-series e inserciones por lote (`batchUpsertWeightLogs`).
+- **`UserProfileDao`**: Gestión de perfil de usuario, biometría y metas calóricas.
+- **`PantryDao`**: Catálogo de despensa y favoritos.
+- **`DatabaseConnectionFactory`**: Resuelve la ruta SQLite dependiente de plataforma, inicializa WAL y pragmas de integridad.
+- **`DatabaseSchema`**: DDL centralizado de tablas, índices B-Tree y migraciones de versión.
+
+### 4. Capa de Nomenclatura y Almacenamiento de Fotos (`lib/services/`)
+- **`MealImageFileNamer`**: Estandarización de nombres de fotos `YYYY_MM_DD_{TYPE}_{INDEX}.jpg`, mapeo de códigos, parseo regex e inferencia por hora del día.
+- **`MealImageStorageResolver`**: Resolución en cascada de directorios de almacenamiento en Android y plataformas de escritorio con anti-colisión determinista.
+
+### 5. Localización e Internacionalización (`lib/l10n/`)
+- **`AppLocalizations`**: Contrato tipado de textos multi-idioma (`app_es.arb` y `app_en.arb`) con delegados `localizationsDelegates` integrados en `NutriTrackerApp`.

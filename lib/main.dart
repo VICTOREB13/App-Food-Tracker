@@ -1,6 +1,9 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
+
+import 'core/di/service_locator.dart';
+import 'l10n/app_localizations.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'services/analysis_queue_service.dart';
@@ -27,6 +30,9 @@ void main() async {
   } catch (e) {
     debugPrint('DateFormatting initialization warning: $e');
   }
+
+  // Initialize service locator for formal dependency injection
+  setupServiceLocator();
 
   try {
     await DatabaseService.instance.init();
@@ -70,6 +76,9 @@ class NutriTrackerApp extends StatelessWidget {
           themeMode: ThemeManager.instance.themeMode,
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('es'),
           home: hasCompletedOnboarding
               ? const DashboardScreen()
               : const OnboardingScreen(),

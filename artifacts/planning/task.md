@@ -1,10 +1,10 @@
 ---
 tipo: task_list
 proyecto: App_Food_Tracker
-iteracion: v1.0.3
+iteracion: v1.0.4
 estado: completado
 fecha: 2026-09-13
-tags: [proyecto, tasks, checklist, v7-teamwork, v1-0-3]
+tags: [proyecto, tasks, checklist, v7-teamwork, v1-0-4]
 ---
 
 # 📋 Checklist Maestro de Tareas de Agentes (v1.0.3)
@@ -113,4 +113,14 @@ tags: [proyecto, tasks, checklist, v7-teamwork, v1-0-3]
 - [x] (Backend-Architect) **H-14:** Timeout defensivo de 35 segundos en llamadas a la API de Gemini Vision en `GeminiVisionService.analyzeMealImage`.
 - [x] (Systems-Auditor) Tests unitarios añadidos y validados para H-01, H-02, H-03, H-04, H-05, H-06, H-08, H-09 y H-14.
 - [x] (DevOps-Engineer) Incremento de versión a `1.0.3+1` en `pubspec.yaml` y documentación completa en `changelog_v1.md`.
+
+---
+
+## 💎 11. Backend-Architect & Systems-Auditor (v1.0.4: Inyección de Dependencias, DAOs Modulares, l10n y Result Type)
+- [x] (Backend-Architect) **Mejora 1 (Inyección de Dependencias Formal):** Adopción de `get_it` como Service Locator centralizado (`lib/core/di/service_locator.dart`), registrando interfaces desacopladas (`IDatabaseService`, `IImageProcessingService`, `IMealDao`, `IWeightLogDao`, `IUserProfileDao`, `IPantryDao`) y permitiendo inyección por constructor en `MealController` y `SettingsController`, preservando compatibilidad transparente con accesores `.instance`.
+- [x] (Backend-Architect) **Mejora 2 (Modularización de Servicios < 300 LoC):** Descomposición de `DatabaseService` (previamente 648 LoC) en DAOs especializados (`MealDao`, `WeightLogDao`, `UserProfileDao`, `PantryDao`) y extracción de `DatabaseConnectionFactory` y `DatabaseSchema`, dejando `DatabaseService` en 217 LoC. Descomposición de `ImageProcessingService` (previamente 648 LoC) en `MealImageFileNamer` (229 LoC) y `MealImageStorageResolver` (153 LoC), dejando el servicio en 265 LoC.
+- [x] (Frontend-UI & Backend-Architect) **Mejora 3 (Localización e Internacionalización):** Configuración de `flutter_localizations` y `l10n.yaml`, creación de catálogos bilingües `app_es.arb` y `app_en.arb`, implementación de `AppLocalizations` (`app_localizations.dart`, `app_localizations_es.dart`, `app_localizations_en.dart`) e integración nativa en `NutriTrackerApp` (`lib/main.dart`).
+- [x] (Backend-Architect) **Mejora 4 (Tipado de Errores Result / Either):** Implementación de tipo funcional `Result<T, Failure>` y jerarquía sellada `Failure` (`DatabaseFailure`, `AiServiceFailure`, `NetworkFailure`, etc.) en Dart 3 exhaustivo con combinadores `fold`, `map`, `flatMap`, `guardAsync` y métodos Result en los DAOs especializados.
+- [x] (Systems-Auditor) Creación de 5 nuevas suites de pruebas automatizadas: `test/core/result_test.dart`, `test/core/service_locator_test.dart`, `test/services/daos_test.dart`, `test/services/meal_image_file_namer_test.dart` y `test/l10n/app_localizations_test.dart`.
+- [x] (DevOps-Engineer) Incremento de versión a `1.0.4+1` en `pubspec.yaml`, verificación de 100% de archivos creados y modificados bajo el límite de 300 LoC (< 300 LoC) y actualización de documentación de arquitectura y changelog.
 

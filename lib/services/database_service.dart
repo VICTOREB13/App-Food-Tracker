@@ -1,26 +1,73 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import '../core/interfaces/daos_interfaces.dart';
+import '../core/interfaces/database_service_interface.dart';
 import '../models/meal.dart';
 import '../models/pantry_item.dart';
 import '../models/user_profile.dart';
 import '../models/weight_log.dart';
+import 'daos/database_connection_factory.dart';
+import 'daos/meal_dao.dart';
+import 'daos/pantry_dao.dart';
+import 'daos/user_profile_dao.dart';
+import 'daos/weight_log_dao.dart';
 
-class DatabaseService {
+/// Central database orchestrator managing SQLite lifecycle, WAL configuration, and DAOs.
+class DatabaseService implements IDatabaseService {
   static DatabaseService? _instance;
   static Database? _database;
   static Future<Database>? _initFuture;
 
-  DatabaseService._();
+  late final IMealDao _mealDao;
+  late final IWeightLogDao _weightLogDao;
+  late final IUserProfileDao _userProfileDao;
+  late final IPantryDao _pantryDao;
 
+  DatabaseService._() {
+    _mealDao = MealDao(() => database);
+    _weightLogDao = WeightLogDao(() => database);
+    _userProfileDao = UserProfileDao(() => database);
+    _pantryDao = PantryDao(() => database);
+  }
+
+  /// Optional constructor allowing dependency injection of custom DAOs.
+  DatabaseService({
+    IMealDao? mealDao,
+    IWeightLogDao? weightLogDao,
+    IUserProfileDao? userProfileDao,
+    IPantryDao? pantryDao,
+  }) {
+    _mealDao = mealDao ?? MealDao(() => database);
+    _weightLogDao = weightLogDao ?? WeightLogDao(() => database);
+    _userProfileDao = userProfileDao ?? UserProfileDao(() => database);
+    _pantryDao = pantryDao ?? PantryDao(() => database);
+  }
+
+  /// Global accessor maintaining backwards compatibility while allowing DI overrides.
   static DatabaseService get instance {
     _instance ??= DatabaseService._();
     return _instance!;
   }
+
+  @visibleForTesting
+  static void setMockInstance(DatabaseService mock) => _instance = mock;
+
+  @visibleForTesting
+  static void resetInstance() => _instance = null;
+
+  @override
+  IMealDao get mealDao => _mealDao;
+
+  @override
+  IWeightLogDao get weightLogDao => _weightLogDao;
+
+  @override
+  IUserProfileDao get userProfileDao => _userProfileDao;
+
+  @override
+  IPantryDao get pantryDao => _pantryDao;
 
   @visibleForTesting
   void setDatabaseForTesting(Database db) {
@@ -37,14 +84,12 @@ class DatabaseService {
     _initFuture = null;
   }
 
+  @override
   Future<Database> get database async {
-    if (_database != null && _database!.isOpen) {
-      return _database!;
-    }
-    if (_initFuture != null) {
-      return await _initFuture!;
-    }
-    _initFuture = _initDatabase();
+    if (_database != null && _database!.isOpen) return _database!;
+    if (_initFuture != null) return await _initFuture!;
+
+    _initFuture = DatabaseConnectionFactory.openFoodTrackerDatabase();
     try {
       _database = await _initFuture!;
       return _database!;
@@ -54,558 +99,83 @@ class DatabaseService {
     }
   }
 
-  Future<void> init() async {
-    await database;
-  }
+  @override
+  Future<void> init() async => await database;
 
-  Future<String> _getDatabasePath() async {
-    if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
-      final directory = await getApplicationDocumentsDirectory();
-      try {
-        final dir = Directory(directory.path);
-        if (!await dir.exists()) {
-          await dir.create(recursive: true);
-        }
-      } catch (_) {}
-      return p.join(directory.path, 'app_food_tracker.db');
-    } else {
-      try {
-        final databasesPath = await getDatabasesPath();
-        try {
-          final dir = Directory(databasesPath);
-          if (!await dir.exists()) {
-            await dir.create(recursive: true);
-          }
-        } catch (_) {}
-        return p.join(databasesPath, 'app_food_tracker.db');
-      } catch (e) {
-        debugPrint('Warning: getDatabasesPath failed ($e), falling back to getApplicationDocumentsDirectory');
-        final directory = await getApplicationDocumentsDirectory();
-        try {
-          final dir = Directory(directory.path);
-          if (!await dir.exists()) {
-            await dir.create(recursive: true);
-          }
-        } catch (_) {}
-        return p.join(directory.path, 'app_food_tracker.db');
-      }
-    }
-  }
+  // Delegations to specialized DAOs
+  @override
+  Future<int> insertMeal(Meal meal) => _mealDao.insertMeal(meal);
+  @override
+  Future<int> upsertMeal(Meal meal) => _mealDao.upsertMeal(meal);
+  @override
+  Future<int> updateMeal(Meal meal) => _mealDao.updateMeal(meal);
+  @override
+  Future<int> deleteMeal(String id) => _mealDao.deleteMeal(id);
+  @override
+  Future<Meal?> getMealById(String id) => _mealDao.getMealById(id);
+  @override
+  Future<List<Meal>> getMealsForDay(DateTime day) => _mealDao.getMealsForDay(day);
+  @override
+  Future<List<Meal>> getAllMeals() => _mealDao.getAllMeals();
+  @override
+  Future<List<Meal>> getMealsByRange(DateTime s, DateTime e) => _mealDao.getMealsByRange(s, e);
+  @override
+  Future<Meal?> getMealByImagePath(String p) => _mealDao.getMealByImagePath(p);
+  @override
+  Future<List<String>> getDistinctMealDates() => _mealDao.getDistinctMealDates();
+  @override
+  Future<int> clearMealImagePath(String mealId) => _mealDao.clearMealImagePath(mealId);
+  @override
+  Future<List<Meal>> getMealsOlderThanWithImages(DateTime c) =>
+      _mealDao.getMealsOlderThanWithImages(c);
 
-  Future<Database> _initDatabase() async {
-    if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
-      sqfliteFfiInit();
-      databaseFactory = databaseFactoryFfi;
-    }
+  @override
+  Future<int> insertPantryItem(PantryItem item) => _pantryDao.insertPantryItem(item);
+  @override
+  Future<int> updatePantryItem(PantryItem item) => _pantryDao.updatePantryItem(item);
+  @override
+  Future<int> deletePantryItem(String id) => _pantryDao.deletePantryItem(id);
+  @override
+  Future<List<PantryItem>> getPantryItems({String? query, String? category, bool? onlyFavorites}) =>
+      _pantryDao.getPantryItems(query: query, category: category, onlyFavorites: onlyFavorites);
 
-    final dbPath = await _getDatabasePath();
+  @override
+  Future<int> insertWeightLog(WeightLog log) => _weightLogDao.insertWeightLog(log);
+  @override
+  Future<int> updateWeightLog(WeightLog log) => _weightLogDao.updateWeightLog(log);
+  @override
+  Future<int> deleteWeightLog(String id) => _weightLogDao.deleteWeightLog(id);
+  @override
+  Future<WeightLog?> getWeightLogById(String id) => _weightLogDao.getWeightLogById(id);
+  @override
+  Future<List<WeightLog>> getAllWeightLogs() => _weightLogDao.getAllWeightLogs();
+  @override
+  Future<WeightLog?> getLatestWeightLog() => _weightLogDao.getLatestWeightLog();
+  @override
+  Future<List<WeightLog>> getWeightLogsByRange(DateTime s, DateTime e) =>
+      _weightLogDao.getWeightLogsByRange(s, e);
+  @override
+  Future<List<WeightLog>> getWeightLogsLastDays(int days) =>
+      _weightLogDao.getWeightLogsLastDays(days);
+  @override
+  Future<void> batchUpsertWeightLogs(List<WeightLog> logs) =>
+      _weightLogDao.batchUpsertWeightLogs(logs);
 
-    return await openDatabase(
-      dbPath,
-      version: 2,
-      onConfigure: _onConfigure,
-      onCreate: _onCreate,
-      onUpgrade: _onUpgrade,
-    );
-  }
+  @override
+  Future<int> saveUserProfile(UserProfile profile) => _userProfileDao.saveUserProfile(profile);
+  @override
+  Future<UserProfile?> getUserProfile() => _userProfileDao.getUserProfile();
+  @override
+  Future<int> deleteUserProfile({String id = 'primary'}) =>
+      _userProfileDao.deleteUserProfile(id: id);
 
-  Future<void> _onConfigure(Database db) async {
-    // WAL mode: rawQuery is required because PRAGMA journal_mode returns a row result.
-    // Android SQLiteDatabase.execSQL() throws SQLException if executed as a statement.
-    try {
-      await db.rawQuery('PRAGMA journal_mode = WAL;');
-    } catch (e) {
-      debugPrint('Warning: Failed to set PRAGMA journal_mode: $e');
-    }
-
-    try {
-      await db.execute('PRAGMA synchronous = NORMAL;');
-    } catch (e) {
-      debugPrint('Warning: Failed to set PRAGMA synchronous: $e');
-    }
-
-    try {
-      await db.execute('PRAGMA foreign_keys = ON;');
-    } catch (e) {
-      debugPrint('Warning: Failed to set PRAGMA foreign_keys: $e');
-    }
-  }
-
-  Future<void> _onCreate(Database db, int version) async {
-    await _createMealsTable(db);
-    await _createMealItemsTable(db);
-    await _createPantryTable(db);
-    await _createWeightLogsTable(db);
-    await _createUserProfileTable(db);
-    await _createIndices(db);
-  }
-
-  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 2) {
-      await _createWeightLogsTable(db);
-      await _createUserProfileTable(db);
-      await db.execute('CREATE INDEX IF NOT EXISTS idx_weight_logs_date ON weight_logs(date);');
-    }
-  }
-
-  Future<void> _createMealsTable(DatabaseExecutor db) async {
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS meals (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        meal_type TEXT NOT NULL,
-        date TEXT NOT NULL,
-        image_path TEXT,
-        calories REAL NOT NULL,
-        protein REAL NOT NULL,
-        carbs REAL NOT NULL,
-        fat REAL NOT NULL,
-        notes TEXT,
-        ai_breakdown_json TEXT
-      )
-    ''');
-  }
-
-  Future<void> _createMealItemsTable(DatabaseExecutor db) async {
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS meal_items (
-        id TEXT PRIMARY KEY,
-        meal_id TEXT NOT NULL,
-        name TEXT NOT NULL,
-        calories REAL NOT NULL,
-        protein REAL NOT NULL,
-        carbs REAL NOT NULL,
-        fat REAL NOT NULL,
-        FOREIGN KEY (meal_id) REFERENCES meals (id) ON DELETE CASCADE
-      )
-    ''');
-    await db.execute('CREATE INDEX IF NOT EXISTS idx_meal_items_meal_id ON meal_items(meal_id);');
-  }
-
-  Future<void> _createPantryTable(DatabaseExecutor db) async {
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS pantry_items (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        brand TEXT,
-        category TEXT,
-        calories REAL NOT NULL,
-        protein REAL NOT NULL,
-        carbs REAL NOT NULL,
-        fat REAL NOT NULL,
-        is_favorite INTEGER NOT NULL DEFAULT 0
-      )
-    ''');
-  }
-
-  Future<void> _createWeightLogsTable(DatabaseExecutor db) async {
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS weight_logs (
-        id TEXT PRIMARY KEY,
-        date TEXT NOT NULL,
-        weight REAL NOT NULL,
-        notes TEXT
-      )
-    ''');
-  }
-
-  Future<void> _createUserProfileTable(DatabaseExecutor db) async {
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS user_profile (
-        id TEXT PRIMARY KEY,
-        name TEXT,
-        age INTEGER NOT NULL,
-        gender TEXT NOT NULL,
-        height REAL NOT NULL,
-        weight REAL NOT NULL,
-        activity_level TEXT NOT NULL,
-        body_goal TEXT NOT NULL,
-        estimated_steps INTEGER NOT NULL DEFAULT 8000,
-        bmr REAL NOT NULL,
-        tdee REAL NOT NULL,
-        target_calories REAL NOT NULL,
-        target_protein REAL NOT NULL,
-        target_carbs REAL NOT NULL,
-        target_fat REAL NOT NULL,
-        master_prompt TEXT,
-        updated_at TEXT NOT NULL
-      )
-    ''');
-  }
-
-  Future<void> _createIndices(DatabaseExecutor db) async {
-    await db.execute('CREATE INDEX IF NOT EXISTS idx_meals_date ON meals(date);');
-    await db.execute('CREATE INDEX IF NOT EXISTS idx_meals_meal_type ON meals(meal_type);');
-    await db.execute('CREATE INDEX IF NOT EXISTS idx_meals_date_type ON meals(date, meal_type);');
-    await db.execute('CREATE INDEX IF NOT EXISTS idx_pantry_name ON pantry_items(name COLLATE NOCASE);');
-    await db.execute('CREATE INDEX IF NOT EXISTS idx_pantry_category ON pantry_items(category);');
-    await db.execute('CREATE INDEX IF NOT EXISTS idx_pantry_favorite ON pantry_items(is_favorite);');
-    await db.execute('CREATE INDEX IF NOT EXISTS idx_weight_logs_date ON weight_logs(date);');
-  }
-
-  // ==========================================
-  // MEALS OPERATIONS
-  // ==========================================
-
-  Future<int> insertMeal(Meal meal) async {
-    return await upsertMeal(meal);
-  }
-
-  Future<int> upsertMeal(Meal meal) async {
-    final db = await database;
-    return await db.transaction((txn) async {
-      final result = await txn.insert(
-        'meals',
-        meal.toSqliteMap(),
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
-      final tableCheck = await txn.rawQuery(
-        "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'meal_items';",
-      );
-      if (tableCheck.isNotEmpty) {
-        await txn.delete('meal_items', where: 'meal_id = ?', whereArgs: [meal.id]);
-        for (final item in meal.items) {
-          await txn.insert(
-            'meal_items',
-            {
-              'id': item.id,
-              'meal_id': meal.id,
-              'name': item.name,
-              'calories': item.calories,
-              'protein': item.protein,
-              'carbs': item.carbs,
-              'fat': item.fat,
-            },
-            conflictAlgorithm: ConflictAlgorithm.replace,
-          );
-        }
-      }
-      return result;
-    });
-  }
-
-  Future<int> updateMeal(Meal meal) async {
-    return await upsertMeal(meal);
-  }
-
-  Future<int> deleteMeal(String id) async {
-    final db = await database;
-    return await db.delete('meals', where: 'id = ?', whereArgs: [id]);
-  }
-
-  Future<Meal?> getMealById(String id) async {
-    final db = await database;
-    final results = await db.query(
-      'meals',
-      where: 'id = ?',
-      whereArgs: [id],
-      limit: 1,
-    );
-    if (results.isEmpty) return null;
-    return Meal.fromSqliteMap(results.first);
-  }
-
-  Future<List<Meal>> getMealsForDay(DateTime day) async {
-    final db = await database;
-    final startOfDay = DateTime(day.year, day.month, day.day).toIso8601String();
-    final nextDay = DateTime(day.year, day.month, day.day + 1).toIso8601String();
-
-    final results = await db.query(
-      'meals',
-      where: 'date >= ? AND date < ?',
-      whereArgs: [startOfDay, nextDay],
-      orderBy: 'date ASC',
-    );
-    return results.map((m) => Meal.fromSqliteMap(m)).toList();
-  }
-
-  Future<List<Meal>> getAllMeals() async {
-    final db = await database;
-    final results = await db.query('meals', orderBy: 'date DESC');
-    return results.map((m) => Meal.fromSqliteMap(m)).toList();
-  }
-
-  /// Retrieves meals within a specific date range directly from SQLite using idx_meals_date.
-  Future<List<Meal>> getMealsByRange(DateTime start, DateTime end) async {
-    final db = await database;
-    final startIso = DateTime(start.year, start.month, start.day).toIso8601String();
-    final endExclusive = DateTime(end.year, end.month, end.day).add(const Duration(days: 1)).toIso8601String();
-
-    final results = await db.query(
-      'meals',
-      where: 'date >= ? AND date < ?',
-      whereArgs: [startIso, endExclusive],
-      orderBy: 'date ASC',
-    );
-    return results.map((m) => Meal.fromSqliteMap(m)).toList();
-  }
-
-  /// Retrieves a meal associated with an image file path.
-  Future<Meal?> getMealByImagePath(String imagePath) async {
-    final db = await database;
-    final results = await db.query(
-      'meals',
-      where: 'image_path = ?',
-      whereArgs: [imagePath],
-      limit: 1,
-    );
-    if (results.isEmpty) return null;
-    return Meal.fromSqliteMap(results.first);
-  }
-
-  Future<List<String>> getDistinctMealDates() async {
-    final db = await database;
-    final results = await db.rawQuery(
-      'SELECT DISTINCT substr(date, 1, 10) as meal_date FROM meals ORDER BY meal_date DESC',
-    );
-    return results
-        .map((r) => r['meal_date'] as String?)
-        .whereType<String>()
-        .toList();
-  }
-
-  Future<int> clearMealImagePath(String mealId) async {
-    final db = await database;
-    return await db.update(
-      'meals',
-      {'image_path': null},
-      where: 'id = ?',
-      whereArgs: [mealId],
-    );
-  }
-
-  Future<List<Meal>> getMealsOlderThanWithImages(DateTime cutoffDate) async {
-    final db = await database;
-    final results = await db.query(
-      'meals',
-      where: 'date < ? AND image_path IS NOT NULL',
-      whereArgs: [cutoffDate.toIso8601String()],
-      orderBy: 'date ASC',
-    );
-    return results.map((m) => Meal.fromSqliteMap(m)).toList();
-  }
-
-  // ==========================================
-  // PANTRY OPERATIONS
-  // ==========================================
-
-  Future<int> insertPantryItem(PantryItem item) async {
-    final db = await database;
-    return await db.insert(
-      'pantry_items',
-      item.toSqliteMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
-  }
-
-  Future<int> updatePantryItem(PantryItem item) async {
-    final db = await database;
-    return await db.update(
-      'pantry_items',
-      item.toSqliteMap(),
-      where: 'id = ?',
-      whereArgs: [item.id],
-    );
-  }
-
-  Future<int> deletePantryItem(String id) async {
-    final db = await database;
-    return await db.delete('pantry_items', where: 'id = ?', whereArgs: [id]);
-  }
-
-  Future<List<PantryItem>> getPantryItems({
-    String? query,
-    String? category,
-    bool? onlyFavorites,
-  }) async {
-    final db = await database;
-    final whereClauses = <String>[];
-    final whereArgs = <dynamic>[];
-
-    if (query != null && query.trim().isNotEmpty) {
-      whereClauses.add('(name LIKE ? OR brand LIKE ?)');
-      whereArgs.add('%${query.trim()}%');
-      whereArgs.add('%${query.trim()}%');
-    }
-
-    if (category != null && category.trim().isNotEmpty) {
-      whereClauses.add('category = ?');
-      whereArgs.add(category.trim());
-    }
-
-    if (onlyFavorites == true) {
-      whereClauses.add('is_favorite = 1');
-    }
-
-    final whereString = whereClauses.isEmpty ? null : whereClauses.join(' AND ');
-    final results = await db.query(
-      'pantry_items',
-      where: whereString,
-      whereArgs: whereArgs.isEmpty ? null : whereArgs,
-      orderBy: 'is_favorite DESC, name ASC',
-    );
-
-    return results.map((p) => PantryItem.fromSqliteMap(p)).toList();
-  }
-
-  // ==========================================
-  // WEIGHT LOGS OPERATIONS (PHASE 2 - MILESTONE 1)
-  // ==========================================
-
-  Future<int> insertWeightLog(WeightLog log) async {
-    final db = await database;
-    return await db.insert(
-      'weight_logs',
-      log.toSqliteMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
-  }
-
-  Future<int> updateWeightLog(WeightLog log) async {
-    final db = await database;
-    return await db.update(
-      'weight_logs',
-      log.toSqliteMap(),
-      where: 'id = ?',
-      whereArgs: [log.id],
-    );
-  }
-
-  Future<int> deleteWeightLog(String id) async {
-    final db = await database;
-    return await db.delete(
-      'weight_logs',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-  }
-
-  Future<WeightLog?> getWeightLogById(String id) async {
-    final db = await database;
-    try {
-      final results = await db.query(
-        'weight_logs',
-        where: 'id = ?',
-        whereArgs: [id],
-        limit: 1,
-      );
-      if (results.isEmpty) return null;
-      return WeightLog.fromSqliteMap(results.first);
-    } catch (_) {
-      return null;
-    }
-  }
-
-  Future<List<WeightLog>> getAllWeightLogs() async {
-    final db = await database;
-    try {
-      final results = await db.query(
-        'weight_logs',
-        orderBy: 'date ASC',
-      );
-      return results.map((m) => WeightLog.fromSqliteMap(m)).toList();
-    } catch (_) {
-      return [];
-    }
-  }
-
-  Future<WeightLog?> getLatestWeightLog() async {
-    final db = await database;
-    try {
-      final results = await db.query(
-        'weight_logs',
-        orderBy: 'date DESC',
-        limit: 1,
-      );
-      if (results.isEmpty) return null;
-      return WeightLog.fromSqliteMap(results.first);
-    } catch (_) {
-      return null;
-    }
-  }
-
-  Future<List<WeightLog>> getWeightLogsByRange(DateTime startDate, DateTime endDate) async {
-    final db = await database;
-    try {
-      final results = await db.query(
-        'weight_logs',
-        where: 'date >= ? AND date <= ?',
-        whereArgs: [startDate.toIso8601String(), endDate.toIso8601String()],
-        orderBy: 'date ASC',
-      );
-      return results.map((m) => WeightLog.fromSqliteMap(m)).toList();
-    } catch (_) {
-      return [];
-    }
-  }
-
-  Future<List<WeightLog>> getWeightLogsLastDays(int days) async {
-    final now = DateTime.now();
-    final startDate = now.subtract(Duration(days: days));
-    return await getWeightLogsByRange(startDate, now);
-  }
-
-  Future<void> batchUpsertWeightLogs(List<WeightLog> logs) async {
-    if (logs.isEmpty) return;
-    final db = await database;
-    await db.transaction((txn) async {
-      final batch = txn.batch();
-      for (final log in logs) {
-        batch.insert(
-          'weight_logs',
-          log.toSqliteMap(),
-          conflictAlgorithm: ConflictAlgorithm.replace,
-        );
-      }
-      await batch.commit(noResult: true);
-    });
-  }
-
-  // ==========================================
-  // USER PROFILE OPERATIONS (PHASE 2 - MILESTONE 1)
-  // ==========================================
-
-  Future<int> saveUserProfile(UserProfile profile) async {
-    final db = await database;
-    return await db.insert(
-      'user_profile',
-      profile.toSqliteMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
-  }
-
-  Future<UserProfile?> getUserProfile() async {
-    final db = await database;
-    try {
-      final results = await db.query(
-        'user_profile',
-        limit: 1,
-      );
-      if (results.isEmpty) return null;
-      return UserProfile.fromSqliteMap(results.first);
-    } catch (_) {
-      return null;
-    }
-  }
-
-  Future<int> deleteUserProfile({String id = 'primary'}) async {
-    final db = await database;
-    return await db.delete(
-      'user_profile',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-  }
-
-  // ==========================================
-  // MAINTENANCE & TELEMETRY
-  // ==========================================
-
+  @override
   Future<void> executeVacuum() async {
     final db = await database;
     await db.execute('VACUUM;');
   }
 
+  @override
   Future<Map<String, dynamic>> getDatabaseStats() async {
     final db = await database;
     final mealsCountRes = await db.rawQuery('SELECT COUNT(*) as count FROM meals;');
@@ -628,7 +198,7 @@ class DatabaseService {
 
     int fileSizeBytes = 0;
     try {
-      final dbPath = await _getDatabasePath();
+      final dbPath = await DatabaseConnectionFactory.getDatabasePath();
       final file = File(dbPath);
       if (await file.exists()) {
         fileSizeBytes = await file.length();

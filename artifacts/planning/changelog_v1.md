@@ -18,6 +18,35 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [1.0.4] - 2026-09-13
+
+### Added
+- **Inyección de Dependencias Formal con Service Locator (`GetIt`):**
+  - Implementación de `setupServiceLocator()` en `lib/core/di/service_locator.dart` registrando contratos desacoplados e instancias singleton de servicios, DAOs y controladores.
+  - Creación de interfaces de dominio en `lib/core/interfaces/` (`IDatabaseService`, `IImageProcessingService`, `IMealDao`, `IWeightLogDao`, `IUserProfileDao`, `IPantryDao`).
+  - Inyección por constructor en `MealController` y `SettingsController` permitiendo pruebas unitarias completamente aisladas con mocks sin acoplamiento global, manteniendo preservada la compatibilidad transparente con accesores `.instance`.
+- **DAOs Especializados y Modularización Estricta (< 300 LoC):**
+  - Descomposición de `DatabaseService` (previamente 648 LoC) en DAOs atómicos: `MealDao` (220 LoC), `WeightLogDao` (185 LoC), `UserProfileDao` (83 LoC) y `PantryDao` (119 LoC), acompañados por `DatabaseSchema` (116 LoC) y `DatabaseConnectionFactory` (81 LoC), reduciendo el orquestador `DatabaseService` a 217 LoC.
+  - Descomposición de `ImageProcessingService` (previamente 648 LoC) en `MealImageFileNamer` (229 LoC), `MealImageStorageResolver` (153 LoC) y `MealImageFileInfo` (59 LoC), dejando `ImageProcessingService` en 265 LoC.
+  - 100% de los 25 archivos creados y modificados para la iteración cumplen con la directriz de ingeniería de permanecer estrictamente por debajo de las 300 líneas de código (< 300 LoC).
+- **Internacionalización y Localización Nativa (`l10n` / `i18n`):**
+  - Soporte multi-idioma oficial mediante `flutter_localizations`, `intl` y configuración de `l10n.yaml`.
+  - Creación de diccionarios completos en español (`lib/l10n/app_es.arb`) e inglés (`lib/l10n/app_en.arb`).
+  - Implementación de `AppLocalizations` con `LocalizationsDelegate` e integración directa en `NutriTrackerApp` (`lib/main.dart`) para desacoplar el texto de los componentes visuales.
+- **Manejo Funcional de Errores con Patrón `Result<T, Failure>`:**
+  - Tipado funcional inspirado en Rust con clases selladas en Dart 3: `Result<T, E extends Failure>` (`Success`, `FailureResult`) en `lib/core/errors/result.dart`.
+  - Jerarquía exhaustiva de fallos tipados: `DatabaseFailure`, `AiServiceFailure`, `NetworkFailure`, `ValidationFailure`, `StorageFailure`, `ImageProcessingFailure` y `UnknownFailure` en `lib/core/errors/failures.dart`.
+  - Combinadores funcionales `fold`, `map`, `mapError`, `flatMap`, `getOrThrow`, `getOrDefault` y capturadores seguros `Result.guard` y `Result.guardAsync`.
+  - APIs funcionales añadidas a todos los DAOs (`upsertMealResult`, `getMealByIdResult`, `insertWeightLogResult`, `saveUserProfileResult`, etc.).
+- **Nuevas Suites de Pruebas Automatizadas:**
+  - `test/core/result_test.dart` (validación de pattern matching, combinadores y guardas).
+  - `test/core/service_locator_test.dart` (validación de registro, resolución y reseteo).
+  - `test/services/daos_test.dart` (validación CRUD y Result en SQLite in-memory de todos los DAOs).
+  - `test/services/meal_image_file_namer_test.dart` (validación de nomenclatura y filtros).
+  - `test/l10n/app_localizations_test.dart` (validación de diccionarios español e inglés).
+
+---
+
 ## [1.0.3] - 2026-09-13
 
 ### Fixed
