@@ -31,19 +31,21 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
   - 100% de los 25 archivos creados y modificados para la iteración cumplen con la directriz de ingeniería de permanecer estrictamente por debajo de las 300 líneas de código (< 300 LoC).
 - **Internacionalización y Localización Nativa (`l10n` / `i18n`):**
   - Soporte multi-idioma oficial mediante `flutter_localizations`, `intl` y configuración de `l10n.yaml`.
-  - Creación de diccionarios completos en español (`lib/l10n/app_es.arb`) e inglés (`lib/l10n/app_en.arb`).
-  - Implementación de `AppLocalizations` con `LocalizationsDelegate` e integración directa en `NutriTrackerApp` (`lib/main.dart`) para desacoplar el texto de los componentes visuales.
+  - Creación de diccionarios completos en español (`lib/l10n/app_es.arb`) e inglés (`lib/l10n/app_en.arb`) con claves para navegación, resumen diario, métricas y diálogos.
+  - Implementación de `AppLocalizations` con `LocalizationsDelegate` e integración directa en `NutriTrackerApp` (`lib/main.dart`) con `localeResolutionCallback` defensivo que garantiza fallback a español en locales no soportados (ej. `fr`, `ja`).
+  - Adopción activa de `AppLocalizations.of(context)` en widgets (`OnboardingBottomNav` para `saveAndStart`, `back`, `continueButton`, `QuickMealDialog` para `cancel`, `save`, etc.) con fallbacks defensivos para compatibilidad con pruebas unitarias sin delegados.
 - **Manejo Funcional de Errores con Patrón `Result<T, Failure>`:**
   - Tipado funcional inspirado en Rust con clases selladas en Dart 3: `Result<T, E extends Failure>` (`Success`, `FailureResult`) en `lib/core/errors/result.dart`.
   - Jerarquía exhaustiva de fallos tipados: `DatabaseFailure`, `AiServiceFailure`, `NetworkFailure`, `ValidationFailure`, `StorageFailure`, `ImageProcessingFailure` y `UnknownFailure` en `lib/core/errors/failures.dart`.
   - Combinadores funcionales `fold`, `map`, `mapError`, `flatMap`, `getOrThrow`, `getOrDefault` y capturadores seguros `Result.guard` y `Result.guardAsync`.
-  - APIs funcionales añadidas a todos los DAOs (`upsertMealResult`, `getMealByIdResult`, `insertWeightLogResult`, `saveUserProfileResult`, etc.).
+  - APIs funcionales añadidas a todos los DAOs (`upsertMealResult`, `getMealByIdResult`, `insertWeightLogResult`, `saveUserProfileResult`, etc.) y delegadas convenientemente en el orquestador `IDatabaseService` y `DatabaseService`.
 - **Nuevas Suites de Pruebas Automatizadas:**
   - `test/core/result_test.dart` (validación de pattern matching, combinadores y guardas).
-  - `test/core/service_locator_test.dart` (validación de registro, resolución y reseteo).
-  - `test/services/daos_test.dart` (validación CRUD y Result en SQLite in-memory de todos los DAOs).
+  - `test/core/service_locator_test.dart` (validación de registro, resolución, fábricas parametrizadas y reseteo).
+  - `test/services/daos_test.dart` (validación CRUD y Result en SQLite in-memory de todos los DAOs y DatabaseService).
   - `test/services/meal_image_file_namer_test.dart` (validación de nomenclatura y filtros).
-  - `test/l10n/app_localizations_test.dart` (validación de diccionarios español e inglés).
+  - `test/l10n/app_localizations_test.dart` (validación de diccionarios español e inglés y nuevas claves de acción).
+  - `test/widgets/nutri_tracker_app_test.dart` (validación de inicio en español, inglés y fallback ante locales no soportados).
 
 ---
 

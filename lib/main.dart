@@ -59,10 +59,12 @@ void main() async {
 
 class NutriTrackerApp extends StatelessWidget {
   final bool hasCompletedOnboarding;
+  final Locale? locale;
 
   const NutriTrackerApp({
     super.key,
     this.hasCompletedOnboarding = false,
+    this.locale,
   });
 
   @override
@@ -78,7 +80,18 @@ class NutriTrackerApp extends StatelessWidget {
           darkTheme: AppTheme.darkTheme,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          locale: const Locale('es'),
+          locale: locale,
+          localeResolutionCallback: (deviceLocale, supportedLocales) {
+            if (locale != null) return locale;
+            if (deviceLocale != null) {
+              for (final supported in supportedLocales) {
+                if (supported.languageCode == deviceLocale.languageCode) {
+                  return supported;
+                }
+              }
+            }
+            return const Locale('es');
+          },
           home: hasCompletedOnboarding
               ? const DashboardScreen()
               : const OnboardingScreen(),

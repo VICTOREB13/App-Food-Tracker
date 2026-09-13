@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../core/errors/failures.dart';
+import '../core/errors/result.dart';
 import '../core/interfaces/daos_interfaces.dart';
 import '../core/interfaces/database_service_interface.dart';
 import '../models/meal.dart';
@@ -168,6 +170,50 @@ class DatabaseService implements IDatabaseService {
   @override
   Future<int> deleteUserProfile({String id = 'primary'}) =>
       _userProfileDao.deleteUserProfile(id: id);
+
+  @override
+  Future<Result<int, DatabaseFailure>> upsertMealResult(Meal meal) =>
+      _mealDao.upsertMealResult(meal);
+  @override
+  Future<Result<Meal?, DatabaseFailure>> getMealByIdResult(String id) =>
+      _mealDao.getMealByIdResult(id);
+  @override
+  Future<Result<List<Meal>, DatabaseFailure>> getMealsForDayResult(DateTime day) =>
+      _mealDao.getMealsForDayResult(day);
+  @override
+  Future<Result<List<Meal>, DatabaseFailure>> getMealsByRangeResult(DateTime s, DateTime e) =>
+      _mealDao.getMealsByRangeResult(s, e);
+
+  @override
+  Future<Result<int, DatabaseFailure>> insertWeightLogResult(WeightLog log) =>
+      _weightLogDao.insertWeightLogResult(log);
+  @override
+  Future<Result<WeightLog?, DatabaseFailure>> getLatestWeightLogResult() =>
+      _weightLogDao.getLatestWeightLogResult();
+  @override
+  Future<Result<List<WeightLog>, DatabaseFailure>> getWeightLogsByRangeResult(
+    DateTime s,
+    DateTime e,
+  ) =>
+      _weightLogDao.getWeightLogsByRangeResult(s, e);
+
+  @override
+  Future<Result<int, DatabaseFailure>> saveUserProfileResult(UserProfile profile) =>
+      _userProfileDao.saveUserProfileResult(profile);
+  @override
+  Future<Result<UserProfile?, DatabaseFailure>> getUserProfileResult() =>
+      _userProfileDao.getUserProfileResult();
+
+  @override
+  Future<Result<int, DatabaseFailure>> insertPantryItemResult(PantryItem item) =>
+      _pantryDao.insertPantryItemResult(item);
+  @override
+  Future<Result<List<PantryItem>, DatabaseFailure>> getPantryItemsResult({
+    String? query,
+    String? category,
+    bool? onlyFavorites,
+  }) =>
+      _pantryDao.getPantryItemsResult(query: query, category: category, onlyFavorites: onlyFavorites);
 
   @override
   Future<void> executeVacuum() async {

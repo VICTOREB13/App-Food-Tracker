@@ -8,6 +8,7 @@ import 'package:food_tracker/core/interfaces/image_processing_service_interface.
 import 'package:food_tracker/services/analysis_queue_service.dart';
 import 'package:food_tracker/services/backup_service.dart';
 import 'package:food_tracker/services/database_service.dart';
+import 'package:food_tracker/services/gemini_vision_service.dart';
 import 'package:food_tracker/services/image_processing_service.dart';
 import 'package:food_tracker/services/secure_storage_service.dart';
 import 'package:food_tracker/services/theme_manager.dart';
@@ -39,6 +40,7 @@ void main() {
       expect(getIt.isRegistered<ThemeManager>(), isTrue);
       expect(getIt.isRegistered<AnalysisQueueService>(), isTrue);
       expect(getIt.isRegistered<BackupService>(), isTrue);
+      expect(getIt.isRegistered<GeminiVisionService>(), isTrue);
     });
 
     test('getIt resolves valid instances matching singleton accessors', () {
@@ -55,6 +57,10 @@ void main() {
 
       final settingsCtrl = getIt<SettingsController>();
       expect(settingsCtrl, equals(SettingsController.instance));
+
+      final vision = getIt<GeminiVisionService>(param1: 'dummy-key', param2: 'dummy-model');
+      expect(vision.apiKey, equals('dummy-key'));
+      expect(vision.modelName, equals('dummy-model'));
     });
 
     test('setupServiceLocator is idempotent when called multiple times', () {

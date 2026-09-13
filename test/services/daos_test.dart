@@ -8,6 +8,7 @@ import 'package:food_tracker/services/daos/meal_dao.dart';
 import 'package:food_tracker/services/daos/pantry_dao.dart';
 import 'package:food_tracker/services/daos/user_profile_dao.dart';
 import 'package:food_tracker/services/daos/weight_log_dao.dart';
+import 'package:food_tracker/services/database_service.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
@@ -130,6 +131,37 @@ void main() {
       final items = await pantryDao.getPantryItems(onlyFavorites: true);
       expect(items.length, equals(1));
       expect(items.first.name, equals('Avena en hojuelas'));
+    });
+
+    test('DatabaseService delegates Result methods cleanly', () async {
+      final dbService = DatabaseService(
+        mealDao: mealDao,
+        weightLogDao: weightLogDao,
+        userProfileDao: userProfileDao,
+        pantryDao: pantryDao,
+      );
+
+      final meal = Meal(
+        id: 'meal-202',
+        name: 'Batido de Proteína',
+        mealType: 'Merienda',
+        date: DateTime(2026, 9, 13, 16, 0),
+        calories: 220,
+        protein: 30,
+        carbs: 10,
+        fat: 4,
+      );
+
+      final res = await dbService.upsertMealResult(meal);
+      expect(res.isSuccess, isTrue);
+
+      final fetched = await dbService.getMealByIdResult('meal-202');
+      expect(fetched.isSuccess, isTrue);
+      expect(fetched.dataOrNull?.name, equals('Batido de Proteína'));
+
+      final mealsDay = await dbService.getMealsForDayResult(DateTime(2026, 9, 13));
+      expect(mealsDay.isSuccess, isTrue);
+      expect(mealsDay.dataOrNull?.any((m) => m.id == 'meal-202'), isTrue);
     });
   });
 }

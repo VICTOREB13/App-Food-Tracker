@@ -255,9 +255,9 @@ Se ejecutó la inspección estricta de todos los artefactos en `artifacts/` conf
 
 ## 📋 7. Certificación Consolidada del Quality Gate
 
-| Criterio Evaluado | Meta Exigida | Estado Real (v1.0.3) | Veredicto |
+| Criterio Evaluado | Meta Exigida | Estado Real (v1.0.4) | Veredicto |
 | :--- | :--- | :--- | :--- |
-| **Pruebas Automatizadas** | 100% de suites en verde | 48 suites / 340+ pruebas sin errores | **PASS** |
+| **Pruebas Automatizadas** | 100% de suites en verde | 53 suites / 370+ pruebas sin errores | **PASS** |
 | **Consultas N+1** | 0 consultas recurrentes | 0 consultas N+1 detectadas | **PASS** |
 | **Seguridad de API Keys** | Cifrado por hardware (BYOK) | `flutter_secure_storage` (Gemini & USDA) | **PASS** |
 | **Firma Permanente** | RSA 2048 con validez > 2050 | Keystore válido hasta 2056 | **PASS** |

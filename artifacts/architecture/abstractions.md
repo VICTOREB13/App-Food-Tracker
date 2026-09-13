@@ -358,7 +358,7 @@ MetabolicCalculator.calculateProfile
 
 ### 1. Inyección de Dependencias y Service Locator (`lib/core/di/service_locator.dart`)
 - **`GetIt getIt`**: Instancia central del Service Locator para desacoplar implementaciones concretas de sus contratos.
-- **`setupServiceLocator({bool isTesting = false})`**: Registra `IDatabaseService`, `IImageProcessingService`, DAOs (`IMealDao`, `IWeightLogDao`, etc.) y controladores.
+- **`setupServiceLocator({bool isTesting = false})`**: Registra `IDatabaseService`, `IImageProcessingService`, DAOs (`IMealDao`, `IWeightLogDao`, etc.), controladores y fábrica parametrizada de `GeminiVisionService`.
 - **`resetServiceLocator()`**: Limpia los registros para garantizar aislamiento total entre pruebas unitarias.
 
 ### 2. Manejo Funcional de Errores: Patrón Result / Either (`lib/core/errors/`)
@@ -366,6 +366,7 @@ MetabolicCalculator.calculateProfile
 - **Métodos Funcionales**: `fold(onSuccess, onFailure)`, `map(fn)`, `flatMap(fn)`, `mapError(fn)`, `getOrThrow()`, `getOrDefault(def)`.
 - **Captura Segura**: `Result.guard(() => syncCode)` y `Result.guardAsync(() => asyncCode)` capturan excepciones y las transforman en fallos de dominio.
 - **Jerarquía `Failure`**: `DatabaseFailure`, `AiServiceFailure`, `NetworkFailure`, `ValidationFailure`, `StorageFailure`, `ImageProcessingFailure`, `UnknownFailure`.
+- **Delegaciones de Dominio**: `IDatabaseService` y `DatabaseService` exponen directamente métodos Result (`upsertMealResult`, `getMealByIdResult`, etc.) delegando a los DAOs especializados.
 
 ### 3. Capa de DAOs Especializados (`lib/services/daos/`)
 - **`MealDao`**: Manejo de persistencia de comidas y alimentos asociados (`meal_items`).
@@ -381,3 +382,5 @@ MetabolicCalculator.calculateProfile
 
 ### 5. Localización e Internacionalización (`lib/l10n/`)
 - **`AppLocalizations`**: Contrato tipado de textos multi-idioma (`app_es.arb` y `app_en.arb`) con delegados `localizationsDelegates` integrados en `NutriTrackerApp`.
+- **`localeResolutionCallback`**: Algoritmo de resolución defensivo que respeta idiomas soportados y redirige de forma segura a español en caso de idiomas no soportados sin lanzar `FlutterError`.
+- **Desacoplamiento de Widgets**: Extracción de textos a `AppLocalizations.of(context)` en componentes clave (`OnboardingBottomNav`, `QuickMealDialog`).

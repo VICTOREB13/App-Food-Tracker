@@ -1,13 +1,13 @@
 ---
 tipo: overview
 proyecto: App_Food_Tracker
-version: v1.0.1
+version: v1.0.4
 estado: activo
-fecha: 2026-09-10
-tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid]
+fecha: 2026-09-13
+tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid, get-it, l10n, result-pattern]
 ---
 
-# 🚀 Visión General del Proyecto: Victor Engineer - Food Tracker
+# 🚀 Visión General del Proyecto: Victor Engineer - Food Tracker (v1.0.4)
 
 > **Mesa de Control (Project-Planner):** Este documento centraliza la visión del producto, capacidades técnicas, directrices de arquitectura y el índice de navegación interconectado de todos los artefactos del proyecto según la metodología de Prototipado Evolutivo y estándares Obsidian.
 
@@ -23,36 +23,52 @@ tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid]
    - **Descubrimiento Dinámico de Modelos:** Cero hardcoding. La aplicación consulta en tiempo real `GET https://generativelanguage.googleapis.com/v1beta/models` para descubrir y listar únicamente aquellos modelos que soportan generación de contenido estructurado y procesamiento visual (`gemini-2.5-flash`, `gemini-1.5-pro`, `gemini-2.0-flash`, etc.).
    - **Cálculo Volumétrico Clínico sin Báscula:** Computa volúmenes basados en referencias anatómicas universales (puño cerrado ~ 1 taza de carbohidratos/legumbres, palma de la mano ~ 100-130g de carne cocida, falange distal ~ 10-15g de grasa/aceite).
    - **Compensación de Merma y Grasa Oculta:** Ajusta mermas por cocción (20-25% en carnes), factores de hidratación (2.5-3x en arroz/pastas) y adiciona entre 5g y 10g de grasa oculta en sofritos y guisos caseros.
+   - **Desglose Anatómico Individual y Cero 200g:** Erradicación total del comodín genérico de 200g y de la duplicación del nombre del plato en ingredientes. Cada elemento se desglosa con su gramaje y macronutrientes reales.
    - **Inyección del "Master Prompt":** Enriquecimiento de la inferencia con el perfil biométrico del usuario, hábitos y objetivos metabólicos calculados en el onboarding.
+   - **Resiliencia de Inferencia:** Timeout defensivo de 35s, rescate de JSON truncado (`JsonRepairHelper`) y salvaguarda de hierbas/especias (`isSeasoningOrHerb`) para evitar distorsiones de macros.
 
-2. **Cascada Híbrida de Consulta Nutricional (USDA FoodData Central + Open Food Facts):**
-   - **Motor Cascada Resiliente (`BarcodeLookupService`):** Prioriza la base de datos oficial del Departamento de Agricultura de EE.UU. (**USDA FoodData Central**) para máxima precisión de micronutrientes y macronutrientes oficiales.
-   - **Fallback Transparente:** En caso de no disponibilidad o ausencia de código en USDA, conmuta automáticamente a **Open Food Facts API v2** sin interrupción perceptible para el usuario.
-   - **Normalización Energética y Rate Limiting:** Conversión automática de kilojulios a kilocalorías ($kJ \rightarrow kcal$ factor 4.184) y control defensivo de tasa de 1.000 req/hr.
+2. **Detección Asíncrona en Background con Anillo Animado (`AnalysisQueueService` & `VeLoadingRing`):**
+   - La captura fotográfica despacha tareas asíncronas a una cola SQLite sin congelar la UI ni bloquear al usuario con diálogos modales sincrónicos.
+   - Anillo de carga de alta fidelidad `VeLoadingRing` inspirado en bocetos de estudio con `CustomPainter`, terminales redondeadas y rotación continua fluida a 60 FPS.
+   - Banner reactivo en el Dashboard con visualización de progreso por etapas y apertura instantánea del plato analizado.
 
-3. **Motor Metabólico Clínico Mifflin-St Jeor & Onboarding (`UserProfileScreen`):**
-   - Implementación estricta de la fórmula internacional **Mifflin-St Jeor** para Tasa Metabólica Basal (TMB) y Gasto Energético Total Diario (TDEE).
-   - Ajuste por niveles de actividad física y conteo de pasos diarios promedio.
-   - Sincronización atómica con las metas diarias de macronutrientes y persistencia en hardware seguro.
+3. **Inyección de Dependencias Formal y Arquitectura Desacoplada (`GetIt`):**
+   - Adopción de `get_it` como Service Locator centralizado (`lib/core/di/service_locator.dart`), registrando interfaces abstractas (`IDatabaseService`, `IImageProcessingService`, `IMealDao`, `IWeightLogDao`, `IUserProfileDao`, `IPantryDao`).
+   - Inyección por constructor en controladores (`MealController`, `SettingsController`) para pruebas unitarias herméticas sin acoplamiento global, manteniendo preservada la compatibilidad con accesores `.instance`.
 
-4. **Persistencia 100% Local-First & SQLite v2 (`weight_logs` y `meals`):**
-   - Persistencia local en SQLite optimizado con `PRAGMA journal_mode = WAL;`, `synchronous = NORMAL;` y llaves foráneas activas (`foreign_keys = ON;`).
-   - Esquema relacional v2 con migración automática, incorporando la tabla `weight_logs` indexada por fecha para auditoría de tendencias de composición corporal.
-   - Consultas de agregación en rangos de 7, 30 y 90 días ejecutadas en menos de 2 ms sin filtrado ineficiente en memoria RAM.
+4. **Persistencia Local-First & DAOs Modulares (< 300 LoC):**
+   - Descomposición estricta de `DatabaseService` en DAOs especializados: `MealDao`, `WeightLogDao`, `UserProfileDao` y `PantryDao`, coordinados por `DatabaseConnectionFactory` y `DatabaseSchema`.
+   - SQLite v2 con `PRAGMA journal_mode = WAL;`, `synchronous = NORMAL;` y llaves foráneas (`foreign_keys = ON;`).
+   - Consultas indexadas B-Tree en rangos de 7, 30 y 90 días ejecutadas en menos de 2 ms sin sobrecargar la memoria RAM.
 
-5. **Panel de Analíticas Bento Grid (`MetricsScreen`):**
-   - Visualización de tendencias de peso mediante curvas de Bézier suavizadas dibujadas a **60 FPS** con `WeightLineChartPainter` acelerado por hardware.
-   - Tarjetas Bento Grid semánticas: adherencia calórica, distribución porcentual de macronutrientes y racha de registro de comidas.
-   - Modal de registro rápido `QuickWeightEntryDialog` con sanitización defensiva contra valores astronómicos, `NaN` o infinitos.
+5. **Manejo Funcional de Errores con Tipo Suma Sellado (`Result<T, Failure>`):**
+   - Adopción del tipo sellado en Dart 3 `Result<T, E extends Failure>` (`Success`, `FailureResult`) en `lib/core/errors/result.dart`.
+   - APIs seguras en DAOs y controladores que erradican excepciones no controladas mediante combinadores funcionales (`fold`, `map`, `flatMap`, `guardAsync`).
+   - Jerarquía sellada `Failure` tipada por dominio (`DatabaseFailure`, `AiServiceFailure`, `NetworkFailure`, etc.).
 
-6. **Seguridad Criptográfica BYOK (Bring Your Own Key) & Firma Permanente Android:**
+6. **Internacionalización y Localización Nativa (`l10n` / `i18n`):**
+   - Catálogos de idioma completos en español (`lib/l10n/app_es.arb`) e inglés (`lib/l10n/app_en.arb`).
+   - Integración nativa con `AppLocalizations` en `NutriTrackerApp` con soporte para detección automática del idioma del dispositivo.
+
+7. **Cascada Híbrida de Consulta Nutricional (USDA FoodData Central + Open Food Facts):**
+   - **Motor Cascada Resiliente (`BarcodeLookupService`):** Prioriza la base de datos oficial del Departamento de Agricultura de EE.UU. (**USDA FoodData Central**) con coincidencia exacta GTIN a 14 dígitos.
+   - **Fallback Transparente:** En caso de no coincidencia o ausencia de clave USDA, conmuta automáticamente a **Open Food Facts API v2** sin interrupción perceptible para el usuario.
+   - **Normalización Energética:** Conversión automática de kilojulios a kilocalorías ($kJ \rightarrow kcal$ factor 4.184) y control defensivo de tasa de 1.000 req/hr.
+
+8. **Motor Metabólico Clínico Mifflin-St Jeor & Onboarding (`UserProfileScreen` & `OnboardingScreen`):**
+   - Implementación estricta de la fórmula internacional **Mifflin-St Jeor** para Tasa Metabólica Basal (TMB) y Gasto Energético Total Diario (TDEE), con Peso Corporal Ajustado ($ABW$) para usuarios con IMC $\ge 30$.
+   - Asistente guiado de onboarding con inicio limpio (Clean Slate), validaciones estrictas y sincronización bidireccional automática entre metas nutricionales y perfil.
+   - Sincronización automática de pesajes corporales con los datos biométricos.
+
+9. **Seguridad Criptográfica BYOK & Firma Permanente Android:**
    - Custodia segura en hardware mediante `flutter_secure_storage` (`EncryptedSharedPreferences` en Android / Keychain en iOS) para las API Keys de Gemini y USDA.
-   - Configuración de Keystore permanente RSA 2048 con validez hasta el año 2056 para despliegues continuos sin pérdida de datos ni necesidad de desinstalación.
+   - Configuración de Keystore permanente RSA 2048 con validez hasta el año 2056 para despliegues continuos sin pérdida de datos.
 
-7. **Sistema de Diseño Victor Engineer (Bento Grid & Obsidian Zinc):**
-   - Paleta monocromática de alta fidelidad: *Obsidian Zinc* (`#09090B`) para modo oscuro y *Crisp Zinc* (`#FAFAFA`) para modo claro, con acento carmesí corporativo `#DC2626`.
-   - Tipografía `Outfit` para métricas numéricas display e `Inter` para datos secundarios y cuerpos de texto.
-   - Descomposición estricta en Monolito Modular: todas las pantallas (`DashboardScreen`, `MealDetailScreen`, `SettingsScreen`, `UserProfileScreen`, `MetricsScreen`) se mantienen por debajo de las 300 líneas de código.
+10. **Sistema de Diseño Victor Engineer (Bento Grid & Obsidian Zinc):**
+    - Paleta monocromática de alta fidelidad: *Obsidian Zinc* (`#09090B`) para modo oscuro y *Crisp Zinc* (`#FAFAFA`) para modo claro, con acento carmesí corporativo `#DC2626`.
+    - Tipografía `Outfit` para métricas numéricas display e `Inter` para datos secundarios y cuerpos de texto.
+    - 100% de pantallas, widgets y archivos de servicios bajo el límite estricto de 300 líneas de código (< 300 LoC).
+    - Suite de pruebas de regresión automatizada: 53 suites, 367 tests pasando (100% PASS).
 
 ---
 
@@ -77,7 +93,8 @@ Todos los enlaces internos siguen estrictamente el estándar de Obsidian con el 
 | Agente | Rol en el Proyecto | Principales Entregables |
 | :--- | :--- | :--- |
 | **Project-Planner** | Tech Lead & Orquestador Maestro | `project_overview.md`, `implementation_plan.md`, `task.md`, `changelog_v1.md`, diagramas Archify. |
-| **Backend-Architect** | Arquitecto de Datos y Servicios | `api_spec.md`, `architecture.md`, `abstractions.md`, `DatabaseService` (SQLite v2), `GeminiModelService`, `UsdaFoodDataService`, `BarcodeLookupService`, `MetabolicCalculator`. |
-| **Frontend-UI** | Especialista de Interfaz y Tokens | `design_system.md`, `ThemeManager`, `DashboardScreen`, `MealDetailScreen`, `SettingsScreen`, `UserProfileScreen`, `MetricsScreen`, widgets atómicos (< 300 LoC), microinteracciones y `WeightLineChartPainter`. |
-| **Systems-Auditor** | Guardián del Quality Gate y Pruebas | `audit_report.md`, batería de pruebas automatizadas, auditoría N+1, WCAG, SecOps. |
+| **Backend-Architect** | Arquitecto de Datos y Servicios | `api_spec.md`, `architecture.md`, `abstractions.md`, `DatabaseService` (SQLite v2 & DAOs), `service_locator.dart`, `Result<T, Failure>`, `GeminiModelService`, `UsdaFoodDataService`, `BarcodeLookupService`, `MetabolicCalculator`. |
+| **Frontend-UI** | Especialista de Interfaz y Tokens | `design_system.md`, `ThemeManager`, `AppLocalizations`, `DashboardScreen`, `MealDetailScreen`, `SettingsScreen`, `UserProfileScreen`, `MetricsScreen`, `OnboardingScreen`, widgets atómicos (< 300 LoC), microinteracciones y `WeightLineChartPainter`. |
+| **Systems-Auditor** | Guardián del Quality Gate y Pruebas | `audit_report.md`, batería de 53 suites de pruebas automatizadas (367 tests), auditoría N+1, WCAG, SecOps. |
 | **DevOps-Engineer** | Infraestructura, CI/CD y Releases | `.github/workflows/ci.yml`, `build_apk.yml`, `release.yml`, Keystore RSA permanente, empaquetado y publicación oficial. |
+

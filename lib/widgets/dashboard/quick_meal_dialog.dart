@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/meal.dart';
 import '../../services/theme_manager.dart';
 
@@ -149,7 +150,10 @@ class _QuickMealDialogState extends State<_QuickMealDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text('Cancelar', style: GoogleFonts.inter(color: AppColors.textSecondary(context))),
+          child: Text(
+            AppLocalizations.of(context)?.cancel ?? 'Cancelar',
+            style: GoogleFonts.inter(color: AppColors.textSecondary(context)),
+          ),
         ),
         ElevatedButton(
           onPressed: _submit,
@@ -158,7 +162,10 @@ class _QuickMealDialogState extends State<_QuickMealDialog> {
             foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
-          child: Text('Añadir', style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
+          child: Text(
+            AppLocalizations.of(context)?.save ?? 'Añadir',
+            style: GoogleFonts.inter(fontWeight: FontWeight.w700),
+          ),
         ),
       ],
     );

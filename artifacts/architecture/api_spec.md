@@ -1,21 +1,21 @@
 ---
 tipo: api_spec
 proyecto: App_Food_Tracker
-version: v1.0.3
+version: v1.0.4
 estado: activo
 fecha: 2026-09-13
-tags: [proyecto, api, backend, contratos, sqlite, v1-0-3]
+tags: [proyecto, api, backend, contratos, sqlite, get-it, daos, result-pattern, v1-0-4]
 ---
 
 # 📡 Especificación de Contrato de Datos, Esquema SQLite v2 y Servicios Backend
 
-> **Backend-Architect:** Este artefacto define formalmente el esquema relacional de base de datos local SQLite v2, los índices B-Tree de cobertura, los modelos de dominio inmutables (Sentinel) y los contratos de servicios internos y externos (Dynamic Gemini API, USDA FoodData Central, Open Food Facts y Calculadora Metabólica).
+> **Backend-Architect:** Este artefacto define formalmente el esquema relacional de base de datos local SQLite v2, los índices B-Tree de cobertura, los modelos de dominio inmutables (Sentinel), los contratos de servicios internos (DAOs, Service Locator, Result Pattern) y externos (Dynamic Gemini API, USDA FoodData Central, Open Food Facts y Calculadora Metabólica).
 
 ---
 
 ## 🗄️ 1. Esquema Relacional de Base de Datos SQLite v2 (DDL)
 
-La base de datos opera localmente bajo el archivo `app_food_tracker.db` en el directorio de documentos de la aplicación, configurada con WAL mode y llaves foráneas.
+La base de datos opera localmente bajo el archivo `app_food_tracker.db` en el directorio de documentos de la aplicación, configurada con WAL mode y llaves foráneas (`DatabaseConnectionFactory` y `DatabaseSchema`).
 
 ### 1.1. Tabla: `meals`
 Almacena cada registro de comida (desayuno, almuerzo, cena, snack o hidratación).
@@ -99,7 +99,32 @@ CREATE TABLE IF NOT EXISTS weight_logs (
 );
 ```
 
-### 1.4. Índices de Cobertura B-Tree y Rendimiento (Zero N+1)
+### 1.6. Tabla: `user_profile` (Perfil Biométrico y Metas Clínicas)
+Almacena el perfil metabólico del comensal, fórmulas basales calculadas y Master Prompt personalizado.
+
+```sql
+CREATE TABLE IF NOT EXISTS user_profile (
+  id TEXT PRIMARY KEY,
+  name TEXT,
+  age INTEGER NOT NULL,
+  gender TEXT NOT NULL,
+  height REAL NOT NULL,
+  weight REAL NOT NULL,
+  activity_level TEXT NOT NULL,
+  body_goal TEXT NOT NULL,
+  estimated_steps INTEGER NOT NULL DEFAULT 8000,
+  bmr REAL NOT NULL,
+  tdee REAL NOT NULL,
+  target_calories REAL NOT NULL,
+  target_protein REAL NOT NULL,
+  target_carbs REAL NOT NULL,
+  target_fat REAL NOT NULL,
+  master_prompt TEXT,
+  updated_at TEXT NOT NULL
+);
+```
+
+### 1.7. Índices de Cobertura B-Tree y Rendimiento (Zero N+1)
 Para garantizar lecturas masivas e históricos diarios en menos de **2 milisegundos**, se han creado los siguientes índices B-Tree:
 
 ```sql
@@ -279,4 +304,50 @@ Todos los modelos incorporan el patrón privado `_sentinel = Object()` en `copyW
 
 - **Exportación:** Genera un JSON estructurado con `version: 2`, `timestamp` ISO 8601, metadatos de aplicación, y colecciones completas de `meals`, `pantry_items`, `weight_logs` y `user_profile`.
 - **Importación Atómica:** Ejecución en una única transacción SQLite (`txn.insert` con `ConflictAlgorithm.replace`), revirtiendo automáticamente cualquier cambio si el archivo JSON está truncado o corrompido.
+
+---
+
+## 🏛️ 7. Contratos de Inyección de Dependencias, DAOs y Result Pattern (v1.0.4)
+
+### 7.1. Service Locator (`lib/core/di/service_locator.dart`)
+- **Instancia Global:** `final getIt = GetIt.instance;`
+- **Registro de Servicios (`setupServiceLocator`):**
+  ```dart
+  void setupServiceLocator({bool isTesting = false});
+  ```
+  Registra contratos desacoplados (`IDatabaseService`, `IImageProcessingService`, `IMealDao`, `IWeightLogDao`, `IUserProfileDao`, `IPantryDao`) y controladores.
+- **Limpieza Aislada (`resetServiceLocator`):**
+  ```dart
+  Future<void> resetServiceLocator() async => await getIt.reset();
+  ```
+
+### 7.2. Contratos de DAOs Especializados (`lib/core/interfaces/daos_interfaces.dart`)
+- **`IMealDao`:**
+  - Operaciones CRUD clásicas: `insertMeal`, `upsertMeal`, `updateMeal`, `deleteMeal`, `getMealById`, `getMealsForDay`, `getAllMeals`, `getMealsByRange`, `getMealByImagePath`, `getDistinctMealDates`, `clearMealImagePath`, `getMealsOlderThanWithImages`.
+  - APIs Funcionales Result: `upsertMealResult`, `getMealByIdResult`, `getMealsForDayResult`, `getMealsByRangeResult`.
+- **`IWeightLogDao`:**
+  - Operaciones CRUD clásicas: `insertWeightLog`, `updateWeightLog`, `deleteWeightLog`, `getWeightLogById`, `getAllWeightLogs`, `getLatestWeightLog`, `getWeightLogsByRange`, `getWeightLogsLastDays`, `batchUpsertWeightLogs`.
+  - APIs Funcionales Result: `insertWeightLogResult`, `getWeightLogsByRangeResult`, `getLatestWeightLogResult`.
+- **`IUserProfileDao`:**
+  - Operaciones CRUD clásicas: `saveUserProfile`, `getUserProfile`, `deleteUserProfile`.
+  - APIs Funcionales Result: `saveUserProfileResult`, `getUserProfileResult`.
+- **`IPantryDao`:**
+  - Operaciones CRUD clásicas: `insertPantryItem`, `updatePantryItem`, `deletePantryItem`, `getPantryItems`.
+  - APIs Funcionales Result: `insertPantryItemResult`, `getPantryItemsResult`.
+
+### 7.3. Contrato de Manejo Funcional de Errores (`lib/core/errors/`)
+- **Tipo Suma Sellado `Result<T, E extends Failure>`:**
+  - `Success<T, E>(T value)`: Portador inmutable del valor de retorno exitoso.
+  - `FailureResult<T, E>(E failure)`: Portador tipado del fallo de dominio.
+- **Combinadores Funcionales:**
+  - `R fold<R>(R Function(T value) onSuccess, R Function(E failure) onFailure)`
+  - `Result<R, E> map<R>(R Function(T value) transform)`
+  - `Result<R, E> flatMap<R>(Result<R, E> Function(T value) transform)`
+  - `T getOrThrow()` & `T getOrDefault(T defaultValue)`
+- **Captura Segura de Excepciones:**
+  - `Result.guard<T>(T Function() computation)`
+  - `Result.guardAsync<T>(Future<T> Function() computation)`
+- **Jerarquía de Fallos de Dominio (`failures.dart`):**
+  - `DatabaseFailure`, `AiServiceFailure`, `NetworkFailure`, `ValidationFailure`, `StorageFailure`, `ImageProcessingFailure`, `UnknownFailure`.
+
 

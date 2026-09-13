@@ -7,6 +7,7 @@ import '../../services/backup_service.dart';
 import '../../services/barcode_lookup_service.dart';
 import '../../services/database_service.dart';
 import '../../services/gemini_model_service.dart';
+import '../../services/gemini_vision_service.dart';
 import '../../services/image_processing_service.dart';
 import '../../services/open_food_facts_service.dart';
 import '../../services/secure_storage_service.dart';
@@ -48,6 +49,12 @@ void setupServiceLocator({bool isTesting = false}) {
   getIt.registerLazySingleton<UsdaFoodDataService>(() => UsdaFoodDataService.instance);
   getIt.registerLazySingleton<BarcodeLookupService>(() => BarcodeLookupService.instance);
   getIt.registerLazySingleton<OpenFoodFactsService>(() => OpenFoodFactsService.instance);
+  getIt.registerFactoryParam<GeminiVisionService, String, String?>(
+    (apiKey, modelName) => GeminiVisionService(
+      apiKey: apiKey,
+      modelName: modelName ?? GeminiVisionService.defaultModel,
+    ),
+  );
 
   // Background Workers & System Tasks
   getIt.registerLazySingleton<AnalysisQueueService>(() => AnalysisQueueService.instance);

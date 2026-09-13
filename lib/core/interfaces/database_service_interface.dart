@@ -3,6 +3,8 @@ import '../../models/meal.dart';
 import '../../models/pantry_item.dart';
 import '../../models/user_profile.dart';
 import '../../models/weight_log.dart';
+import '../errors/failures.dart';
+import '../errors/result.dart';
 import 'daos_interfaces.dart';
 
 /// Contract defining the Database Service connection orchestrator and DAOs provider.
@@ -49,4 +51,24 @@ abstract interface class IDatabaseService {
   Future<int> saveUserProfile(UserProfile profile);
   Future<UserProfile?> getUserProfile();
   Future<int> deleteUserProfile({String id = 'primary'});
+
+  // Result pattern delegations to DAOs
+  Future<Result<int, DatabaseFailure>> upsertMealResult(Meal meal);
+  Future<Result<Meal?, DatabaseFailure>> getMealByIdResult(String id);
+  Future<Result<List<Meal>, DatabaseFailure>> getMealsForDayResult(DateTime day);
+  Future<Result<List<Meal>, DatabaseFailure>> getMealsByRangeResult(DateTime start, DateTime end);
+  Future<Result<int, DatabaseFailure>> insertWeightLogResult(WeightLog log);
+  Future<Result<WeightLog?, DatabaseFailure>> getLatestWeightLogResult();
+  Future<Result<List<WeightLog>, DatabaseFailure>> getWeightLogsByRangeResult(
+    DateTime startDate,
+    DateTime endDate,
+  );
+  Future<Result<int, DatabaseFailure>> saveUserProfileResult(UserProfile profile);
+  Future<Result<UserProfile?, DatabaseFailure>> getUserProfileResult();
+  Future<Result<int, DatabaseFailure>> insertPantryItemResult(PantryItem item);
+  Future<Result<List<PantryItem>, DatabaseFailure>> getPantryItemsResult({
+    String? query,
+    String? category,
+    bool? onlyFavorites,
+  });
 }

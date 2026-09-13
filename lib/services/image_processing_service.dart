@@ -5,6 +5,7 @@ import 'package:image/image.dart' as img;
 
 import '../core/errors/failures.dart';
 import '../core/errors/result.dart';
+import '../core/interfaces/database_service_interface.dart';
 import '../core/interfaces/image_processing_service_interface.dart';
 import 'database_service.dart';
 import 'meal_image_file_namer.dart';
@@ -26,8 +27,13 @@ class ImageProcessingService implements IImageProcessingService {
   @visibleForTesting
   static void resetInstance() => _mockInstance = null;
 
-  ImageProcessingService._();
-  ImageProcessingService();
+  final IDatabaseService? _dbOverride;
+  IDatabaseService get _db => _dbOverride ?? DatabaseService.instance;
+
+  ImageProcessingService._([IDatabaseService? databaseService])
+      : _dbOverride = databaseService;
+  ImageProcessingService({IDatabaseService? databaseService})
+      : _dbOverride = databaseService;
 
   static const int maxDimension = 1024;
   static const int jpegQuality = 85;
@@ -168,7 +174,7 @@ class ImageProcessingService implements IImageProcessingService {
   Future<int> pruneOldMealPhotos({required int retentionDays}) async {
     if (retentionDays <= 0) return 0;
     final cutoffDate = DateTime.now().subtract(Duration(days: retentionDays));
-    final meals = await DatabaseService.instance.getMealsOlderThanWithImages(cutoffDate);
+    final meals = await _db.getMealsOlderThanWithImages(cutoffDate);
 
     int deletedCount = 0;
     for (final meal in meals) {
@@ -182,7 +188,7 @@ class ImageProcessingService implements IImageProcessingService {
           }
         } catch (_) {}
       }
-      await DatabaseService.instance.clearMealImagePath(meal.id);
+      await _db.clearMealImagePath(meal.id);
     }
     return deletedCount;
   }

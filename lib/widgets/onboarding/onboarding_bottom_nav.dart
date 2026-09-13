@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/theme_manager.dart';
 
 /// Bottom navigation bar for onboarding flow with responsive sizing and step validation.
@@ -45,7 +46,7 @@ class OnboardingBottomNav extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               ),
               child: Text(
-                'Atrás',
+                AppLocalizations.of(context)?.back ?? 'Atrás',
                 style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 14),
               ),
             ),
@@ -81,7 +82,10 @@ class OnboardingBottomNav extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              isLastStep ? 'Guardar y Comenzar' : 'Continuar',
+                              isLastStep
+                                  ? (AppLocalizations.of(context)?.saveAndStart ??
+                                      'Guardar y Comenzar')
+                                  : (AppLocalizations.of(context)?.continueButton ?? 'Continuar'),
                               style: GoogleFonts.outfit(
                                 fontWeight: FontWeight.w700,
                                 fontSize: 15,

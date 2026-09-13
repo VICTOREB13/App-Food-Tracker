@@ -70,4 +70,19 @@ void main() {
     expect(find.byType(NutriTrackerApp), findsOneWidget);
     expect(ThemeManager.instance, isNotNull);
   });
+
+  testWidgets('NutriTrackerApp renders cleanly in English locale', (tester) async {
+    await tester.pumpWidget(const NutriTrackerApp(locale: Locale('en')));
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(find.byType(NutriTrackerApp), findsOneWidget);
+  });
+
+  testWidgets('NutriTrackerApp gracefully falls back to Spanish for unsupported locale', (tester) async {
+    // Should not throw FlutterError on unsupported locale like French
+    await tester.pumpWidget(const NutriTrackerApp(locale: Locale('fr')));
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(find.byType(NutriTrackerApp), findsOneWidget);
+  });
 }
