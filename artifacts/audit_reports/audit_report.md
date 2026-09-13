@@ -58,7 +58,7 @@ tags: [proyecto, audit, quality-gate, v1-0-4, v7-teamwork]
 
 ---
 
-## 🧪 2. Matriz de Pruebas Automatizadas (53 Suites / 355 Tests — 100% PASS)
+## 🧪 2. Matriz de Pruebas Automatizadas (53 Suites / 367 Tests — 100% PASS)
 
 Se auditó la totalidad de la suite de pruebas del proyecto (`test/`), constatando cobertura exhaustiva y **0 fallos (100% PASS)**:
 
