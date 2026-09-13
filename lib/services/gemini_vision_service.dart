@@ -2,9 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:google_generative_ai/google_generative_ai.dart';
-import '../models/food_item.dart';
 import '../models/meal_analysis_result.dart';
-import '../models/model_sanitizer.dart';
 import 'image_processing_service.dart';
 
 export '../models/meal_analysis_result.dart';
