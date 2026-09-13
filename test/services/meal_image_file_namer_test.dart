@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/services/meal_image_file_namer.dart';
 
