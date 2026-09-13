@@ -116,8 +116,14 @@ class SettingsController extends ChangeNotifier {
   }
 
   Future<void> saveSelectedGeminiModel(String modelName) async {
-    await SecureStorageService.instance.setSelectedGeminiModel(modelName);
-    _selectedGeminiModel = modelName;
+    final trimmed = modelName.trim();
+    if (trimmed.isEmpty) {
+      await SecureStorageService.instance.deleteSelectedGeminiModel();
+      _selectedGeminiModel = null;
+    } else {
+      await SecureStorageService.instance.setSelectedGeminiModel(trimmed);
+      _selectedGeminiModel = trimmed;
+    }
     notifyListeners();
   }
 

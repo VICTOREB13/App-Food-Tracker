@@ -41,8 +41,10 @@ void main() {
       final en = lookupAppLocalizations(const Locale('en'));
       expect(en, isA<AppLocalizationsEn>());
 
-      final fallback = lookupAppLocalizations(const Locale('fr'));
-      expect(fallback, isA<AppLocalizationsEs>());
+      expect(
+        () => lookupAppLocalizations(const Locale('fr')),
+        throwsA(isA<FlutterError>()),
+      );
     });
 
     test('AppLocalizations.supportedLocales contains es and en', () {
