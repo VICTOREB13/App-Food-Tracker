@@ -9,14 +9,14 @@ tags: [proyecto, tasks, checklist, v7-teamwork, v1-0-2]
 
 # 📋 Checklist Maestro de Tareas de Agentes (v1.0.2)
 
-> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.0.1. Cada tarea completada se marca con `[x]`.
+> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.0.2. Cada tarea completada se marca con `[x]`.
 
 ---
 
 ## 🧭 1. Project-Planner (Master Tech Lead)
-- [x] (Project-Planner) Identificar y priorizar requerimientos de la iteración v1.0.1.
+- [x] (Project-Planner) Identificar y priorizar requerimientos de la iteración v1.0.2.
 - [x] (Project-Planner) Supervisar resolución de static analysis en Quality Gate y compilación de release.
-- [x] (Project-Planner) Verificar publicación exitosa del Fat APK v1.0.1 en GitHub Releases.
+- [x] (Project-Planner) Verificar publicación exitosa del Fat APK v1.0.2 en GitHub Releases.
 
 ---
 
@@ -89,3 +89,13 @@ tags: [proyecto, tasks, checklist, v7-teamwork, v1-0-2]
 - [x] (Frontend-UI) Integrar superposición visual con `VeLoadingRing` y avance de etapas paso a paso en `MealImageCard` y `MealDetailScreen` para la captura y re-análisis con correcciones.
 - [x] (Systems-Auditor) Crear suites de pruebas para `VeLoadingRing`, `AnalysisQueueService`, `AnalysisProgressBanner` y validar desglose no plano en `gemini_vision_service_test.dart`.
 - [x] (DevOps-Engineer) Incrementar versión en `pubspec.yaml` a `1.0.2+1` y documentar en `changelog_v1.md`.
+
+---
+
+## 🔧 9. DevOps-Engineer & Systems-Auditor (v1.0.2: Quality Gate CI Fixes & Release)
+- [x] (DevOps-Engineer) Eliminar importaciones redundantes y en desuso (`dart:typed_data` en `analysis_queue_service.dart`, `food_item.dart` y `model_sanitizer.dart` en `gemini_vision_service.dart`).
+- [x] (Systems-Auditor) Alinear aserción de widget en `test/widgets/meal_ai_reanalyze_button_test.dart` con `VeLoadingRing`.
+- [x] (Backend-Architect) Refinar lógica de detección de ingredientes agrupados (`isLumped`) en `MealAnalysisResult` preservando casing original y evitando la descomposición de platos unitarios legítimos.
+- [x] (Systems-Auditor) Verificar que la totalidad de las 48 suites automatizadas (329 tests) pasen limpiamente al 100%.
+- [x] (DevOps-Engineer) Ejecutar pipeline completo en GitHub Actions (Quality Gate, Build APK, GitHub Release) y publicar oficialmente la versión `v1.0.2`.
+

@@ -43,7 +43,7 @@ tags: [proyecto, audit, quality-gate, v1-0-2, v7-teamwork]
 
 ---
 
-## 🧪 2. Matriz de Pruebas Automatizadas (44 Suites — 100% PASS)
+## 🧪 2. Matriz de Pruebas Automatizadas (48 Suites / 329 Tests — 100% PASS)
 
 Se auditó la totalidad de la suite de pruebas del proyecto (`test/`), constatando cobertura exhaustiva y **0 fallos (100% PASS)**:
 
@@ -57,14 +57,15 @@ Se auditó la totalidad de la suite de pruebas del proyecto (`test/`), constatan
 | `user_profile_model_test.dart` | Modelo inmutable con Sentinel, validación de sexo, peso, altura, edad, pasos y Master Prompt. | 6 | **PASS** |
 | `weight_log_model_test.dart` | Validación de rangos biológicos (`[20.0, 500.0]`), serialización SQLite y parsing de fechas. | 6 | **PASS** |
 
-### 2.2. Pruebas de Servicios y Controladores (`test/services/` y `test/controllers/`) — 18 Suites / 171 Tests
+### 2.2. Pruebas de Servicios y Controladores (`test/services/` y `test/controllers/`) — 19 Suites / 183 Tests
 | Archivo de Prueba | Cobertura / Casos Auditados | Tests | Resultado |
 | :--- | :--- | :---: | :--- |
+| `analysis_queue_service_test.dart` | Cola asíncrona SQLite, inicialización de tareas, transiciones de estado y purga de completadas. | 3 | **PASS** |
 | `database_service_test.dart` | Modos WAL, PRAGMAs, índices B-Tree, concurrencia de 50 peticiones simultáneas, CRUD de comidas, `getMealsOlderThanWithImages` y `clearMealImagePath`. | 8 | **PASS** |
 | `database_service_v2_test.dart` | Migración a esquema v2, tabla `weight_logs`, orden cronológico en `getAllWeightLogs`, consultas indexadas en rangos 7, 30 y 90 días. | 10 | **PASS** |
 | `backup_service_test.dart` | Exportación JSON e importación transaccional atómica (`txn.insert`). | 3 | **PASS** |
 | `backup_service_v2_test.dart` | Respaldo v2 con serialización y deserialización de registros de peso y perfil biométrico. | 5 | **PASS** |
-| `gemini_vision_service_test.dart` | Extracción de esquemas JSON con markdown/texto conversacional, recálculo de totales, mapeo de errores amigables (`userFriendlyErrorMessage`). | 11 | **PASS** |
+| `gemini_vision_service_test.dart` | Extracción de esquemas JSON, fallback volumétrico sin 200g, desglose atómico de ingredientes, recálculo de totales, mapeo de errores amigables. | 20 | **PASS** |
 | `gemini_model_service_test.dart` | Introspección en vivo de `GET /v1beta/models`, bloqueo de modelos prohibidos (`banana`, `omni`, `transcribe`, etc.), validación de fallbacks y selector. | 11 | **PASS** |
 | `usda_food_data_service_test.dart` | Parseo dual de esquemas (/foods/search vs /food/{id}), factor de conversión energética $kJ \rightarrow kcal$ (4.184). | 8 | **PASS** |
 | `barcode_lookup_service_test.dart` | Cascada resiliente: consulta prioritaria a USDA y fallback transparente a Open Food Facts. | 9 | **PASS** |
@@ -79,14 +80,14 @@ Se auditó la totalidad de la suite de pruebas del proyecto (`test/`), constatan
 | `meal_controller_weight_test.dart` | Control de registros de peso corporal, período histórico (`days: 0`) y reactividad del historial. | 6 | **PASS** |
 | `settings_controller_test.dart` | Gestión de API Keys, selección de modelos Gemini, guardado de metas con sincronización automática de perfil. | 9 | **PASS** |
 
-### 2.3. Pruebas de Pantallas y Widgets (`test/screens/` y `test/widgets/`) — 20 Suites / 82 Tests
+### 2.3. Pruebas de Pantallas y Widgets (`test/screens/` y `test/widgets/`) — 23 Suites / 110 Tests
 | Archivo de Prueba | Componente Auditado | Tests | Resultado |
 | :--- | :--- | :---: | :--- |
 | `onboarding_screen_test.dart` | Flujo completo de 4 pasos (bienvenida, biometría, actividad, objetivo), validación, persistencia y marcación en SecureStorage. | 3 | **PASS** |
 | `metrics_screen_test.dart` | Pantalla de métricas Bento Grid con filtrado de rangos (incluye Histórico), historial y diálogo de peso. | 3 | **PASS** |
 | `user_profile_screen_test.dart` | Pantalla de perfil con formulario biométrico y cálculo reactivo de TMB/TDEE. | 6 | **PASS** |
 | `food_item_editor_dialog_test.dart` | Layout ergonómico de 2 filas, manipulación de macros, cancelación y guardado defensivo. | 4 | **PASS** |
-| `meal_ai_reanalyze_button_test.dart` | Botón accesible de re-análisis con Gemini Vision, estados reactivos de loading y callbacks. | 3 | **PASS** |
+| `meal_ai_reanalyze_button_test.dart` | Botón accesible de re-análisis con Gemini Vision, estados reactivos de loading con VeLoadingRing y callbacks. | 3 | **PASS** |
 | `weight_history_bento_card_test.dart` | Tarjeta Bento de historial cronológico de peso con expansión/colapso, formato es y notas. | 3 | **PASS** |
 | `weight_line_chart_painter_test.dart` | Renderizado de curvas Bézier a 60 FPS con límites mínimos/máximos y gradiente. | 6 | **PASS** |
 | `quick_weight_entry_dialog_test.dart` | Modal de registro rápido de peso con clamp defensivo. | 4 | **PASS** |
@@ -100,9 +101,12 @@ Se auditó la totalidad de la suite de pruebas del proyecto (`test/`), constatan
 | `ve_logo_test.dart` | Logotipo oficial de Victor Engineer con gradientes. | 2 | **PASS** |
 | `meal_form_fields_test.dart` | Formulario de comida y selector de categorías. | 1 | **PASS** |
 | `quick_meal_dialog_test.dart` | Diálogo express para añadir comidas estimadas con soporte opcional de macros. | 1 | **PASS** |
-| `meal_image_card_test.dart` | Tarjeta visual de foto de plato con zoom y controles de reemplazo. | 2 | **PASS** |
+| `meal_image_card_test.dart` | Tarjeta visual de foto con zoom, controles de reemplazo e indicador de progreso animado. | 4 | **PASS** |
 | `meal_section_card_test.dart` | Agrupador de comidas por sección con badge de notas y cálculo calórico. | 3 | **PASS** |
 | `food_items_list_card_test.dart` | Desglose de ingredientes, deduplicación de gramos, macro chips y callbacks reactivos. | 3 | **PASS** |
+| `analysis_progress_banner_test.dart` | Banner no bloqueante en Dashboard con etapas, VeLoadingRing reactivo y navegación. | 3 | **PASS** |
+| `ve_loading_ring_test.dart` | Anillo animado CustomPainter, modos indeterminado y determinado, soporte de color y trazo. | 4 | **PASS** |
+
 
 
 
