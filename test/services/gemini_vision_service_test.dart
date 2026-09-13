@@ -676,8 +676,8 @@ void main() {
       );
 
       expect(items.length, equals(2));
-      final pollo = items.firstWhere((i) => i.name.contains('Pollo'));
-      final romero = items.firstWhere((i) => i.name.contains('Romero'));
+      final pollo = items.firstWhere((i) => i.name.toLowerCase().contains('pollo'));
+      final romero = items.firstWhere((i) => i.name.toLowerCase().contains('romero'));
 
       expect(pollo.calories, greaterThan(250.0));
       expect(pollo.protein, greaterThan(35.0));

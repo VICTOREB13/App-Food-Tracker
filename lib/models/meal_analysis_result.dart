@@ -47,9 +47,7 @@ class MealAnalysisResult {
   static bool isSeasoningOrHerb(String name) {
     final s = name.toLowerCase();
     if (s.contains('salmon') || s.contains('salmón') || s.contains('salchicha') ||
-        s.contains('salsa') || s.contains('ensalada') || s.contains('saltead')) {
-      return false;
-    }
+        s.contains('salsa') || s.contains('ensalada') || s.contains('saltead')) return false;
     const keys = ['romero', 'perejil', 'orégano', 'oregano', 'cilantro', 'pimienta',
       'laurel', 'albahaca', 'comino', 'tomillo', 'especi', 'condimento', 'hierba', 'eneldo', 'curry', 'canela'];
     if (keys.any((k) => s.contains(k))) return true;
@@ -264,7 +262,8 @@ class MealAnalysisResult {
       final substantialItems = parsedItems.where((it) => !isSeasoningOrHerb(it.name)).toList();
       final hasSubstantial = substantialItems.isNotEmpty;
       final mainCount = hasSubstantial ? substantialItems.length : parsedItems.length;
-
+      final hasSeasoning = parsedItems.any((it) => isSeasoningOrHerb(it.name));
+      final factor = hasSeasoning ? 0.99 : 1.0;
       for (int i = 0; i < parsedItems.length; i++) {
         final item = parsedItems[i];
         if (hasSubstantial && isSeasoningOrHerb(item.name)) {
@@ -277,7 +276,6 @@ class MealAnalysisResult {
             visualJustification: 'Nota de saborización / condimento marginal',
           );
         } else {
-          final factor = hasSubstantial ? 0.99 : 1.0;
           parsedItems[i] = item.copyWith(
             calories: ModelSanitizer.clampDouble((cal * factor) / mainCount),
             protein: ModelSanitizer.clampDouble((prot * factor) / mainCount),
