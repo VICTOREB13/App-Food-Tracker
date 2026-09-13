@@ -325,6 +325,34 @@ class DatabaseService {
     return results.map((m) => Meal.fromSqliteMap(m)).toList();
   }
 
+  /// Retrieves meals within a specific date range directly from SQLite using idx_meals_date.
+  Future<List<Meal>> getMealsByRange(DateTime start, DateTime end) async {
+    final db = await database;
+    final startIso = DateTime(start.year, start.month, start.day).toIso8601String();
+    final endExclusive = DateTime(end.year, end.month, end.day).add(const Duration(days: 1)).toIso8601String();
+
+    final results = await db.query(
+      'meals',
+      where: 'date >= ? AND date < ?',
+      whereArgs: [startIso, endExclusive],
+      orderBy: 'date ASC',
+    );
+    return results.map((m) => Meal.fromSqliteMap(m)).toList();
+  }
+
+  /// Retrieves a meal associated with an image file path.
+  Future<Meal?> getMealByImagePath(String imagePath) async {
+    final db = await database;
+    final results = await db.query(
+      'meals',
+      where: 'image_path = ?',
+      whereArgs: [imagePath],
+      limit: 1,
+    );
+    if (results.isEmpty) return null;
+    return Meal.fromSqliteMap(results.first);
+  }
+
   Future<List<String>> getDistinctMealDates() async {
     final db = await database;
     final results = await db.rawQuery(

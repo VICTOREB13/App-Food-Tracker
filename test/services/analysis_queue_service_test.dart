@@ -86,5 +86,23 @@ void main() {
       await service.clearCompleted();
       expect(service.tasks.any((t) => t.id == 'test-task-1'), isFalse);
     });
+
+    test('retryTask marks failed task with missing image as failed with error (H-06)', () async {
+      final service = AnalysisQueueService.instance;
+      final task = AnalysisTask(
+        id: 'missing-img-task',
+        imagePath: '/non/existent/path/meal.jpg',
+        mealType: 'Cena',
+        date: DateTime.now(),
+        status: AnalysisStatus.failed,
+        error: 'Network failure',
+      );
+      service.addTaskForTesting(task);
+
+      await service.retryTask('missing-img-task');
+
+      expect(task.status, equals(AnalysisStatus.failed));
+      expect(task.error, contains('No se encontró el archivo'));
+    });
   });
 }

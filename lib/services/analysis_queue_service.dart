@@ -111,7 +111,22 @@ class AnalysisQueueService extends ChangeNotifier {
           createdAt: DateTime.tryParse(r['created_at'] as String? ?? '') ?? DateTime.now(),
         );
         if (task.status == AnalysisStatus.processing || task.status == AnalysisStatus.queued) {
-          task.status = File(task.imagePath).existsSync() ? AnalysisStatus.queued : AnalysisStatus.failed;
+          if (meal != null) {
+            task.status = AnalysisStatus.completed;
+            task.progress = 1.0;
+            task.stage = '¡Comida analizada y registrada!';
+          } else {
+            final existing = await DatabaseService.instance.getMealById(task.id) ??
+                await DatabaseService.instance.getMealByImagePath(task.imagePath);
+            if (existing != null) {
+              task.resultMeal = existing;
+              task.status = AnalysisStatus.completed;
+              task.progress = 1.0;
+              task.stage = '¡Comida analizada y registrada!';
+            } else {
+              task.status = File(task.imagePath).existsSync() ? AnalysisStatus.queued : AnalysisStatus.failed;
+            }
+          }
         }
         _tasks.add(task);
       }
@@ -130,7 +145,7 @@ class AnalysisQueueService extends ChangeNotifier {
     List<FoodItem>? initialItems,
     String? currentDishName,
   }) async {
-    final compressed = ImageProcessingService.instance.compressAndResize(rawImageBytes);
+    final compressed = await ImageProcessingService.instance.compressAndResizeAsync(rawImageBytes);
     final savedPath = await ImageProcessingService.instance.saveMealImage(
       compressed,
       mealType: mealType,
@@ -229,7 +244,10 @@ class AnalysisQueueService extends ChangeNotifier {
           ? 'Ingredientes: ${analysis.items.map((e) => '${e.name} (${e.estimatedGrams.toStringAsFixed(0)}g)').join(', ')}'
           : null;
 
+      final existingMeal = await DatabaseService.instance.getMealByImagePath(task.imagePath);
+      final mealId = task.resultMeal?.id ?? existingMeal?.id ?? task.id;
       final meal = Meal(
+        id: mealId,
         name: analysis.dishName,
         mealType: task.mealType,
         date: task.date,
@@ -290,6 +308,31 @@ class AnalysisQueueService extends ChangeNotifier {
       final db = await DatabaseService.instance.database;
       await db.delete('analysis_queue', where: 'id = ?', whereArgs: [taskId]);
     } catch (_) {}
+  }
+
+  Future<void> retryTask(String taskId) async {
+    final task = _tasks.cast<AnalysisTask?>().firstWhere(
+          (t) => t != null && t.id == taskId,
+          orElse: () => null,
+        );
+    if (task == null) return;
+
+    if (!File(task.imagePath).existsSync()) {
+      task.status = AnalysisStatus.failed;
+      task.error = 'No se encontró el archivo de imagen para reintentar.';
+      notifyListeners();
+      await _persistTaskToDb(task);
+      return;
+    }
+
+    task.status = AnalysisStatus.queued;
+    task.error = null;
+    task.progress = 0.10;
+    task.stage = 'En cola para reintento...';
+    notifyListeners();
+    await _persistTaskToDb(task);
+
+    _triggerWorker();
   }
 
   Future<void> clearCompleted() async {

@@ -222,16 +222,51 @@ class MealController extends ChangeNotifier {
           bmr: newBmr,
           activityLevel: profile.activityLevel,
         );
+
+        // Check if user is using automatic metabolic goals
+        final prevBmr = MetabolicCalculator.calculateBmr(
+          gender: profile.gender, weightKg: profile.weight,
+          heightCm: profile.height, age: profile.age,
+        );
+        final prevTdee = MetabolicCalculator.calculateTdee(bmr: prevBmr, activityLevel: profile.activityLevel);
+        final prevAutoCals = MetabolicCalculator.calculateCaloricGoal(
+          tdee: prevTdee, bmr: prevBmr, bodyGoal: profile.bodyGoal,
+        );
+        final prevMacros = MetabolicCalculator.calculateMacros(
+          targetCalories: prevAutoCals, weightKg: profile.weight,
+          bodyGoal: profile.bodyGoal, heightCm: profile.height, gender: profile.gender,
+        );
+        final isAutoGoals = (profile.targetCalories - prevAutoCals).abs() <= 1.0 &&
+            (profile.targetProtein - prevMacros.protein).abs() <= 1.0 &&
+            (profile.targetFat - prevMacros.fat).abs() <= 1.0;
+
+        double targetCal = profile.targetCalories, targetProt = profile.targetProtein;
+        double targetCarb = profile.targetCarbs, targetFat = profile.targetFat;
+
+        if (isAutoGoals) {
+          targetCal = MetabolicCalculator.calculateCaloricGoal(
+            tdee: newTdee, bmr: newBmr, bodyGoal: profile.bodyGoal,
+          );
+          final macros = MetabolicCalculator.calculateMacros(
+            targetCalories: targetCal, weightKg: weight, bodyGoal: profile.bodyGoal,
+            heightCm: profile.height, gender: profile.gender,
+          );
+          targetProt = macros.protein; targetCarb = macros.carbs; targetFat = macros.fat;
+        }
+
         final updatedProfile = profile.copyWith(
-          weight: weight,
-          bmr: newBmr,
-          tdee: newTdee,
+          weight: weight, bmr: newBmr, tdee: newTdee,
+          targetCalories: targetCal, targetProtein: targetProt,
+          targetCarbs: targetCarb, targetFat: targetFat,
           updatedAt: DateTime.now(),
         );
         final newPrompt = MetabolicCalculator.generateMasterPrompt(updatedProfile);
         final finalProfile = updatedProfile.copyWith(masterPrompt: newPrompt);
         await DatabaseService.instance.saveUserProfile(finalProfile);
         await SecureStorageService.instance.setMasterPrompt(newPrompt);
+        await SecureStorageService.instance.setDailyGoals(finalProfile.dailyGoals);
+        await refreshGoals();
+        await SettingsController.instance.refreshDailyGoals(finalProfile.dailyGoals);
         SettingsController.instance.notifyProfileUpdated();
       }
     } catch (e) {

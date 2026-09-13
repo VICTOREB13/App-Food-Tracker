@@ -47,20 +47,18 @@ class _MetricsScreenState extends State<MetricsScreen> {
   Future<void> _loadData() async {
     try {
       await _mealController.loadWeightLogs(days: _selectedDays);
-      final allMeals = await DatabaseService.instance.getAllMeals();
+      List<Meal> meals;
       if (_selectedDays == 0) {
-        if (mounted) {
-          setState(() {
-            _rangeMeals = allMeals;
-          });
-        }
+        meals = await DatabaseService.instance.getAllMeals();
       } else {
-        final cutoff = DateTime.now().subtract(Duration(days: _selectedDays));
-        if (mounted) {
-          setState(() {
-            _rangeMeals = allMeals.where((m) => m.date.isAfter(cutoff)).toList();
-          });
-        }
+        final now = DateTime.now();
+        final cutoff = now.subtract(Duration(days: _selectedDays));
+        meals = await DatabaseService.instance.getMealsByRange(cutoff, now);
+      }
+      if (mounted) {
+        setState(() {
+          _rangeMeals = meals;
+        });
       }
     } catch (_) {
       if (mounted) {

@@ -315,5 +315,25 @@ void main() {
       expect(copied.calories, equals(170.0));
       expect(copied.protein, equals(31.0));
     });
+
+    test('fetchByBarcode returns null when search hits do not match GTIN exactly (H-01)', () async {
+      final mockClient = MockClient((request) async {
+        return http.Response('''
+        {
+          "foods": [
+            {
+              "fdcId": 999999,
+              "description": "Unrelated Product",
+              "gtinUpc": "999999999999"
+            }
+          ]
+        }
+        ''', 200);
+      });
+
+      final service = UsdaFoodDataService(client: mockClient, storage: mockStorage);
+      final item = await service.fetchByBarcode('030000010402');
+      expect(item, isNull);
+    });
   });
 }

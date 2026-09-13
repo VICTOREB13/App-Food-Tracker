@@ -640,5 +640,83 @@ void main() {
       expect(result.items[3].name, equals('Aguacate fresco en tajadas'));
       expect(result.items[3].estimatedGrams, equals(70.0));
     });
+
+    test('MealAnalysisResult repara JSON truncado por corte de tokens de Gemini (H-08)', () {
+      const truncatedJson = '''
+      {
+        "plato": "Pollo al Horno con Romero",
+        "items": [
+          {
+            "alimento": "Pechuga de pollo",
+            "gramos_estimados": 150,
+            "calorias": 240,
+            "proteinas_g": 40.0,
+            "carbohidratos_g": 0.0,
+            "grasas_g": 5.0
+          },
+          {
+            "alimento": "Papas rústicas",
+            "gramos_estimados": 120,
+            "calorias": 110
+      ''';
+
+      final result = MealAnalysisResult.fromJsonString(truncatedJson);
+      expect(result.dishName, equals('Pollo al Horno con Romero'));
+      expect(result.items.isNotEmpty, isTrue);
+      expect(result.items.first.name, equals('Pechuga de pollo'));
+    });
+
+    test('MealAnalysisResult protege hierbas y condimentos de absorber macros mayores (H-04)', () {
+      final items = MealAnalysisResult.decomposeCompositeFood(
+        ['Pechuga de pollo', 'Romero fresco'],
+        300.0,
+        40.0,
+        0.0,
+        10.0,
+      );
+
+      expect(items.length, equals(2));
+      final pollo = items.firstWhere((i) => i.name.contains('Pollo'));
+      final romero = items.firstWhere((i) => i.name.contains('Romero'));
+
+      expect(pollo.calories, greaterThan(250.0));
+      expect(pollo.protein, greaterThan(35.0));
+
+      expect(romero.calories, lessThan(15.0));
+      expect(romero.protein, lessThan(2.0));
+      expect(romero.estimatedGrams, lessThanOrEqualTo(15.0));
+    });
+
+    test('MealAnalysisResult no confunde salmón o salchichas con condimentos por contener sal (H-04)', () {
+      final items = MealAnalysisResult.decomposeCompositeFood(
+        ['Filete de salmón a la plancha', 'Arroz blanco', 'Romero fresco'],
+        500.0,
+        45.0,
+        50.0,
+        15.0,
+      );
+
+      final salmon = items.firstWhere((i) => i.name.contains('salmón'));
+      final romero = items.firstWhere((i) => i.name.contains('Romero'));
+
+      expect(salmon.calories, greaterThan(100.0));
+      expect(salmon.protein, greaterThan(20.0));
+      expect(salmon.estimatedGrams, greaterThan(50.0));
+
+      expect(romero.calories, lessThan(15.0));
+      expect(romero.estimatedGrams, lessThanOrEqualTo(15.0));
+    });
+
+    test('MealAnalysisResult repara JSON cortado a mitad de clave y con escape colgante (H-08)', () {
+      const truncatedMidKey = '{"plato": "Pollo al Curry", "items": [{"alimento": "Pechuga", "calor';
+      final result1 = MealAnalysisResult.fromJsonString(truncatedMidKey);
+      expect(result1.dishName, equals('Pollo al Curry'));
+      expect(result1.items.length, equals(1));
+      expect(result1.items.first.name, equals('Pechuga'));
+
+      const truncatedEscape = '{"plato": "Pollo al Romero con \\';
+      final result2 = MealAnalysisResult.fromJsonString(truncatedEscape);
+      expect(result2.dishName, contains('Pollo al Romero'));
+    });
   });
 }

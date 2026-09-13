@@ -280,6 +280,21 @@ void main() {
       // Balance
       expect(macros.totalCalories, closeTo(2200.0, 2.0));
     });
+
+    test('Ajuste clínico para IMC >= 30 utiliza Peso Corporal Ajustado (ABW) (H-05)', () {
+      final macros = MetabolicCalculator.calculateMacros(
+        targetCalories: 2000.0,
+        weightKg: 110.0,
+        bodyGoal: 'fat_loss',
+        heightCm: 175.0,
+        gender: 'male',
+      );
+
+      expect(macros.protein, lessThan(200.0));
+      expect(macros.protein, closeTo(172.6, 2.0));
+      expect(macros.carbs, greaterThan(80.0));
+      expect(macros.totalCalories, closeTo(2000.0, 2.0));
+    });
   });
 
   group('MetabolicCalculator - Master Prompt Synthesis', () {

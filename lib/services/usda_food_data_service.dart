@@ -181,18 +181,22 @@ class UsdaFoodDataService {
       final List<dynamic> foods = data['foods'] ?? [];
       if (foods.isEmpty) return null;
 
-      // Find exact GTIN match or best hit
+      // Find exact GTIN match with 14-digit normalization
+      final normCode = code.trim().padLeft(14, '0');
       Map<String, dynamic>? matched;
       for (final f in foods) {
         if (f is Map<String, dynamic>) {
-          final gtin = f['gtinUpc']?.toString();
-          if (gtin == code || (gtin != null && (gtin.endsWith(code) || code.endsWith(gtin)))) {
-            matched = f;
-            break;
+          final rawGtin = f['gtinUpc']?.toString().trim();
+          if (rawGtin != null && rawGtin.isNotEmpty) {
+            final normGtin = rawGtin.padLeft(14, '0');
+            if (normGtin == normCode) {
+              matched = f;
+              break;
+            }
           }
         }
       }
-      matched ??= (foods.first as Map<String, dynamic>);
+      if (matched == null) return null;
       return UsdaFoodItem.fromFdcJson(matched);
     } catch (_) {
       return null;

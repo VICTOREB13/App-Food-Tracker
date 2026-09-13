@@ -161,11 +161,16 @@ Reglas obligatorias de cubicaje:
     String? overrideMasterPrompt,
   }) async {
     try {
-      final compressedBytes = ImageProcessingService.instance.compressAndResize(
-        rawImageBytes,
-        targetMaxDimension: 1024,
-        quality: 85,
-      );
+      // Avoid recompression if image already has adequate dimensions (<= 1024)
+      Uint8List imageBytesToSend = rawImageBytes;
+      final fastDims = _getFastDimensions(rawImageBytes);
+      if (fastDims == null || fastDims.$1 > 1024 || fastDims.$2 > 1024) {
+        imageBytesToSend = await ImageProcessingService.instance.compressAndResizeAsync(
+          rawImageBytes,
+          targetMaxDimension: 1024,
+          quality: 85,
+        );
+      }
 
       final effectiveModel = (overrideModel != null && overrideModel.trim().isNotEmpty)
           ? overrideModel.trim()
@@ -236,11 +241,13 @@ Reglas obligatorias de cubicaje:
       }
 
       final content = Content.multi([
-        DataPart('image/jpeg', compressedBytes),
+        DataPart('image/jpeg', imageBytesToSend),
         TextPart(promptBuffer.toString()),
       ]);
 
-      final response = await model.generateContent([content]);
+      final response = await model
+          .generateContent([content])
+          .timeout(const Duration(seconds: 35));
       final text = response.text;
       if (text == null || text.trim().isEmpty) {
         throw Exception('Gemini devolvió una respuesta vacía');
@@ -250,5 +257,30 @@ Reglas obligatorias de cubicaje:
     } catch (e) {
       throw Exception(userFriendlyErrorMessage(e));
     }
+  }
+
+  /// Fast O(1) header inspection for JPEG/PNG image dimensions without decoding pixels
+  static (int, int)? _getFastDimensions(Uint8List bytes) {
+    if (bytes.length < 30) return null;
+    if (bytes[0] == 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4E && bytes[3] == 0x47) {
+      final width = (bytes[16] << 24) | (bytes[17] << 16) | (bytes[18] << 8) | bytes[19];
+      final height = (bytes[20] << 24) | (bytes[21] << 16) | (bytes[22] << 8) | bytes[23];
+      return (width, height);
+    }
+    if (bytes[0] == 0xFF && bytes[1] == 0xD8) {
+      int offset = 2;
+      while (offset + 8 < bytes.length) {
+        if (bytes[offset] != 0xFF) break;
+        final marker = bytes[offset + 1];
+        if (marker == 0xC0 || marker == 0xC1 || marker == 0xC2) {
+          final height = (bytes[offset + 5] << 8) | bytes[offset + 6];
+          final width = (bytes[offset + 7] << 8) | bytes[offset + 8];
+          return (width, height);
+        }
+        final length = (bytes[offset + 2] << 8) | bytes[offset + 3];
+        offset += 2 + length;
+      }
+    }
+    return null;
   }
 }

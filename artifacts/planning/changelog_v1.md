@@ -18,6 +18,21 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [1.0.3] - 2026-09-13
+
+### Fixed
+- **Coincidencia Exacta GTIN en USDA y Fallback Limpio (H-01):** Eliminación de coincidencia difusa o primer resultado arbitrario (`matched ??= foods.first`) en `UsdaFoodDataService`. Se implementó normalización GTIN a 14 dígitos (`padLeft(14, '0')`) y retorno estricto de `null` en caso de no concordancia exacta, permitiendo a `BarcodeLookupService` activar de forma transparente el fallback hacia Open Food Facts.
+- **Compresión Asíncrona en Isolate y Prevención de Recompresión (H-02):** Migración del procesamiento de imágenes a un Isolate secundario (`Isolate.run`) en `ImageProcessingService.compressAndResizeAsync` para liberar por completo el hilo principal de la UI a 60 FPS. Además, `GeminiVisionService` ahora decodifica los límites de la imagen y omite la recompresión si las dimensiones ya son $\le 1024$ px.
+- **Sincronización Metabólica Completa al Registrar Peso (H-03):** En `MealController.recordWeight`, el recálculo biométrico ahora actualiza dinámicamente las metas nutricionales (`calculateMacros`) cuando el usuario tiene metas automáticas, persiste `DailyGoals` en SQLite, invoca `refreshGoals()` y emite notificación a los oyentes de la UI.
+- **Protección de Hierbas, Especias y Condimentos en Desglose de Macros (H-04):** En `MealAnalysisResult.decomposeCompositeFood` y `_distributeZeroCalorieIngredients`, se añadió `isSeasoningOrHerb` para restringir la asignación de calorías y macronutrientes a ingredientes como orégano, pimienta, perejil o comino, impidiendo que absorban erróneamente más del 50% de los macros del plato principal.
+- **Peso Corporal Ajustado Clínico para Obesidad (H-05):** En `MetabolicCalculator.calculateMacros`, se incorporó la fórmula clínica de Peso Corporal Ajustado ($ABW = IBW + 0.4 \times (TBW - IBW)$) para usuarios con IMC $\ge 30$, evitando la sobreestimación de requerimientos proteicos y energéticos asociada a masa grasa no metabólicamente activa.
+- **Robustez y Reintento en Cola Asíncrona de Análisis (H-06):** Prevención de comidas duplicadas en `AnalysisQueueService` mediante la asignación determinista del ID de la tarea (`task.resultMeal?.id ?? task.id`), deduplicación al inicializar tareas residuales, y adición del método `retryTask(taskId)` para reintentar tareas en estado fallido sin perder la foto original.
+- **Recuperación Resiliente de JSON Truncado de Gemini (H-08):** Nuevo módulo `JsonRepairHelper` (< 300 LoC) que implementa un algoritmo de balanceo de corchetes, llaves y comillas no cerradas para rescatar respuestas incompletas de la API de Gemini Vision antes de descartar el análisis.
+- **Consultas Paginadas por Rango de Fecha en SQLite (H-09):** Implementación de `DatabaseService.getMealsByRange(start, end)` indexado por `idx_meals_date` y actualización de `MetricsScreen._loadData` para consultar únicamente el intervalo relevante en lugar de cargar el historial completo en RAM.
+- **Timeout Defensivo en Llamadas de Red a Gemini Vision (H-14):** Inclusión de `timeout(const Duration(seconds: 35))` en `GeminiVisionService.analyzeMealImage` para evitar que la interfaz o la cola de análisis queden en espera infinita ante latencias anómalas de red o congelamientos de socket.
+
+---
+
 ## [1.0.2] - 2026-09-12
 
 ### Fixed

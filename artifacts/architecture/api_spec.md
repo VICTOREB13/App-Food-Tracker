@@ -1,10 +1,10 @@
 ---
 tipo: api_spec
 proyecto: App_Food_Tracker
-version: v1.0.2
+version: v1.0.3
 estado: activo
-fecha: 2026-09-12
-tags: [proyecto, api, backend, contratos, sqlite, v1-0-2]
+fecha: 2026-09-13
+tags: [proyecto, api, backend, contratos, sqlite, v1-0-3]
 ---
 
 # 📡 Especificación de Contrato de Datos, Esquema SQLite v2 y Servicios Backend
@@ -244,6 +244,7 @@ Todos los modelos incorporan el patrón privado `_sentinel = Object()` en `copyW
 ### 4.1. USDA FoodData Central API (`UsdaFoodDataService`)
 - **Búsqueda por Código de Barras / UPC:**
   - `GET https://api.nal.usda.gov/fdc/v1/foods/search?api_key={KEY}&query={UPC}&dataType=Branded,Foundation`
+  - Coincidencia exacta estricta normalizando el GTIN a 14 dígitos (`padLeft(14, '0')`). Si no hay coincidencia exacta, retorna `null` para que `BarcodeLookupService` active el fallback transparente a Open Food Facts.
 - **Mapeo de Nutrientes Oficiales (Nutrient IDs):**
   - Calorías: ID `1008` (`Energy` en kcal) o ID `1062` (`Energy` en kJ, convertida dividiendo por 4.184).
   - Proteína: ID `1003`.
@@ -266,6 +267,11 @@ Todos los modelos incorporan el patrón privado `_sentinel = Object()` en `copyW
 - Multiplicador base según actividad: Sedentario (1.2), Ligero (1.375), Moderado (1.55), Intenso (1.725), Muy Intenso (1.9).
 - Bonus por pasos: $\frac{\text{pasos}}{10000} \times 0.15$ al factor de actividad.
 - Ajuste por objetivo: Déficit (-500 kcal), Mantenimiento (0 kcal), Superávit (+350 kcal).
+
+### 5.3. Peso Corporal Ajustado Clínico (ABW) en Obesidad
+- Para usuarios con $IMC \ge 30$, se calcula el Peso Corporal Ideal ($IBW = 22 \times \text{altura}_{\text{m}}^2$ o fórmula Devine) y el Peso Corporal Ajustado:
+  $$ABW = IBW + 0.4 \times (TBW - IBW)$$
+- Las metas de proteínas y macronutrientes se calculan sobre el $ABW$ en lugar del peso total ($TBW$), previniendo sobrecargas proteicas y calóricas irreales en presencia de alto porcentaje de adiposidad.
 
 ---
 

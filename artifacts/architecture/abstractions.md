@@ -1,10 +1,10 @@
 ---
 tipo: abstracciones
 proyecto: App_Food_Tracker
-version: v1.0.2
+version: v1.0.3
 estado: activo
-fecha: 2026-09-12
-tags: [proyecto, arquitectura, abstracciones, backend, v1-0-2]
+fecha: 2026-09-13
+tags: [proyecto, arquitectura, abstracciones, backend, v1-0-3]
 ---
 
 # Abstracciones del Sistema y Arquitectura de Código: Victor Engineer - Food Tracker
@@ -44,6 +44,7 @@ lib/
 │   ├── daily_goals.dart
 │   ├── food_item.dart
 │   ├── gemini_model_info.dart
+│   ├── json_repair_helper.dart
 │   ├── meal.dart
 │   ├── meal_analysis_result.dart
 │   ├── model_sanitizer.dart
@@ -87,6 +88,12 @@ lib/
   - `parseDate(dynamic value, {DateTime? fallback}): DateTime`
   - `formatIsoDate(DateTime? date): String`
 
+### `JsonRepairHelper`
+- **Ubicación:** `lib/models/json_repair_helper.dart`
+- **Propósito:** Algoritmo utilitario de recuperación resiliente de payloads JSON truncados emitidos por Gemini Vision mediante balanceo de pila (stack) de comillas, corchetes y llaves.
+- **Firmas:**
+  - `repairJson(String jsonStr): String`
+
 ### `MacroDistribution`
 - **Ubicación:** `lib/services/metabolic_calculator.dart`
 - **Propósito:** Objeto de valor inmutable representativo del reparto calórico y de macronutrientes en gramos calculado clínicamente.
@@ -95,7 +102,7 @@ lib/
 
 ### `MealAnalysisResult`
 - **Ubicación:** `lib/models/meal_analysis_result.dart` (re-exportado en `lib/services/gemini_vision_service.dart`)
-- **Propósito:** DTO inmutable resultante del análisis volumétrico y nutricional generado por el motor de visión IA multimodal. Incorpora descomposición automática inteligente de platos compuestos en ingredientes individuales independientes, erradicación de 200g genérico y estimación de pesos volumétricos realistas basados en densidad calórica.
+- **Propósito:** DTO inmutable resultante del análisis volumétrico y nutricional generado por el motor de visión IA multimodal. Incorpora descomposición automática inteligente de platos compuestos en ingredientes individuales independientes, protección de hierbas/especias (`isSeasoningOrHerb`) y recuperación resiliente con `JsonRepairHelper`.
 - **Campos:** `dishName` (String), `items` (List<FoodItem>), `totalCalories` (double), `totalProtein` (double), `totalCarbs` (double), `totalFat` (double), `rawJson` (String).
 - **Métodos Clave:** `extractComponents(String text): List<String>`, `decomposeCompositeFood(...): List<FoodItem>`, `fromJsonString(String jsonStr): MealAnalysisResult`.
 
@@ -115,6 +122,8 @@ lib/
   - `init(): Future<void>`: Inicialización perezosa protegida contra carreras concurrentes mediante `_initFuture`.
   - `insertMeal(Meal meal) / updateMeal(Meal meal) / upsertMeal(Meal meal) / deleteMeal(String id): Future<int>`: Garantiza la persistencia atómica mediante `ConflictAlgorithm.replace`.
   - `getMealsForDay(DateTime day) / getAllMeals(): Future<List<Meal>>`
+  - `getMealsByRange(DateTime start, DateTime end): Future<List<Meal>>`: Consulta comidas indexadas por `idx_meals_date` en un intervalo temporal específico para alimentar métricas sin sobrecargar RAM.
+  - `getMealByImagePath(String imagePath): Future<Meal?>`: Resuelve la comida asociada a una ruta de imagen en disco.
   - `clearMealImagePath(String mealId): Future<int>`: Desvincula la imagen borrada del registro SQLite (`image_path = null`) durante la depuración de almacenamiento.
   - `getMealsOlderThanWithImages(DateTime cutoffDate): Future<List<Meal>>`: Consulta comidas previas a la fecha de corte que conservan imagen en disco.
   - `insertPantryItem(PantryItem item) / updatePantryItem(PantryItem item) / deletePantryItem(String id): Future<int>`
@@ -124,15 +133,15 @@ lib/
 
 ### 2. `GeminiVisionService`
 - **Ubicación:** `lib/services/gemini_vision_service.dart`
-- **Responsabilidad:** Orquestación de inferencia multimodal visual utilizando Google Generative AI SDK, inyección del Master Prompt biométrico, schema estructurado JSON forzado (`responseSchema`) y traducción defensiva de errores amigables al usuario.
+- **Responsabilidad:** Orquestación de inferencia multimodal visual utilizando Google Generative AI SDK, inyección del Master Prompt biométrico, schema estructurado JSON forzado (`responseSchema`), timeout defensivo de 35 segundos y traducción defensiva de errores amigables al usuario.
 - **Dependencias:** `ImageProcessingService`, `ModelSanitizer`.
 - **Métodos Clave:**
   - `userFriendlyErrorMessage(dynamic error): String`: Mapea excepciones técnicas (SocketException, 401/403, 429 cuota, fallos de detección/seguridad) a mensajes claros y accionables en español.
   - `analyzeMealPhoto({required Uint8List rawImageBytes, ...}) / analyzeMealImage(Uint8List imageBytes, ...): Future<MealAnalysisResult>`:
-    1. Comprime y redimensiona la imagen a 1024x1024 píxeles (JPEG al 85% de calidad).
+    1. Decodifica dimensiones y omite recompresión si ancho y alto ya son <= 1024 px; de lo contrario comprime en Isolate asíncrono.
     2. Construye el modelo `GenerativeModel` con temperatura baja (`0.2`) y esquema estructurado.
     3. Concatena la instrucción clínica del sistema, el Master Prompt del usuario y las notas contextuales opcionales.
-    4. Ejecuta `generateContent` capturando excepciones y envolviéndolas mediante `userFriendlyErrorMessage`.
+    4. Ejecuta `generateContent` con timeout defensivo de 35s (`.timeout(Duration(seconds: 35))`), capturando excepciones y envolviéndolas mediante `userFriendlyErrorMessage`.
 
 ### 3. `GeminiModelService`
 - **Ubicación:** `lib/services/gemini_model_service.dart`
@@ -148,6 +157,7 @@ lib/
 - **Responsabilidad:** Cliente HTTP para la API oficial de USDA FoodData Central (`api.nal.usda.gov/fdc/v1`).
 - **Capacidades Defensivas:**
   - Ventana deslizante de limitación de tasa (1.000 solicitudes/hora) y lectura defensiva de headers `x-ratelimit-remaining`.
+  - Coincidencia exacta de GTIN mediante normalización de 14 dígitos (`padLeft(14, '0')`) y fallback limpio retornando `null` para activar delegación transparente a Open Food Facts.
   - Normalización energética de kilojulios a kilocalorías ($kJ \rightarrow kcal$ factor 4.184).
   - Manejo de excepciones tipadas: `UsdaRateLimitException`, `UsdaAuthenticationException`.
 - **Métodos Clave:**
@@ -167,13 +177,22 @@ lib/
   - `calculateBmr({required String gender, required double weightKg, required double heightCm, required int age}): double`
   - `calculateTdee({required double bmr, required String activityLevel}): double`
   - `calculateCaloricGoal({required double tdee, required double bmr, required String bodyGoal}): double`
-  - `calculateMacros({required double targetCalories, required double weightKg, required String bodyGoal}): MacroDistribution`
+  - `calculateMacros({required double targetCalories, required double weightKg, required String bodyGoal, double? heightCm, String? gender}): MacroDistribution`: Aplica la fórmula de Peso Corporal Ajustado ($ABW = IBW + 0.4 \times (TBW - IBW)$) cuando el IMC $\ge 30$, protegiendo contra la sobreestimación proteica en obesidad.
   - `generateMasterPrompt(UserProfile profile): String`
   - `calculateProfile(...): UserProfile`
   - `saveAndSynchronizeProfile(UserProfile profile): Future<UserProfile>`: Persiste en SQLite, sincroniza DailyGoals y Master Prompt en SecureStorage, actualiza reactivamente `MealController` y sincroniza en memoria `SettingsController`.
   - `calculateAndSaveProfile(...): Future<UserProfile>`
 
-### 7. `SecureStorageService` (Singleton)
+### 7. `AnalysisQueueService` (Singleton)
+- **Ubicación:** `lib/services/analysis_queue_service.dart`
+- **Responsabilidad:** Motor asíncrono no bloqueante con persistencia en SQLite (`analysis_queue`) para desacoplar el procesamiento fotográfico del hilo de la UI.
+- **Métodos Clave:**
+  - `init(): Future<void>`: Carga y recupera tareas pendientes, deduplicando contra comidas ya persistidas en SQLite.
+  - `enqueueTask(String imagePath, {String? mealType, String? notes, DateTime? targetDate}): Future<AnalysisTask>`
+  - `retryTask(String taskId): Future<void>`: Reintenta tareas fallidas restableciendo su estado sin perder los datos originales.
+  - `purgeCompletedTasks(): Future<void>`
+
+### 8. `SecureStorageService` (Singleton)
 - **Ubicación:** `lib/services/secure_storage_service.dart`
 - **Responsabilidad:** Almacenamiento seguro en hardware cifrado para credenciales BYOK y tokens sensibles.
 - **Métodos Clave:**
@@ -184,31 +203,25 @@ lib/
   - `getDailyGoals() / setDailyGoals(DailyGoals goals): Future<void>`
   - `hasCompletedOnboarding() / setCompletedOnboarding(bool completed): Future<void>`
 
-### 8. `BackupService`
+### 9. `BackupService`
 - **Ubicación:** `lib/services/backup_service.dart`
 - **Responsabilidad:** Exportación e importación atómica de copias de seguridad en formato JSON v2 estructurado dentro de transacciones SQLite.
 - **Métodos Clave:**
   - `exportToJsonString(): Future<String>`
   - `importFromJsonString(String jsonContent): Future<Map<String, int>>`
 
-### 9. `ImageProcessingService`
+### 10. `ImageProcessingService`
 - **Ubicación:** `lib/services/image_processing_service.dart`
-- **Responsabilidad:** Compresión y redimensionamiento defensivo de fotografías de platos (máximo 1024x1024 px, JPEG 85%), gestión del almacenamiento en la carpeta pública visible del usuario (`/storage/emulated/0/Pictures/FoodTracker/images`) con cascada de fallbacks a almacenamiento de aplicación y documentos, y depuración de almacenamiento por retención temporal sin afectar registros SQLite.
+- **Responsabilidad:** Compresión y redimensionamiento defensivo de fotografías de platos (máximo 1024x1024 px, JPEG 85%), gestión del almacenamiento en la carpeta pública visible del usuario con cascada de fallbacks, y compresión asíncrona en Isolate secundario para mantener 60 FPS en UI.
 - **Métodos Clave:**
   - `compressAndResize(Uint8List rawBytes, {int targetMaxDimension = 1024, int quality = 85}): Uint8List`
-  - `saveMealImage(Uint8List imageBytes, {String? mealType, DateTime? date, String? mealId, int? index, Directory? customDirectory}): Future<String>`: Guarda la fotografía siguiendo la nomenclatura estricta `YYYY_MM_DD_{TYPE}_{INDEX}.jpg` (ej: `2026_06_30_B_01.jpg`), resolviendo índices secuenciales automáticamente y previniendo colisiones en la ruta pública visible de Android `/storage/emulated/0/Pictures/FoodTracker/images` (o cascada de fallbacks).
-  - `generateMealImageFileName({DateTime? date, String? mealType, Directory? directory, int? explicitIndex}): Future<String>`: Genera el nombre de archivo estandarizado `YYYY_MM_DD_{TYPE}_{INDEX}.jpg` resolviendo o infiriendo tipos y secuenciales.
-  - `getMealTypeCode(String? mealType): String`: Mapea categorías a códigos (`B`: Breakfast/Desayuno, `L`: Lunch/Almuerzo, `D`: Dinner/Cena, `S`: Snack/Merienda/Snarck/Botana, `O`: Fallback/Otro).
-  - `getMealTypeFromCode(String code): String`: Deserializa el código de comida a su nombre canónico en español.
-  - `inferMealTypeByTime([DateTime? time]): String`: Infiere automáticamente el tipo de comida sugerido según la hora actual del día.
-  - `parseMealImageFileName(String pathOrFileName): MealImageFileInfo?`: Descompone nombres de archivo según la nomenclatura validando estrictamente el calendario gregoriano (días reales de cada mes y bisiestos) y extrayendo metadatos.
-  - `filterMealImages(List<String> filePaths, {DateTime? date, int? year, int? month, int? day, String? mealType}): List<MealImageFileInfo>`: Filtra colecciones de fotografías por criterios temporales y de tipo de comida.
-  - `listMealImages({required Directory directory, DateTime? date, int? year, int? month, int? day, String? mealType}): Future<List<MealImageFileInfo>>`: Escanea un directorio en disco y retorna todas las fotos de comida conformes que coincidan con los filtros.
-  - `normalizeFilePath(String pathOrUri): String`: Normaliza rutas directas y esquemas `file://` a rutas absolutas válidas del sistema de archivos.
-  - `pruneOldMealPhotos({required int retentionDays}): Future<int>`: Elimina archivos de imágenes con antigüedad mayor al umbral sin importar la ruta donde residan, manteniendo intactos los registros SQLite (`image_path = null`).
-  - `deleteMealImage(String? filePath): Future<void>`: Elimina la fotografía del plato en disco de forma segura.
+  - `compressAndResizeAsync(Uint8List rawBytes, {int targetMaxDimension = 1024, int quality = 85}): Future<Uint8List>`: Ejecuta la compresión en `Isolate.run`.
+  - `saveMealImage(Uint8List imageBytes, ...): Future<String>`
+  - `generateMealImageFileName(...): Future<String>`
+  - `pruneOldMealPhotos({required int retentionDays}): Future<int>`
+  - `deleteMealImage(String? filePath): Future<void>`
 
-### 10. `ThemeManager`
+### 11. `ThemeManager`
 - **Ubicación:** `lib/services/theme_manager.dart`
 - **Responsabilidad:** Gestión reactiva del modo de visualización (`ThemeMode.light`, `ThemeMode.dark`, `ThemeMode.system`) persistido en `SharedPreferences`.
 

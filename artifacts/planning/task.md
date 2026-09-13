@@ -1,13 +1,13 @@
 ---
 tipo: task_list
 proyecto: App_Food_Tracker
-iteracion: v1.0.2
+iteracion: v1.0.3
 estado: completado
-fecha: 2026-09-12
-tags: [proyecto, tasks, checklist, v7-teamwork, v1-0-2]
+fecha: 2026-09-13
+tags: [proyecto, tasks, checklist, v7-teamwork, v1-0-3]
 ---
 
-# 📋 Checklist Maestro de Tareas de Agentes (v1.0.2)
+# 📋 Checklist Maestro de Tareas de Agentes (v1.0.3)
 
 > **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.0.2. Cada tarea completada se marca con `[x]`.
 
@@ -98,4 +98,19 @@ tags: [proyecto, tasks, checklist, v7-teamwork, v1-0-2]
 - [x] (Backend-Architect) Refinar lógica de detección de ingredientes agrupados (`isLumped`) en `MealAnalysisResult` preservando casing original y evitando la descomposición de platos unitarios legítimos.
 - [x] (Systems-Auditor) Verificar que la totalidad de las 48 suites automatizadas (329 tests) pasen limpiamente al 100%.
 - [x] (DevOps-Engineer) Ejecutar pipeline completo en GitHub Actions (Quality Gate, Build APK, GitHub Release) y publicar oficialmente la versión `v1.0.2`.
+
+---
+
+## 🛡️ 10. Backend-Architect & Systems-Auditor (v1.0.3: Robustez de Análisis, Resiliencia y Precisión Clínica)
+- [x] (Backend-Architect) **H-01:** USDA exact GTIN match (`padLeft(14, '0')`) y fallback limpio retornando `null` en `UsdaFoodDataService` para delegar en Open Food Facts.
+- [x] (Backend-Architect) **H-02:** Compresión asíncrona de imágenes en Isolate secundario (`compressAndResizeAsync`) y prevención de recompresión redundante en `GeminiVisionService` si dimensiones $\le 1024$ px.
+- [x] (Backend-Architect) **H-03:** Sincronización metabólica en `MealController.recordWeight` recalculando macros con `calculateMacros`, guardando `DailyGoals`, invocando `refreshGoals()` y notificando oyentes.
+- [x] (Backend-Architect) **H-04:** Protección de condimentos, especias y hierbas (`isSeasoningOrHerb`) en `MealAnalysisResult` contra asignación desproporcionada ($\ge 50\%$) de macronutrientes del plato.
+- [x] (Backend-Architect) **H-05:** Peso Corporal Ajustado Clínico ($ABW = IBW + 0.4 \times (TBW - IBW)$) en `MetabolicCalculator.calculateMacros` para usuarios con IMC $\ge 30$.
+- [x] (Backend-Architect) **H-06:** Robustez en cola de análisis `AnalysisQueueService` con ID determinista de comidas (`task.resultMeal?.id ?? task.id`), deduplicación en inicio y reintento con `retryTask(taskId)`.
+- [x] (Backend-Architect) **H-08:** Módulo utilitario `JsonRepairHelper` (< 300 LoC) para reparar respuestas JSON truncadas de Gemini Vision mediante pila de balanceo.
+- [x] (Backend-Architect) **H-09:** Consulta por rango de fechas `getMealsByRange(start, end)` en `DatabaseService` y adopción en `MetricsScreen._loadData` para evitar picos de memoria RAM.
+- [x] (Backend-Architect) **H-14:** Timeout defensivo de 35 segundos en llamadas a la API de Gemini Vision en `GeminiVisionService.analyzeMealImage`.
+- [x] (Systems-Auditor) Tests unitarios añadidos y validados para H-01, H-02, H-03, H-04, H-05, H-06, H-08, H-09 y H-14.
+- [x] (DevOps-Engineer) Incremento de versión a `1.0.3+1` en `pubspec.yaml` y documentación completa en `changelog_v1.md`.
 

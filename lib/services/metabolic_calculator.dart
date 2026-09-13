@@ -175,14 +175,38 @@ class MetabolicCalculator {
 
   /// Calculates Macronutrient Distribution in grams:
   /// - Protein: 2.0 g/kg (fat_loss), 1.8 g/kg (maintenance), 2.2 g/kg (muscle_gain)
-  /// - Fat: 25% of target calories / 9 (minimum 0.8 g/kg)
+  /// - Clinical adjustment with Adjusted Body Weight (ABW = IBW + 0.4 * (TBW - IBW)) when BMI >= 30
+  /// - Fat: 25% of target calories / 9 (minimum 0.8 g/kg of effective weight)
   /// - Carbs: (Target calories - protein*4 - fat*9) / 4
   static MacroDistribution calculateMacros({
     required double targetCalories,
     required double weightKg,
     required String bodyGoal,
+    double? heightCm,
+    String? gender,
   }) {
     final goal = normalizeBodyGoal(bodyGoal);
+
+    // Clinical adjustment for obesity (BMI >= 30)
+    // Uses Adjusted Body Weight (ABW = IBW + 0.4 * (TBW - IBW)) for protein
+    // to prevent excessive protein/fat budgets that starve carbohydrates.
+    double effectiveWeight = weightKg;
+    if (heightCm != null && heightCm > 0) {
+      final heightM = heightCm / 100.0;
+      final bmi = weightKg / (heightM * heightM);
+      if (bmi >= 30.0) {
+        final isFemale = normalizeGender(gender) == 'female';
+        final baseIbw = isFemale ? 45.5 : 50.0;
+        double ibw = baseIbw + 0.91 * (heightCm - 152.4);
+        if (ibw <= 0 || heightCm < 152.4) {
+          ibw = 22.0 * (heightM * heightM);
+        }
+        if (weightKg > ibw) {
+          final abw = ibw + 0.4 * (weightKg - ibw);
+          effectiveWeight = double.parse(abw.toStringAsFixed(2));
+        }
+      }
+    }
 
     // 1. Protein
     double proteinFactor;
@@ -198,13 +222,13 @@ class MetabolicCalculator {
         proteinFactor = proteinFactorMaintenance;
         break;
     }
-    final rawProtein = weightKg * proteinFactor;
+    final rawProtein = effectiveWeight * proteinFactor;
     final proteinGrams = double.parse(rawProtein.toStringAsFixed(1));
     final proteinCals = proteinGrams * 4.0;
 
-    // 2. Fat (25% of target calories / 9, minimum 0.8 g/kg)
+    // 2. Fat (25% of target calories / 9, minimum 0.8 g/kg of effective weight)
     final fatFromPercentage = (targetCalories * fatCaloriePercentage) / 9.0;
-    final fatFloor = weightKg * fatMinimumPerKg;
+    final fatFloor = effectiveWeight * fatMinimumPerKg;
     final rawFat = math.max(fatFromPercentage, fatFloor);
     final fatGrams = double.parse(rawFat.toStringAsFixed(1));
     final fatCals = fatGrams * 9.0;
@@ -296,6 +320,8 @@ class MetabolicCalculator {
       targetCalories: targetCalories,
       weightKg: weight,
       bodyGoal: bodyGoal,
+      heightCm: height,
+      gender: gender,
     );
 
     final preliminary = UserProfile(

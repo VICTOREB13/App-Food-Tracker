@@ -273,5 +273,64 @@ void main() {
       expect(updatedProfile.masterPrompt, contains('74.85 kg'));
       expect(updatedProfile.masterPrompt, contains('1597 kcal'));
     });
+
+    test('recordWeight recalcula metas automáticamente si el perfil usa metas automáticas (H-03)', () async {
+      final controller = MealController.instance;
+
+      final initialProfile = MetabolicCalculator.calculateProfile(
+        name: 'Ana Auto',
+        age: 30,
+        gender: 'female',
+        height: 165.0,
+        weight: 80.0,
+        activityLevel: 'moderate',
+        bodyGoal: 'fat_loss',
+      );
+      await DatabaseService.instance.saveUserProfile(initialProfile);
+
+      await controller.recordWeight(75.0, notes: 'Progreso -5kg');
+
+      final updatedProfile = await DatabaseService.instance.getUserProfile();
+      expect(updatedProfile, isNotNull);
+      expect(updatedProfile!.weight, equals(75.0));
+
+      final expectedBmr = MetabolicCalculator.calculateBmr(gender: 'female', weightKg: 75.0, heightCm: 165.0, age: 30);
+      final expectedTdee = MetabolicCalculator.calculateTdee(bmr: expectedBmr, activityLevel: 'moderate');
+      final expectedCals = MetabolicCalculator.calculateCaloricGoal(tdee: expectedTdee, bmr: expectedBmr, bodyGoal: 'fat_loss');
+      final expectedMacros = MetabolicCalculator.calculateMacros(targetCalories: expectedCals, weightKg: 75.0, bodyGoal: 'fat_loss', heightCm: 165.0, gender: 'female');
+
+      expect(updatedProfile.targetCalories, equals(expectedCals));
+      expect(updatedProfile.targetProtein, equals(expectedMacros.protein));
+      expect(controller.dailyGoals.calories, equals(expectedCals));
+    });
+
+    test('recordWeight preserva macros personalizadas aun cuando las calorias coinciden con auto (H-03)', () async {
+      final controller = MealController.instance;
+
+      final autoProfile = MetabolicCalculator.calculateProfile(
+        name: 'David Custom Macros',
+        age: 26,
+        gender: 'male',
+        height: 178.0,
+        weight: 80.0,
+        activityLevel: 'moderate',
+        bodyGoal: 'maintenance',
+      );
+      // Keep auto calories but customize macros (e.g., high protein / low carb)
+      final customProfile = autoProfile.copyWith(
+        targetProtein: autoProfile.targetProtein + 40.0,
+        targetCarbs: autoProfile.targetCarbs - 40.0,
+      );
+      await DatabaseService.instance.saveUserProfile(customProfile);
+
+      await controller.recordWeight(79.0, notes: 'Leve bajada');
+
+      final updated = await DatabaseService.instance.getUserProfile();
+      expect(updated, isNotNull);
+      expect(updated!.weight, equals(79.0));
+      expect(updated.targetProtein, equals(customProfile.targetProtein));
+      expect(updated.targetCarbs, equals(customProfile.targetCarbs));
+      expect(controller.dailyGoals.protein, equals(customProfile.targetProtein));
+    });
   });
 }

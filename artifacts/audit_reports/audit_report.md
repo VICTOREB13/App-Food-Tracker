@@ -1,16 +1,16 @@
 ---
 tipo: audit_report
 proyecto: App_Food_Tracker
-iteracion: v1.0.2
+iteracion: v1.0.3
 veredicto: PASS
 estado: activo
-fecha: 2026-09-12
-tags: [proyecto, audit, quality-gate, v1-0-2, v7-teamwork]
+fecha: 2026-09-13
+tags: [proyecto, audit, quality-gate, v1-0-3, v7-teamwork]
 ---
 
-# 🛡️ Reporte de Auditoría Integral y Quality Gate (v1.0.2)
+# 🛡️ Reporte de Auditoría Integral y Quality Gate (v1.0.3)
 
-> **Systems-Auditor (Quality Gatekeeper):** Este documento contiene los resultados de la inspección técnica exhaustiva, auditoría de rendimiento, análisis de seguridad SecOps, validación de diseño atómico, verificación de la suite de pruebas automatizadas y la auditoría formal de cumplimiento de estándares `artifact-standards` (V7 Teamwork) para la versión **v1.0.2** del proyecto **Victor Engineer - Food Tracker**.
+> **Systems-Auditor (Quality Gatekeeper):** Este documento contiene los resultados de la inspección técnica exhaustiva, auditoría de rendimiento, análisis de seguridad SecOps, validación de diseño atómico, verificación de la suite de pruebas automatizadas y la auditoría formal de cumplimiento de estándares `artifact-standards` (V7 Teamwork) para la versión **v1.0.3** del proyecto **Victor Engineer - Food Tracker**.
 
 ---
 
@@ -20,6 +20,15 @@ tags: [proyecto, audit, quality-gate, v1-0-2, v7-teamwork]
 =====================================================
           QUALITY GATE VERDICT: STATUS: PASS
 =====================================================
+ [✓] Coincidencia Exacta GTIN en USDA (14 dígitos) y Fallback Limpio a Open Food Facts (H-01)
+ [✓] Compresión Asíncrona en Isolate y Bypass si Dimensiones <= 1024px (H-02)
+ [✓] Sincronización Metabólica Completa en recordWeight (Macros, DailyGoals, refreshGoals) (H-03)
+ [✓] Protección de Condimentos y Hierbas contra Acaparamiento de Macros (>= 50%) (H-04)
+ [✓] Peso Corporal Ajustado Clínico (ABW) para Obesidad (IMC >= 30) (H-05)
+ [✓] Robustez en Cola Asíncrona (ID Determinista, Deduplicación y retryTask) (H-06)
+ [✓] Recuperación Resiliente de JSON Truncado de Gemini vía JsonRepairHelper (H-08)
+ [✓] Consultas Paginadas por Rango de Fechas en SQLite (getMealsByRange) (H-09)
+ [✓] Timeout Defensivo de 35s en API de Gemini Vision (H-14)
  [✓] 48 Suites de Pruebas Automatizadas Verificadas (100% PASS)
  [✓] Desglose Anatómico Individual de Ingredientes (Fin a la duplicación del plato)
  [✓] Estimación Volumétrica Realista de Gramos (Erradicación del comodín 200g)
@@ -39,7 +48,7 @@ tags: [proyecto, audit, quality-gate, v1-0-2, v7-teamwork]
 ```
 
 **Estatus:** `Status: PASS`  
-**Autorización:** Calidad verificada sin fisuras. Se autoriza la liberación formal de la versión `v1.0.2`.
+**Autorización:** Calidad verificada sin fisuras. Se autoriza la liberación formal de la versión `v1.0.3`.
 
 ---
 
@@ -57,27 +66,27 @@ Se auditó la totalidad de la suite de pruebas del proyecto (`test/`), constatan
 | `user_profile_model_test.dart` | Modelo inmutable con Sentinel, validación de sexo, peso, altura, edad, pasos y Master Prompt. | 6 | **PASS** |
 | `weight_log_model_test.dart` | Validación de rangos biológicos (`[20.0, 500.0]`), serialización SQLite y parsing de fechas. | 6 | **PASS** |
 
-### 2.2. Pruebas de Servicios y Controladores (`test/services/` y `test/controllers/`) — 19 Suites / 183 Tests
+### 2.2. Pruebas de Servicios y Controladores (`test/services/` y `test/controllers/`) — 19 Suites / 191 Tests
 | Archivo de Prueba | Cobertura / Casos Auditados | Tests | Resultado |
 | :--- | :--- | :---: | :--- |
-| `analysis_queue_service_test.dart` | Cola asíncrona SQLite, inicialización de tareas, transiciones de estado y purga de completadas. | 3 | **PASS** |
-| `database_service_test.dart` | Modos WAL, PRAGMAs, índices B-Tree, concurrencia de 50 peticiones simultáneas, CRUD de comidas, `getMealsOlderThanWithImages` y `clearMealImagePath`. | 8 | **PASS** |
+| `analysis_queue_service_test.dart` | Cola asíncrona SQLite, inicialización de tareas, transiciones de estado, reintento con `retryTask` y deduplicación. | 4 | **PASS** |
+| `database_service_test.dart` | Modos WAL, PRAGMAs, índices B-Tree, concurrencia de 50 peticiones simultáneas, CRUD de comidas, consultas por rango de fecha (`getMealsByRange`) y búsqueda por imagen (`getMealByImagePath`). | 10 | **PASS** |
 | `database_service_v2_test.dart` | Migración a esquema v2, tabla `weight_logs`, orden cronológico en `getAllWeightLogs`, consultas indexadas en rangos 7, 30 y 90 días. | 10 | **PASS** |
 | `backup_service_test.dart` | Exportación JSON e importación transaccional atómica (`txn.insert`). | 3 | **PASS** |
 | `backup_service_v2_test.dart` | Respaldo v2 con serialización y deserialización de registros de peso y perfil biométrico. | 5 | **PASS** |
-| `gemini_vision_service_test.dart` | Extracción de esquemas JSON, fallback volumétrico sin 200g, desglose atómico de ingredientes, recálculo de totales, mapeo de errores amigables. | 20 | **PASS** |
+| `gemini_vision_service_test.dart` | Extracción de esquemas JSON, reparación de JSON truncado (`JsonRepairHelper`), protección de hierbas/especias, desglose atómico de ingredientes, recálculo de totales, timeout defensivo. | 22 | **PASS** |
 | `gemini_model_service_test.dart` | Introspección en vivo de `GET /v1beta/models`, bloqueo de modelos prohibidos (`banana`, `omni`, `transcribe`, etc.), validación de fallbacks y selector. | 11 | **PASS** |
-| `usda_food_data_service_test.dart` | Parseo dual de esquemas (/foods/search vs /food/{id}), factor de conversión energética $kJ \rightarrow kcal$ (4.184). | 8 | **PASS** |
+| `usda_food_data_service_test.dart` | Parseo dual de esquemas (/foods/search vs /food/{id}), factor $kJ \rightarrow kcal$ (4.184), normalización GTIN a 14 dígitos y retorno de null en no coincidencias. | 9 | **PASS** |
 | `barcode_lookup_service_test.dart` | Cascada resiliente: consulta prioritaria a USDA y fallback transparente a Open Food Facts. | 9 | **PASS** |
-| `metabolic_calculator_test.dart` | Ecuación Mifflin-St Jeor (TMB y TDEE) para hombres y mujeres, ajuste por pasos, metas calóricas y sincronización bidireccional. | 15 | **PASS** |
+| `metabolic_calculator_test.dart` | Ecuación Mifflin-St Jeor (TMB y TDEE), ajuste por pasos, cálculo clínico de Peso Corporal Ajustado ($ABW$) para IMC >= 30, metas calóricas y sincronización bidireccional. | 16 | **PASS** |
 | `secure_storage_service_test.dart` | Almacenamiento seguro por hardware de API Keys de Gemini y USDA, estado de onboarding y metas diarias. | 7 | **PASS** |
-| `image_processing_service_test.dart` | Compresión JPEG al 85% a 1024x1024 px, nomenclatura `YYYY_MM_DD_T_XX.jpg`, validación de días bisiestos y poda temporal. | 8 | **PASS** |
+| `image_processing_service_test.dart` | Compresión JPEG al 85% a 1024x1024 px en Isolate secundario (`compressAndResizeAsync`), nomenclatura `YYYY_MM_DD_T_XX.jpg`, validación de días bisiestos y poda temporal. | 9 | **PASS** |
 | `metabolic_calculator_adversarial_test.dart` | Resiliencia ante entradas aberrantes (edades negativas, pesos extremos, pasos exorbitantes). | 11 | **PASS** |
 | `settings_controller_adversarial_test.dart` | Fallas simuladas de red y corrupción de claves almacenadas. | 6 | **PASS** |
 | `usda_adversarial_test.dart` | Manejo de payloads truncados, respuestas 429 de cuota y errores de red HTTP. | 11 | **PASS** |
 | `gemini_and_storage_adversarial_test.dart` | Peticiones simultáneas y recuperación ante timeouts de hardware storage. | 30 | **PASS** |
 | `meal_controller_test.dart` | Agregación de macronutrientes, progreso diario, navegación de fechas, `upsertMeal` y `pruneOldPhotos`. | 5 | **PASS** |
-| `meal_controller_weight_test.dart` | Control de registros de peso corporal, período histórico (`days: 0`) y reactividad del historial. | 6 | **PASS** |
+| `meal_controller_weight_test.dart` | Control de registros de peso corporal, período histórico (`days: 0`), reactividad y sincronización de metas nutricionales calculadas. | 7 | **PASS** |
 | `settings_controller_test.dart` | Gestión de API Keys, selección de modelos Gemini, guardado de metas con sincronización automática de perfil. | 9 | **PASS** |
 
 ### 2.3. Pruebas de Pantallas y Widgets (`test/screens/` y `test/widgets/`) — 23 Suites / 110 Tests
@@ -234,9 +243,9 @@ Se ejecutó la inspección estricta de todos los artefactos en `artifacts/` conf
 
 ## 📋 7. Certificación Consolidada del Quality Gate
 
-| Criterio Evaluado | Meta Exigida | Estado Real (v0.4.0-alpha) | Veredicto |
+| Criterio Evaluado | Meta Exigida | Estado Real (v1.0.3) | Veredicto |
 | :--- | :--- | :--- | :--- |
-| **Pruebas Automatizadas** | 100% de suites en verde | 44 suites / 289+ pruebas sin errores | **PASS** |
+| **Pruebas Automatizadas** | 100% de suites en verde | 48 suites / 340+ pruebas sin errores | **PASS** |
 | **Consultas N+1** | 0 consultas recurrentes | 0 consultas N+1 detectadas | **PASS** |
 | **Seguridad de API Keys** | Cifrado por hardware (BYOK) | `flutter_secure_storage` (Gemini & USDA) | **PASS** |
 | **Firma Permanente** | RSA 2048 con validez > 2050 | Keystore válido hasta 2056 | **PASS** |
@@ -268,4 +277,4 @@ Se ejecutó la inspección estricta de todos los artefactos en `artifacts/` conf
 
 **Estatus:** `Status: PASS`  
 **Firma del Auditor:** `Systems-Auditor (Autonomous Subagent - Quality Gatekeeper)`  
-**Fecha de Certificación:** 2026-09-10
+**Fecha de Certificación:** 2026-09-13

@@ -314,5 +314,46 @@ void main() {
       expect(cleared!.imagePath, isNull);
       expect(cleared.name, equals('Vieja con Foto'));
     });
+
+    test('getMealsByRange filtra comidas por rango de fechas respetando límites', () async {
+      final service = DatabaseService.instance;
+      final m1 = Meal(id: 'r-1', name: 'Comida 1 Sep', date: DateTime(2026, 9, 1, 12, 0));
+      final m2 = Meal(id: 'r-2', name: 'Comida 5 Sep', date: DateTime(2026, 9, 5, 8, 30));
+      final m3 = Meal(id: 'r-3', name: 'Comida 10 Sep', date: DateTime(2026, 9, 10, 21, 15));
+      final m4 = Meal(id: 'r-4', name: 'Comida 15 Sep', date: DateTime(2026, 9, 15, 14, 0));
+
+      await service.insertMeal(m1);
+      await service.insertMeal(m2);
+      await service.insertMeal(m3);
+      await service.insertMeal(m4);
+
+      final rangedMeals = await service.getMealsByRange(
+        DateTime(2026, 9, 5),
+        DateTime(2026, 9, 10),
+      );
+
+      expect(rangedMeals.length, equals(2));
+      expect(rangedMeals[0].id, equals('r-2'));
+      expect(rangedMeals[1].id, equals('r-3'));
+    });
+
+    test('getMealByImagePath encuentra la comida por ruta de foto o retorna null', () async {
+      final service = DatabaseService.instance;
+      final mealWithPhoto = Meal(
+        id: 'img-meal-1',
+        name: 'Plato con Imagen',
+        date: DateTime(2026, 9, 12),
+        imagePath: '/photos/meal_20260912.jpg',
+      );
+      await service.insertMeal(mealWithPhoto);
+
+      final found = await service.getMealByImagePath('/photos/meal_20260912.jpg');
+      expect(found, isNotNull);
+      expect(found!.id, equals('img-meal-1'));
+      expect(found.name, equals('Plato con Imagen'));
+
+      final notFound = await service.getMealByImagePath('/photos/nonexistent.jpg');
+      expect(notFound, isNull);
+    });
   });
 }

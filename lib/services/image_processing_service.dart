@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:typed_data';
 import 'package:image/image.dart' as img;
 import 'package:path/path.dart' as p;
@@ -405,6 +406,22 @@ class ImageProcessingService {
 
     final compressed = img.encodeJpg(processed, quality: quality);
     return Uint8List.fromList(compressed);
+  }
+
+  /// Asynchronously compresses and resizes [rawBytes] inside a secondary Isolate
+  /// to eliminate UI jank or ANR on high-resolution camera photos.
+  Future<Uint8List> compressAndResizeAsync(
+    Uint8List rawBytes, {
+    int targetMaxDimension = maxDimension,
+    int quality = jpegQuality,
+  }) async {
+    return await Isolate.run(() {
+      return compressAndResize(
+        rawBytes,
+        targetMaxDimension: targetMaxDimension,
+        quality: quality,
+      );
+    });
   }
 
   /// Saves processed meal image bytes into an identifiable, user-friendly directory

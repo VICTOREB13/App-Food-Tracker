@@ -106,6 +106,20 @@ void main() {
       expect(result, equals(corruptBytes));
     });
 
+    test('compressAndResizeAsync compresses in isolate and resizes appropriately (H-02)', () async {
+      final service = ImageProcessingService.instance;
+      final testImage = img.Image(width: 1600, height: 800);
+      img.fill(testImage, color: img.ColorRgb8(0, 0, 255));
+      final rawJpg = Uint8List.fromList(img.encodeJpg(testImage));
+
+      final processed = await service.compressAndResizeAsync(rawJpg, targetMaxDimension: 1024);
+      final decoded = img.decodeImage(processed);
+
+      expect(decoded, isNotNull);
+      expect(decoded!.width, equals(1024));
+      expect(decoded.height, equals(512));
+    });
+
     test('MealImageFileInfo implements value equality, hashCode, and holds filePath', () {
       final date = DateTime(2026, 6, 30);
       final info1 = MealImageFileInfo(

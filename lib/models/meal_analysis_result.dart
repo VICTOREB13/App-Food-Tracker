@@ -1,6 +1,10 @@
 import 'dart:convert';
+import 'dart:math' as math;
 import 'food_item.dart';
+import 'json_repair_helper.dart';
 import 'model_sanitizer.dart';
+
+export 'json_repair_helper.dart';
 
 class MealAnalysisResult {
   final String dishName;
@@ -39,6 +43,20 @@ class MealAnalysisResult {
     return parts;
   }
 
+  /// Identifies seasonings, spices, and herbs to protect macro allocation
+  static bool isSeasoningOrHerb(String name) {
+    final s = name.toLowerCase();
+    if (s.contains('salmon') || s.contains('salmón') || s.contains('salchicha') ||
+        s.contains('salsa') || s.contains('ensalada') || s.contains('saltead')) {
+      return false;
+    }
+    const keys = ['romero', 'perejil', 'orégano', 'oregano', 'cilantro', 'pimienta',
+      'laurel', 'albahaca', 'comino', 'tomillo', 'especi', 'condimento', 'hierba', 'eneldo', 'curry', 'canela'];
+    if (keys.any((k) => s.contains(k))) return true;
+    final words = s.split(RegExp(r'[\s,.;:()/\-]+'));
+    return words.contains('sal') || words.contains('ajo');
+  }
+
   /// Decomposes composite foods or dishes into distinct ingredients with realistic volumetric grams
   static List<FoodItem> decomposeCompositeFood(
     List<String> componentNames,
@@ -53,7 +71,9 @@ class MealAnalysisResult {
     // Weight coefficients per category: [calWeight, protWeight, carbWeight, fatWeight, baseGrams, density]
     List<double> weightsFor(String name) {
       final s = name.toLowerCase();
-      if (s.contains('arroz') || s.contains('pasta') || s.contains('fideo') || s.contains('papa') ||
+      if (isSeasoningOrHerb(s)) {
+        return [0.01, 0.01, 0.01, 0.01, 5.0, 0.5];
+      } else if (s.contains('arroz') || s.contains('pasta') || s.contains('fideo') || s.contains('papa') ||
           s.contains('platano') || s.contains('plátano') || s.contains('yuca') || s.contains('arepa')) {
         return [0.35, 0.10, 0.65, 0.05, 160.0, 1.3];
       } else if (s.contains('frijol') || s.contains('caraota') || s.contains('lenteja') || s.contains('garbanzo')) {
@@ -91,7 +111,9 @@ class MealAnalysisResult {
 
       double grams = prof[4];
       if (itemCal > 0) {
-        grams = (itemCal / prof[5]).clamp(35.0, 320.0);
+        final minG = isSeasoningOrHerb(name) ? 2.0 : 35.0;
+        final maxG = isSeasoningOrHerb(name) ? 15.0 : 320.0;
+        grams = (itemCal / prof[5]).clamp(minG, maxG);
       }
       if (grams == 200.0) grams = 185.0; // Enforce anti-200g generic
 
@@ -108,6 +130,9 @@ class MealAnalysisResult {
     return items;
   }
 
+  /// Repairs truncated JSON by closing dangling strings and matching unclosed braces/brackets.
+  static String repairTruncatedJson(String raw) => JsonRepairHelper.repair(raw);
+
   factory MealAnalysisResult.fromJsonString(String jsonStr) {
     var cleaned = jsonStr.trim();
 
@@ -122,7 +147,17 @@ class MealAnalysisResult {
       }
     }
 
-    final Map<String, dynamic> data = json.decode(cleaned);
+    Map<String, dynamic> data;
+    try {
+      data = json.decode(cleaned);
+    } catch (_) {
+      try {
+        data = json.decode(repairTruncatedJson(cleaned));
+      } catch (_) {
+        data = {'plato': 'Comida Analizada', 'items': [],
+          'totales': {'calorias': 0.0, 'proteina_g': 0.0, 'carbohidratos_g': 0.0, 'grasas_g': 0.0}};
+      }
+    }
     final String dish = (data['plato'] ?? data['nombre'] ?? data['dish'] ?? data['name'] ?? 'Comida Analizada').toString();
 
     final List<FoodItem> parsedItems = [];
@@ -180,10 +215,7 @@ class MealAnalysisResult {
       fat = ModelSanitizer.clampDouble(totalesMap['grasas_g'] ?? totalesMap['grasa_g'] ?? totalesMap['fat'] ?? totalesMap['fats_g']);
     } else {
       for (final item in parsedItems) {
-        cal += item.calories;
-        prot += item.protein;
-        carbs += item.carbs;
-        fat += item.fat;
+        cal += item.calories; prot += item.protein; carbs += item.carbs; fat += item.fat;
       }
     }
 
@@ -229,24 +261,37 @@ class MealAnalysisResult {
     // If items have 0 calories but total calories exist, distribute macros
     final itemsCalSum = parsedItems.fold(0.0, (acc, e) => acc + e.calories);
     if (itemsCalSum == 0.0 && parsedItems.isNotEmpty && cal > 0) {
-      final count = parsedItems.length;
+      final substantialItems = parsedItems.where((it) => !isSeasoningOrHerb(it.name)).toList();
+      final hasSubstantial = substantialItems.isNotEmpty;
+      final mainCount = hasSubstantial ? substantialItems.length : parsedItems.length;
+
       for (int i = 0; i < parsedItems.length; i++) {
-        parsedItems[i] = parsedItems[i].copyWith(
-          calories: cal / count,
-          protein: prot / count,
-          carbs: carbs / count,
-          fat: fat / count,
-        );
+        final item = parsedItems[i];
+        if (hasSubstantial && isSeasoningOrHerb(item.name)) {
+          parsedItems[i] = item.copyWith(
+            estimatedGrams: 5.0,
+            calories: math.min(5.0, cal * 0.01),
+            protein: 0.1,
+            carbs: 0.5,
+            fat: 0.1,
+            visualJustification: 'Nota de saborización / condimento marginal',
+          );
+        } else {
+          final factor = hasSubstantial ? 0.99 : 1.0;
+          parsedItems[i] = item.copyWith(
+            calories: ModelSanitizer.clampDouble((cal * factor) / mainCount),
+            protein: ModelSanitizer.clampDouble((prot * factor) / mainCount),
+            carbs: ModelSanitizer.clampDouble((carbs * factor) / mainCount),
+            fat: ModelSanitizer.clampDouble((fat * factor) / mainCount),
+          );
+        }
       }
     }
 
     return MealAnalysisResult(
-      dishName: dish,
-      items: parsedItems,
-      totalCalories: ModelSanitizer.clampDouble(cal),
-      totalProtein: ModelSanitizer.clampDouble(prot),
-      totalCarbs: ModelSanitizer.clampDouble(carbs),
-      totalFat: ModelSanitizer.clampDouble(fat),
+      dishName: dish, items: parsedItems,
+      totalCalories: ModelSanitizer.clampDouble(cal), totalProtein: ModelSanitizer.clampDouble(prot),
+      totalCarbs: ModelSanitizer.clampDouble(carbs), totalFat: ModelSanitizer.clampDouble(fat),
       rawJson: jsonStr,
     );
   }
