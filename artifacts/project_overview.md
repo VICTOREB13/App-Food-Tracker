@@ -68,7 +68,7 @@ tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid, get-it, 
     - Paleta monocromática de alta fidelidad: *Obsidian Zinc* (`#09090B`) para modo oscuro y *Crisp Zinc* (`#FAFAFA`) para modo claro, con acento carmesí corporativo `#DC2626`.
     - Tipografía `Outfit` para métricas numéricas display e `Inter` para datos secundarios y cuerpos de texto.
     - 100% de pantallas, widgets y archivos de servicios bajo el límite estricto de 300 líneas de código (< 300 LoC).
-    - Suite de pruebas de regresión automatizada: 53 suites, 367 tests pasando (100% PASS).
+    - Suite de pruebas de regresión automatizada: 53 suites, 370 tests pasando (100% PASS).
 
 ---
 
@@ -95,6 +95,6 @@ Todos los enlaces internos siguen estrictamente el estándar de Obsidian con el 
 | **Project-Planner** | Tech Lead & Orquestador Maestro | `project_overview.md`, `implementation_plan.md`, `task.md`, `changelog_v1.md`, diagramas Archify. |
 | **Backend-Architect** | Arquitecto de Datos y Servicios | `api_spec.md`, `architecture.md`, `abstractions.md`, `DatabaseService` (SQLite v2 & DAOs), `service_locator.dart`, `Result<T, Failure>`, `GeminiModelService`, `UsdaFoodDataService`, `BarcodeLookupService`, `MetabolicCalculator`. |
 | **Frontend-UI** | Especialista de Interfaz y Tokens | `design_system.md`, `ThemeManager`, `AppLocalizations`, `DashboardScreen`, `MealDetailScreen`, `SettingsScreen`, `UserProfileScreen`, `MetricsScreen`, `OnboardingScreen`, widgets atómicos (< 300 LoC), microinteracciones y `WeightLineChartPainter`. |
-| **Systems-Auditor** | Guardián del Quality Gate y Pruebas | `audit_report.md`, batería de 53 suites de pruebas automatizadas (367 tests), auditoría N+1, WCAG, SecOps. |
+| **Systems-Auditor** | Guardián del Quality Gate y Pruebas | `audit_report.md`, batería de 53 suites de pruebas automatizadas (370 tests), auditoría N+1, WCAG, SecOps. |
 | **DevOps-Engineer** | Infraestructura, CI/CD y Releases | `.github/workflows/ci.yml`, `build_apk.yml`, `release.yml`, Keystore RSA permanente, empaquetado y publicación oficial. |
 

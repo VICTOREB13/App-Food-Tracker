@@ -58,7 +58,7 @@ tags: [proyecto, audit, quality-gate, v1-0-4, v7-teamwork]
 
 ---
 
-## 🧪 2. Matriz de Pruebas Automatizadas (53 Suites / 367 Tests — 100% PASS)
+## 🧪 2. Matriz de Pruebas Automatizadas (53 Suites / 370 Tests — 100% PASS)
 
 Se auditó la totalidad de la suite de pruebas del proyecto (`test/`), constatando cobertura exhaustiva y **0 fallos (100% PASS)**:
 
@@ -95,7 +95,7 @@ Se auditó la totalidad de la suite de pruebas del proyecto (`test/`), constatan
 | `meal_controller_weight_test.dart` | Control de registros de peso corporal, período histórico (`days: 0`), reactividad y sincronización de metas nutricionales calculadas. | 7 | **PASS** |
 | `settings_controller_test.dart` | Gestión de API Keys, selección de modelos Gemini, guardado de metas con sincronización automática de perfil. | 9 | **PASS** |
 
-### 2.3. Pruebas de Pantallas y Widgets (`test/screens/` y `test/widgets/`) — 23 Suites / 110 Tests
+### 2.3. Pruebas de Pantallas y Widgets (`test/screens/` y `test/widgets/`) — 23 Suites / 113 Tests
 | Archivo de Prueba | Componente Auditado | Tests | Resultado |
 | :--- | :--- | :---: | :--- |
 | `onboarding_screen_test.dart` | Flujo completo de 4 pasos (bienvenida, biometría, actividad, objetivo), validación, persistencia y marcación en SecureStorage. | 3 | **PASS** |
@@ -108,7 +108,7 @@ Se auditó la totalidad de la suite de pruebas del proyecto (`test/`), constatan
 | `quick_weight_entry_dialog_test.dart` | Modal de registro rápido de peso con clamp defensivo. | 4 | **PASS** |
 | `gemini_model_selector_card_test.dart` | Selector reactivo de modelos Gemini con badges semánticos y apertura de `ModelPickerBottomSheet`. | 7 | **PASS** |
 | `usda_api_key_card_test.dart` | Entrada de API Key con toggle de visibilidad y guardado seguro. | 5 | **PASS** |
-| `nutri_tracker_app_test.dart` | Integración general de la aplicación con temas claro y oscuro y enrutamiento condicional. | 1 | **PASS** |
+| `nutri_tracker_app_test.dart` | Integración general de la aplicación con temas claro y oscuro, resolución de idioma y fallback ante locales no soportados. | 3 | **PASS** |
 | `calories_hero_ring_test.dart` | Renderizado animado del anillo hero de calorías. | 2 | **PASS** |
 | `daily_calorie_summary_card_test.dart` | Visualización de métricas de calorías y badges de macros. | 1 | **PASS** |
 | `dashboard_fab_menu_test.dart` | Speed-Dial flotante con rotación elástica y 6 acciones. | 7 | **PASS** |
@@ -122,12 +122,12 @@ Se auditó la totalidad de la suite de pruebas del proyecto (`test/`), constatan
 | `analysis_progress_banner_test.dart` | Banner no bloqueante en Dashboard con etapas, VeLoadingRing reactivo y navegación. | 3 | **PASS** |
 | `ve_loading_ring_test.dart` | Anillo animado CustomPainter, modos indeterminado y determinado, soporte de color y trazo. | 4 | **PASS** |
 
-### 2.4. Pruebas de Core, DAOs y Localización (`test/core/`, `test/services/`, `test/l10n/`) — 5 Suites / 26 Tests
+### 2.4. Pruebas de Core, DAOs y Localización (`test/core/`, `test/services/`, `test/l10n/`) — 5 Suites / 27 Tests
 | Archivo de Prueba | Cobertura / Casos Auditados | Tests | Resultado |
 | :--- | :--- | :---: | :--- |
 | `result_test.dart` | Tipado funcional Result (Success/FailureResult), pattern matching en Dart 3, combinadores `fold`, `map`, `flatMap`, `getOrThrow`, `getOrDefault` y capturadores `guard`/`guardAsync`. | 8 | **PASS** |
-| `service_locator_test.dart` | Registro de Service Locator con GetIt, resolución de contratos `IDatabaseService`, `IImageProcessingService`, DAOs, controladores y ciclo de vida/reseteo. | 4 | **PASS** |
-| `daos_test.dart` | Operaciones CRUD y APIs funcionales Result sobre SQLite in-memory para `MealDao`, `WeightLogDao`, `UserProfileDao` y `PantryDao`. | 4 | **PASS** |
+| `service_locator_test.dart` | Registro de Service Locator con GetIt, resolución de contratos `IDatabaseService`, `IImageProcessingService`, DAOs, controladores, fábricas parametrizadas y ciclo de vida/reseteo. | 4 | **PASS** |
+| `daos_test.dart` | Operaciones CRUD y APIs funcionales Result sobre SQLite in-memory para `MealDao`, `WeightLogDao`, `UserProfileDao`, `PantryDao` y `DatabaseService`. | 5 | **PASS** |
 | `meal_image_file_namer_test.dart` | Normalización y parsing regex de nomenclatura de fotos `YYYY_MM_DD_{TYPE}_{INDEX}.jpg`, mapeo de códigos, generación secuencial y filtros. | 6 | **PASS** |
 | `app_localizations_test.dart` | Verificación de diccionarios multi-idioma (Español e Inglés), resolución por `Locale` y compatibilidad de delegados de localización. | 4 | **PASS** |
 
