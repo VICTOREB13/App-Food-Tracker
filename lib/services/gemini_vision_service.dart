@@ -1,167 +1,13 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import '../models/food_item.dart';
+import '../models/meal_analysis_result.dart';
 import '../models/model_sanitizer.dart';
 import 'image_processing_service.dart';
 
-class MealAnalysisResult {
-  final String dishName;
-  final List<FoodItem> items;
-  final double totalCalories;
-  final double totalProtein;
-  final double totalCarbs;
-  final double totalFat;
-  final String rawJson;
-
-  const MealAnalysisResult({
-    required this.dishName,
-    required this.items,
-    required this.totalCalories,
-    required this.totalProtein,
-    required this.totalCarbs,
-    required this.totalFat,
-    required this.rawJson,
-  });
-
-  factory MealAnalysisResult.fromJsonString(String jsonStr) {
-    var cleaned = jsonStr.trim();
-    
-    // Check if wrapped in markdown code fence anywhere in the string
-    final jsonFenceMatch = RegExp(r'```(?:json)?\s*([\s\S]*?)\s*```').firstMatch(cleaned);
-    if (jsonFenceMatch != null) {
-      cleaned = jsonFenceMatch.group(1)!.trim();
-    } else {
-      // Fallback: extract substring between first '{' and last '}'
-      final firstBrace = cleaned.indexOf('{');
-      final lastBrace = cleaned.lastIndexOf('}');
-      if (firstBrace != -1 && lastBrace != -1 && lastBrace > firstBrace) {
-        cleaned = cleaned.substring(firstBrace, lastBrace + 1).trim();
-      }
-    }
-
-    final Map<String, dynamic> data = json.decode(cleaned);
-    final String dish = (data['plato'] ?? data['nombre'] ?? data['dish'] ?? data['name'] ?? 'Comida Analizada').toString();
-
-    final List<FoodItem> parsedItems = [];
-    final dynamic itemsList = data['items'] ??
-        data['ingredientes'] ??
-        data['alimentos'] ??
-        data['ingredients'] ??
-        data['componentes'] ??
-        data['desglose'] ??
-        data['food_items'] ??
-        data['foods'];
-    if (itemsList is List) {
-      for (final itemMap in itemsList) {
-        if (itemMap is Map<String, dynamic>) {
-          parsedItems.add(FoodItem.fromJson(itemMap));
-        } else if (itemMap is String && itemMap.trim().isNotEmpty) {
-          parsedItems.add(FoodItem(
-            name: itemMap.trim(),
-            estimatedGrams: 100,
-            calories: 0,
-            protein: 0,
-            carbs: 0,
-            fat: 0,
-            visualJustification: 'Ingrediente identificado por IA',
-          ));
-        }
-      }
-    } else if (itemsList is Map<String, dynamic>) {
-      for (final entry in itemsList.entries) {
-        if (entry.value is Map<String, dynamic>) {
-          final map = Map<String, dynamic>.from(entry.value as Map<String, dynamic>);
-          if (!map.containsKey('alimento') && !map.containsKey('nombre') && !map.containsKey('name')) {
-            map['alimento'] = entry.key;
-          }
-          parsedItems.add(FoodItem.fromJson(map));
-        } else {
-          parsedItems.add(FoodItem(
-            name: entry.key,
-            estimatedGrams: 100,
-            calories: 0,
-            protein: 0,
-            carbs: 0,
-            fat: 0,
-            visualJustification: 'Ingrediente identificado por IA',
-          ));
-        }
-      }
-    } else if (itemsList is String && itemsList.trim().isNotEmpty) {
-      final parts = itemsList.split(RegExp(r'[,;\n]')).map((e) => e.trim()).where((e) => e.isNotEmpty);
-      for (final part in parts) {
-        parsedItems.add(FoodItem(
-          name: part,
-          estimatedGrams: 100,
-          calories: 0,
-          protein: 0,
-          carbs: 0,
-          fat: 0,
-          visualJustification: 'Ingrediente identificado por IA',
-        ));
-      }
-    }
-
-    double cal = 0.0;
-    double prot = 0.0;
-    double carbs = 0.0;
-    double fat = 0.0;
-
-    final totalesMap = data['totales'] ?? data['totals'];
-    if (totalesMap is Map<String, dynamic>) {
-      cal = ModelSanitizer.clampDouble(totalesMap['calorias'] ?? totalesMap['calories'] ?? totalesMap['total_calorias']);
-      prot = ModelSanitizer.clampDouble(totalesMap['proteina_g'] ?? totalesMap['proteinas_g'] ?? totalesMap['protein'] ?? totalesMap['proteins_g']);
-      carbs = ModelSanitizer.clampDouble(totalesMap['carbohidratos_g'] ?? totalesMap['carbohidratos'] ?? totalesMap['carbs'] ?? totalesMap['carbohydrates_g']);
-      fat = ModelSanitizer.clampDouble(totalesMap['grasas_g'] ?? totalesMap['grasa_g'] ?? totalesMap['fat'] ?? totalesMap['fats_g']);
-    } else {
-      for (final item in parsedItems) {
-        cal += item.calories;
-        prot += item.protein;
-        carbs += item.carbs;
-        fat += item.fat;
-      }
-    }
-
-    // If items were parsed without individual macros but totals exist, distribute totals evenly
-    final itemsCalSum = parsedItems.fold(0.0, (acc, e) => acc + e.calories);
-    if (itemsCalSum == 0.0 && parsedItems.isNotEmpty && cal > 0) {
-      final count = parsedItems.length;
-      for (int i = 0; i < parsedItems.length; i++) {
-        parsedItems[i] = parsedItems[i].copyWith(
-          calories: cal / count,
-          protein: prot / count,
-          carbs: carbs / count,
-          fat: fat / count,
-        );
-      }
-    }
-
-    if (parsedItems.isEmpty && (cal > 0 || prot > 0 || carbs > 0 || fat > 0)) {
-      parsedItems.add(FoodItem(
-        name: dish,
-        estimatedGrams: 200,
-        calories: cal,
-        protein: prot,
-        carbs: carbs,
-        fat: fat,
-        visualJustification: 'Porción completa del plato estimada por IA',
-      ));
-    }
-
-    return MealAnalysisResult(
-      dishName: dish,
-      items: parsedItems,
-      totalCalories: ModelSanitizer.clampDouble(cal),
-      totalProtein: ModelSanitizer.clampDouble(prot),
-      totalCarbs: ModelSanitizer.clampDouble(carbs),
-      totalFat: ModelSanitizer.clampDouble(fat),
-      rawJson: jsonStr,
-    );
-  }
-}
+export '../models/meal_analysis_result.dart';
 
 class GeminiVisionService {
   final String apiKey;
@@ -175,7 +21,7 @@ Eres un nutricionista clínico y experto en estimación volumétrica visual de a
 
 Reglas obligatorias de cubicaje:
 1. Referencias anatómicas de volumen:
-   - Puño cerrado ~ 1 taza de volumen (~150-200g de arroz, frijoles o pastas cocidas).
+   - Puño cerrado ~ 1 taza de volumen (~140-180g de arroz cocido, ~130-160g de legumbres cocidas, ~120-150g de pastas cocidas).
    - Palma de la mano (grosor del meñique) ~ 100-130g de carne, pollo o pescado cocido.
    - Pulgar / Falange distal ~ 1 cucharada o ~10-15g de aceite, mantequilla o grasa.
    - Dos manos ahuecadas ~ 50-80g de ensalada de hojas crudas.
@@ -190,9 +36,19 @@ Reglas obligatorias de cubicaje:
 5. Desglose obligatorio de ingredientes en 'items':
    - Es ESTRICTAMENTE OBLIGATORIO desglosar de forma individual cada alimento, guarnición e ingrediente que compone el plato dentro de la lista 'items'.
    - NUNCA devuelvas 'items' como un arreglo vacío cuando haya alimentos visibles en la foto. Cada elemento debe ser una porción identificable (ej. "Arroz blanco cocido", "Pechuga de pollo asada", "Aguacate", "Grasa oculta de sofrito/aceite").
+   - PROHIBIDO agrupar o duplicar el nombre del plato como único elemento en 'items' (ej. si el plato es "Arroz blanco con frijoles y carne molida", desglosa individualmente "Arroz blanco cocido", "Frijoles negros", "Carne molida guisada", etc.). Si hay varios alimentos visibles, es OBLIGATORIO desglosarlos por separado (mínimo 2 o más items).
    - Para cada alimento en 'items', estima con precisión sus gramos, calorías, proteínas, carbohidratos y grasas específicos.
    - La suma de las calorías y macronutrientes de los 'items' individuales debe coincidir con 'totales'.
-6. Formato estricto:
+6. Estimación volumétrica precisa de gramos (PROHIBIDO fijar 200g genéricos):
+   - PROHIBIDO asignar 200g de forma genérica o repetitiva a los ingredientes o al plato.
+   - Cada alimento debe tener un peso en gramos estimado según su densidad visual y área en el plato:
+     * Arroz o pasta cocida: típicamente 120g - 220g según volumen.
+     * Carnes, pollo, pescado o carne molida: típicamente 90g - 160g cocido.
+     * Legumbres o frijoles: típicamente 100g - 160g con su caldo.
+     * Aguacate: una porción de tajada o medio aguacate típicamente 40g - 90g.
+     * Ensaladas / vegetales: 30g - 100g.
+     * Aceite o grasa visible/oculta: 5g - 15g.
+7. Formato estricto:
    - Responde únicamente con el JSON definido en el esquema.
 ''';
 
@@ -322,14 +178,23 @@ Reglas obligatorias de cubicaje:
 
       final schema = Schema.object(
         description: 'Desglose nutricional y volumétrico de comida casera',
+        requiredProperties: ['plato', 'items', 'totales'],
         properties: {
           'plato': Schema.string(description: 'Nombre representativo del plato'),
           'items': Schema.array(
-            description: 'Lista obligatoria con el desglose detallado de cada ingrediente o alimento individual identificado en el plato',
+            description: 'Lista obligatoria con el desglose individual de cada alimento visible por separado',
             items: Schema.object(
+              requiredProperties: [
+                'alimento',
+                'gramos_estimados',
+                'calorias',
+                'proteinas_g',
+                'carbohidratos_g',
+                'grasas_g',
+              ],
               properties: {
-                'alimento': Schema.string(description: 'Nombre del alimento o ingrediente individual'),
-                'gramos_estimados': Schema.number(description: 'Peso estimado en gramos'),
+                'alimento': Schema.string(description: 'Nombre del alimento o ingrediente individual (ej. "Arroz blanco", "Frijoles negros", "Carne molida", "Aguacate")'),
+                'gramos_estimados': Schema.number(description: 'Peso realista estimado en gramos para este ingrediente'),
                 'calorias': Schema.number(description: 'Calorías estimadas'),
                 'proteinas_g': Schema.number(description: 'Proteínas en gramos'),
                 'carbohidratos_g': Schema.number(description: 'Carbohidratos en gramos'),
@@ -339,6 +204,7 @@ Reglas obligatorias de cubicaje:
             ),
           ),
           'totales': Schema.object(
+            requiredProperties: ['calorias', 'proteina_g', 'carbohidratos_g', 'grasas_g'],
             properties: {
               'calorias': Schema.number(description: 'Total calorías del plato'),
               'proteina_g': Schema.number(description: 'Total proteínas en gramos'),
@@ -361,8 +227,12 @@ Reglas obligatorias de cubicaje:
       );
 
       final promptBuffer = StringBuffer();
-      promptBuffer.writeln('Analiza esta comida casera y estima su desglose nutricional siguiendo las reglas volumétricas.');
-      promptBuffer.writeln('IMPORTANTE: Identifica y desglosa OBLIGATORIAMENTE cada uno de los ingredientes y alimentos individuales que componen el plato en la lista "items" con sus gramos y macronutrientes correspondientes. NUNCA devuelvas la lista de items vacía.');
+      promptBuffer.writeln('Analiza minuciosamente esta comida casera y estima su desglose nutricional siguiendo las reglas volumétricas.');
+      promptBuffer.writeln('REGLAS FUNDAMENTALES DE DESGLOSE:');
+      promptBuffer.writeln('1. DESGLOSE INDIVIDUAL OBLIGATORIO: Identifica y desglosa CADA alimento o ingrediente visible en la foto dentro de la lista "items" (ej. "Arroz blanco cocido", "Frijoles negros", "Carne molida", "Aguacate", "Grasa de sofrito/aceite"). Si ves arroz, carne, frijoles y aguacate, DEBEN ser al menos 4 items distintos en la lista. NUNCA devuelvas la lista de items vacía.');
+      promptBuffer.writeln('2. PROHIBIDO DUPLICAR EL PLATO: NUNCA coloques el plato entero como un único ingrediente con el mismo nombre del plato.');
+      promptBuffer.writeln('3. GRAMOS REALISTAS: PROHIBIDO fijar 200g genéricos. Estima los gramos según el volumen específico y densidad de cada porción en el plato.');
+      promptBuffer.writeln('4. La suma de calorías y macronutrientes de los items individuales debe corresponder con los totales.');
       if (userContext != null && userContext.trim().isNotEmpty) {
         promptBuffer.writeln('Contexto y notas del comensal: ${userContext.trim()}');
       }

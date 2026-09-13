@@ -50,3 +50,7 @@ local.properties
 
 # Test APKs
 test_apks/
+
+# Temporary user screenshots & reference media
+Screenshot*.jpg
+*.mp4

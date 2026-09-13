@@ -1,13 +1,13 @@
 ---
 tipo: implementation_plan
 proyecto: App_Food_Tracker
-iteracion: v1.0.1
+iteracion: v1.0.2
 estado: completado
-fecha: 2026-09-10
-tags: [proyecto, planning, v1-0-1, yagni, local-first, ui-ux, gemini-ai]
+fecha: 2026-09-12
+tags: [proyecto, planning, v1-0-2, yagni, local-first, ui-ux, gemini-ai]
 ---
 
-# 🎯 Plan de Implementación: Victor Engineer - Food Tracker (v1.0.1)
+# 🎯 Plan de Implementación: Victor Engineer - Food Tracker (v1.0.2)
 
 > **Mesa de Control (Project-Planner):** Este plan formaliza la construcción y cierre de la versión **v1.0.1**, enfocada en el inicio completamente limpio (Clean Slate Onboarding), la sincronización bidireccional total de macros (calorías + proteínas, carbohidratos y grasas), la auto-actualización del peso biométrico desde métricas, la deduplicación de gramos en ingredientes y la corrección del guardado transaccional de comidas.
 
@@ -87,4 +87,19 @@ tags: [proyecto, planning, v1-0-1, yagni, local-first, ui-ux, gemini-ai]
 4. **Revisita desde Ajustes:**
    - Añadir en `SettingsScreen` la opción de reiniciar o volver a ejecutar el onboarding para reconfigurar el perfil si el usuario lo desea.
 
-
+### Fase 7: Desglose Fino de Ingredientes, Sin 200g y Detección Asíncrona con Anillo (v1.0.2)
+1. **Reglas Volumétricas Estrictas en `GeminiVisionService`:**
+   - Prohibición explícita de unificar el plato como un solo ingrediente en `items` o duplicar el título del plato.
+   - Prohibición estricta de asignar 200g genéricos; estimación anatómica y por densidad calórica de porciones reales (40g a 220g por componente).
+2. **Cola Asíncrona y Worker en SQLite (`AnalysisQueueService`):**
+   - Servicio desacoplado con persistencia en tabla `analysis_queue`.
+   - Transición por etapas con actualización de progreso: preparación (20%), conexión con Gemini (40%), cubicaje y desglose (65%), macros y guardado (88%), completado (100%).
+   - Guardado automático del `Meal` en base de datos SQLite y recarga reactiva del `MealController`.
+3. **Anillo de Carga Animado Premium (`VeLoadingRing`):**
+   - Widget con `CustomPainter`, terminales redondeadas (`StrokeCap.round`), rotación continua suave y arco dinámico pulsante inspirado en los videos boceto (`anillo de carga.mp4`).
+4. **Dashboard y Detalle No Bloqueantes:**
+   - Banner interactivo `AnalysisProgressBanner` en Dashboard para monitoreo en vivo sin congelar la app.
+   - Superposición con `VeLoadingRing` y avance de etapas paso a paso en `MealImageCard` y `MealDetailScreen`.
+5. **Calidad y Modularidad:**
+   - Cobertura de pruebas unitarias y de widgets para todos los componentes nuevos.
+   - Preservación del límite < 300 LoC por archivo.

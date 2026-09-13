@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/onboarding_screen.dart';
+import 'services/analysis_queue_service.dart';
 import 'services/database_service.dart';
 import 'services/secure_storage_service.dart';
 import 'services/theme_manager.dart';
@@ -29,6 +30,7 @@ void main() async {
 
   try {
     await DatabaseService.instance.init();
+    await AnalysisQueueService.instance.init();
   } catch (e, stack) {
     debugPrint('Database initialization warning: $e\n$stack');
   }

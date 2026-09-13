@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../controllers/meal_controller.dart';
 import '../models/food_item.dart';
@@ -34,6 +35,9 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
   List<FoodItem> _items = [];
   double _calories = 0.0, _protein = 0.0, _carbs = 0.0, _fat = 0.0;
   bool _isSaving = false, _isReanalyzing = false;
+  String? _analysisStage;
+  double? _analysisProgress;
+  Timer? _progressTimer;
 
   @override
   void initState() {
@@ -56,24 +60,36 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
 
   @override
   void dispose() {
+    _progressTimer?.cancel();
     _nameController.dispose();
     _notesController.dispose();
     super.dispose();
   }
 
   void _recalculateTotals() {
-    double cal = 0.0, prot = 0.0, carbs = 0.0, fat = 0.0;
+    double cal = 0, prot = 0, carbs = 0, fat = 0;
     for (final item in _items) {
-      cal += item.calories;
-      prot += item.protein;
-      carbs += item.carbs;
-      fat += item.fat;
+      cal += item.calories; prot += item.protein; carbs += item.carbs; fat += item.fat;
     }
-    setState(() {
-      _calories = cal;
-      _protein = prot;
-      _carbs = carbs;
-      _fat = fat;
+    setState(() { _calories = cal; _protein = prot; _carbs = carbs; _fat = fat; });
+  }
+
+  void _startAnalysisProgress() {
+    _progressTimer?.cancel();
+    _analysisProgress = 0.15;
+    _analysisStage = 'Optimizando foto y cubicaje...';
+    _progressTimer = Timer.periodic(const Duration(milliseconds: 650), (t) {
+      if (!mounted || !_isReanalyzing) return t.cancel();
+      final cur = _analysisProgress ?? 0.15;
+      setState(() {
+        if (cur < 0.40) {
+          _analysisProgress = 0.40; _analysisStage = 'Conectando con Gemini Vision...';
+        } else if (cur < 0.68) {
+          _analysisProgress = 0.68; _analysisStage = 'Estimando volumen visual y porciones...';
+        } else if (cur < 0.88) {
+          _analysisProgress = 0.88; _analysisStage = 'Desglosando ingredientes y macros...';
+        }
+      });
     });
   }
 
@@ -95,8 +111,10 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
   }
 
   Future<void> _reanalyzeWithAi() async {
-    if (_isSaving || _isReanalyzing || _imagePath == null) return;
+    if (_isSaving || _imagePath == null) return;
     setState(() => _isReanalyzing = true);
+    _startAnalysisProgress();
+
     try {
       final analysis = await reanalyzeMealWithAi(
         context: context,
@@ -106,6 +124,13 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
         currentItems: _items,
       );
       if (analysis != null && mounted) {
+        _progressTimer?.cancel();
+        setState(() {
+          _analysisProgress = 1.0;
+          _analysisStage = '¡Desglose nutricional completado!';
+        });
+        await Future.delayed(const Duration(milliseconds: 350));
+        if (!mounted) return;
         setState(() {
           if (_nameController.text.trim().isEmpty && analysis.dishName.isNotEmpty) {
             _nameController.text = analysis.dishName;
@@ -120,12 +145,17 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
           _carbs = analysis.totalCarbs;
           _fat = analysis.totalFat;
         });
-        if (_items.isNotEmpty) {
-          _recalculateTotals();
-        }
+        if (_items.isNotEmpty) _recalculateTotals();
       }
     } finally {
-      if (mounted) setState(() => _isReanalyzing = false);
+      _progressTimer?.cancel();
+      if (mounted) {
+        setState(() {
+          _isReanalyzing = false;
+          _analysisStage = null;
+          _analysisProgress = null;
+        });
+      }
     }
   }
 
@@ -133,7 +163,6 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
     if (_isSaving || _isReanalyzing) return;
     final name = _nameController.text.trim();
     final rawNotes = _notesController.text.trim();
-    final notes = rawNotes.isNotEmpty ? rawNotes : null;
 
     setState(() => _isSaving = true);
     final saved = await saveMealEntry(
@@ -147,7 +176,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
       protein: _protein,
       carbs: _carbs,
       fat: _fat,
-      notes: notes,
+      notes: rawNotes.isNotEmpty ? rawNotes : null,
       items: _items,
     );
     if (mounted) setState(() => _isSaving = false);
@@ -208,6 +237,9 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
             imagePath: _imagePath,
             dishName: _nameController.text,
             onPickImage: _pickImage,
+            isAnalyzing: _isReanalyzing,
+            analysisStage: _analysisStage,
+            analysisProgress: _analysisProgress,
           ),
           if (_imagePath != null) ...[
             const SizedBox(height: 10),
@@ -218,10 +250,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
           ],
           const SizedBox(height: 16),
           MealMacroChipsRow(
-            calories: _calories,
-            protein: _protein,
-            carbs: _carbs,
-            fat: _fat,
+            calories: _calories, protein: _protein, carbs: _carbs, fat: _fat,
           ),
           const SizedBox(height: 16),
           MealFormFields(
@@ -233,9 +262,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
                 setState(() => _mealType = val);
                 if (_imagePath != null) {
                   final renamed = await ImageProcessingService.instance.renameMealImage(
-                    currentPath: _imagePath!,
-                    newMealType: val,
-                    date: _date,
+                    currentPath: _imagePath!, newMealType: val, date: _date,
                   );
                   if (mounted && renamed != _imagePath) {
                     setState(() => _imagePath = renamed);

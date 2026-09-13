@@ -2,18 +2,25 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../services/theme_manager.dart';
+import '../common/ve_loading_ring.dart';
 import 'food_image_viewer_dialog.dart';
 
 class MealImageCard extends StatelessWidget {
   final String? imagePath;
   final String? dishName;
   final VoidCallback onPickImage;
+  final bool isAnalyzing;
+  final String? analysisStage;
+  final double? analysisProgress;
 
   const MealImageCard({
     super.key,
     required this.imagePath,
     this.dishName,
     required this.onPickImage,
+    this.isAnalyzing = false,
+    this.analysisStage,
+    this.analysisProgress,
   });
 
   @override
@@ -100,6 +107,48 @@ class MealImageCard extends StatelessWidget {
                 ),
               ),
             ),
+            if (isAnalyzing)
+              Positioned.fill(
+                child: Container(
+                  color: Colors.black.withValues(alpha: 0.65),
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        VeLoadingRing(
+                          size: 60,
+                          strokeWidth: 4.5,
+                          color: Colors.white,
+                          progress: analysisProgress,
+                          child: analysisProgress != null
+                              ? Text(
+                                  '${(analysisProgress! * 100).toInt()}%',
+                                  style: GoogleFonts.inter(
+                                    color: Colors.white,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
+                              : null,
+                        ),
+                        const SizedBox(height: 12),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(
+                            analysisStage ?? 'Analizando con IA...',
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),

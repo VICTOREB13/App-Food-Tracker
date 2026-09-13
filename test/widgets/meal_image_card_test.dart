@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/widgets/meal_detail/food_image_viewer_dialog.dart';
@@ -83,6 +83,25 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(FoodImageViewerScreen), findsNothing);
+    });
+
+    testWidgets('MealImageCard shows analyzing overlay with progress when isAnalyzing is true', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MealImageCard(
+              imagePath: testFile.path,
+              onPickImage: () {},
+              isAnalyzing: true,
+              analysisStage: 'Optimizando foto y cubicaje...',
+              analysisProgress: 0.45,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Optimizando foto y cubicaje...'), findsOneWidget);
+      expect(find.text('45%'), findsOneWidget);
     });
   });
 }

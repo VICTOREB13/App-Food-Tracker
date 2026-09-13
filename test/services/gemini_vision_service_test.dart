@@ -425,7 +425,7 @@ void main() {
       expect(result.items[2].name, equals('Pechuga de pollo'));
     });
 
-    test('MealAnalysisResult genera item de respaldo cuando la IA no desglosa items pero devuelve totales', () {
+    test('MealAnalysisResult desglosa componentes individuales si la IA devuelve items vacíos en plato compuesto', () {
       const jsonWithoutItems = '''
       {
         "plato": "Arroz blanco con pollo asado y aguacate",
@@ -442,10 +442,66 @@ void main() {
       final result = MealAnalysisResult.fromJsonString(jsonWithoutItems);
       expect(result.dishName, equals('Arroz blanco con pollo asado y aguacate'));
       expect(result.items.isNotEmpty, isTrue);
+      expect(result.items.length, equals(3));
+      expect(result.items.any((e) => e.name.contains('Arroz')), isTrue);
+      expect(result.items.any((e) => e.name.contains('pollo asado')), isTrue);
+      expect(result.items.any((e) => e.name.contains('aguacate')), isTrue);
+      expect(result.totalCalories, equals(585.0));
+    });
+
+    test('MealAnalysisResult genera item de respaldo cuando el plato es simple y no contiene separadores', () {
+      const jsonSimpleDish = '''
+      {
+        "plato": "Sopa de res",
+        "items": [],
+        "totales": {
+          "calorias": 320.0,
+          "proteina_g": 24.0,
+          "carbohidratos_g": 18.0,
+          "grasas_g": 12.0
+        }
+      }
+      ''';
+
+      final result = MealAnalysisResult.fromJsonString(jsonSimpleDish);
+      expect(result.dishName, equals('Sopa de res'));
       expect(result.items.length, equals(1));
-      expect(result.items.first.name, equals('Arroz blanco con pollo asado y aguacate'));
-      expect(result.items.first.calories, equals(585.0));
-      expect(result.items.first.protein, equals(38.0));
+      expect(result.items.first.name, equals('Sopa de res'));
+      expect(result.items.first.estimatedGrams, isNot(equals(200.0)));
+    });
+
+    test('MealAnalysisResult desglosa ingrediente único que contiene lista agrupada (escenario de screenshot)', () {
+      const jsonScreenshotCase = '''
+      {
+        "plato": "Arroz blanco, frijoles negros y carne molida",
+        "items": [
+          {
+            "alimento": "Arroz blanco, frijoles negros y carne molida",
+            "gramos_estimados": 200,
+            "calorias": 758,
+            "proteinas_g": 32,
+            "carbohidratos_g": 79,
+            "grasas_g": 36
+          }
+        ],
+        "totales": {
+          "calorias": 758,
+          "proteina_g": 32,
+          "carbohidratos_g": 79,
+          "grasas_g": 36
+        }
+      }
+      ''';
+
+      final result = MealAnalysisResult.fromJsonString(jsonScreenshotCase);
+      expect(result.dishName, equals('Arroz blanco, frijoles negros y carne molida'));
+      expect(result.items.length, equals(3));
+      for (final item in result.items) {
+        expect(item.estimatedGrams, isNot(equals(200.0)));
+      }
+      expect(result.items.any((e) => e.name.toLowerCase().contains('arroz')), isTrue);
+      expect(result.items.any((e) => e.name.toLowerCase().contains('frijol')), isTrue);
+      expect(result.items.any((e) => e.name.toLowerCase().contains('carne')), isTrue);
     });
 
     test('MealAnalysisResult soporta items como Map y distribuye totales cuando los items tienen 0 calorias', () {
@@ -508,6 +564,81 @@ void main() {
       const prompt = GeminiVisionService.systemInstruction;
       expect(prompt, contains('Desglose obligatorio de ingredientes en \'items\''));
       expect(prompt, contains('NUNCA devuelvas \'items\' como un arreglo vacío'));
+      expect(prompt, contains('PROHIBIDO agrupar o duplicar el nombre del plato'));
+      expect(prompt, contains('PROHIBIDO fijar 200g genéricos'));
+      expect(prompt, contains('PROHIBIDO asignar 200g de forma genérica'));
+    });
+
+    test('MealAnalysisResult deserializa múltiples ingredientes individuales con sus propios gramos sin 200g genérico', () {
+      const detailedMealJson = '''
+      {
+        "plato": "Arroz blanco con frijoles negros, carne molida y aguacate",
+        "items": [
+          {
+            "alimento": "Arroz blanco cocido",
+            "gramos_estimados": 160,
+            "calorias": 208,
+            "proteinas_g": 4.0,
+            "carbohidratos_g": 45.0,
+            "grasas_g": 0.5,
+            "justificacion_visual": "Porción aproximada de 1 taza"
+          },
+          {
+            "alimento": "Frijoles negros guisados",
+            "gramos_estimados": 130,
+            "calorias": 170,
+            "proteinas_g": 10.5,
+            "carbohidratos_g": 26.0,
+            "grasas_g": 3.0,
+            "justificacion_visual": "Porción lateral con caldo"
+          },
+          {
+            "alimento": "Carne molida guisada",
+            "gramos_estimados": 125,
+            "calorias": 240,
+            "proteinas_g": 24.0,
+            "carbohidratos_g": 2.0,
+            "grasas_g": 15.0,
+            "justificacion_visual": "Carne sazonada en el centro"
+          },
+          {
+            "alimento": "Aguacate fresco en tajadas",
+            "gramos_estimados": 70,
+            "calorias": 112,
+            "proteinas_g": 1.4,
+            "carbohidratos_g": 6.0,
+            "grasas_g": 10.0,
+            "justificacion_visual": "Dos tajadas visibles"
+          }
+        ],
+        "totales": {
+          "calorias": 730,
+          "proteina_g": 39.9,
+          "carbohidratos_g": 79.0,
+          "grasas_g": 28.5
+        }
+      }
+      ''';
+
+      final result = MealAnalysisResult.fromJsonString(detailedMealJson);
+      expect(result.dishName, equals('Arroz blanco con frijoles negros, carne molida y aguacate'));
+      expect(result.items.length, equals(4));
+
+      // Assert none of the individual ingredients are arbitrarily set to generic 200g
+      for (final item in result.items) {
+        expect(item.estimatedGrams, isNot(equals(200.0)));
+        expect(item.name, isNot(equals(result.dishName)));
+        expect(item.calories, greaterThan(0));
+      }
+
+      expect(result.items[0].name, equals('Arroz blanco cocido'));
+      expect(result.items[0].estimatedGrams, equals(160.0));
+      expect(result.items[1].name, equals('Frijoles negros guisados'));
+      expect(result.items[1].estimatedGrams, equals(130.0));
+      expect(result.items[2].name, equals('Carne molida guisada'));
+      expect(result.items[2].estimatedGrams, equals(125.0));
+      expect(result.items[3].name, equals('Aguacate fresco en tajadas'));
+      expect(result.items[3].estimatedGrams, equals(70.0));
     });
   });
 }

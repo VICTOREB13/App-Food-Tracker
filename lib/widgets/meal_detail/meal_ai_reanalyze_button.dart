@@ -1,6 +1,7 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../services/theme_manager.dart';
+import '../common/ve_loading_ring.dart';
 
 class MealAiReanalyzeButton extends StatelessWidget {
   final bool isReanalyzing;
@@ -17,13 +18,10 @@ class MealAiReanalyzeButton extends StatelessWidget {
     return OutlinedButton.icon(
       onPressed: isReanalyzing ? null : onPressed,
       icon: isReanalyzing
-          ? const SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: AppColors.primary,
-              ),
+          ? const VeLoadingRing(
+              size: 16,
+              strokeWidth: 2,
+              color: AppColors.primary,
             )
           : const Icon(Icons.auto_awesome, size: 18),
       label: Text(

@@ -18,6 +18,20 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [1.0.2] - 2026-09-12
+
+### Fixed
+- **Desglose Anatómico Individual de Ingredientes y Fin de Duplicación del Plato:** Corrección estricta en las reglas del sistema de `GeminiVisionService` y en `reanalyzeMealWithAi`, prohibiendo explícitamente agrupar o duplicar el nombre del plato como un único ingrediente. Cada componente (arroz, legumbres, carnes, aguacate, grasa oculta) se desglosa individualmente en `items` con sus propios macronutrientes y calorías editables.
+- **Eliminación del Peso Genérico de 200g:** Erradicación del valor comodín de 200g tanto en las instrucciones del modelo Gemini como en el fallback de cálculo volumétrico de `MealAnalysisResult`, implementando estimaciones realistas basadas en densidad calórica y volumen visible de porción.
+
+### Added
+- **Procesamiento Asíncrono No Bloqueante con Cola en SQLite (`AnalysisQueueService`):** Implementación de worker asíncrono con persistencia en tabla `analysis_queue` de SQLite. Al escanear fotos desde el Dashboard, la interfaz ya no se congela con diálogos modales sincrónicos; el análisis se despacha en segundo plano permitiendo navegar, cambiar fechas y registrar comidas libremente.
+- **Anillo de Carga Animado Premium (`VeLoadingRing`):** Nuevo widget con `CustomPainter` inspirado en los bocetos (`anillo de carga.mp4` y `anillo de carga (1).mp4`), con pista circular de fondo, terminales redondeadas (`StrokeCap.round`), rotación continua suave y arco dinámico pulsante.
+- **Banner de Estado de Análisis en Dashboard (`AnalysisProgressBanner`):** Componente reactivo en la pantalla principal que visualiza el progreso del análisis en tiempo real (preparación, consulta a Gemini, cubicaje de ingredientes y cálculo de macros) con el anillo animado `VeLoadingRing` y acceso directo al plato completado.
+- **Retroalimentación Visual Progresiva en Detalle de Comida (`MealImageCard`):** Superposición animada con `VeLoadingRing` y descripción paso a paso durante el análisis y re-análisis con correcciones en `MealDetailScreen`.
+
+---
+
 ## [1.0.1] - 2026-09-10
 
 ### Fixed

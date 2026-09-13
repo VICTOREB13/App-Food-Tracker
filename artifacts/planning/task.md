@@ -1,13 +1,13 @@
 ---
 tipo: task_list
 proyecto: App_Food_Tracker
-iteracion: v1.0.1
+iteracion: v1.0.2
 estado: completado
-fecha: 2026-09-10
-tags: [proyecto, tasks, checklist, v7-teamwork, v1-0-1]
+fecha: 2026-09-12
+tags: [proyecto, tasks, checklist, v7-teamwork, v1-0-2]
 ---
 
-# 📋 Checklist Maestro de Tareas de Agentes (v1.0.1)
+# 📋 Checklist Maestro de Tareas de Agentes (v1.0.2)
 
 > **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.0.1. Cada tarea completada se marca con `[x]`.
 
@@ -67,7 +67,6 @@ tags: [proyecto, tasks, checklist, v7-teamwork, v1-0-1]
 
 ## 🚀 7. Frontend-UI & Systems-Auditor (Flujo de Inicio y Onboarding de Primer Uso)
 - [x] (Frontend-UI) Crear `lib/screens/onboarding_screen.dart` (< 300 LoC) con navegación interactiva por pasos (`PageView`), barra de progreso superior, feedback táctil y animaciones suaves.
-- [x] (Frontend-UI) Diseñar subcomponentes modulares en `lib/widgets/onboarding/` (< 300 LoC cada uno):
   - `onboarding_welcome_step.dart`: Bienvenida visual, presentación de Food Tracker e ingreso de nombre.
   - `onboarding_biometrics_step.dart`: Selector de género biológico (Mifflin-St Jeor), edad, estatura y peso.
   - `onboarding_activity_step.dart`: Nivel de actividad física diaria y meta estimada de pasos.
@@ -77,3 +76,16 @@ tags: [proyecto, tasks, checklist, v7-teamwork, v1-0-1]
 - [x] (Frontend-UI) Añadir botón de reinicio/revisita del Asistente de Inicio en `SettingsScreen` o `UserProfileScreen`.
 - [x] (Systems-Auditor) Crear suite de pruebas `test/screens/onboarding_screen_test.dart` verificando la navegación por pasos, validaciones y guardado del perfil.
 - [x] (Systems-Auditor) Asegurar que todos los tests continúen pasando y cero advertencias de linter.
+
+---
+
+## ⚡ 8. Backend-Architect & Frontend-UI (v1.0.2: Desglose Fino de Ingredientes, Sin 200g y Detección Asíncrona con Anillo)
+- [x] (Backend-Architect) Erradicar el valor genérico de 200g de las instrucciones de cubicaje visual de `GeminiVisionService` y en el fallback de `MealAnalysisResult.fromJsonString`.
+- [x] (Backend-Architect) Prohibir explícitamente en el prompt del sistema y en `reanalyzeMealWithAi` agrupar o duplicar el nombre del plato en `items`, obligando al desglose de cada ingrediente independiente con sus propios gramos y macros.
+- [x] (Backend-Architect) Implementar servicio de cola y worker asíncrono `AnalysisQueueService` (`lib/services/analysis_queue_service.dart`) con persistencia en SQLite (`analysis_queue`), desacoplando el análisis fotográfico del hilo de la UI.
+- [x] (Frontend-UI) Diseñar componente visual de anillo de carga `VeLoadingRing` (`lib/widgets/common/ve_loading_ring.dart`) con `CustomPainter`, terminales redondeadas (`StrokeCap.round`), rotación continua suave y arco dinámico pulsante inspirado en los videos boceto.
+- [x] (Frontend-UI) Diseñar banner reactivo no bloqueante en Dashboard `AnalysisProgressBanner` (`lib/widgets/dashboard/analysis_progress_banner.dart`) para reflejar las etapas del análisis y abrir el plato directamente.
+- [x] (Frontend-UI) Reemplazar diálogo modal bloqueante en `DashboardScreen` por despacho asíncrono no intrusivo a `AnalysisQueueService`.
+- [x] (Frontend-UI) Integrar superposición visual con `VeLoadingRing` y avance de etapas paso a paso en `MealImageCard` y `MealDetailScreen` para la captura y re-análisis con correcciones.
+- [x] (Systems-Auditor) Crear suites de pruebas para `VeLoadingRing`, `AnalysisQueueService`, `AnalysisProgressBanner` y validar desglose no plano en `gemini_vision_service_test.dart`.
+- [x] (DevOps-Engineer) Incrementar versión en `pubspec.yaml` a `1.0.2+1` y documentar en `changelog_v1.md`.

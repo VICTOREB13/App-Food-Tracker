@@ -1,10 +1,10 @@
 ---
 tipo: abstracciones
 proyecto: App_Food_Tracker
-version: v1.0.1
+version: v1.0.2
 estado: activo
-fecha: 2026-09-10
-tags: [proyecto, arquitectura, abstracciones, backend]
+fecha: 2026-09-12
+tags: [proyecto, arquitectura, abstracciones, backend, v1-0-2]
 ---
 
 # Abstracciones del Sistema y Arquitectura de Código: Victor Engineer - Food Tracker
@@ -45,12 +45,14 @@ lib/
 │   ├── food_item.dart
 │   ├── gemini_model_info.dart
 │   ├── meal.dart
+│   ├── meal_analysis_result.dart
 │   ├── model_sanitizer.dart
 │   ├── pantry_item.dart
 │   ├── usda_food_item.dart
 │   ├── user_profile.dart
 │   └── weight_log.dart
 ├── services/             # Servicios de Negocio, Clientes API y Persistencia
+│   ├── analysis_queue_service.dart
 │   ├── backup_service.dart
 │   ├── barcode_lookup_service.dart
 │   ├── database_service.dart
@@ -63,9 +65,9 @@ lib/
 │   ├── theme_manager.dart
 │   └── usda_food_data_service.dart
 └── widgets/              # Componentes de UI Atómicos y Modulares
-    ├── common/
-    ├── dashboard/
-    ├── meal_detail/
+    ├── common/           # VeLoadingRing, VeAppBar, VeCard, VeLogo...
+    ├── dashboard/        # AnalysisProgressBanner, DailyCalorieSummary...
+    ├── meal_detail/      # MealImageCard con overlay de análisis...
     ├── metrics/
     ├── profile/
     └── settings/
@@ -92,9 +94,10 @@ lib/
 - **Getters Computados:** `proteinCalories`, `carbsCalories`, `fatCalories`, `totalCalories`.
 
 ### `MealAnalysisResult`
-- **Ubicación:** `lib/services/gemini_vision_service.dart`
-- **Propósito:** DTO inmutable resultante del análisis volumétrico y nutricional generado por el motor de visión IA multimodal.
+- **Ubicación:** `lib/models/meal_analysis_result.dart` (re-exportado en `lib/services/gemini_vision_service.dart`)
+- **Propósito:** DTO inmutable resultante del análisis volumétrico y nutricional generado por el motor de visión IA multimodal. Incorpora descomposición automática inteligente de platos compuestos en ingredientes individuales independientes, erradicación de 200g genérico y estimación de pesos volumétricos realistas basados en densidad calórica.
 - **Campos:** `dishName` (String), `items` (List<FoodItem>), `totalCalories` (double), `totalProtein` (double), `totalCarbs` (double), `totalFat` (double), `rawJson` (String).
+- **Métodos Clave:** `extractComponents(String text): List<String>`, `decomposeCompositeFood(...): List<FoodItem>`, `fromJsonString(String jsonStr): MealAnalysisResult`.
 
 ### `BarcodeLookupResult`
 - **Ubicación:** `lib/services/barcode_lookup_service.dart`

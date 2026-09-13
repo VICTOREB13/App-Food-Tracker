@@ -143,9 +143,16 @@ Future<MealAnalysisResult?> reanalyzeMealWithAi({
         ? currentItems.map((e) => '${e.name}: ${e.estimatedGrams.toStringAsFixed(0)}g').join(', ')
         : 'sin ingredientes';
 
-    final userContext = 'El comensal corrigió ingredientes del plato: '
-        'Plato: "$currentDishName", Notas: "$currentNotes", Ingredientes: $itemsSummary. '
-        'Recalcula los gramos y macronutrientes inteligentemente con esta corrección.';
+    final String? userContext;
+    if (currentDishName.isEmpty && currentItems.isEmpty) {
+      userContext = currentNotes.isNotEmpty
+          ? 'Notas/Indicaciones del comensal: "$currentNotes"'
+          : null;
+    } else {
+      userContext = 'El comensal corrigió ingredientes del plato: '
+          'Plato: "$currentDishName", Notas/Indicaciones: "$currentNotes", Ingredientes actuales: $itemsSummary. '
+          'Desglosa CADA ingrediente de forma independiente con sus gramos y macronutrientes reales ajustados a las indicaciones del comensal. PROHIBIDO unificar todo en un solo ingrediente o usar 200g genéricos.';
+    }
 
     final analysis = await gemini.analyzeMealPhoto(
       rawImageBytes: bytes,

@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import '../controllers/meal_controller.dart';
 import '../models/food_item.dart';
 import '../models/meal.dart';
 import '../models/pantry_item.dart';
-import '../services/gemini_vision_service.dart';
+import '../services/analysis_queue_service.dart';
 import '../services/image_processing_service.dart';
 import '../services/secure_storage_service.dart';
 import '../services/theme_manager.dart';
 import '../widgets/common/barcode_scanner_dialog.dart';
 import '../widgets/common/ve_app_bar.dart';
+import '../widgets/dashboard/analysis_progress_banner.dart';
 import '../widgets/dashboard/api_key_prompt_dialog.dart';
 import '../widgets/dashboard/daily_calorie_summary_card.dart';
 import '../widgets/dashboard/dashboard_fab_menu.dart';
@@ -66,77 +66,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final bytes = await file.readAsBytes();
     if (!mounted) return;
 
-    final selectedModel = await SecureStorageService.instance.getSelectedGeminiModel();
-    final masterPrompt = await SecureStorageService.instance.getMasterPrompt();
-    final effectiveModel = selectedModel ?? GeminiVisionService.defaultModel;
-    if (!mounted) return;
+    final inferredMealType = ImageProcessingService.inferMealTypeByTime();
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        backgroundColor: AppColors.surface(context),
-        content: Row(
-          children: [
-            const CircularProgressIndicator(color: AppColors.primary),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                'Analizando con $effectiveModel...\nCubicando volumen y macros.',
-                style: GoogleFonts.inter(fontSize: 13),
-              ),
-            ),
-          ],
-        ),
-      ),
+    await AnalysisQueueService.instance.enqueueMealAnalysis(
+      rawImageBytes: bytes,
+      mealType: inferredMealType,
+      date: _mealController.selectedDate,
     );
 
-    try {
-      final gemini = GeminiVisionService(
-        apiKey: apiKey,
-        modelName: effectiveModel,
-        masterPrompt: masterPrompt,
-      );
-      final analysis = await gemini.analyzeMealPhoto(rawImageBytes: bytes);
-      final inferredMealType = ImageProcessingService.inferMealTypeByTime();
-      final compressed = ImageProcessingService.instance.compressAndResize(bytes);
-      final savedPath = await ImageProcessingService.instance.saveMealImage(
-        compressed,
-        mealType: inferredMealType,
-        date: _mealController.selectedDate,
-      );
-
-      final ingredientsSummary = analysis.items.isNotEmpty
-          ? 'Ingredientes: ${analysis.items.map((e) => '${e.name} (${e.estimatedGrams.toStringAsFixed(0)}g)').join(', ')}'
-          : null;
-
-      final meal = Meal(
-        name: analysis.dishName,
-        mealType: inferredMealType,
-        date: _mealController.selectedDate,
-        imagePath: savedPath,
-        calories: analysis.totalCalories,
-        protein: analysis.totalProtein,
-        carbs: analysis.totalCarbs,
-        fat: analysis.totalFat,
-        notes: ingredientsSummary,
-        items: analysis.items,
-        aiBreakdownJson: analysis.rawJson,
-      ).recalculateFromItems(analysis.items);
-
-      if (!mounted) return;
-      Navigator.of(context).pop();
-
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => MealDetailScreen(initialMeal: meal)),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      Navigator.of(context).pop();
+    if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error al analizar imagen: $e'),
+        const SnackBar(
+          content: Text('✨ Analizando comida en segundo plano. Puedes seguir usando la app.'),
           backgroundColor: AppColors.primary,
+          duration: Duration(seconds: 3),
         ),
       );
     }
@@ -268,7 +211,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
               selectedDate: _mealController.selectedDate,
               onDateSelected: _mealController.setSelectedDate,
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 12),
+            AnalysisProgressBanner(
+              onOpenMeal: (meal) => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => MealDetailScreen(initialMeal: meal)),
+              ),
+            ),
             DailyCalorieSummaryCard(
               currentCalories: _mealController.totalCalories,
               currentProtein: _mealController.totalProtein,

@@ -1,10 +1,10 @@
 ---
 tipo: api_spec
 proyecto: App_Food_Tracker
-version: v1.0.1
+version: v1.0.2
 estado: activo
-fecha: 2026-09-10
-tags: [proyecto, api, backend, contratos, sqlite]
+fecha: 2026-09-12
+tags: [proyecto, api, backend, contratos, sqlite, v1-0-2]
 ---
 
 # 📡 Especificación de Contrato de Datos, Esquema SQLite v2 y Servicios Backend
@@ -69,14 +69,32 @@ CREATE TABLE pantry_items (
 );
 ```
 
-### 1.3. Tabla: `weight_logs` (Introducida en v2)
-Almacena el historial cronológico de peso corporal para tendencias biométricas y trazado de curvas.
+### 1.4. Tabla: `analysis_queue` (Cola Asíncrona de Detección)
+Registra las tareas de procesamiento y cubicaje de fotos en segundo plano.
 
 ```sql
-CREATE TABLE weight_logs (
+CREATE TABLE IF NOT EXISTS analysis_queue (
   id TEXT PRIMARY KEY,
-  weight REAL NOT NULL,
+  image_path TEXT NOT NULL,
+  meal_type TEXT NOT NULL,
   date TEXT NOT NULL,
+  status TEXT NOT NULL,
+  progress REAL NOT NULL DEFAULT 0.0,
+  stage TEXT NOT NULL DEFAULT 'En cola',
+  error TEXT,
+  result_meal_id TEXT,
+  created_at TEXT NOT NULL
+);
+```
+
+### 1.5. Tabla: `weight_logs` (Historial Ponderal de Peso)
+Almacena las mediciones corporales de peso histórico del comensal.
+
+```sql
+CREATE TABLE IF NOT EXISTS weight_logs (
+  id TEXT PRIMARY KEY,
+  date TEXT NOT NULL,
+  weight REAL NOT NULL,
   notes TEXT
 );
 ```
