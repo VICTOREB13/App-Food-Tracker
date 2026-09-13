@@ -33,7 +33,6 @@ class MealAnalysisResult {
         .map((p) => p.trim())
         .map((p) => p.replaceAll(RegExp(r'^[-*•"\s]+|[-*•"\s]+$'), ''))
         .where((p) => p.length >= 2)
-        .map((p) => p[0].toUpperCase() + p.substring(1))
         .toSet()
         .toList();
 
@@ -191,18 +190,26 @@ class MealAnalysisResult {
     // Decompose single lumped items or empty item lists
     if (parsedItems.length == 1) {
       final singleItem = parsedItems.first;
-      final components = extractComponents(singleItem.name);
-      final dishComponents = extractComponents(dish);
-      final effectiveComponents = components.length > 1 ? components : (dishComponents.length > 1 ? dishComponents : const <String>[]);
-      if (effectiveComponents.length > 1) {
-        parsedItems.clear();
-        parsedItems.addAll(decomposeCompositeFood(
-          effectiveComponents,
-          cal > 0 ? cal : singleItem.calories,
-          prot > 0 ? prot : singleItem.protein,
-          carbs > 0 ? carbs : singleItem.carbs,
-          fat > 0 ? fat : singleItem.fat,
-        ));
+      final isLumped = singleItem.name.trim().toLowerCase() == dish.trim().toLowerCase() ||
+          singleItem.estimatedGrams == 200.0 ||
+          singleItem.name.contains(',') ||
+          singleItem.name.contains(';');
+      if (isLumped) {
+        final components = extractComponents(singleItem.name);
+        final dishComponents = extractComponents(dish);
+        final effectiveComponents = components.length > 1
+            ? components
+            : (dishComponents.length > 1 ? dishComponents : const <String>[]);
+        if (effectiveComponents.length > 1) {
+          parsedItems.clear();
+          parsedItems.addAll(decomposeCompositeFood(
+            effectiveComponents,
+            cal > 0 ? cal : singleItem.calories,
+            prot > 0 ? prot : singleItem.protein,
+            carbs > 0 ? carbs : singleItem.carbs,
+            fat > 0 ? fat : singleItem.fat,
+          ));
+        }
       }
     } else if (parsedItems.isEmpty && (cal > 0 || prot > 0 || carbs > 0 || fat > 0)) {
       final components = extractComponents(dish);

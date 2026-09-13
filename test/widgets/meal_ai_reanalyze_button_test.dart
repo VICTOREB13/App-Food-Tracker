@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:food_tracker/widgets/common/ve_loading_ring.dart';
 import 'package:food_tracker/widgets/meal_detail/meal_ai_reanalyze_button.dart';
 
 void main() {
@@ -20,7 +21,7 @@ void main() {
 
       expect(find.text('Re-analizar con correcciones'), findsOneWidget);
       expect(find.byIcon(Icons.auto_awesome), findsOneWidget);
-      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(find.byType(VeLoadingRing), findsNothing);
 
       await tester.tap(find.byType(OutlinedButton));
       expect(pressed, isTrue);
@@ -41,7 +42,7 @@ void main() {
       );
 
       expect(find.text('Re-analizando con IA...'), findsOneWidget);
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(VeLoadingRing), findsOneWidget);
       expect(find.byIcon(Icons.auto_awesome), findsNothing);
 
       final button = tester.widget<OutlinedButton>(find.byType(OutlinedButton));
