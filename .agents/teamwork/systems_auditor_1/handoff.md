@@ -11,13 +11,13 @@
 ## 1. Observation
 
 1. **Análisis Estático (Linter):**
-   - Ejecutado en GitHub Actions CI (Run ID `37241369985`, Job ID `111550594003`):
-   - `flutter analyze`: `No issues found! (ran in 16.0s)`
+   - Ejecutado en GitHub Actions CI (Run ID `37244378457`, Job ID `111559237287`):
+   - `flutter analyze`: `No issues found! (ran in 17.0s)`
    - Cero errores, cero advertencias, cero hints.
 
 2. **Ejecución de Suites de Prueba Automatizadas:**
-   - Ejecutado en GitHub Actions CI (Run ID `37241369985`):
-   - `flutter test --coverage`: `🎉 458 tests passed.` (0 failed, 100% PASS).
+   - Ejecutado en GitHub Actions CI (Run ID `37244378457`):
+   - `flutter test --coverage`: `🎉 467 tests passed.` (0 failed, 100% PASS).
    - Incluye las 9 suites nuevas añadidas y verificadas en v1.2.4:
      - `test/services/backup_normalizer_test.dart` (PASS)
      - `test/models/pantry_item_portion_scaling_test.dart` (PASS)
@@ -47,7 +47,7 @@
      - `lib/widgets/metrics/weekly_digest_card.dart`: 287 LoC (< 300)
      - `lib/widgets/pantry/pantry_consumption_dialog.dart`: 186 LoC (< 300)
      - `lib/widgets/pantry/pantry_item_editor_dialog.dart`: 139 LoC (< 300)
-     - `lib/widgets/recommendations/recommendation_diagnostic_card.dart`: 259 LoC (< 300)
+     - `lib/widgets/recommendations/recommendation_diagnostic_card.dart`: 275 LoC (< 300)
      - `lib/widgets/recommendations/what_to_eat_sheet.dart`: 248 LoC (< 300)
      - `lib/widgets/settings/json_file_picker_dialog.dart`: 231 LoC (< 300)
      - `pubspec.yaml`: 43 LoC (< 300)
@@ -68,7 +68,7 @@
 ## 2. Logic Chain
 
 1. *De la observación 1:* Al ejecutar `flutter analyze` y obtener `No issues found!`, se certifica la ausencia total de advertencias de tipo, imports obsoletos o violaciones a las reglas de linter del SDK Dart/Flutter.
-2. *De la observación 2:* La ejecución de 458 pruebas automatizadas sin un solo fallo confirma la robustez funcional del normalizador JSON retrocompatible, el escalado matemático por gramos en despensa, las transacciones por lotes en SQLite y las envolturas ergonómicas en la UI.
+2. *De la observación 2:* La ejecución de 467 pruebas automatizadas sin un solo fallo confirma la robustez funcional del normalizador JSON retrocompatible, el escalado matemático por gramos en despensa, las transacciones por lotes en SQLite y las envolturas ergonómicas en la UI.
 3. *De la observación 3:* El cumplimiento del 100% de los archivos con < 300 LoC garantiza la modularidad arquitectónica y previene deuda técnica o monolitos inmanejables.
 4. *De las observaciones 4 y 5:* La corrección de etiquetas XML en RemoteViews y la alineación de `file_picker ^13.1.0` resuelven fallos en runtime de Android y garantizan estabilidad de compilación continua en CI.
 
@@ -84,7 +84,7 @@
 
 El Quality Gate para la versión **Food Tracker v1.2.4** queda **APROBADO (veredicto: PASS)**:
 - 0 errores y 0 advertencias en análisis estático.
-- 458 pruebas unitarias y de widgets ejecutadas con 100% PASS.
+- 467 pruebas unitarias y de widgets ejecutadas con 100% PASS.
 - 29/29 archivos cumplen con < 300 LoC.
 - Se autoriza a `DevOps-Engineer` para la certificación de release y congelamiento del changelog.
 
@@ -95,7 +95,7 @@ El Quality Gate para la versión **Food Tracker v1.2.4** queda **APROBADO (vered
 Para verificar independientemente los hallazgos:
 1. Inspeccionar el run de GitHub Actions:
    ```bash
-   gh run view 37241369985 --job 111550594003 --log
+   gh run view 37244378457 --job 111559237287 --log
    ```
 2. Ejecutar auditoría de LoC:
    ```powershell
