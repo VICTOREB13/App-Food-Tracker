@@ -12,7 +12,7 @@ import 'services/database_service.dart';
 import 'services/secure_storage_service.dart';
 import 'services/theme_manager.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Intercept uncaught framework and asynchronous errors to prevent native black screen crashes
@@ -29,11 +29,24 @@ void main() {
   // Synchronously configure service locator for dependency injection
   setupServiceLocator();
 
-  // Render UI immediately to prevent Android 16 ANR/Watchdog kills
-  runApp(const NutriTrackerApp());
-
-  // Initialize background services asynchronously without blocking initial frame rendering
+  // Initialize heavy background services asynchronously without blocking initial frame
   _initializeBackgroundServices();
+
+  // Fast, non-blocking check for onboarding with strict 150ms fallback to avoid Watchdog kills
+  bool hasCompletedOnboarding = true;
+  try {
+    hasCompletedOnboarding = await SecureStorageService.instance
+        .hasCompletedOnboarding()
+        .timeout(
+          const Duration(milliseconds: 150),
+          onTimeout: () => true,
+        );
+  } catch (e) {
+    debugPrint('Onboarding check warning: $e');
+  }
+
+  // Render UI immediately to prevent Android 16 ANR/Watchdog kills
+  runApp(NutriTrackerApp(hasCompletedOnboarding: hasCompletedOnboarding));
 }
 
 Future<void> _initializeBackgroundServices() async {
@@ -75,68 +88,15 @@ Future<void> _initializeBackgroundServices() async {
   }
 }
 
-class NutriTrackerApp extends StatefulWidget {
-  final bool? hasCompletedOnboarding;
+class NutriTrackerApp extends StatelessWidget {
+  final bool hasCompletedOnboarding;
   final Locale? locale;
 
   const NutriTrackerApp({
     super.key,
-    this.hasCompletedOnboarding,
+    this.hasCompletedOnboarding = true,
     this.locale,
   });
-
-  @override
-  State<NutriTrackerApp> createState() => _NutriTrackerAppState();
-}
-
-class _NutriTrackerAppState extends State<NutriTrackerApp> {
-  bool? _hasCompletedOnboarding;
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.hasCompletedOnboarding != null) {
-      _hasCompletedOnboarding = widget.hasCompletedOnboarding;
-    } else {
-      _checkOnboardingState();
-    }
-  }
-
-  Future<void> _checkOnboardingState() async {
-    try {
-      final completed = await SecureStorageService.instance
-          .hasCompletedOnboarding()
-          .timeout(
-            const Duration(seconds: 2),
-            onTimeout: () => false,
-          );
-      if (mounted) {
-        setState(() => _hasCompletedOnboarding = completed);
-      }
-    } catch (e) {
-      debugPrint('Onboarding check warning: $e');
-      if (mounted) {
-        setState(() => _hasCompletedOnboarding = false);
-      }
-    }
-  }
-
-  Widget _buildHome() {
-    if (_hasCompletedOnboarding == null) {
-      return const Scaffold(
-        backgroundColor: Color(0xFF09090B),
-        body: Center(
-          child: CircularProgressIndicator(
-            color: Color(0xFF10B981),
-            strokeWidth: 2.5,
-          ),
-        ),
-      );
-    }
-    return _hasCompletedOnboarding!
-        ? const DashboardScreen()
-        : const OnboardingScreen();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -144,7 +104,7 @@ class _NutriTrackerAppState extends State<NutriTrackerApp> {
       listenable: Listenable.merge([ThemeManager.instance, SettingsController.instance]),
       builder: (context, _) {
         final ctrlLocale = SettingsController.instance.currentLocale;
-        final targetLocale = widget.locale ?? ctrlLocale;
+        final targetLocale = locale ?? ctrlLocale;
         Locale? effectiveLocale;
         if (targetLocale != null) {
           final isSupported = AppLocalizations.supportedLocales.any(
@@ -173,7 +133,9 @@ class _NutriTrackerAppState extends State<NutriTrackerApp> {
             }
             return const Locale('es');
           },
-          home: _buildHome(),
+          home: hasCompletedOnboarding
+              ? const DashboardScreen()
+              : const OnboardingScreen(),
         );
       },
     );
