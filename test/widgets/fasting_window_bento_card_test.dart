@@ -115,8 +115,6 @@ void main() {
       expect(find.text('AYUNO INTERMITENTE'), findsOneWidget);
       expect(find.text('En curso'), findsOneWidget);
       expect(find.text('Terminar'), findsOneWidget);
-
-      controller.dispose();
     });
   });
 }

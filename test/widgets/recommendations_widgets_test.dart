@@ -143,12 +143,32 @@ void main() {
     });
 
     testWidgets('showRecommendationDiagnosticDialog renders bounded dialog with close button', (tester) async {
+      const sampleReport = NutritionalAnalysisReport(
+        daysAnalyzed: 7,
+        mealsLogged: 5,
+        averageDailyCalories: 1900,
+        averageDailyProtein: 130,
+        averageDailyCarbs: 210,
+        averageDailyFat: 55,
+        targetCalories: 2000,
+        targetProtein: 140,
+        targetCarbs: 220,
+        targetFat: 60,
+        fatDiagnosis: 'Consumo de grasa equilibrado dentro de tu objetivo.',
+        proteinDiagnosis: 'Consumo de proteína adecuado.',
+        carbsDiagnosis: 'Balance adecuado.',
+        calorieDiagnosis: 'Calorías en rango.',
+        fatReductionSwaps: [],
+        proteinIncreaseSuggestions: [],
+        suggestedPlates: [],
+      );
+
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: Builder(
               builder: (ctx) => ElevatedButton(
-                onPressed: () => showRecommendationDiagnosticDialog(ctx),
+                onPressed: () => showRecommendationDiagnosticDialog(ctx, initialReport: sampleReport),
                 child: const Text('Open Dialog'),
               ),
             ),

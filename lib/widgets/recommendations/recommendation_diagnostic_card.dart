@@ -125,13 +125,12 @@ class _RecommendationDiagnosticCardState extends State<RecommendationDiagnosticC
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Text('Analizar histórico:', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
-              Row(
-                mainAxisSize: MainAxisSize.min,
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
                 children: [
                   _buildPeriodChip(7, '7 días'),
-                  const SizedBox(width: 6),
                   _buildPeriodChip(15, '15 días'),
-                  const SizedBox(width: 6),
                   _buildPeriodChip(30, '30 días'),
                 ],
               ),
