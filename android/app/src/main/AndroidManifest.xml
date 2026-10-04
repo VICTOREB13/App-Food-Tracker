@@ -11,7 +11,7 @@
         android:icon="@mipmap/ic_launcher"
         android:requestLegacyExternalStorage="true">
         <activity
-            android:name="com.victorengineer.foodtracker.MainActivity"
+            android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:theme="@style/LaunchTheme"
@@ -34,17 +34,6 @@
                 <data android:scheme="foodtracker" />
             </intent-filter>
         </activity>
-
-        <!-- Retrocompatibility launcher alias for upgrading users from v1.0.4 -->
-        <activity-alias
-            android:name="com.example.food_tracker.MainActivity"
-            android:targetActivity="com.victorengineer.foodtracker.MainActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-        </activity-alias>
 
         <!-- Compact 2x2 Home Widget Provider -->
         <receiver

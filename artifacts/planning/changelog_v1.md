@@ -18,6 +18,17 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [1.2.1] - 2026-10-04
+
+La versión v1.2.1 soluciona de forma crítica problemas de entorno nativo en Android 16: erradicación del doble ícono en el launcher del sistema operativo y arranque tolerante a fallos sin bloqueos de ANR/Watchdog.
+
+### Fixed
+- **Eliminación de Doble Ícono Launcher:** Remoción completa del bloque `<activity-alias>` redundante en `AndroidManifest.xml` que generaba duplicación de íconos en el lanzador de Android. Estandarización de la actividad principal como `.MainActivity`.
+- **Depuración de Archivos Huérfanos de Kotlin:** Eliminación definitiva del paquete y archivo legado `android/app/src/main/kotlin/com/example/food_tracker/MainActivity.kt`.
+- **Arranque Inmediato y Resiliencia en Android 16 (`main.dart`):** Desacoplamiento de las inicializaciones asíncronas de `DatabaseService`, `AnalysisQueueService`, `ThemeManager` y `SecureStorageService` respecto a `runApp()`. El árbol de widgets se renderiza de inmediato en el frame 0, evitando que timeouts de Keystore o almacenamiento disparen el Watchdog de Android 16.
+
+---
+
 ## [1.2.0] - 2026-10-04
 
 La versión v1.2.0 introduce el Motor Inteligente de Recomendaciones Nutricionales, la experiencia interactiva "¿Qué debería comer hoy?", el sistema de exportación física e importación de archivos `.json`, y la compatibilidad integral de actualización y retrocompatibilidad con Android 16 (páginas de 16KB).

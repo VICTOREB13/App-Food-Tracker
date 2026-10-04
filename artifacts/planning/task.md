@@ -1,15 +1,15 @@
 ---
 tipo: task_list
 proyecto: App_Food_Tracker
-iteracion: v1.2.0
+iteracion: v1.2.1
 estado: completado
 fecha: 2026-10-04
-tags: [proyecto, tasks, checklist, v1-2-0]
+tags: [proyecto, tasks, checklist, v1-2-1]
 ---
 
-# 📋 Checklist Maestro de Tareas de Agentes (v1.2.0)
+# 📋 Checklist Maestro de Tareas de Agentes (v1.2.1)
 
-> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.2.0. Cada tarea completada se marca con `[x]`.
+> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.2.1. Cada tarea completada se marca con `[x]`.
 
 ---
 
@@ -138,6 +138,16 @@ tags: [proyecto, tasks, checklist, v1-2-0]
 - [x] (DevOps-Engineer) Configurar `useLegacyPackaging = true` en Gradle (removiendo `extractNativeLibs` explícito de `AndroidManifest.xml` para cumplimiento estricto con AGP) y compatibilidad para Android 16.
 - [x] (DevOps-Engineer) Incorporar timeouts de arranque en servicios en `main.dart` y `HomeWidgetService` para prevenir ANR.
 - [x] (DevOps-Engineer) Incrementar versión en `pubspec.yaml` a `1.2.0+1` y registrar cambios en `artifacts/planning/changelog_v1.md`.
+
+---
+
+## 🌟 Iteración v1.2.1: Erradicación de Doble Ícono y Arranque Resiliente en Android 16
+- [x] (DevOps-Engineer) Incrementar versión en `pubspec.yaml` a `1.2.1+1`.
+- [x] (DevOps-Engineer) Eliminar bloque `<activity-alias>` en `android/app/src/main/AndroidManifest.xml` y fijar actividad principal en `.MainActivity`.
+- [x] (DevOps-Engineer) Purgar archivo huérfano de Kotlin en `android/app/src/main/kotlin/com/example/food_tracker/MainActivity.kt`.
+- [x] (DevOps-Engineer) Desacoplar inicializaciones asíncronas de `runApp()` en `lib/main.dart` para arranque inmediato en frame 0 sin ANR en Android 16.
+- [x] (DevOps-Engineer) Documentar versión en `artifacts/planning/changelog_v1.md` bajo `[1.2.1] - 2026-10-04`.
+- [x] (DevOps-Engineer) Publicar release `v1.2.1` en GitHub Actions y GitHub Releases.
 
 ---
 
