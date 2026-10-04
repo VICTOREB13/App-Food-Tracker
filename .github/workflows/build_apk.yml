@@ -267,6 +267,14 @@ jobs:
               find "$cp" -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i -E 's/compileSdk[ ]+[0-9]+/compileSdk 34/g' {} + 2>/dev/null || true
               find "$cp" -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i -E 's/targetSdk[ ]*=[ ]*[0-9]+/targetSdk = 34/g' {} + 2>/dev/null || true
               find "$cp" -type f \( -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i -E 's/targetSdkVersion[ (].*/targetSdkVersion 34/g' {} + 2>/dev/null || true
+
+              # Compatibilidad Java 17 y Android SDK 34 en sqflite_android (reemplazar APIs Java 21 / Android 16)
+              find "$cp" -type f -name "Utils.java" -path "*/sqflite_android*" -exec sed -i 's/Build.VERSION_CODES.BAKLAVA/36/g' {} + 2>/dev/null || true
+              find "$cp" -type f -name "Utils.java" -path "*/sqflite_android*" -exec sed -i 's/Locale\.of(/new java.util.Locale(/g' {} + 2>/dev/null || true
+              find "$cp" -type f -name "Utils.java" -path "*/sqflite_android*" -exec sed -i 's/thread\.threadId()/thread.getId()/g' {} + 2>/dev/null || true
+
+              # Compatibilidad Android SDK 34 en home_widget (stub de previews de Glance/Compose que requieren API 35)
+              find "$cp" -type f -name "HomeWidgetPreviews.kt" -exec sh -c 'echo "// Android API 34 compatibility stub" > "$1"' _ {} \; 2>/dev/null || true
             fi
           done
 
