@@ -168,7 +168,7 @@ tags: [proyecto, tasks, checklist, v1-2-4]
 ### 🧭 1. Project-Planner (Master Tech Lead & Orquestador)
 - [x] (Project-Planner) Conducir Survey Técnico con 3 Exploradores en paralelo (Backend, Frontend, Despensa).
 - [x] (Project-Planner) Definir arquitectura y desglosar tareas atómicas en `artifacts/planning/task.md`, `implementation_plan.md`, `abstractions.md` y `api_spec.md`.
-- [ ] (Project-Planner) Despachar y supervisar subagentes especializados (`Backend-Architect`, `Frontend-UI`, `Systems-Auditor`, `DevOps-Engineer`).
+- [x] (Project-Planner) Despachar y supervisar subagentes especializados (`Backend-Architect`, `Frontend-UI`, `Systems-Auditor`, `DevOps-Engineer`).
 
 ### 🗄️ 2. Backend-Architect (Datos, Normalización Resiliente, Isolate, Batch y Gramajes)
 - [x] (Backend-Architect) **Dependencias y Versión:**
@@ -218,9 +218,9 @@ tags: [proyecto, tasks, checklist, v1-2-4]
 - [x] (Systems-Auditor) Emitir `artifacts/audit_reports/audit_report.md` con veredicto `PASS`.
 
 ### 🚀 5. DevOps-Engineer (Empaquetado y Certificación de Release)
-- [ ] (DevOps-Engineer) Verificar sincronización de versión `1.2.4+1` en `pubspec.yaml` y Gradle.
-- [ ] (DevOps-Engineer) Redactar y formalizar la sección `## [1.2.4] - 2026-10-04` en `artifacts/planning/changelog_v1.md`.
-- [ ] (DevOps-Engineer) Certificar Quality Gate para cierre formal de la iteración.
+- [x] (DevOps-Engineer) Verificar sincronización de versión `1.2.4+1` en `pubspec.yaml` y Gradle.
+- [x] (DevOps-Engineer) Redactar y formalizar la sección `## [1.2.4] - 2026-10-04` en `artifacts/planning/changelog_v1.md`.
+- [x] (DevOps-Engineer) Certificar Quality Gate para cierre formal de la iteración.
 
 ---
 
