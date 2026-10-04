@@ -67,6 +67,8 @@ jobs:
           mkdir -p /tmp/res_backup && cp -r android/app/src/main/res/* /tmp/res_backup/ 2>/dev/null || true
           cp android/app/src/main/AndroidManifest.xml /tmp/AndroidManifest.xml.canonical 2>/dev/null || true
           cp pubspec.yaml /tmp/pubspec.yaml.canonical 2>/dev/null || true
+          cp android/app/build.gradle /tmp/build.gradle.canonical 2>/dev/null || true
+          cp android/app/build.gradle.kts /tmp/build.gradle.kts.canonical 2>/dev/null || true
           flutter create --org com.victorengineer --project-name foodtracker --platforms android .
           if [ -f "/tmp/pubspec.yaml.canonical" ]; then
             cp /tmp/pubspec.yaml.canonical pubspec.yaml
@@ -74,11 +76,19 @@ jobs:
           if [ -f "/tmp/AndroidManifest.xml.canonical" ]; then
             cp /tmp/AndroidManifest.xml.canonical android/app/src/main/AndroidManifest.xml
           fi
+          if [ -f "/tmp/build.gradle.canonical" ]; then
+            cp /tmp/build.gradle.canonical android/app/build.gradle
+          fi
+          if [ -f "/tmp/build.gradle.kts.canonical" ]; then
+            cp /tmp/build.gradle.kts.canonical android/app/build.gradle.kts
+          fi
           cp -r /tmp/res_backup/* android/app/src/main/res/ 2>/dev/null || true
           cp -r /tmp/kotlin_backup/* android/app/src/main/kotlin/ 2>/dev/null || true
+          rm -rf android/app/src/main/kotlin/com/example 2>/dev/null || true
+          rm -rf android/app/src/main/kotlin/com/victorengineer/food_tracker 2>/dev/null || true
           cp -rf lib/assets/launcher_icons/android/* android/app/src/main/res/ 2>/dev/null || true
 
-          # Garantizar namespace com.victorengineer.foodtracker y applicationId com.example.food_tracker en Gradle
+          # Garantizar namespace y applicationId com.victorengineer.foodtracker y useLegacyPackaging en Gradle
           python3 - << 'EOF'
           import os, re
           for fpath in ["android/app/build.gradle", "android/app/build.gradle.kts"]:
@@ -87,12 +97,22 @@ jobs:
               with open(fpath, "r", encoding="utf-8") as f:
                   content = f.read()
               content = re.sub(r'namespace\s*=?\s*["\'][^"\']+["\']', 'namespace = "com.victorengineer.foodtracker"', content)
-              content = re.sub(r'applicationId\s*=?\s*["\'][^"\']+["\']', 'applicationId = "com.example.food_tracker"', content)
+              content = re.sub(r'applicationId\s*=?\s*["\'][^"\']+["\']', 'applicationId = "com.victorengineer.foodtracker"', content)
               if 'namespace = "com.victorengineer.foodtracker"' not in content and 'namespace "com.victorengineer.foodtracker"' not in content:
                   content = re.sub(r'android\s*\{', 'android {\n    namespace = "com.victorengineer.foodtracker"', content)
+              if 'applicationId = "com.victorengineer.foodtracker"' not in content and 'applicationId "com.victorengineer.foodtracker"' not in content:
+                  content = re.sub(r'defaultConfig\s*\{', 'defaultConfig {\n        applicationId = "com.victorengineer.foodtracker"', content)
+              if 'useLegacyPackaging' not in content:
+                  packaging_block = """    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
+"""
+                  content = re.sub(r'android\s*\{', 'android {\n' + packaging_block, content)
               with open(fpath, "w", encoding="utf-8") as f:
                   f.write(content)
-              print(f"✅ {fpath} verificado con namespace com.victorengineer.foodtracker y applicationId com.example.food_tracker")
+              print(f"✅ {fpath} verificado con namespace y applicationId com.victorengineer.foodtracker y useLegacyPackaging = true")
           EOF
 
       - name: Configurar Compatibilidad de Android SDK (compileSdk 34)
@@ -111,13 +131,13 @@ jobs:
             sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 34/' android/app/build.gradle
             sed -i 's/compileSdkVersion flutter.compileSdkVersion/compileSdkVersion 34/' android/app/build.gradle
             sed -i 's/namespace .*/namespace = "com.victorengineer.foodtracker"/' android/app/build.gradle 2>/dev/null || true
-            sed -i 's/applicationId .*/applicationId = "com.example.food_tracker"/' android/app/build.gradle 2>/dev/null || true
+            sed -i 's/applicationId .*/applicationId = "com.victorengineer.foodtracker"/' android/app/build.gradle 2>/dev/null || true
           fi
           if [ -f "android/app/build.gradle.kts" ]; then
             sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 34/' android/app/build.gradle.kts
             sed -i 's/compileSdk = [0-9]*/compileSdk = 34/' android/app/build.gradle.kts
             sed -i 's/namespace = .*/namespace = "com.victorengineer.foodtracker"/' android/app/build.gradle.kts 2>/dev/null || true
-            sed -i 's/applicationId = .*/applicationId = "com.example.food_tracker"/' android/app/build.gradle.kts 2>/dev/null || true
+            sed -i 's/applicationId = .*/applicationId = "com.victorengineer.foodtracker"/' android/app/build.gradle.kts 2>/dev/null || true
           fi
 
           if [ -f "android/build.gradle" ]; then
@@ -160,8 +180,8 @@ jobs:
           app = root.find('application')
           if app is not None:
               app.set(f'{android_ns}label', 'Food Tracker')
-              app.set(f'{android_ns}extractNativeLibs', 'true')
               app.set(f'{android_ns}requestLegacyExternalStorage', 'true')
+              app.attrib.pop(f'{android_ns}extractNativeLibs', None)
 
           tree.write(manifest_path, encoding='utf-8', xml_declaration=True)
           print("✅ AndroidManifest.xml parseado y validado correctamente sin errores de sintaxis")
