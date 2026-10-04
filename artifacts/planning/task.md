@@ -134,8 +134,8 @@ tags: [proyecto, tasks, checklist, v1-2-0]
 - [x] (Systems-Auditor) Crear pruebas unitarias completas para `NutritionalRecommendationService` y `BackupService` físico.
 - [x] (Systems-Auditor) Crear pruebas de widgets para `WhatToEatSheet` y componentes de recomendación.
 - [x] (Systems-Auditor) Auditar que el 100% de los archivos nuevos y modificados cumplan con < 300 LoC.
-- [x] (DevOps-Engineer) Preservar retrocompatibilidad de actualización con `applicationId: com.example.food_tracker` en `release.yml` y soporte de actividad heredada.
-- [x] (DevOps-Engineer) Configurar `android:extractNativeLibs="true"` en `AndroidManifest.xml` y depurar dependencias para compatibilidad con páginas de 16KB en Android 16.
+- [x] (DevOps-Engineer) Consolidar e implementar canónicamente `applicationId: com.victorengineer.foodtracker` y `namespace` unificado conforme a la directiva del usuario.
+- [x] (DevOps-Engineer) Configurar `useLegacyPackaging = true` en Gradle (removiendo `extractNativeLibs` explícito de `AndroidManifest.xml` para cumplimiento estricto con AGP) y compatibilidad para Android 16.
 - [x] (DevOps-Engineer) Incorporar timeouts de arranque en servicios en `main.dart` y `HomeWidgetService` para prevenir ANR.
 - [x] (DevOps-Engineer) Incrementar versión en `pubspec.yaml` a `1.2.0+1` y registrar cambios en `artifacts/planning/changelog_v1.md`.
 

@@ -26,8 +26,8 @@ La versión v1.2.0 introduce el Motor Inteligente de Recomendaciones Nutricional
 - **Motor de Recomendaciones Nutricionales Inteligente (`NutritionalRecommendationService`):** Análisis longitudinal de 7, 15 y 30 días del balance de macronutrientes, con diagnósticos específicos de superávit de grasas y déficit de proteínas, sustituciones inteligentes y platos sugeridos.
 - **¿Qué Debería Comer Hoy? (`WhatToEatSheet`):** Cálculo en tiempo real del presupuesto calórico y de macronutrientes restante del día, consejos adaptados al contexto y sugerencias de platos balanceados con registro en 1 toque.
 - **Exportación e Importación Física de Archivos `.json`:** Reemplazo definitivo del portapapeles por exportación a archivos físicos en Descargas/Documentos, explorador in-app de respaldos con previsualización de entidades y restauración atómica.
-- **Compatibilidad de Actualización Retroactiva (`applicationId`):** Preservación de `applicationId = "com.example.food_tracker"` permitiendo actualizar instalaciones existentes (v1.0.4+) sin duplicar la aplicación ni perder bases de datos SQLite locales.
-- **Soporte Nativo Android 16 (16KB Page Size) y Anti-ANR:** Configuración de `android:extractNativeLibs="true"`, depuración de bibliotecas nativas, y timeouts defensivos en el arranque de servicios asíncronos en `main.dart` para evitar bloqueos en el splash screen.
+- **Identificador Canónico Unificado (`applicationId`):** Consolidación de `namespace` y `applicationId` canónico como `com.victorengineer.foodtracker` en Gradle, manifiesto y pipelines CI/CD.
+- **Soporte Nativo Android 16 (16KB Page Size) y Anti-ANR:** Configuración de `packagingOptions.jniLibs.useLegacyPackaging = true` en Gradle, depuración de bibliotecas nativas, y timeouts defensivos en el arranque de servicios asíncronos en `main.dart` para evitar bloqueos en el splash screen.
 
 ### Features & Capacidades de Producto
 - **Tarjeta Bento de Diagnóstico Nutricional (`RecommendationDiagnosticCard`):** Selector de período (7, 15, 30 días), comparativa gráfica de consumo real vs metas calóricas/macros, y acordeones de sugerencias de reemplazo de grasas y aumento proteico.
