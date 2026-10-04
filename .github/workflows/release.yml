@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Configurar Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
           java-version: '17'
@@ -50,7 +50,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Configurar Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
           java-version: '17'
@@ -99,11 +99,10 @@ jobs:
 
       - name: Configurar Compatibilidad de Android SDK (compileSdk 34)
         run: |
-          # Redirigir android-35 a android-34 para evitar bug de AAPT2 con tabla de recursos
+          # Remover android-35 si existe para evitar advertencias de plataformas duplicadas en SDK Manager
           if [ -d "/usr/local/lib/android/sdk/platforms/android-35" ]; then
             sudo rm -rf /usr/local/lib/android/sdk/platforms/android-35 2>/dev/null || true
-            sudo ln -sf /usr/local/lib/android/sdk/platforms/android-34 /usr/local/lib/android/sdk/platforms/android-35 2>/dev/null || true
-            echo "✅ android-35 redirigido a android-34 en SDK"
+            echo "✅ android-35 removido del SDK para evitar advertencias de duplicados"
           fi
 
           echo "compileSdkVersion=34" >> android/gradle.properties
