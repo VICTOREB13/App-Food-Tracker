@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/main.dart';
 import 'package:food_tracker/screens/dashboard_screen.dart';
 import 'package:food_tracker/screens/onboarding_screen.dart';
+import 'package:food_tracker/services/daos/database_schema.dart';
 import 'package:food_tracker/services/database_service.dart';
 import 'package:food_tracker/services/theme_manager.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -21,42 +22,13 @@ void main() {
     testDb = await databaseFactoryFfi.openDatabase(
       inMemoryDatabasePath,
       options: OpenDatabaseOptions(
-        version: 1,
+        version: 3,
         onConfigure: (db) async {
           await db.rawQuery('PRAGMA journal_mode = WAL;');
           await db.execute('PRAGMA synchronous = NORMAL;');
           await db.execute('PRAGMA foreign_keys = ON;');
         },
-        onCreate: (db, version) async {
-          await db.execute('''
-            CREATE TABLE meals (
-              id TEXT PRIMARY KEY,
-              name TEXT NOT NULL,
-              meal_type TEXT NOT NULL,
-              date TEXT NOT NULL,
-              image_path TEXT,
-              calories REAL NOT NULL,
-              protein REAL NOT NULL,
-              carbs REAL NOT NULL,
-              fat REAL NOT NULL,
-              notes TEXT,
-              ai_breakdown_json TEXT
-            )
-          ''');
-          await db.execute('''
-            CREATE TABLE pantry_items (
-              id TEXT PRIMARY KEY,
-              name TEXT NOT NULL,
-              brand TEXT,
-              category TEXT,
-              calories REAL NOT NULL,
-              protein REAL NOT NULL,
-              carbs REAL NOT NULL,
-              fat REAL NOT NULL,
-              is_favorite INTEGER NOT NULL DEFAULT 0
-            )
-          ''');
-        },
+        onCreate: (db, version) => DatabaseSchema.createAllTables(db),
       ),
     );
     DatabaseService.instance.setDatabaseForTesting(testDb);

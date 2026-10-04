@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'dart:ui';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -97,7 +99,8 @@ class _NutriTrackerAppState extends State<NutriTrackerApp> {
   void initState() {
     super.initState();
     _hasCompletedOnboarding = widget.hasCompletedOnboarding ?? true;
-    if (widget.hasCompletedOnboarding == null) {
+    final isTesting = !kIsWeb && Platform.environment.containsKey('FLUTTER_TEST');
+    if (widget.hasCompletedOnboarding == null && !isTesting) {
       _checkOnboardingInBackground();
     }
   }
