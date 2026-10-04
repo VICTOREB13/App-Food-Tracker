@@ -1,7 +1,5 @@
 import 'dart:async';
-import 'dart:io' show Platform;
 import 'dart:ui';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -99,9 +97,17 @@ class _NutriTrackerAppState extends State<NutriTrackerApp> {
   void initState() {
     super.initState();
     _hasCompletedOnboarding = widget.hasCompletedOnboarding ?? true;
-    final isTesting = !kIsWeb && Platform.environment.containsKey('FLUTTER_TEST');
-    if (widget.hasCompletedOnboarding == null && !isTesting) {
+    if (widget.hasCompletedOnboarding == null) {
       _checkOnboardingInBackground();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant NutriTrackerApp oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.hasCompletedOnboarding != null &&
+        widget.hasCompletedOnboarding != oldWidget.hasCompletedOnboarding) {
+      _hasCompletedOnboarding = widget.hasCompletedOnboarding!;
     }
   }
 
@@ -156,9 +162,19 @@ class _NutriTrackerAppState extends State<NutriTrackerApp> {
             }
             return const Locale('es');
           },
-          home: _hasCompletedOnboarding
-              ? const DashboardScreen()
-              : const OnboardingScreen(),
+          home: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 250),
+            child: _hasCompletedOnboarding
+                ? const DashboardScreen(key: ValueKey('dashboard'))
+                : OnboardingScreen(
+                    key: const ValueKey('onboarding'),
+                    onCompleted: () {
+                      if (mounted) {
+                        setState(() => _hasCompletedOnboarding = true);
+                      }
+                    },
+                  ),
+          ),
         );
       },
     );
