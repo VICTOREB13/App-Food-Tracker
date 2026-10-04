@@ -59,14 +59,14 @@ void main() {
   setUpAll(() async {
     await initializeDateFormatting('es', null);
     sqfliteFfiInit();
-    databaseFactory = databaseFactoryFfi;
+    databaseFactory = databaseFactoryFfiNoIsolate;
   });
 
   late Database testDb;
   late _FakeSecureStorage fakeStorage;
 
   setUp(() async {
-    testDb = await databaseFactoryFfi.openDatabase(
+    testDb = await databaseFactoryFfiNoIsolate.openDatabase(
       inMemoryDatabasePath,
       options: OpenDatabaseOptions(
         version: 3,
@@ -141,8 +141,26 @@ void main() {
 
     await tester.pumpWidget(const NutriTrackerApp());
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump(const Duration(milliseconds: 350));
+    await tester.pump(const Duration(milliseconds: 350));
 
     expect(find.byType(OnboardingScreen), findsOneWidget);
+  });
+
+  testWidgets('OnboardingScreen onCompleted callback updates root app to DashboardScreen', (tester) async {
+    fakeStorage.data.remove('has_completed_onboarding');
+
+    await tester.pumpWidget(const NutriTrackerApp());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+    await tester.pump(const Duration(milliseconds: 350));
+    expect(find.byType(OnboardingScreen), findsOneWidget);
+
+    final onboardingWidget = tester.widget<OnboardingScreen>(find.byType(OnboardingScreen));
+    onboardingWidget.onCompleted?.call();
+
+    await tester.pump(const Duration(milliseconds: 350));
+    await tester.pump(const Duration(milliseconds: 350));
+    expect(find.byType(DashboardScreen), findsOneWidget);
   });
 }
