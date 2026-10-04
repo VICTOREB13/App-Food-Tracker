@@ -1,15 +1,15 @@
 ---
 tipo: task_list
 proyecto: App_Food_Tracker
-iteracion: v1.1.1
+iteracion: v1.2.0
 estado: completado
 fecha: 2026-10-04
-tags: [proyecto, tasks, checklist, v1-1-1]
+tags: [proyecto, tasks, checklist, v1-2-0]
 ---
 
-# 📋 Checklist Maestro de Tareas de Agentes (v1.1.1)
+# 📋 Checklist Maestro de Tareas de Agentes (v1.2.0)
 
-> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.1.1. Cada tarea completada se marca con `[x]`.
+> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.2.0. Cada tarea completada se marca con `[x]`.
 
 ---
 
@@ -120,6 +120,24 @@ tags: [proyecto, tasks, checklist, v1-1-1]
 - [x] (DevOps-Engineer) Alinear 8 suites de prueba con `FakeFlutterSecureStorage` actualizando parámetros a `AppleOptions`.
 - [x] (DevOps-Engineer) Configurar scripts de Gradle para resolver compatibilidad con Java 17 y Android SDK 34 (`sqflite_android`, `androidx.work:2.9.1`).
 - [x] (DevOps-Engineer) Compilar, firmar y publicar APK oficial `v1.1.1` (`Victor-Engineer-Food-Tracker-Android.apk`) en GitHub Releases.
+
+## 🌟 Iteración v1.2.0: Motor de Recomendaciones Nutricionales, Exportación Física e Higiene Android 16
+- [x] (Backend-Architect) Diseñar e implementar `NutritionalRecommendationService` con análisis de 7, 15 y 30 días, cálculo de deltas de macros vs metas, diagnósticos de grasa/proteína, sustituciones inteligentes y sugerencias de platos.
+- [x] (Backend-Architect) Diseñar e implementar `getWhatShouldIEatToday` para calcular presupuesto calórico y de macronutrientes restante hoy, consejo dietético dinámico y lista de platos sugeridos.
+- [x] (Backend-Architect) Diseñar e implementar en `BackupService` exportación física a archivo `.json` (`exportToJsonFile`), guardado en carpeta pública Downloads/Documentos, listado de respaldos (`listAvailableBackups`), e inspección de contenido (`inspectBackupFile`).
+- [x] (Backend-Architect) Registrar `INutritionalRecommendationService` en `service_locator.dart`.
+- [x] (Frontend-UI) Implementar bottom sheet interactivo `WhatToEatSheet` con desglose visual de macros restantes, consejos de balance y botón de registro directo en 1 toque.
+- [x] (Frontend-UI) Implementar tarjeta bento `RecommendationDiagnosticCard` con selector de período (7/15/30 días), comparativas de macros y paneles de sugerencias.
+- [x] (Frontend-UI) Implementar banner `WhatToEatBannerCard` e integrarlo en `DashboardScreen`.
+- [x] (Frontend-UI) Implementar diálogo modal `JsonFilePickerDialog` para navegación y selección de archivos físicos `.json` con vista previa de entidades a restaurar.
+- [x] (Frontend-UI) Actualizar `BackupCard` en `SettingsScreen` para enlazar exportación física y apertura del explorador de respaldos.
+- [x] (Systems-Auditor) Crear pruebas unitarias completas para `NutritionalRecommendationService` y `BackupService` físico.
+- [x] (Systems-Auditor) Crear pruebas de widgets para `WhatToEatSheet` y componentes de recomendación.
+- [x] (Systems-Auditor) Auditar que el 100% de los archivos nuevos y modificados cumplan con < 300 LoC.
+- [x] (DevOps-Engineer) Preservar retrocompatibilidad de actualización con `applicationId: com.example.food_tracker` en `release.yml` y soporte de actividad heredada.
+- [x] (DevOps-Engineer) Configurar `android:extractNativeLibs="true"` en `AndroidManifest.xml` y depurar dependencias para compatibilidad con páginas de 16KB en Android 16.
+- [x] (DevOps-Engineer) Incorporar timeouts de arranque en servicios en `main.dart` y `HomeWidgetService` para prevenir ANR.
+- [x] (DevOps-Engineer) Incrementar versión en `pubspec.yaml` a `1.2.0+1` y registrar cambios en `artifacts/planning/changelog_v1.md`.
 
 ---
 

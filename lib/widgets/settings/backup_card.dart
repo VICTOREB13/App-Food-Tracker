@@ -32,18 +32,19 @@ class BackupCard extends StatelessWidget {
         file = await BackupService.instance.exportToJsonFile();
       }
 
-      if (!context.mounted) return;
-
-      final fileSizeKb = ((await file.length()) / 1024).toStringAsFixed(1);
+      final length = await file.length();
+      final fileSizeKb = (length / 1024).toStringAsFixed(1);
       final fileName = p.basename(file.path);
+
+      if (!context.mounted) return;
 
       await showDialog<void>(
         context: context,
         builder: (dialogCtx) => AlertDialog(
-          backgroundColor: AppColors.surface(context),
+          backgroundColor: AppColors.surface(dialogCtx),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: AppColors.border(context)),
+            side: BorderSide(color: AppColors.border(dialogCtx)),
           ),
           title: Row(
             children: [
@@ -54,7 +55,7 @@ class BackupCard extends StatelessWidget {
                 style: GoogleFonts.outfit(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary(context),
+                  color: AppColors.textPrimary(dialogCtx),
                 ),
               ),
             ],
@@ -65,7 +66,7 @@ class BackupCard extends StatelessWidget {
             children: [
               Text(
                 'Se generó el archivo de respaldo completo en el almacenamiento de tu dispositivo:',
-                style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary(context), height: 1.4),
+                style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary(dialogCtx), height: 1.4),
               ),
               const SizedBox(height: 12),
               Container(
@@ -80,11 +81,11 @@ class BackupCard extends StatelessWidget {
                   children: [
                     Text(fileName, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.protein)),
                     const SizedBox(height: 4),
-                    Text('Tamaño: $fileSizeKb KB', style: GoogleFonts.inter(fontSize: 10, color: AppColors.textSecondary(context))),
+                    Text('Tamaño: $fileSizeKb KB', style: GoogleFonts.inter(fontSize: 10, color: AppColors.textSecondary(dialogCtx))),
                     const SizedBox(height: 6),
                     Text(
                       file.path,
-                      style: GoogleFonts.inter(fontSize: 10, color: AppColors.textMuted(context)),
+                      style: GoogleFonts.inter(fontSize: 10, color: AppColors.textMuted(dialogCtx)),
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),

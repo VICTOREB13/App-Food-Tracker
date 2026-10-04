@@ -18,6 +18,29 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [1.2.0] - 2026-10-04
+
+La versión v1.2.0 introduce el Motor Inteligente de Recomendaciones Nutricionales, la experiencia interactiva "¿Qué debería comer hoy?", el sistema de exportación física e importación de archivos `.json`, y la compatibilidad integral de actualización y retrocompatibilidad con Android 16 (páginas de 16KB).
+
+### Highlights
+- **Motor de Recomendaciones Nutricionales Inteligente (`NutritionalRecommendationService`):** Análisis longitudinal de 7, 15 y 30 días del balance de macronutrientes, con diagnósticos específicos de superávit de grasas y déficit de proteínas, sustituciones inteligentes y platos sugeridos.
+- **¿Qué Debería Comer Hoy? (`WhatToEatSheet`):** Cálculo en tiempo real del presupuesto calórico y de macronutrientes restante del día, consejos adaptados al contexto y sugerencias de platos balanceados con registro en 1 toque.
+- **Exportación e Importación Física de Archivos `.json`:** Reemplazo definitivo del portapapeles por exportación a archivos físicos en Descargas/Documentos, explorador in-app de respaldos con previsualización de entidades y restauración atómica.
+- **Compatibilidad de Actualización Retroactiva (`applicationId`):** Preservación de `applicationId = "com.example.food_tracker"` permitiendo actualizar instalaciones existentes (v1.0.4+) sin duplicar la aplicación ni perder bases de datos SQLite locales.
+- **Soporte Nativo Android 16 (16KB Page Size) y Anti-ANR:** Configuración de `android:extractNativeLibs="true"`, depuración de bibliotecas nativas, y timeouts defensivos en el arranque de servicios asíncronos en `main.dart` para evitar bloqueos en el splash screen.
+
+### Features & Capacidades de Producto
+- **Tarjeta Bento de Diagnóstico Nutricional (`RecommendationDiagnosticCard`):** Selector de período (7, 15, 30 días), comparativa gráfica de consumo real vs metas calóricas/macros, y acordeones de sugerencias de reemplazo de grasas y aumento proteico.
+- **Banner de Recomendaciones en Dashboard (`WhatToEatBannerCard`):** Acceso directo y prominente desde la pantalla principal para consultar qué comer y revisar el diagnóstico nutricional.
+- **Explorador y Selector de Respaldos (`JsonFilePickerDialog`):** Detección automática de archivos `.json` en el dispositivo, inspección previa del contenido (comidas, peso, despensa, perfil) y restauración segura con confirmación.
+- **Timeouts Defensivos de Arranque en `main.dart`:** Inicialización desacoplada con salvaguardas de tiempo en `DatabaseService`, `AnalysisQueueService`, `ThemeManager`, `SettingsController` y `HomeWidgetService`.
+
+### Quality Gate & Certificación
+- **100% Suites Automatizadas PASS:** Pruebas unitarias de servicios de recomendación y respaldo físico, pruebas de widgets UI para las nuevas pantallas y 0 errores de linter.
+- **Estricto Límite Modular:** Todos los archivos creados y modificados se mantienen estrictamente por debajo de 300 LoC.
+
+---
+
 ## [1.1.1] - 2026-10-04
 
 La versión v1.1.1 formaliza una actualización integral de modernización de dependencias, higiene del compilador de Android y migración a almacenamiento seguro v11. Se actualizan componentes críticos a sus versiones estables más recientes, se erradican advertencias de Gradle/KGP y duplicados de SDK, y se optimiza la resiliencia en la inicialización de hardware criptográfico.

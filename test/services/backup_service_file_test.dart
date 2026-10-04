@@ -54,6 +54,12 @@ void main() {
           gender: 'male',
           height: 178,
           weight: 75,
+          bmr: 1700,
+          tdee: 2400,
+          targetCalories: 2000,
+          targetProtein: 150,
+          targetCarbs: 220,
+          targetFat: 60,
         ),
       );
 

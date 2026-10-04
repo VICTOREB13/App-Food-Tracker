@@ -30,7 +30,10 @@ class HomeWidgetService {
     try {
       await HomeWidget.setAppGroupId(appGroupId).timeout(
         const Duration(seconds: 2),
-        onTimeout: () => debugPrint('HomeWidget setAppGroupId timeout'),
+        onTimeout: () {
+          debugPrint('HomeWidget setAppGroupId timeout');
+          return null;
+        },
       );
     } catch (e) {
       debugPrint('HomeWidgetService: Failed to set app group id: $e');

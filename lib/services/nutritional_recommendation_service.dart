@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import '../core/interfaces/database_service_interface.dart';
 import '../core/interfaces/nutritional_recommendation_service_interface.dart';
 import '../models/daily_goals.dart';
-import '../models/meal.dart';
 import '../models/nutritional_recommendation.dart';
 import 'database_service.dart';
 import 'secure_storage_service.dart';
@@ -32,8 +31,6 @@ class NutritionalRecommendationService implements INutritionalRecommendationServ
 
   Future<DailyGoals> _resolveGoals() async {
     try {
-      final storedGoals = await _storage.getDailyGoals();
-      if (storedGoals != null) return storedGoals;
       final profile = await _db.getUserProfile();
       if (profile != null) {
         return DailyGoals(
@@ -43,6 +40,7 @@ class NutritionalRecommendationService implements INutritionalRecommendationServ
           fat: profile.targetFat,
         );
       }
+      return await _storage.getDailyGoals();
     } catch (_) {}
     return const DailyGoals();
   }

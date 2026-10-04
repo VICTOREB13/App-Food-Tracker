@@ -1,17 +1,17 @@
 ---
 tipo: arquitectura
 proyecto: App_Food_Tracker
-version: v1.1.0
+version: v1.2.0
 estado: activo
 fecha: 2026-10-04
-stack_principal: [Flutter, SQLite WAL v3, Google Gemini API, USDA FoodData Central, Open Food Facts, FlutterSecureStorage, GetIt, Flutter Localizations, HomeWidget]
+stack_principal: [Flutter, SQLite WAL v3, Google Gemini API, USDA FoodData Central, Open Food Facts, FlutterSecureStorage, GetIt, Flutter Localizations, HomeWidget, NutritionalRecommendationService]
 diagrama_html: PRJ_App_Food_Tracker_architecture_diagram.html
-tags: [proyecto, arquitectura, tech-stack, archify, local-first, get-it, l10n, result-pattern, android-widgets, sqlite-v3]
+tags: [proyecto, arquitectura, tech-stack, archify, local-first, get-it, l10n, result-pattern, android-widgets, sqlite-v3, recommendations, file-backups, android-16]
 ---
 
-# 🏗️ Arquitectura del Sistema: Victor Engineer - Food Tracker (v1.1.0)
+# 🏗️ Arquitectura del Sistema: Victor Engineer - Food Tracker (v1.2.0)
 
-> **Mesa de Control & Backend-Architect:** Este documento establece los componentes fundamentales, el Tech Stack tecnológico, las decisiones arquitectónicas estructurales y el flujo de datos integral de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.1.0` (Generación Omnicanal de Precisión Visual, Volumétrica y Nutricional).
+> **Mesa de Control & Backend-Architect:** Este documento establece los componentes fundamentales, el Tech Stack tecnológico, las decisiones arquitectónicas estructurales y el flujo de datos integral de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.2.0` (Motor de Recomendaciones Nutricionales, Exportación Física e Higiene Android 16).
 
 ---
 
@@ -88,3 +88,17 @@ El diagrama interactivo de componentes, límites de seguridad, widgets nativos d
 
 ### 3.6. Estimación Inteligente Local Zero-Tokens
 - `OfflineFoodEstimatorService` resuelve búsquedas como "carne molida 100g" en menos de 5 milisegundos sin consumir tokens de IA ni realizar peticiones HTTP, reduciendo la latencia de usuario y los costes operativos.
+
+### 3.7. Motor Inteligente de Recomendaciones Nutricionales y "¿Qué Debería Comer Hoy?"
+- `NutritionalRecommendationService` procesa análisis longitudinales de 7, 15 y 30 días calculando deltas reales frente a las metas calóricas y de macronutrientes del usuario.
+- Genera diagnósticos específicos (reducción de grasas saturadas, incremento de densidad proteica) acompañados de sugerencias de sustitución inteligente.
+- El flujo interactivo `WhatToEatSheet` evalúa el déficit/superávit restante en la jornada actual y sugiere opciones culinarias balanceadas con capacidad de registro en 1 toque directo a la base de datos local SQLite.
+
+### 3.8. Sistema de Respaldos Físicos JSON en Almacenamiento Local y Explorador In-App
+- Sustitución de portapapeles por exportación física de archivos `.json` deterministas en directorios accesibles del dispositivo (`Downloads/FoodTracker_Backups` en Android / Documentos en Desktop).
+- Diálogo interactivo `JsonFilePickerDialog` para detección de respaldos existentes, lectura previa de metadatos (conteo de comidas, peso, vajilla, perfil) y restauración atómica en transacción SQLite con salvaguarda de estado previo.
+
+### 3.9. Retrocompatibilidad de Actualización (`applicationId`) y Arquitectura Android 16 (16KB)
+- Mantenimiento explícito de `applicationId = "com.example.food_tracker"` en `build.gradle` para permitir actualizaciones transparentes de binarios sin generar aplicaciones duplicadas ni desvincular bases de datos locales.
+- Adición de `android:extractNativeLibs="true"` en `AndroidManifest.xml` y eliminación de bibliotecas nativas incompatibles (`sqlite3_flutter_libs`) para cumplimiento estricto del alineamiento de páginas de 16KB en Android 16.
+- Timeouts defensivos (2-4s) con fallback silencioso en el arranque de servicios asíncronos en `main.dart` para garantizar que `runApp()` se invoque sin retrasos ni ANR en arranques en frío.

@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:food_tracker/models/daily_goals.dart';
 import 'package:food_tracker/models/meal.dart';
 import 'package:food_tracker/models/user_profile.dart';
 import 'package:food_tracker/services/daos/database_schema.dart';
@@ -46,6 +45,8 @@ void main() {
           gender: 'male',
           height: 178,
           weight: 78,
+          bmr: 1750,
+          tdee: 2500,
           targetCalories: 2000,
           targetProtein: 140,
           targetCarbs: 200,
@@ -118,6 +119,8 @@ void main() {
           gender: 'male',
           height: 178,
           weight: 78,
+          bmr: 1750,
+          tdee: 2500,
           targetCalories: 2000,
           targetProtein: 150,
           targetCarbs: 220,
