@@ -125,11 +125,11 @@ class _QuickMealDialogState extends State<_QuickMealDialog> {
             children: [
               TextField(
                 controller: _nameController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Descripción / Alimento',
                   hintText: 'Ej. Manzana, Avena, Yogur',
-                  suffixIcon: const Icon(Icons.search, size: 18, color: AppColors.primary),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  suffixIcon: Icon(Icons.search, size: 18, color: AppColors.primary),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                 ),
               ),
               if (_suggestions.isNotEmpty)

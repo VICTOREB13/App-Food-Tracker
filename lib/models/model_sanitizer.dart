@@ -25,15 +25,17 @@ class ModelSanitizer {
     dynamic value, {
     double min = minMacroValue,
     double max = maxMacroValue,
+    double? fallback,
   }) {
-    if (value == null) return min;
+    final defaultVal = fallback ?? min;
+    if (value == null) return defaultVal;
     double? doubleVal;
     if (value is num) {
       doubleVal = value.toDouble();
     } else {
       doubleVal = double.tryParse(value.toString().trim());
     }
-    if (doubleVal == null || doubleVal.isNaN) return min;
+    if (doubleVal == null || doubleVal.isNaN) return defaultVal;
     if (doubleVal < min) return min;
     if (doubleVal > max) return max;
     return double.parse(doubleVal.toStringAsFixed(2));

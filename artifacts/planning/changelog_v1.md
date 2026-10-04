@@ -20,18 +20,28 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ## [1.1.0] - 2026-10-04
 
-### Added
-- **Widgets Nativos de Android (`home_widget`):** Formatos Compacto (2x2) y Extendido (4x2) con soporte para Modo Claro y Modo Oscuro Zinc/Carmesí, y deep links interactivos (`foodtracker://scan_food`, `foodtracker://scan_barcode`, `foodtracker://new_meal`).
-- **Búsqueda en Vivo de Alimentos por API (Cascada Híbrida):** Integración de `FoodSearchCoordinator` conectando catálogo local, Open Food Facts y USDA FoodData Central con auto-escalado proporcional por gramos y autocompletado en tiempo real en `FoodItemEditorDialog` y `QuickMealDialog`.
-- **Migración de Base de Datos a SQLite v3:** Incorporación de micronutrientes (`fiber`, `sodium`, `sugar`) en `meals` y `meal_items`, y nuevas tablas relacionales `calibrated_dishware`, `meal_templates` y `fasting_logs`.
-- **Protocolo y Temporizador de Ayuno Intermitente:** Controlador reactivo `FastingController` y tarjeta interactiva `FastingWindowBentoCard` con visualización de fases metabólicas y alertas.
-- **Resumen Nutricional Semanal (`WeeklyDigestCard`):** Nueva tarjeta analítica en `MetricsScreen` con desglose promediado de calorías, micronutrientes y consistencia.
-- **Selector Dinámico de Idioma en Caliente:** Selector de idioma (Español / Inglés) en `SettingsScreen` con reactividad instantánea sin reiniciar la aplicación.
-- **Exportación Clínica Tabular en Excel/CSV (`ClinicalExcelExportService`):** Generación de reportes clínicos con cabecera UTF-8 BOM (`\uFEFF`) y estándar RFC 4180 para importación médica sin corrupción de caracteres.
-- **Multimodalidad Omnicanal Avanzada:** Registro y análisis por voz natural (`analyzeSpeechMeal`) y análisis volumétrico tridimensional a partir de fotogramas clave de video (`analyzeVideoFramesMeal`).
-- **Escáner OCR de Tablas Nutricionales:** `NutritionLabelScannerService` para digitalización directa de tablas de información nutrimental desde la cámara.
-- **Escala Métrica de Vajilla Calibrada:** Inyección de dimensiones de vajilla del usuario y contexto de despensa en el prompt de inferencia de Gemini Vision.
-- **Cola Asíncrona Zero-Freeze y Preservación de Fotos:** `AnalysisQueueService` con resiliencia defensiva que garantiza la persistencia física de capturas en disco ante errores de red o cuota.
+La versión v1.1.0 consolida la generación omnicanal de precisión volumétrica y nutricional con widgets nativos en Android (2x2 y 4x2 en modos claro/zinc), búsqueda federada de alimentos en tiempo real (USDA y Open Food Facts), migración de base de datos a SQLite v3 con soporte integral de micronutrientes, gestión clínica de ayuno intermitente y exportación tabular conforme al estándar RFC 4180 con UTF-8 BOM.
+
+### Highlights
+- **Widgets Nativos Android 2x2 y 4x2:** Visualización reactiva en tiempo real del progreso calórico y macronutrientes en launcher, con deep links interactivos (`foodtracker://scan_food`, `foodtracker://scan_barcode`) y soporte temático claro/zinc.
+- **Búsqueda en Vivo de Alimentos por API:** Coordinador híbrido en tiempo real que integra el catálogo local offline con Open Food Facts y USDA FoodData Central con escalado volumétrico automático en `FoodItemEditorDialog` y `QuickMealDialog`.
+- **Migración a SQLite v3 & Micronutrientes:** Incorporación de fibra, sodio y azúcar en el esquema relacional, acompañados de tablas para vajilla calibrada (`calibrated_dishware`), plantillas de comida (`meal_templates`) y registros de ayuno (`fasting_logs`).
+- **Controlador y Bento de Ayuno Intermitente:** Temporizador circular interactivo en Dashboard con visualización de fases metabólicas, cálculo de adherencia clínica y persistencia reactiva en `FastingController`.
+
+### Features & Capacidades de Producto
+- **Resumen Nutricional Semanal (`WeeklyDigestCard`):** Tarjeta analítica en `MetricsScreen` con desglose promediado de calorías, micronutrientes y consistencia semanal.
+- **Escáner OCR de Tablas Nutricionales (`NutritionLabelScannerService`):** Digitalización directa de tablas de información nutrimental desde fotos de empaques para alimentar la despensa.
+- **Multimodalidad Omnicanal por Voz y Video:** Soporte para registro dietético mediante dictado en lenguaje natural (`analyzeSpeechMeal`) y muestreo volumétrico multi-fotograma (`analyzeVideoFramesMeal`).
+- **Selector Dinámico de Idioma en Caliente:** Conmutación instantánea entre Español e Inglés en `SettingsScreen` sin reiniciar el estado de la aplicación.
+
+### Arquitectura, Resiliencia y Rendimiento
+- **Cola Asíncrona Zero-Freeze y Preservación de Fotos:** Encolado inmediato en paso 0 (`AnalysisQueueService`) con compresión en Isolate secundario y salvaguarda física de capturas ante caídas de red o cuota.
+- **Resiliencia Defensiva en Gemini API:** Reintentos con retroceso exponencial, jitter y conmutación automática de modelo (`gemini-2.5-flash` $\rightarrow$ `gemini-1.5-flash`).
+- **Escala Métrica de Vajilla Calibrada:** Inyección de dimensiones de plato del comensal y contexto de despensa en el prompt de inferencia visual.
+- **Exportación Clínica RFC 4180:** Generación de reportes tabulares CSV con marca UTF-8 BOM (`\uFEFF`) inmunes a corrupción de caracteres en Microsoft Excel.
+
+### Quality Gate & Certificación
+- **69 Suites Automatizadas (100% PASS):** Verificación integral de modelos, migración transaccional v3, linter estricto y cero regresiones certificadas por Systems-Auditor.
 
 ---
 

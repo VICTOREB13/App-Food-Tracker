@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/models/meal.dart';
 import 'package:food_tracker/services/analysis_queue_service.dart';

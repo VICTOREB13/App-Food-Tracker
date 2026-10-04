@@ -17,12 +17,12 @@ void main() {
       );
 
       expect(prompt, contains("El comensal corrigió el ingrediente 'Mortadela' por 'Jamón de pavo bajo en sodio'."));
-      expect(prompt, contains("Conserva el volumen y la distribución espacial de la foto"));
-      expect(prompt, contains("recalcula los macronutrientes y micronutrientes específicos"));
-      expect(prompt, contains("26.0 cm de diámetro"));
-      expect(prompt, contains("- Arroz blanco (150g - 195 kcal)"));
-      expect(prompt, contains("- Mortadela (60g - 180 kcal)"));
-      expect(prompt, contains("Notas del comensal: Sustituí el embutido por pechuga de pavo horneada"));
+      expect(prompt, contains('Conserva el volumen y la distribución espacial de la foto'));
+      expect(prompt, contains('recalcula los macronutrientes y micronutrientes específicos'));
+      expect(prompt, contains('26.0 cm de diámetro'));
+      expect(prompt, contains('- Arroz blanco (150g - 195 kcal)'));
+      expect(prompt, contains('- Mortadela (60g - 180 kcal)'));
+      expect(prompt, contains('Notas del comensal: Sustituí el embutido por pechuga de pavo horneada'));
     });
 
     test('builds substitution prompt without optional dishware and notes', () {
@@ -35,9 +35,9 @@ void main() {
       );
 
       expect(prompt, contains("El comensal corrigió el ingrediente 'Huevo frito' por 'Tofu revuelto'."));
-      expect(prompt, contains("- Huevo frito (50g - 90 kcal)"));
-      expect(prompt, isNot(contains("Escala métrica de referencia del plato")));
-      expect(prompt, isNot(contains("Notas del comensal")));
+      expect(prompt, contains('- Huevo frito (50g - 90 kcal)'));
+      expect(prompt, isNot(contains('Escala métrica de referencia del plato')));
+      expect(prompt, isNot(contains('Notas del comensal')));
     });
   });
 }

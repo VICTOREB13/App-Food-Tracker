@@ -49,16 +49,16 @@ class FakeFastingDao implements IFastingDao {
 
   @override
   Future<Result<FastingLog?, DatabaseFailure>> getActiveFastingLogResult() async =>
-      Result.success(activeLog);
+      Result<FastingLog?, DatabaseFailure>.ok(activeLog);
 
   @override
   Future<Result<List<FastingLog>, DatabaseFailure>> getAllFastingLogsResult() async =>
-      Result.success(allLogs);
+      Result<List<FastingLog>, DatabaseFailure>.ok(allLogs);
 
   @override
   Future<Result<int, DatabaseFailure>> insertFastingLogResult(FastingLog log) async {
     await insertFastingLog(log);
-    return const Result.success(1);
+    return const Result<int, DatabaseFailure>.ok(1);
   }
 }
 

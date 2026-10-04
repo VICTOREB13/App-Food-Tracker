@@ -80,6 +80,7 @@ void main() {
       expect(uri.host, equals('scan_barcode'));
       expect(scanFoodUri.scheme, equals('foodtracker'));
       expect(scanFoodUri.host, equals('scan_food'));
+      expect(capturedUri, isNull);
     });
   });
 }

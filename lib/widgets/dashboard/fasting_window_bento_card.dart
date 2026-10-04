@@ -182,7 +182,7 @@ class _FastingWindowBentoCardState extends State<FastingWindowBentoCard> {
                     strokeWidth: 4.5,
                     progress: isActive ? progress : 0.0,
                     color: isGoalReached ? AppColors.success : AppColors.primary,
-                    backgroundColor: AppColors.border(context).withValues(alpha: 0.4),
+                    trackColor: AppColors.border(context).withValues(alpha: 0.4),
                   ),
                   Icon(
                     isActive ? Icons.timer_outlined : Icons.hourglass_empty_rounded,

@@ -60,9 +60,6 @@ class WeeklyDigestCard extends StatelessWidget {
     final calAdherence = goals.calories > 0
         ? ((avgCalories / goals.calories) * 100).clamp(0, 200).toInt()
         : 0;
-    final protAdherence = goals.protein > 0
-        ? ((avgProtein / goals.protein) * 100).clamp(0, 200).toInt()
-        : 0;
 
     return Container(
       padding: const EdgeInsets.all(16),

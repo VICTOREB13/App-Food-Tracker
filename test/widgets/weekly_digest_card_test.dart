@@ -15,7 +15,7 @@ void main() {
       const goals = DailyGoals(calories: 2000, protein: 150, carbs: 200, fat: 60);
 
       await tester.pumpWidget(
-        const MaterialApp(
+        MaterialApp(
           home: Scaffold(
             body: WeeklyDigestCard(
               meals: meals,

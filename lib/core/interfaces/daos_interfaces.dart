@@ -5,6 +5,10 @@ import '../../models/weight_log.dart';
 import '../errors/failures.dart';
 import '../errors/result.dart';
 
+export 'dishware_dao_interface.dart';
+export 'meal_template_dao_interface.dart';
+export 'fasting_dao_interface.dart';
+
 /// Contract for Meal Data Access Object.
 abstract interface class IMealDao {
   Future<int> insertMeal(Meal meal);
@@ -79,8 +83,4 @@ abstract interface class IPantryDao {
     bool? onlyFavorites,
   });
 }
-
-export 'dishware_dao_interface.dart';
-export 'meal_template_dao_interface.dart';
-export 'fasting_dao_interface.dart';
 

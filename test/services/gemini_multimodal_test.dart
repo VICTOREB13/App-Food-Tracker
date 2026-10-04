@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/services/gemini_resilience_helper.dart';
 import 'package:food_tracker/services/gemini_vision_service.dart';

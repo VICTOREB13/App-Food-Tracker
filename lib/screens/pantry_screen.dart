@@ -34,7 +34,7 @@ class _PantryScreenState extends State<PantryScreen> {
   Future<void> _loadItems() async {
     setState(() => _isLoading = true);
     try {
-      final list = await DatabaseService.instance.pantryDao.getAllPantryItems();
+      final list = await DatabaseService.instance.pantryDao.getPantryItems();
       if (mounted) setState(() { _items = list; _isLoading = false; });
     } catch (_) {
       if (mounted) setState(() => _isLoading = false);
@@ -50,7 +50,7 @@ class _PantryScreenState extends State<PantryScreen> {
     try {
       final file = File(picked.path);
       final bytes = await file.readAsBytes();
-      final compressed = await ImageProcessingService.instance.compressImageBytes(bytes);
+      final compressed = await ImageProcessingService.instance.compressAndResizeAsync(bytes);
       final scanned = await NutritionLabelScannerService.instance.scanNutritionLabel(imageBytes: compressed);
 
       if (mounted) {

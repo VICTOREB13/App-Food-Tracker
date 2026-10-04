@@ -140,6 +140,8 @@ class MealController extends ChangeNotifier {
     await loadMeals();
   }
 
+  Future<void> addMeal(Meal meal) => upsertMeal(meal);
+
   Future<void> updateMeal(Meal meal) async {
     await _db.updateMeal(meal);
     await loadMeals();

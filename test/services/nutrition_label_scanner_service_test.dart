@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/models/pantry_item.dart';
 import 'package:food_tracker/services/nutrition_label_scanner_service.dart';
 
 void main() {

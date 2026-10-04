@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import '../models/food_item.dart';
 import '../models/meal_analysis_result.dart';
 import 'gemini_resilience_helper.dart';
 import 'image_processing_service.dart';

@@ -18,9 +18,11 @@ sealed class Result<T, E extends Failure> {
 
   /// Creates a successful result holding [data].
   const factory Result.ok(T data) = Success<T, E>;
+  const factory Result.success(T data) = Success<T, E>;
 
   /// Creates a failed result holding [error].
   const factory Result.err(E error) = FailureResult<T, E>;
+  const factory Result.failure(E error) = FailureResult<T, E>;
 
   /// Returns true if this is a [Success].
   bool get isSuccess => this is Success<T, E>;
