@@ -21,7 +21,7 @@ class AdversarialFakeSecureStorage extends Fake implements FlutterSecureStorage 
     AndroidOptions? aOptions,
     LinuxOptions? lOptions,
     WebOptions? webOptions,
-    MacOsOptions? mOptions,
+    AppleOptions? mOptions,
     WindowsOptions? wOptions,
   }) async {
     if (throwOnRead) throw Exception('Simulated Hardware Keystore Failure on READ');
@@ -36,7 +36,7 @@ class AdversarialFakeSecureStorage extends Fake implements FlutterSecureStorage 
     AndroidOptions? aOptions,
     LinuxOptions? lOptions,
     WebOptions? webOptions,
-    MacOsOptions? mOptions,
+    AppleOptions? mOptions,
     WindowsOptions? wOptions,
   }) async {
     if (throwOnWrite) throw Exception('Simulated Hardware Keystore Failure on WRITE');
@@ -54,7 +54,7 @@ class AdversarialFakeSecureStorage extends Fake implements FlutterSecureStorage 
     AndroidOptions? aOptions,
     LinuxOptions? lOptions,
     WebOptions? webOptions,
-    MacOsOptions? mOptions,
+    AppleOptions? mOptions,
     WindowsOptions? wOptions,
   }) async {
     if (throwOnDelete) throw Exception('Simulated Hardware Keystore Failure on DELETE');
@@ -67,7 +67,7 @@ class AdversarialFakeSecureStorage extends Fake implements FlutterSecureStorage 
     AndroidOptions? aOptions,
     LinuxOptions? lOptions,
     WebOptions? webOptions,
-    MacOsOptions? mOptions,
+    AppleOptions? mOptions,
     WindowsOptions? wOptions,
   }) async {
     data.clear();

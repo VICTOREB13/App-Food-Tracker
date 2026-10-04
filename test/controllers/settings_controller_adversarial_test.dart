@@ -21,7 +21,7 @@ class AdversarialFakeStorage extends Fake implements FlutterSecureStorage {
     AndroidOptions? aOptions,
     LinuxOptions? lOptions,
     WebOptions? webOptions,
-    MacOsOptions? mOptions,
+    AppleOptions? mOptions,
     WindowsOptions? wOptions,
   }) async {
     return data[key];
@@ -35,7 +35,7 @@ class AdversarialFakeStorage extends Fake implements FlutterSecureStorage {
     AndroidOptions? aOptions,
     LinuxOptions? lOptions,
     WebOptions? webOptions,
-    MacOsOptions? mOptions,
+    AppleOptions? mOptions,
     WindowsOptions? wOptions,
   }) async {
     if (value != null) {
@@ -52,7 +52,7 @@ class AdversarialFakeStorage extends Fake implements FlutterSecureStorage {
     AndroidOptions? aOptions,
     LinuxOptions? lOptions,
     WebOptions? webOptions,
-    MacOsOptions? mOptions,
+    AppleOptions? mOptions,
     WindowsOptions? wOptions,
   }) async {
     data.remove(key);

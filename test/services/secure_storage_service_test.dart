@@ -14,7 +14,7 @@ class FakeFlutterSecureStorage extends Fake implements FlutterSecureStorage {
     AndroidOptions? aOptions,
     LinuxOptions? lOptions,
     WebOptions? webOptions,
-    MacOsOptions? mOptions,
+    AppleOptions? mOptions,
     WindowsOptions? wOptions,
   }) async {
     if (shouldThrow) throw Exception('Simulated storage failure');
@@ -29,7 +29,7 @@ class FakeFlutterSecureStorage extends Fake implements FlutterSecureStorage {
     AndroidOptions? aOptions,
     LinuxOptions? lOptions,
     WebOptions? webOptions,
-    MacOsOptions? mOptions,
+    AppleOptions? mOptions,
     WindowsOptions? wOptions,
   }) async {
     if (shouldThrow) throw Exception('Simulated storage failure');
@@ -47,7 +47,7 @@ class FakeFlutterSecureStorage extends Fake implements FlutterSecureStorage {
     AndroidOptions? aOptions,
     LinuxOptions? lOptions,
     WebOptions? webOptions,
-    MacOsOptions? mOptions,
+    AppleOptions? mOptions,
     WindowsOptions? wOptions,
   }) async {
     if (shouldThrow) throw Exception('Simulated storage failure');
@@ -60,7 +60,7 @@ class FakeFlutterSecureStorage extends Fake implements FlutterSecureStorage {
     AndroidOptions? aOptions,
     LinuxOptions? lOptions,
     WebOptions? webOptions,
-    MacOsOptions? mOptions,
+    AppleOptions? mOptions,
     WindowsOptions? wOptions,
   }) async {
     if (shouldThrow) throw Exception('Simulated storage failure');
