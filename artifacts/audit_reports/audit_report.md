@@ -21,8 +21,8 @@ tags: [proyecto, audit, quality-gate, v1-2-4]
           QUALITY GATE VERDICT: STATUS: PASS
 =====================================================
  [✓] Análisis Estático (flutter analyze): 0 Errores, 0 Advertencias (No issues found)
- [✓] Suite Automatizada (flutter test): 458 Tests Verificados (100% PASS, 0 fallos)
- [✓] GitHub Actions CI Quality Gate: Run ID 37241369985 (Status: Success / PASS)
+ [✓] Suite Automatizada (flutter test): 467 Tests Verificados (100% PASS, 0 fallos)
+ [✓] GitHub Actions CI Quality Gate: Run ID 37244378457 (Status: Success / PASS)
  [✓] Selector Nativo de Archivos JSON (file_picker ^13.1.0 SAF) integrado sin fricción
  [✓] Normalizador Adaptativo Retrocompatible (BackupNormalizer) con soporte a v1.0.4 y arrays planos
  [✓] Persistencia Transaccional por Lotes (txn.batch().commit()) para 60 FPS garantizados
@@ -31,7 +31,7 @@ tags: [proyecto, audit, quality-gate, v1-2-4]
  [✓] Modal "¿Qué debería comer hoy?" rediseñado con SafeArea, botón de cierre y límite de altura (0.85)
  [✓] Ayuno Intermitente en Dashboard rediseñado como tarjeta Bento compacta (~44px) colapsable
  [✓] Diálogo de Recomendaciones desacoplado con scroll independiente y sin solapamiento
- [✓] Erradicación de desbordamientos RenderFlex en pantallas angostas (320dp) en WeeklyDigestCard
+ [✓] Erradicación de desbordamientos RenderFlex en pantallas angostas (320dp) en WeeklyDigestCard y RecommendationDiagnosticCard
  [✓] Layouts de RemoteViews en Widget 4x2 corregidos (<FrameLayout> en lugar de etiquetas prohibidas <View>)
  [✓] Cumplimiento Modular Estricto: 100% de los 29 archivos modificados/creados < 300 LoC
  [✓] Integridad Técnica Genuina: Cero hardcoding, cero fachadas y cero simulaciones
@@ -49,7 +49,7 @@ tags: [proyecto, audit, quality-gate, v1-2-4]
 - **Resultado Oficial:**
   ```text
   Analyzing App-Food-Tracker...
-  No issues found! (ran in 16.0s)
+  No issues found! (ran in 17.0s)
   ```
 - **Métricas:**
   - **Errores:** 0
@@ -59,12 +59,12 @@ tags: [proyecto, audit, quality-gate, v1-2-4]
 
 ---
 
-## 🧪 3. Matriz de Pruebas Automatizadas (458 Tests — 100% PASS)
+## 🧪 3. Matriz de Pruebas Automatizadas (467 Tests — 100% PASS)
 
-Se auditó la totalidad de la suite de pruebas del proyecto (`test/`), constatando cobertura exhaustiva y **0 fallos (100% PASS)** en GitHub Actions Run ID `37241369985`:
+Se auditó la totalidad de la suite de pruebas del proyecto (`test/`), constatando cobertura exhaustiva y **0 fallos (100% PASS)** en GitHub Actions Run ID `37244378457` (Job ID: `111559237287`):
 
 ```text
-🎉 458 tests passed. (0 failed)
+🎉 467 tests passed. (0 failed)
 ```
 
 ### 3.1. Nuevas Suites de Prueba Introducidas y Verificadas en v1.2.4
@@ -73,11 +73,11 @@ Se auditó la totalidad de la suite de pruebas del proyecto (`test/`), constatan
 | `test/services/backup_normalizer_test.dart` | `BackupNormalizer` | Envoltura de arrays planos legados en `{"meals": [...]}`, traducción de claves en español (`comidas`, `despensa`, `pesos`, `perfil`), preservación de esquemas canónicos modernos, decodificación en segundo plano con `Isolate.run`, rechazo controlado con `FormatException` ante corrupción. | **PASS** |
 | `test/models/pantry_item_portion_scaling_test.dart` | `PantryItem` & SQLite v4 | Persistencia y deserialización de `packageWeight`, Sentinel pattern en `copyWith`, escalado proporcional de calorías y macronutrientes según gramos consumidos (`toScaledFoodItem`), fallback seguro ante porción cero o negativa, migración v3 $\rightarrow$ v4 idempotente en SQLite. | **PASS** |
 | `test/widgets/dashboard_fab_menu_test.dart` | `DashboardFabMenu` | Apertura y cierre del menú flotante, presencia de acción destacada "¿Qué debería comer hoy?", disparo de modal interactivo `WhatToEatSheet`. | **PASS** |
-| `test/widgets/fasting_window_bento_card_test.dart` | `FastingWindowBentoCard` | Renderizado de estado inactivo compacto tipo píldora (~44px), animación expansiva al tocar o al iniciar ayuno, visualización en curso, cancelación limpia de temporizadores en teardown. | **PASS** |
+| `test/widgets/fasting_window_bento_card_test.dart` | `FastingWindowBentoCard` | Renderizado de estado inactivo compacto tipo píldora (~44px), animación expansiva al tocar o al iniciar ayuno, visualización en curso, cancelación limpia de temporizadores y desmontaje seguro del árbol. | **PASS** |
 | `test/widgets/json_file_picker_dialog_test.dart` | `JsonFilePickerDialog` | Renderizado del botón prominente nativo de 1 toque, inspección reactiva de metadatos de respaldo, estado deshabilitado del botón de confirmación hasta seleccionar archivo, acción de cancelar. | **PASS** |
 | `test/widgets/pantry_consumption_dialog_test.dart` | `PantryConsumptionDialog` | Cálculo reactivo en vivo de calorías y macros escalados al modificar el slider/input de gramos consumidos, validación de stock disponible, creación de `FoodItem` proporcional. | **PASS** |
 | `test/widgets/pantry_item_editor_dialog_test.dart` | `PantryItemEditorDialog` | Edición y guardado de porción de referencia en gramos y peso total de empaque, sanitización de entradas numéricas. | **PASS** |
-| `test/widgets/recommendations_widgets_test.dart` | `RecommendationWidgets` | Modal `WhatToEatSheet` acotado con `SafeArea` y botón de cierre explícito, modal `showRecommendationDiagnosticDialog` con cabecera fija, botón de cierre desacoplado y scroll independiente sin solapamiento. | **PASS** |
+| `test/widgets/recommendations_widgets_test.dart` | `RecommendationWidgets` | Modal `WhatToEatSheet` acotado con `SafeArea` y botón de cierre explícito, modal `showRecommendationDiagnosticDialog` con cabecera fija, botón de cierre desacoplado y scroll independiente sin solapamiento ni desbordamientos horizontales. | **PASS** |
 | `test/widgets/weekly_digest_card_test.dart` | `WeeklyDigestCard` | Renderizado de estadísticas semanales, distribución de macros y renderizado libre de desbordamientos (`RenderFlex overflow`) en viewport estrecho de 320dp. | **PASS** |
 
 ---
@@ -104,18 +104,18 @@ Se realizó la medición física de líneas con PowerShell `(Get-Content <file>)
 | `lib/widgets/metrics/weekly_digest_card.dart` | UI / Resumen Semanal 320dp | 287 | < 300 LoC | **CUMPLE** |
 | `lib/widgets/pantry/pantry_consumption_dialog.dart` | UI / Consumo de Despensa | 186 | < 300 LoC | **CUMPLE** |
 | `lib/widgets/pantry/pantry_item_editor_dialog.dart` | UI / Editor de Despensa | 139 | < 300 LoC | **CUMPLE** |
-| `lib/widgets/recommendations/recommendation_diagnostic_card.dart` | UI / Diálogo Diagnóstico | 259 | < 300 LoC | **CUMPLE** |
+| `lib/widgets/recommendations/recommendation_diagnostic_card.dart` | UI / Diálogo Diagnóstico | 275 | < 300 LoC | **CUMPLE** |
 | `lib/widgets/recommendations/what_to_eat_sheet.dart` | UI / Modal ¿Qué Comer Hoy? | 248 | < 300 LoC | **CUMPLE** |
 | `lib/widgets/settings/json_file_picker_dialog.dart` | UI / Selector de Respaldo SAF | 231 | < 300 LoC | **CUMPLE** |
 | `pubspec.yaml` | Configuración / Dependencias | 43 | < 300 LoC | **CUMPLE** |
 | `test/models/pantry_item_portion_scaling_test.dart` | Pruebas Unitarias de Modelo | 217 | < 300 LoC | **CUMPLE** |
 | `test/services/backup_normalizer_test.dart` | Pruebas Unitarias de Servicio | 221 | < 300 LoC | **CUMPLE** |
 | `test/widgets/dashboard_fab_menu_test.dart` | Pruebas de Widgets | 239 | < 300 LoC | **CUMPLE** |
-| `test/widgets/fasting_window_bento_card_test.dart` | Pruebas de Widgets | 119 | < 300 LoC | **CUMPLE** |
+| `test/widgets/fasting_window_bento_card_test.dart` | Pruebas de Widgets | 122 | < 300 LoC | **CUMPLE** |
 | `test/widgets/json_file_picker_dialog_test.dart` | Pruebas de Widgets | 62 | < 300 LoC | **CUMPLE** |
 | `test/widgets/pantry_consumption_dialog_test.dart` | Pruebas de Widgets | 70 | < 300 LoC | **CUMPLE** |
 | `test/widgets/pantry_item_editor_dialog_test.dart` | Pruebas de Widgets | 63 | < 300 LoC | **CUMPLE** |
-| `test/widgets/recommendations_widgets_test.dart` | Pruebas de Widgets | 171 | < 300 LoC | **CUMPLE** |
+| `test/widgets/recommendations_widgets_test.dart` | Pruebas de Widgets | 191 | < 300 LoC | **CUMPLE** |
 | `test/widgets/weekly_digest_card_test.dart` | Pruebas de Widgets | 66 | < 300 LoC | **CUMPLE** |
 
 **Resultado Global:** **0 archivos no conformes**. 100% de los archivos auditados cumplen rigurosamente el principio de monolito modular (< 300 LoC).
