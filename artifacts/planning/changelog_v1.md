@@ -26,6 +26,9 @@ La versión v1.2.1 soluciona de forma crítica problemas de entorno nativo en An
 - **Eliminación de Doble Ícono Launcher:** Remoción completa del bloque `<activity-alias>` redundante en `AndroidManifest.xml` que generaba duplicación de íconos en el lanzador de Android. Estandarización de la actividad principal como `.MainActivity`.
 - **Depuración de Archivos Huérfanos de Kotlin:** Eliminación definitiva del paquete y archivo legado `android/app/src/main/kotlin/com/example/food_tracker/MainActivity.kt`.
 - **Arranque Inmediato y Resiliencia en Android 16 (`main.dart`):** Desacoplamiento de las inicializaciones asíncronas de `DatabaseService`, `AnalysisQueueService`, `ThemeManager` y `SecureStorageService` respecto a `runApp()`. El árbol de widgets se renderiza de inmediato en el frame 0, evitando que timeouts de Keystore o almacenamiento disparen el Watchdog de Android 16.
+- **Empaquetado Nativo Descomprimido y Alineado a 16 KB (`useLegacyPackaging = false`):** Configuración definitiva de librerías C/C++ `.so` (`libflutter.so`, `libapp.so`, `libsqlite3.so`, `libdartjni.so`) empaquetadas sin compresión (`STORED 0`) y con alineación estricta de 16 KB en los límites de página (0x4000), garantizando compatibilidad con el kernel de Android 16 (API 36).
+- **Recursos Nativos de Tema en `res/`:** Creación de `styles.xml`, `values-night/styles.xml` y `launch_background.xml` para prevenir `Resources$NotFoundException`.
+- **Sincronización de Ciclo de Vida y Transición Suave de Onboarding:** Erradicación del bypass evasivo de pruebas en `main.dart`, introducción de `AnimatedSwitcher` en `NutriTrackerApp` y sincronización bidireccional mediante callback `onCompleted` en `OnboardingScreen`.
 
 ---
 

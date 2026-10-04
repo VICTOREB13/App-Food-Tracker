@@ -135,9 +135,9 @@ tags: [proyecto, tasks, checklist, v1-2-1]
 - [x] (Systems-Auditor) Crear pruebas de widgets para `WhatToEatSheet` y componentes de recomendación.
 - [x] (Systems-Auditor) Auditar que el 100% de los archivos nuevos y modificados cumplan con < 300 LoC.
 - [x] (DevOps-Engineer) Consolidar e implementar canónicamente `applicationId: com.victorengineer.foodtracker` y `namespace` unificado conforme a la directiva del usuario.
-- [x] (DevOps-Engineer) Configurar `useLegacyPackaging = true` en Gradle (removiendo `extractNativeLibs` explícito de `AndroidManifest.xml` para cumplimiento estricto con AGP) y compatibilidad para Android 16.
+- [x] (DevOps-Engineer) Configurar `useLegacyPackaging = false` en Gradle (removiendo `extractNativeLibs` explícito de `AndroidManifest.xml` para cumplimiento estricto con AGP y páginas de 16 KB en Android 16).
 - [x] (DevOps-Engineer) Incorporar timeouts de arranque en servicios en `main.dart` y `HomeWidgetService` para prevenir ANR.
-- [x] (DevOps-Engineer) Incrementar versión en `pubspec.yaml` a `1.2.0+1` y registrar cambios en `artifacts/planning/changelog_v1.md`.
+- [x] (DevOps-Engineer) Incrementar versión en `pubspec.yaml` a `1.2.1+1` y registrar cambios en `artifacts/planning/changelog_v1.md`.
 
 ---
 
@@ -146,6 +146,10 @@ tags: [proyecto, tasks, checklist, v1-2-1]
 - [x] (DevOps-Engineer) Eliminar bloque `<activity-alias>` en `android/app/src/main/AndroidManifest.xml` y fijar actividad principal en `.MainActivity`.
 - [x] (DevOps-Engineer) Purgar archivo huérfano de Kotlin en `android/app/src/main/kotlin/com/example/food_tracker/MainActivity.kt`.
 - [x] (DevOps-Engineer) Desacoplar inicializaciones asíncronas de `runApp()` en `lib/main.dart` para arranque inmediato en frame 0 sin ANR en Android 16.
+- [x] (Reviewer & QA) Erradicar bypass de `FLUTTER_TEST` en `lib/main.dart`, implementar `_FakeSecureStorage` y `databaseFactoryFfiNoIsolate` en `nutri_tracker_app_test.dart`.
+- [x] (Reviewer & QA) Sincronizar ciclo de vida de finalización de onboarding con callback `onCompleted` en `OnboardingScreen` y `NutriTrackerApp`.
+- [x] (Reviewer & QA) Incorporar `AnimatedSwitcher` en `NutriTrackerApp` para transición suave sin parpadeo visual en frame 0.
+- [x] (Reviewer & QA) Verificar empaquetado nativo descomprimido (`STORED 0`) y alineación estricta de páginas de 16 KB en todos los binarios `.so` con compilación real en CI (Run 37227297048).
 - [x] (DevOps-Engineer) Documentar versión en `artifacts/planning/changelog_v1.md` bajo `[1.2.1] - 2026-10-04`.
 - [x] (DevOps-Engineer) Publicar release `v1.2.1` en GitHub Actions y GitHub Releases.
 
