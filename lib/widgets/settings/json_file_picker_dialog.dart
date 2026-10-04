@@ -33,20 +33,17 @@ class _JsonFilePickerDialogState extends State<JsonFilePickerDialog> {
     });
 
     try {
-      final result = await FilePicker.platform.pickFiles(
+      final picked = await FilePicker.pickFile(
         type: FileType.custom,
         allowedExtensions: ['json'],
       );
 
-      if (result != null && result.files.isNotEmpty) {
-        final path = result.files.single.path;
-        if (path != null && path.isNotEmpty) {
-          final file = File(path);
-          if (await file.exists()) {
-            await _selectFile(file);
-          } else {
-            setState(() => _errorMessage = 'El archivo seleccionado no existe.');
-          }
+      if (picked != null && picked.path != null && picked.path!.isNotEmpty) {
+        final file = File(picked.path!);
+        if (await file.exists()) {
+          await _selectFile(file);
+        } else {
+          setState(() => _errorMessage = 'El archivo seleccionado no existe.');
         }
       }
     } catch (e) {
