@@ -63,12 +63,39 @@ jobs:
 
       - name: Generar Archivos de Plataforma Android
         run: |
+          mkdir -p /tmp/kotlin_backup && cp -r android/app/src/main/kotlin/* /tmp/kotlin_backup/ 2>/dev/null || true
+          mkdir -p /tmp/res_backup && cp -r android/app/src/main/res/* /tmp/res_backup/ 2>/dev/null || true
           cp android/app/src/main/AndroidManifest.xml /tmp/AndroidManifest.xml.canonical 2>/dev/null || true
-          flutter create --project-name food_tracker --platforms android .
+          cp pubspec.yaml /tmp/pubspec.yaml.canonical 2>/dev/null || true
+          flutter create --org com.victorengineer --project-name foodtracker --platforms android .
+          if [ -f "/tmp/pubspec.yaml.canonical" ]; then
+            cp /tmp/pubspec.yaml.canonical pubspec.yaml
+          fi
           if [ -f "/tmp/AndroidManifest.xml.canonical" ]; then
             cp /tmp/AndroidManifest.xml.canonical android/app/src/main/AndroidManifest.xml
           fi
+          cp -r /tmp/res_backup/* android/app/src/main/res/ 2>/dev/null || true
+          cp -r /tmp/kotlin_backup/* android/app/src/main/kotlin/ 2>/dev/null || true
+          rm -rf android/app/src/main/kotlin/com/example 2>/dev/null || true
+          rm -rf android/app/src/main/kotlin/com/victorengineer/food_tracker 2>/dev/null || true
           cp -rf lib/assets/launcher_icons/android/* android/app/src/main/res/ 2>/dev/null || true
+
+          # Garantizar namespace y applicationId com.victorengineer.foodtracker en Gradle
+          python3 - << 'EOF'
+          import os, re
+          for fpath in ["android/app/build.gradle", "android/app/build.gradle.kts"]:
+              if not os.path.exists(fpath):
+                  continue
+              with open(fpath, "r", encoding="utf-8") as f:
+                  content = f.read()
+              content = re.sub(r'namespace\s*=?\s*["\'][^"\']+["\']', 'namespace = "com.victorengineer.foodtracker"', content)
+              content = re.sub(r'applicationId\s*=?\s*["\'][^"\']+["\']', 'applicationId = "com.victorengineer.foodtracker"', content)
+              if 'namespace = "com.victorengineer.foodtracker"' not in content and 'namespace "com.victorengineer.foodtracker"' not in content:
+                  content = re.sub(r'android\s*\{', 'android {\n    namespace = "com.victorengineer.foodtracker"', content)
+              with open(fpath, "w", encoding="utf-8") as f:
+                  f.write(content)
+              print(f"✅ {fpath} verificado con namespace y applicationId = com.victorengineer.foodtracker")
+          EOF
 
       - name: Configurar Compatibilidad de Android SDK (compileSdk 34)
         run: |
@@ -86,10 +113,14 @@ jobs:
           if [ -f "android/app/build.gradle" ]; then
             sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 34/' android/app/build.gradle
             sed -i 's/compileSdkVersion flutter.compileSdkVersion/compileSdkVersion 34/' android/app/build.gradle
+            sed -i 's/namespace .*/namespace = "com.victorengineer.foodtracker"/' android/app/build.gradle 2>/dev/null || true
+            sed -i 's/applicationId .*/applicationId = "com.victorengineer.foodtracker"/' android/app/build.gradle 2>/dev/null || true
           fi
           if [ -f "android/app/build.gradle.kts" ]; then
             sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 34/' android/app/build.gradle.kts
             sed -i 's/compileSdk = [0-9]*/compileSdk = 34/' android/app/build.gradle.kts
+            sed -i 's/namespace = .*/namespace = "com.victorengineer.foodtracker"/' android/app/build.gradle.kts 2>/dev/null || true
+            sed -i 's/applicationId = .*/applicationId = "com.victorengineer.foodtracker"/' android/app/build.gradle.kts 2>/dev/null || true
           fi
 
           if [ -f "android/build.gradle" ]; then
