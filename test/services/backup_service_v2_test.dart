@@ -6,6 +6,7 @@ import 'package:food_tracker/models/pantry_item.dart';
 import 'package:food_tracker/models/user_profile.dart';
 import 'package:food_tracker/models/weight_log.dart';
 import 'package:food_tracker/services/backup_service.dart';
+import 'package:food_tracker/services/daos/database_schema.dart';
 import 'package:food_tracker/services/database_service.dart';
 
 void main() {
@@ -20,70 +21,9 @@ void main() {
     db = await databaseFactoryFfi.openDatabase(
       inMemoryDatabasePath,
       options: OpenDatabaseOptions(
-        version: 2,
+        version: 3,
         onCreate: (db, version) async {
-          await db.execute('''
-            CREATE TABLE meals (
-              id TEXT PRIMARY KEY,
-              name TEXT NOT NULL,
-              meal_type TEXT NOT NULL,
-              date TEXT NOT NULL,
-              image_path TEXT,
-              calories REAL NOT NULL,
-              protein REAL NOT NULL,
-              carbs REAL NOT NULL,
-              fat REAL NOT NULL,
-              notes TEXT,
-              ai_breakdown_json TEXT
-            )
-          ''');
-
-          await db.execute('''
-            CREATE TABLE pantry_items (
-              id TEXT PRIMARY KEY,
-              name TEXT NOT NULL,
-              brand TEXT,
-              category TEXT,
-              calories REAL NOT NULL,
-              protein REAL NOT NULL,
-              carbs REAL NOT NULL,
-              fat REAL NOT NULL,
-              is_favorite INTEGER NOT NULL DEFAULT 0
-            )
-          ''');
-
-          await db.execute('''
-            CREATE TABLE weight_logs (
-              id TEXT PRIMARY KEY,
-              date TEXT NOT NULL,
-              weight REAL NOT NULL,
-              notes TEXT
-            )
-          ''');
-
-          await db.execute('''
-            CREATE TABLE user_profile (
-              id TEXT PRIMARY KEY,
-              name TEXT,
-              age INTEGER NOT NULL,
-              gender TEXT NOT NULL,
-              height REAL NOT NULL,
-              weight REAL NOT NULL,
-              activity_level TEXT NOT NULL,
-              body_goal TEXT NOT NULL,
-              estimated_steps INTEGER NOT NULL DEFAULT 8000,
-              bmr REAL NOT NULL,
-              tdee REAL NOT NULL,
-              target_calories REAL NOT NULL,
-              target_protein REAL NOT NULL,
-              target_carbs REAL NOT NULL,
-              target_fat REAL NOT NULL,
-              master_prompt TEXT,
-              updated_at TEXT NOT NULL
-            )
-          ''');
-
-          await db.execute('CREATE INDEX IF NOT EXISTS idx_weight_logs_date ON weight_logs(date);');
+          await DatabaseSchema.createAllTables(db);
         },
       ),
     );

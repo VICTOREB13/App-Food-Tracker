@@ -4,6 +4,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:food_tracker/models/meal.dart';
 import 'package:food_tracker/models/pantry_item.dart';
 import 'package:food_tracker/services/backup_service.dart';
+import 'package:food_tracker/services/daos/database_schema.dart';
 import 'package:food_tracker/services/database_service.dart';
 
 void main() {
@@ -18,37 +19,9 @@ void main() {
     db = await databaseFactoryFfi.openDatabase(
       inMemoryDatabasePath,
       options: OpenDatabaseOptions(
-        version: 1,
+        version: 3,
         onCreate: (db, version) async {
-          await db.execute('''
-            CREATE TABLE meals (
-              id TEXT PRIMARY KEY,
-              name TEXT NOT NULL,
-              meal_type TEXT NOT NULL,
-              date TEXT NOT NULL,
-              image_path TEXT,
-              calories REAL NOT NULL,
-              protein REAL NOT NULL,
-              carbs REAL NOT NULL,
-              fat REAL NOT NULL,
-              notes TEXT,
-              ai_breakdown_json TEXT
-            )
-          ''');
-
-          await db.execute('''
-            CREATE TABLE pantry_items (
-              id TEXT PRIMARY KEY,
-              name TEXT NOT NULL,
-              brand TEXT,
-              category TEXT,
-              calories REAL NOT NULL,
-              protein REAL NOT NULL,
-              carbs REAL NOT NULL,
-              fat REAL NOT NULL,
-              is_favorite INTEGER NOT NULL DEFAULT 0
-            )
-          ''');
+          await DatabaseSchema.createAllTables(db);
         },
       ),
     );

@@ -17,11 +17,7 @@ class GeminiVisionService {
   static const String defaultModel = 'gemini-2.5-flash';
   static const String fallbackModel = 'gemini-1.5-flash';
 
-  static const String baseSystemInstruction = '''
-Eres un nutricionista clínico y experto en estimación volumétrica visual de alimentos sin báscula para comidas caseras latinoamericanas y familiares.
-Calcula calorías, proteínas, carbohidratos, grasas y micronutrientes (fibra_g, sodio_mg, azucar_g).
-''';
-
+  static const String baseSystemInstruction = GeminiResilienceHelper.baseSystemInstruction;
   static const String systemInstruction = baseSystemInstruction;
 
   static String buildSystemInstruction([String? masterPrompt, String? pantryContext]) =>
