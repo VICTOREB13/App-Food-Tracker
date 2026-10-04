@@ -103,13 +103,7 @@ jobs:
               if 'applicationId = "com.victorengineer.foodtracker"' not in content and 'applicationId "com.victorengineer.foodtracker"' not in content:
                   content = re.sub(r'defaultConfig\s*\{', 'defaultConfig {\n        applicationId = "com.victorengineer.foodtracker"', content)
               if 'useLegacyPackaging' not in content:
-                  packaging_block = """    packagingOptions {
-        jniLibs {
-            useLegacyPackaging = true
-        }
-    }
-"""
-                  content = re.sub(r'android\s*\{', 'android {\n' + packaging_block, content)
+                  content = re.sub(r'android\s*\{', 'android {\n    packagingOptions {\n        jniLibs {\n            useLegacyPackaging = true\n        }\n    }', content)
               with open(fpath, "w", encoding="utf-8") as f:
                   f.write(content)
               print(f"✅ {fpath} verificado con namespace y applicationId com.victorengineer.foodtracker y useLegacyPackaging = true")
