@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as p;
@@ -9,6 +10,7 @@ import '../models/meal.dart';
 import '../models/pantry_item.dart';
 import '../models/user_profile.dart';
 import '../models/weight_log.dart';
+import 'backup_normalizer.dart';
 import 'database_service.dart';
 
 /// Service orchestrating database backup export to physical JSON files and atomic JSON restores.
@@ -140,20 +142,19 @@ class BackupService {
   /// Inspects a backup file and returns metadata preview without executing changes.
   Future<Map<String, dynamic>> inspectBackupFile(File file) async {
     final content = await file.readAsString();
-    final dynamic decoded = json.decode(content);
-    if (decoded is! Map<String, dynamic>) {
-      throw const FormatException('El archivo de respaldo no tiene el formato JSON esperado.');
-    }
+    final normalized = await Isolate.run(
+      () => BackupNormalizer.decodeAndNormalize(content),
+    );
 
     return {
       'path': file.path,
       'filename': p.basename(file.path),
       'size_bytes': await file.length(),
-      'export_date': decoded['export_date'],
-      'meals_count': (decoded['meals'] as List?)?.length ?? 0,
-      'pantry_count': (decoded['pantry_items'] as List?)?.length ?? 0,
-      'weight_logs_count': (decoded['weight_logs'] as List?)?.length ?? 0,
-      'has_user_profile': decoded['user_profile'] != null,
+      'export_date': normalized['export_date'],
+      'meals_count': (normalized['meals'] as List?)?.length ?? 0,
+      'pantry_count': (normalized['pantry_items'] as List?)?.length ?? 0,
+      'weight_logs_count': (normalized['weight_logs'] as List?)?.length ?? 0,
+      'has_user_profile': normalized['user_profile'] != null,
     };
   }
 
@@ -165,10 +166,9 @@ class BackupService {
 
   /// Restores database content from raw JSON string with SQLite transaction guarantees.
   Future<Map<String, int>> importFromJsonString(String jsonContent) async {
-    final dynamic decoded = json.decode(jsonContent);
-    if (decoded is! Map<String, dynamic>) {
-      throw const FormatException('El archivo de respaldo no tiene el formato JSON esperado.');
-    }
+    final normalized = await Isolate.run(
+      () => BackupNormalizer.decodeAndNormalize(jsonContent),
+    );
 
     final db = await DatabaseService.instance.database;
     int importedMeals = 0;
@@ -177,61 +177,49 @@ class BackupService {
     int importedUserProfile = 0;
 
     await db.transaction((txn) async {
-      // 1. Restore Meals
-      if (decoded['meals'] is List) {
-        for (final item in decoded['meals']) {
-          if (item is Map<String, dynamic>) {
-            final meal = Meal.fromJson(item);
-            await txn.insert(
-              'meals',
-              meal.toSqliteMap(),
-              conflictAlgorithm: ConflictAlgorithm.replace,
-            );
+      final batch = txn.batch();
+
+      final meals = normalized['meals'];
+      if (meals is List) {
+        for (final item in meals) {
+          if (item is Map) {
+            final meal = Meal.fromJson(Map<String, dynamic>.from(item));
+            batch.insert('meals', meal.toSqliteMap(), conflictAlgorithm: ConflictAlgorithm.replace);
             importedMeals++;
           }
         }
       }
 
-      // 2. Restore Pantry Items
-      if (decoded['pantry_items'] is List) {
-        for (final item in decoded['pantry_items']) {
-          if (item is Map<String, dynamic>) {
-            final pantryItem = PantryItem.fromJson(item);
-            await txn.insert(
-              'pantry_items',
-              pantryItem.toSqliteMap(),
-              conflictAlgorithm: ConflictAlgorithm.replace,
-            );
+      final pantry = normalized['pantry_items'];
+      if (pantry is List) {
+        for (final item in pantry) {
+          if (item is Map) {
+            final pItem = PantryItem.fromJson(Map<String, dynamic>.from(item));
+            batch.insert('pantry_items', pItem.toSqliteMap(), conflictAlgorithm: ConflictAlgorithm.replace);
             importedPantry++;
           }
         }
       }
 
-      // 3. Restore Weight Logs
-      if (decoded['weight_logs'] is List) {
-        for (final item in decoded['weight_logs']) {
-          if (item is Map<String, dynamic>) {
-            final weightLog = WeightLog.fromJson(item);
-            await txn.insert(
-              'weight_logs',
-              weightLog.toSqliteMap(),
-              conflictAlgorithm: ConflictAlgorithm.replace,
-            );
+      final weightLogs = normalized['weight_logs'];
+      if (weightLogs is List) {
+        for (final item in weightLogs) {
+          if (item is Map) {
+            final wLog = WeightLog.fromJson(Map<String, dynamic>.from(item));
+            batch.insert('weight_logs', wLog.toSqliteMap(), conflictAlgorithm: ConflictAlgorithm.replace);
             importedWeightLogs++;
           }
         }
       }
 
-      // 4. Restore User Profile
-      if (decoded['user_profile'] is Map<String, dynamic>) {
-        final profile = UserProfile.fromJson(decoded['user_profile'] as Map<String, dynamic>);
-        await txn.insert(
-          'user_profile',
-          profile.toSqliteMap(),
-          conflictAlgorithm: ConflictAlgorithm.replace,
-        );
+      final userProfile = normalized['user_profile'];
+      if (userProfile is Map) {
+        final profile = UserProfile.fromJson(Map<String, dynamic>.from(userProfile));
+        batch.insert('user_profile', profile.toSqliteMap(), conflictAlgorithm: ConflictAlgorithm.replace);
         importedUserProfile = 1;
       }
+
+      await batch.commit(noResult: true);
     });
 
     return {

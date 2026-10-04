@@ -51,7 +51,7 @@ class DatabaseConnectionFactory {
 
     return await openDatabase(
       dbPath,
-      version: 3,
+      version: 4,
       onConfigure: configurePragmas,
       onCreate: (db, version) => DatabaseSchema.createAllTables(db),
       onUpgrade: DatabaseSchema.onUpgrade,

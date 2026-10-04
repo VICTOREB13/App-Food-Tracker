@@ -67,6 +67,7 @@ class DatabaseSchema {
         fat REAL NOT NULL,
         serving_size REAL DEFAULT 100.0,
         serving_unit TEXT DEFAULT 'g',
+        package_weight REAL,
         fiber REAL DEFAULT 0.0,
         sodium REAL DEFAULT 0.0,
         sugar REAL DEFAULT 0.0,
@@ -213,6 +214,9 @@ class DatabaseSchema {
       await db.execute('CREATE INDEX IF NOT EXISTS idx_calibrated_dishware_default ON calibrated_dishware(is_default);');
       await db.execute('CREATE INDEX IF NOT EXISTS idx_meal_templates_meal_type ON meal_templates(meal_type);');
       await db.execute('CREATE INDEX IF NOT EXISTS idx_fasting_logs_start ON fasting_logs(start_time);');
+    }
+    if (oldVersion < 4) {
+      await _safeAddColumn(db, 'pantry_items', 'package_weight REAL');
     }
   }
 }

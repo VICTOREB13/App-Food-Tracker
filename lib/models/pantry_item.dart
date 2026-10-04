@@ -1,4 +1,5 @@
 import 'package:uuid/uuid.dart';
+import 'food_item.dart';
 import 'model_sanitizer.dart';
 
 class PantryItem {
@@ -12,6 +13,7 @@ class PantryItem {
   final double fat;
   final double servingSize;
   final String servingUnit;
+  final double? packageWeight;
   final double fiber;
   final double sodium;
   final double sugar;
@@ -34,6 +36,7 @@ class PantryItem {
     num? fat,
     num? servingSize = 100.0,
     String? servingUnit = 'g',
+    num? packageWeight,
     num? fiber = 0.0,
     num? sodium = 0.0,
     num? sugar = 0.0,
@@ -52,6 +55,9 @@ class PantryItem {
         fat = ModelSanitizer.clampDouble(fat),
         servingSize = ModelSanitizer.clampDouble(servingSize, min: 0.1, fallback: 100.0),
         servingUnit = ModelSanitizer.truncate(servingUnit, 32, fallback: 'g'),
+        packageWeight = packageWeight != null
+            ? ModelSanitizer.clampDouble(packageWeight, min: 0.1, max: 50000.0)
+            : null,
         fiber = ModelSanitizer.clampDouble(fiber),
         sodium = ModelSanitizer.clampDouble(sodium),
         sugar = ModelSanitizer.clampDouble(sugar),
@@ -70,6 +76,7 @@ class PantryItem {
     double? fat,
     double? servingSize,
     String? servingUnit,
+    Object? packageWeight = _sentinel,
     double? fiber,
     double? sodium,
     double? sugar,
@@ -90,6 +97,9 @@ class PantryItem {
       fat: fat ?? this.fat,
       servingSize: servingSize ?? this.servingSize,
       servingUnit: servingUnit ?? this.servingUnit,
+      packageWeight: identical(packageWeight, _sentinel)
+          ? this.packageWeight
+          : (packageWeight as double?),
       fiber: fiber ?? this.fiber,
       sodium: sodium ?? this.sodium,
       sugar: sugar ?? this.sugar,
@@ -105,6 +115,25 @@ class PantryItem {
     );
   }
 
+  FoodItem toScaledFoodItem({required double gramsConsumed, String? justification}) {
+    final refServing = servingSize > 0 ? servingSize : 100.0;
+    final factor = gramsConsumed / refServing;
+    final displayName = (brand != null && brand!.isNotEmpty) ? '$name ($brand)' : name;
+    return FoodItem(
+      name: displayName,
+      estimatedGrams: gramsConsumed,
+      calories: ModelSanitizer.clampDouble(calories * factor),
+      protein: ModelSanitizer.clampDouble(protein * factor),
+      carbs: ModelSanitizer.clampDouble(carbs * factor),
+      fat: ModelSanitizer.clampDouble(fat * factor),
+      fiber: ModelSanitizer.clampDouble(fiber * factor),
+      sodium: ModelSanitizer.clampDouble(sodium * factor, max: 50000.0),
+      sugar: ModelSanitizer.clampDouble(sugar * factor),
+      visualJustification: justification ??
+          'Despensa: ${gramsConsumed.toStringAsFixed(0)}g (ref. ${refServing.toStringAsFixed(0)}g)',
+    );
+  }
+
   Map<String, dynamic> toSqliteMap() {
     return {
       'id': id,
@@ -117,6 +146,7 @@ class PantryItem {
       'fat': fat,
       'serving_size': servingSize,
       'serving_unit': servingUnit,
+      'package_weight': packageWeight,
       'fiber': fiber,
       'sodium': sodium,
       'sugar': sugar,
@@ -129,6 +159,8 @@ class PantryItem {
   }
 
   factory PantryItem.fromSqliteMap(Map<String, dynamic> map) {
+    final rawPackageWeight =
+        map['package_weight'] ?? map['peso_neto'] ?? map['peso_paquete'];
     return PantryItem(
       id: map['id']?.toString(),
       name: map['name']?.toString() ?? 'Alimento',
@@ -140,6 +172,9 @@ class PantryItem {
       fat: ModelSanitizer.clampDouble(map['fat']),
       servingSize: ModelSanitizer.clampDouble(map['serving_size'], min: 0.1, fallback: 100.0),
       servingUnit: map['serving_unit']?.toString() ?? 'g',
+      packageWeight: rawPackageWeight != null
+          ? ModelSanitizer.clampDouble(rawPackageWeight, min: 0.1, max: 50000.0)
+          : null,
       fiber: ModelSanitizer.clampDouble(map['fiber']),
       sodium: ModelSanitizer.clampDouble(map['sodium']),
       sugar: ModelSanitizer.clampDouble(map['sugar']),
