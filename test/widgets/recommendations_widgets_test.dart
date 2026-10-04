@@ -32,7 +32,7 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: WhatToEatSheet(initialPlan: samplePlan),
           ),
@@ -68,7 +68,7 @@ void main() {
         proteinDiagnosis: 'Consumo de proteína adecuado.',
         carbsDiagnosis: 'Balance adecuado.',
         calorieDiagnosis: 'Calorías en rango.',
-        fatReductionSwaps: [
+        fatReductionSwaps: const [
           FoodSwapSuggestion(
             originalFood: 'Aceite común',
             substituteFood: 'Spray antiadherente',
@@ -76,12 +76,12 @@ void main() {
             fatSavedGrams: 10,
           ),
         ],
-        proteinIncreaseSuggestions: [],
-        suggestedPlates: [],
+        proteinIncreaseSuggestions: const [],
+        suggestedPlates: const [],
       );
 
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: SingleChildScrollView(
               child: RecommendationDiagnosticCard(initialReport: sampleReport),
