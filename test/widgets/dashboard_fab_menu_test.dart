@@ -200,5 +200,40 @@ void main() {
       expect(anyClicked, isFalse);
       expect(find.text('REGISTRAR COMIDA O ACTIVIDAD'), findsNothing);
     });
+
+    testWidgets('Tapping Que deberia comer hoy invokes onWhatToEat callback', (tester) async {
+      tester.view.physicalSize = const Size(800, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      bool whatToEatClicked = false;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            floatingActionButton: DashboardFabMenu(
+              onAiPhotoScan: () {},
+              onBarcodeScan: () {},
+              onManualEntry: () {},
+              onWhatToEat: () => whatToEatClicked = true,
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+
+      expect(find.text('¿Qué debería comer hoy?'), findsOneWidget);
+      expect(find.text('Sugerencias inteligentes según tus macros'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('what_to_eat_fab_button')));
+      await tester.pumpAndSettle();
+
+      expect(whatToEatClicked, isTrue);
+      expect(find.text('REGISTRAR COMIDA O ACTIVIDAD'), findsNothing);
+    });
   });
 }

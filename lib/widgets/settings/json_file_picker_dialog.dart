@@ -1,12 +1,12 @@
 import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import 'package:path/path.dart' as p;
 import '../../services/backup_service.dart';
 import '../../services/theme_manager.dart';
 
-/// Modal dialog allowing the user to select an existing JSON backup file or specify a local file path.
+/// Modal dialog allowing the user to select a JSON backup file via the native system file picker.
 class JsonFilePickerDialog extends StatefulWidget {
   final Future<Map<String, int>> Function(File file) onRestoreFile;
 
@@ -20,50 +20,45 @@ class JsonFilePickerDialog extends StatefulWidget {
 }
 
 class _JsonFilePickerDialogState extends State<JsonFilePickerDialog> {
-  final TextEditingController _pathController = TextEditingController();
-  List<File> _availableFiles = [];
   File? _selectedFile;
   Map<String, dynamic>? _previewMetadata;
-  bool _isLoading = true;
+  bool _isPicking = false;
   bool _isRestoring = false;
   String? _errorMessage;
 
-  @override
-  void initState() {
-    super.initState();
-    _loadAvailableFiles();
-  }
+  Future<void> _pickFileWithNativePicker() async {
+    setState(() {
+      _isPicking = true;
+      _errorMessage = null;
+    });
 
-  @override
-  void dispose() {
-    _pathController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _loadAvailableFiles() async {
-    setState(() => _isLoading = true);
     try {
-      final files = await BackupService.instance.listAvailableBackups();
-      if (mounted) {
-        setState(() {
-          _availableFiles = files;
-          _isLoading = false;
-        });
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+      );
+
+      if (result != null && result.files.isNotEmpty) {
+        final path = result.files.single.path;
+        if (path != null && path.isNotEmpty) {
+          final file = File(path);
+          if (await file.exists()) {
+            await _selectFile(file);
+          } else {
+            setState(() => _errorMessage = 'El archivo seleccionado no existe.');
+          }
+        }
       }
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _errorMessage = 'No se pudieron escanear respaldos: $e';
-        });
-      }
+      if (mounted) setState(() => _errorMessage = 'Error al abrir el selector: $e');
+    } finally {
+      if (mounted) setState(() => _isPicking = false);
     }
   }
 
   Future<void> _selectFile(File file) async {
     setState(() {
       _selectedFile = file;
-      _pathController.text = file.path;
       _errorMessage = null;
     });
 
@@ -80,26 +75,13 @@ class _JsonFilePickerDialogState extends State<JsonFilePickerDialog> {
     }
   }
 
-  Future<void> _handleManualPathCheck() async {
-    final path = _pathController.text.trim();
-    if (path.isEmpty) return;
-    final file = File(path);
-    if (!await file.exists()) {
-      setState(() => _errorMessage = 'El archivo no existe en la ruta especificada.');
-      return;
-    }
-    await _selectFile(file);
-  }
-
   Future<void> _confirmRestore() async {
     if (_selectedFile == null) return;
     setState(() => _isRestoring = true);
 
     try {
       final result = await widget.onRestoreFile(_selectedFile!);
-      if (mounted) {
-        Navigator.of(context).pop(result);
-      }
+      if (mounted) Navigator.of(context).pop(result);
     } catch (e) {
       if (mounted) {
         setState(() {
@@ -125,11 +107,7 @@ class _JsonFilePickerDialogState extends State<JsonFilePickerDialog> {
           Expanded(
             child: Text(
               'Importar Respaldo JSON',
-              style: GoogleFonts.outfit(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary(context),
-              ),
+              style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary(context)),
             ),
           ),
         ],
@@ -139,111 +117,76 @@ class _JsonFilePickerDialogState extends State<JsonFilePickerDialog> {
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Selecciona un archivo JSON generado por la app para restaurar todas tus comidas y despensa.',
+                'Selecciona tu archivo JSON de respaldo con un toque desde Descargas, Drive o almacenamiento interno.',
                 style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary(context), height: 1.4),
               ),
               const SizedBox(height: 14),
-              Text(
-                'Archivos detectados en el dispositivo:',
-                style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textPrimary(context)),
-              ),
-              const SizedBox(height: 8),
-              if (_isLoading)
-                const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator()))
-              else if (_availableFiles.isEmpty)
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.border(context).withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    'No se encontraron archivos .json automáticos. Ingresa la ruta manualmente abajo.',
-                    style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary(context)),
-                  ),
-                )
-              else
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 140),
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    itemCount: _availableFiles.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 6),
-                    itemBuilder: (context, idx) {
-                      final file = _availableFiles[idx];
-                      final isSelected = _selectedFile?.path == file.path;
-                      final name = p.basename(file.path);
-                      final modified = DateFormat('dd/MM/yyyy HH:mm').format(file.lastModifiedSync());
-                      return InkWell(
-                        onTap: () => _selectFile(file),
-                        borderRadius: BorderRadius.circular(8),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: isSelected ? AppColors.protein.withValues(alpha: 0.15) : AppColors.surface(context),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: isSelected ? AppColors.protein : AppColors.border(context)),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(Icons.insert_drive_file_outlined, size: 18, color: isSelected ? AppColors.protein : AppColors.textSecondary(context)),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(name, maxLines: 1, overflow: TextOverflow.ellipsis, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold)),
-                                    Text(modified, style: GoogleFonts.inter(fontSize: 10, color: AppColors.textSecondary(context))),
-                                  ],
-                                ),
-                              ),
-                              if (isSelected) const Icon(Icons.check_circle, size: 16, color: AppColors.protein),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+              ElevatedButton.icon(
+                key: const Key('native_file_picker_button'),
+                onPressed: (_isPicking || _isRestoring) ? null : _pickFileWithNativePicker,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.protein,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  elevation: 2,
                 ),
-              const SizedBox(height: 14),
-              Text(
-                'O ruta de archivo:',
-                style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary(context)),
+                icon: _isPicking
+                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : const Icon(Icons.folder_open_rounded, size: 20),
+                label: Text(
+                  _isPicking ? 'Abriendo explorador...' : 'Seleccionar Archivo JSON',
+                  style: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 13),
+                ),
               ),
-              const SizedBox(height: 6),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _pathController,
-                      style: GoogleFonts.inter(fontSize: 11),
-                      decoration: InputDecoration(
-                        hintText: '/storage/emulated/0/Download/...',
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                        isDense: true,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  IconButton(
-                    icon: const Icon(Icons.search, size: 20),
-                    tooltip: 'Cargar ruta',
-                    onPressed: _handleManualPathCheck,
-                  ),
-                ],
-              ),
-              if (_previewMetadata != null) ...[
+              if (_selectedFile != null) ...[
                 const SizedBox(height: 12),
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppColors.protein.withValues(alpha: 0.08),
+                    color: AppColors.protein.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColors.protein),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.check_circle, size: 16, color: AppColors.protein),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              p.basename(_selectedFile!.path),
+                              style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _selectedFile!.path,
+                        style: GoogleFonts.inter(fontSize: 10, color: AppColors.textSecondary(context)),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              if (_previewMetadata != null) ...[
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceSubtle(context),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.protein.withValues(alpha: 0.3)),
+                    border: Border.all(color: AppColors.border(context)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -274,6 +217,7 @@ class _JsonFilePickerDialogState extends State<JsonFilePickerDialog> {
           child: Text('Cancelar', style: GoogleFonts.inter(color: AppColors.textSecondary(context))),
         ),
         ElevatedButton(
+          key: const Key('confirm_restore_button'),
           onPressed: (_selectedFile != null && !_isRestoring) ? _confirmRestore : null,
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.protein,

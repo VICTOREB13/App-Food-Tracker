@@ -6,6 +6,52 @@ import '../../services/nutritional_recommendation_service.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_card.dart';
 
+/// Shows the nutritional recommendation diagnostic dialog in a bounded, scrollable modal
+/// completely separating content from the close action.
+Future<void> showRecommendationDiagnosticDialog(
+  BuildContext context, {
+  NutritionalAnalysisReport? initialReport,
+  INutritionalRecommendationService? service,
+}) {
+  return showDialog<void>(
+    context: context,
+    builder: (dialogCtx) => Dialog(
+      backgroundColor: AppColors.surface(context),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: AppColors.border(context))),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: 420, maxHeight: MediaQuery.of(context).size.height * 0.85),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Diagnóstico Nutricional', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary(context))),
+                  IconButton(
+                    icon: const Icon(Icons.close, size: 20),
+                    tooltip: 'Cerrar',
+                    onPressed: () => Navigator.of(dialogCtx).pop(),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+            Flexible(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(12),
+                child: RecommendationDiagnosticCard(initialReport: initialReport, service: service),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
 /// Card analyzing 7, 15, or 30 days nutritional history and diagnosing fats, proteins, carbs, and calories.
 class RecommendationDiagnosticCard extends StatefulWidget {
   final NutritionalAnalysisReport? initialReport;
@@ -42,12 +88,7 @@ class _RecommendationDiagnosticCardState extends State<RecommendationDiagnosticC
     try {
       final s = widget.service ?? NutritionalRecommendationService.instance;
       final rep = await s.analyzeHistory(days: _selectedDays);
-      if (mounted) {
-        setState(() {
-          _report = rep;
-          _isLoading = false;
-        });
-      }
+      if (mounted) setState(() { _report = rep; _isLoading = false; });
     } catch (_) {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -66,12 +107,7 @@ class _RecommendationDiagnosticCardState extends State<RecommendationDiagnosticC
               Expanded(
                 child: Text(
                   'MOTOR DE RECOMENDACIÓN NUTRICIONAL',
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.8,
-                    color: AppColors.textSecondary(context),
-                  ),
+                  style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.8, color: AppColors.textSecondary(context)),
                 ),
               ),
             ],
@@ -96,30 +132,16 @@ class _RecommendationDiagnosticCardState extends State<RecommendationDiagnosticC
           else ...[
             _buildMacroGauges(),
             const SizedBox(height: 12),
-            _buildInsightTile(
-              title: 'Control de Grasas',
-              content: _report!.fatDiagnosis,
-              color: AppColors.fat,
-              icon: Icons.opacity,
-            ),
+            _buildInsightTile(title: 'Control de Grasas', content: _report!.fatDiagnosis, color: AppColors.fat, icon: Icons.opacity),
             const SizedBox(height: 8),
-            _buildInsightTile(
-              title: 'Metas de Proteína',
-              content: _report!.proteinDiagnosis,
-              color: AppColors.protein,
-              icon: Icons.fitness_center,
-            ),
+            _buildInsightTile(title: 'Metas de Proteína', content: _report!.proteinDiagnosis, color: AppColors.protein, icon: Icons.fitness_center),
             const SizedBox(height: 8),
-            _buildInsightTile(
-              title: 'Energía y Carbohidratos',
-              content: _report!.carbsDiagnosis,
-              color: AppColors.carbs,
-              icon: Icons.bolt,
-            ),
+            _buildInsightTile(title: 'Energía y Carbohidratos', content: _report!.carbsDiagnosis, color: AppColors.carbs, icon: Icons.bolt),
             const SizedBox(height: 10),
             Text('Sustituciones Inteligentes Sugeridas:', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold)),
             const SizedBox(height: 6),
-            ..._report!.fatReductionSwaps.map((s) => _buildSwapRow(s)),
+            ..._report!.fatReductionSwaps.map(_buildSwapRow),
+            const SizedBox(height: 8),
           ],
         ],
       ),
@@ -147,10 +169,7 @@ class _RecommendationDiagnosticCardState extends State<RecommendationDiagnosticC
     final r = _report!;
     return Container(
       padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: AppColors.border(context).withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(10),
-      ),
+      decoration: BoxDecoration(color: AppColors.border(context).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [

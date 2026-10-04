@@ -1,10 +1,10 @@
 ---
 tipo: task_list
 proyecto: App_Food_Tracker
-iteracion: v1.2.1
-estado: completado
+iteracion: v1.2.4
+estado: activo
 fecha: 2026-10-04
-tags: [proyecto, tasks, checklist, v1-2-1]
+tags: [proyecto, tasks, checklist, v1-2-4]
 ---
 
 # 📋 Checklist Maestro de Tareas de Agentes (v1.2.1)
@@ -160,6 +160,67 @@ tags: [proyecto, tasks, checklist, v1-2-1]
 - [x] (Reviewer & QA R3) Añadir prueba de integración en `nutri_tracker_app_test.dart` validando retención en `DashboardScreen` cuando SecureStorage está vacío pero el perfil existe en SQLite.
 - [x] (DevOps-Engineer) Documentar versión en `artifacts/planning/changelog_v1.md` bajo `[1.2.1] - 2026-10-04`.
 - [x] (DevOps-Engineer) Publicar release `v1.2.1` en GitHub Actions y GitHub Releases.
+
+---
+
+## 🌟 Iteración v1.2.4: Selector Nativo de Respaldos, Normalización Resiliente, Ergonomía de Dashboard y Gramaje de Despensa
+
+### 🧭 1. Project-Planner (Master Tech Lead & Orquestador)
+- [x] (Project-Planner) Conducir Survey Técnico con 3 Exploradores en paralelo (Backend, Frontend, Despensa).
+- [x] (Project-Planner) Definir arquitectura y desglosar tareas atómicas en `artifacts/planning/task.md`, `implementation_plan.md`, `abstractions.md` y `api_spec.md`.
+- [ ] (Project-Planner) Despachar y supervisar subagentes especializados (`Backend-Architect`, `Frontend-UI`, `Systems-Auditor`, `DevOps-Engineer`).
+
+### 🗄️ 2. Backend-Architect (Datos, Normalización Resiliente, Isolate, Batch y Gramajes)
+- [x] (Backend-Architect) **Dependencias y Versión:**
+  - Incrementar versión en `pubspec.yaml` a `1.2.4+1`.
+  - Añadir dependencia `file_picker: ^8.1.7` en `pubspec.yaml`.
+- [x] (Backend-Architect) **Normalizador Adaptativo de Respaldos (`BackupNormalizer`):**
+  - Crear `lib/services/backup_normalizer.dart` (< 250 LoC) con soporte completo para esquemas legados (v1.0.4 y anteriores).
+  - Traducir claves legadas en español y formatos directos: `comidas` $\rightarrow$ `meals`, `despensa` $\rightarrow$ `pantry_items`, `perfil` $\rightarrow$ `user_profile`, `pesos` $\rightarrow$ `weight_logs`, array crudo `[...]` $\rightarrow$ `{"meals": [...]}`.
+  - Implementar ejecución en isolate secundario con `Isolate.run` para decodificación y parseo JSON sin bloqueo de UI.
+- [x] (Backend-Architect) **Persistencia Transaccional por Lotes en SQLite:**
+  - Actualizar `BackupService` (`lib/services/backup_service.dart` < 250 LoC) para ejecutar inserciones masivas mediante `txn.batch()` y `batch.commit(noResult: true)` garantizando 60 FPS durante importaciones grandes.
+- [x] (Backend-Architect) **Esquema SQLite v4 y Modelo de Despensa:**
+  - Incrementar versión de base de datos a `4` en `DatabaseConnectionFactory.dart`.
+  - Agregar columna `package_weight REAL` en `createPantryTable` y migración `_safeAddColumn(db, 'pantry_items', 'package_weight REAL')` en `DatabaseSchema.dart`.
+  - Actualizar `PantryItem` (`lib/models/pantry_item.dart`): añadir campo inmutable `packageWeight`, serialización JSON/SQLite tolerante a nulos, y método `toScaledFoodItem({required double gramsConsumed})` para escalado proporcional de calorías y macronutrientes.
+- [x] (Backend-Architect) **Pruebas Automatizadas Backend:**
+  - Crear `test/services/backup_normalizer_test.dart` validando traducción de claves legadas, arrays crudos, isolate y tolerancia a fallos.
+  - Crear `test/models/pantry_item_portion_scaling_test.dart` verificando escalado matemático y migración de esquema v4.
+
+### 🎨 3. Frontend-UI (Ergonomía Visual, Modales, Bento Fasting y Despensa)
+- [x] (Frontend-UI) **Selector Nativo de Respaldos JSON (R1 UI):**
+  - Modificar `JsonFilePickerDialog` (`lib/widgets/settings/json_file_picker_dialog.dart` < 250 LoC) reemplazando la entrada de texto manual por un botón prominente de 1 toque que invoca `FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['json'])`.
+- [x] (Frontend-UI) **Reubicación y Rediseño de "¿Qué Debería Comer Hoy?" (R2 UI):**
+  - Retirar la tarjeta fija `WhatToEatBannerCard` del scroll principal en `lib/screens/dashboard_screen.dart:250`.
+  - Reubicar la acción como opción destacada dentro de `lib/widgets/dashboard/dashboard_fab_menu.dart` (manteniendo < 300 LoC).
+  - Rediseñar `WhatToEatSheet` (`lib/widgets/recommendations/what_to_eat_sheet.dart`): envolver en `SafeArea`, barra superior con `IconButton(icon: Icon(Icons.close))`, restricciones de altura (`maxHeight: 0.85`) y scroll fluido.
+- [x] (Frontend-UI) **Tarjeta Bento Colapsable de Ayuno Intermitente (R3 UI):**
+  - Refactorizar `FastingWindowBentoCard` (`lib/widgets/dashboard/fasting_window_bento_card.dart` < 280 LoC) para mostrar formato Bento compacto (~44px) por defecto cuando está inactivo, expandiéndose con animación al estar en ayuno o al tocarlo.
+- [x] (Frontend-UI) **Corrección de Diálogo de Recomendaciones y Métricas (R3 UI):**
+  - Corregir solapamiento de textos en `RecommendationDiagnosticCard` / diálogo asegurando scroll independiente sobre el botón de cierre.
+  - Corregir `WeeklyDigestCard` (`lib/widgets/metrics/weekly_digest_card.dart`): envolver badge en `Flexible`/`Expanded` para eliminar desbordamiento horizontal de "1/7 días con registro" en anchos reducidos.
+  - Corregir `MetricsScreen` (`lib/screens/metrics_screen.dart`): aplicar `IntrinsicHeight` en fila calórica/racha para evitar recorte sobre tarjeta de macronutrientes.
+- [x] (Frontend-UI) **Editor de Despensa y Registro con Escalado Automático (R4 UI):**
+  - Extraer y construir `PantryItemEditorDialog` (`lib/widgets/pantry/pantry_item_editor_dialog.dart` < 200 LoC) con campos para porción de referencia (ej. 100g) y peso neto de empaque (ej. 500g).
+  - Implementar `PantryConsumptionDialog` (`lib/widgets/pantry/pantry_consumption_dialog.dart` < 200 LoC) para registrar alimentos de despensa a comidas con previsualización reactiva de macros escalados según los gramos consumidos.
+  - Conectar autocompletado en `FoodItemEditorDialog`.
+- [x] (Frontend-UI / Android) **Corrección de InflateException en Widget Nativo 4x2:**
+  - Reemplazar etiquetas prohibidas `<View>` en `RemoteViews` (líneas 96, 129 y 197) por `<FrameLayout>` en `android/app/src/main/res/layout/food_tracker_widget_wide.xml` y `lib/assets/android_widgets/food_tracker_widget_wide.xml`.
+- [x] (Frontend-UI) **Pruebas de Widgets Frontend:**
+  - Crear pruebas de widgets para `JsonFilePickerDialog`, `WhatToEatSheet`, `FastingWindowBentoCard` y `WeeklyDigestCard`.
+
+### 🛡️ 4. Systems-Auditor (Auditoría de Calidad, Integridad y Modularidad)
+- [ ] (Systems-Auditor) Ejecutar `flutter analyze` garantizando 0 errores y 0 advertencias.
+- [ ] (Systems-Auditor) Ejecutar 100% de la suite de pruebas unitarias y de widgets (`flutter test`).
+- [ ] (Systems-Auditor) Auditar estricto cumplimiento modular: todos los archivos creados o modificados deben tener < 300 LoC.
+- [ ] (Forensic Auditor) Ejecutar auditoría forense de integridad (`teamwork_preview_auditor`) confirmando implementaciones reales sin hardcoding ni fachadas.
+- [ ] (Systems-Auditor) Emitir `artifacts/audit_reports/audit_report.md` con veredicto `PASS`.
+
+### 🚀 5. DevOps-Engineer (Empaquetado y Certificación de Release)
+- [ ] (DevOps-Engineer) Verificar sincronización de versión `1.2.4+1` en `pubspec.yaml` y Gradle.
+- [ ] (DevOps-Engineer) Redactar y formalizar la sección `## [1.2.4] - 2026-10-04` en `artifacts/planning/changelog_v1.md`.
+- [ ] (DevOps-Engineer) Certificar Quality Gate para cierre formal de la iteración.
 
 ---
 

@@ -30,6 +30,7 @@ class _FoodItemEditorDialogState extends State<_FoodItemEditorDialog> {
   bool _hasAutoEstimated = false;
   Timer? _debounceTimer;
   List<FoodSearchSuggestion> _suggestions = [];
+  FoodSearchSuggestion? _activeSuggestion;
 
   @override
   void initState() {
@@ -44,7 +45,7 @@ class _FoodItemEditorDialogState extends State<_FoodItemEditorDialog> {
     _justificationController = TextEditingController(text: item?.visualJustification ?? '');
 
     _nameController.addListener(_onNameInputChanged);
-    _gramsController.addListener(_checkAndAutoEstimate);
+    _gramsController.addListener(_onGramsChanged);
     _caloriesController.addListener(_checkAndAutoEstimate);
   }
 
@@ -52,7 +53,7 @@ class _FoodItemEditorDialogState extends State<_FoodItemEditorDialog> {
   void dispose() {
     _debounceTimer?.cancel();
     _nameController.removeListener(_onNameInputChanged);
-    _gramsController.removeListener(_checkAndAutoEstimate);
+    _gramsController.removeListener(_onGramsChanged);
     _caloriesController.removeListener(_checkAndAutoEstimate);
     _nameController.dispose();
     _gramsController.dispose();
@@ -62,6 +63,26 @@ class _FoodItemEditorDialogState extends State<_FoodItemEditorDialog> {
     _fatController.dispose();
     _justificationController.dispose();
     super.dispose();
+  }
+
+  void _onGramsChanged() {
+    if (_activeSuggestion != null) {
+      final grams = double.tryParse(_gramsController.text.trim()) ?? 0.0;
+      if (grams > 0) {
+        final ratio = grams / 100.0;
+        _caloriesController.text = (_activeSuggestion!.caloriesPer100g * ratio).toStringAsFixed(0);
+        _proteinController.text = (_activeSuggestion!.proteinPer100g * ratio).toStringAsFixed(1);
+        _carbsController.text = (_activeSuggestion!.carbsPer100g * ratio).toStringAsFixed(1);
+        _fatController.text = (_activeSuggestion!.fatPer100g * ratio).toStringAsFixed(1);
+        _estimatedFiber = _activeSuggestion!.fiberPer100g * ratio;
+        _estimatedSodium = _activeSuggestion!.sodiumPer100g * ratio;
+        _estimatedSugar = _activeSuggestion!.sugarPer100g * ratio;
+        _justificationController.text = 'Datos de [${_activeSuggestion!.sourceBadgeLabel}] escala a ${grams.toInt()}g';
+        if (mounted) setState(() {});
+        return;
+      }
+    }
+    _checkAndAutoEstimate();
   }
 
   void _onNameInputChanged() {
@@ -79,6 +100,7 @@ class _FoodItemEditorDialogState extends State<_FoodItemEditorDialog> {
   }
 
   void _applySuggestion(FoodSearchSuggestion s) {
+    _activeSuggestion = s;
     final grams = double.tryParse(_gramsController.text.trim()) ?? 100.0;
     final ratio = grams / 100.0;
     _nameController.text = s.brand != null && s.brand!.isNotEmpty ? '${s.name} (${s.brand})' : s.name;
@@ -187,34 +209,20 @@ class _FoodItemEditorDialogState extends State<_FoodItemEditorDialog> {
               Row(
                 children: [
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Gramos', style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary(context))),
-                        const SizedBox(height: 6),
-                        TextField(
-                          controller: _gramsController,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          style: GoogleFonts.inter(fontSize: 14, color: AppColors.textPrimary(context)),
-                          decoration: const InputDecoration(suffixText: 'g', contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12)),
-                        ),
-                      ],
+                    child: TextField(
+                      controller: _gramsController,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      style: GoogleFonts.inter(fontSize: 14, color: AppColors.textPrimary(context)),
+                      decoration: const InputDecoration(labelText: 'Gramos', suffixText: 'g', contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12)),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Calorías', style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.calories)),
-                        const SizedBox(height: 6),
-                        TextField(
-                          controller: _caloriesController,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          style: GoogleFonts.inter(fontSize: 14, color: AppColors.textPrimary(context)),
-                          decoration: const InputDecoration(suffixText: 'kcal', contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12)),
-                        ),
-                      ],
+                    child: TextField(
+                      controller: _caloriesController,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      style: GoogleFonts.inter(fontSize: 14, color: AppColors.textPrimary(context)),
+                      decoration: const InputDecoration(labelText: 'Calorías', suffixText: 'kcal', contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12)),
                     ),
                   ),
                 ],

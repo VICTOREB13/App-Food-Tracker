@@ -9,6 +9,8 @@ import '../services/nutrition_label_scanner_service.dart';
 import '../services/theme_manager.dart';
 import '../widgets/common/ve_app_bar.dart';
 import '../widgets/common/ve_card.dart';
+import '../widgets/pantry/pantry_consumption_dialog.dart';
+import '../widgets/pantry/pantry_item_editor_dialog.dart';
 
 class PantryScreen extends StatefulWidget {
   const PantryScreen({super.key});
@@ -74,75 +76,12 @@ class _PantryScreenState extends State<PantryScreen> {
   }
 
   Future<void> _showEditDialog([PantryItem? item]) async {
-    final nameCtrl = TextEditingController(text: item?.name ?? '');
-    final brandCtrl = TextEditingController(text: item?.brand ?? '');
-    final calCtrl = TextEditingController(text: item != null ? item.calories.toStringAsFixed(0) : '100');
-    final protCtrl = TextEditingController(text: item != null ? item.protein.toStringAsFixed(1) : '5.0');
-    final carbsCtrl = TextEditingController(text: item != null ? item.carbs.toStringAsFixed(1) : '15.0');
-    final fatCtrl = TextEditingController(text: item != null ? item.fat.toStringAsFixed(1) : '2.0');
+    final saved = await showPantryItemEditorDialog(context, item: item);
+    if (saved != null) _loadItems();
+  }
 
-    final saved = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surface(context),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14), side: BorderSide(color: AppColors.border(context))),
-        title: Text(item == null ? 'Añadir Producto' : 'Editar Producto', style: GoogleFonts.outfit(fontWeight: FontWeight.w700)),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Nombre del producto *')),
-              const SizedBox(height: 10),
-              TextField(controller: brandCtrl, decoration: const InputDecoration(labelText: 'Marca (opcional)')),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(child: TextField(controller: calCtrl, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Calorías', suffixText: 'kcal'))),
-                  const SizedBox(width: 10),
-                  Expanded(child: TextField(controller: protCtrl, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Proteína', suffixText: 'g'))),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(child: TextField(controller: carbsCtrl, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Carbos', suffixText: 'g'))),
-                  const SizedBox(width: 10),
-                  Expanded(child: TextField(controller: fatCtrl, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Grasas', suffixText: 'g'))),
-                ],
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancelar')),
-          ElevatedButton(
-            onPressed: () async {
-              final name = nameCtrl.text.trim();
-              if (name.isEmpty) return;
-              final newItem = PantryItem(
-                id: item?.id,
-                name: name,
-                brand: brandCtrl.text.trim().isNotEmpty ? brandCtrl.text.trim() : null,
-                calories: double.tryParse(calCtrl.text.trim()) ?? 0,
-                protein: double.tryParse(protCtrl.text.trim()) ?? 0,
-                carbs: double.tryParse(carbsCtrl.text.trim()) ?? 0,
-                fat: double.tryParse(fatCtrl.text.trim()) ?? 0,
-              );
-              final dao = DatabaseService.instance.pantryDao;
-              if (item == null) {
-                await dao.insertPantryItem(newItem);
-              } else {
-                await dao.updatePantryItem(newItem);
-              }
-              if (ctx.mounted) Navigator.of(ctx).pop(true);
-            },
-            child: const Text('Guardar'),
-          ),
-        ],
-      ),
-    );
-
-    if (saved == true) _loadItems();
+  Future<void> _consumeItem(PantryItem item) async {
+    await showPantryConsumptionDialog(context, item);
   }
 
   @override
@@ -255,16 +194,38 @@ class _PantryScreenState extends State<PantryScreen> {
                 ),
             ],
           ),
-          subtitle: Text(
-            '${item.calories.toInt()} kcal • P: ${item.protein.toStringAsFixed(1)}g • C: ${item.carbs.toStringAsFixed(1)}g • G: ${item.fat.toStringAsFixed(1)}g',
-            style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary(context)),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${item.calories.toInt()} kcal • P: ${item.protein.toStringAsFixed(1)}g • C: ${item.carbs.toStringAsFixed(1)}g • G: ${item.fat.toStringAsFixed(1)}g',
+                style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary(context)),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                'Porción: ${item.servingSize.toInt()}g${item.packageWeight != null ? ' • Empaque: ${item.packageWeight!.toInt()}g' : ''}',
+                style: GoogleFonts.inter(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.w600),
+              ),
+            ],
           ),
-          trailing: IconButton(
-            icon: const Icon(Icons.delete_outline, size: 20),
-            onPressed: () async {
-              await DatabaseService.instance.pantryDao.deletePantryItem(item.id);
-              _loadItems();
-            },
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                key: Key('consume_pantry_${item.id}'),
+                icon: const Icon(Icons.restaurant_outlined, size: 20, color: AppColors.protein),
+                tooltip: 'Registrar a Comida',
+                onPressed: () => _consumeItem(item),
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete_outline, size: 20),
+                tooltip: 'Eliminar',
+                onPressed: () async {
+                  await DatabaseService.instance.pantryDao.deletePantryItem(item.id);
+                  _loadItems();
+                },
+              ),
+            ],
           ),
           onTap: () => _showEditDialog(item),
         ),

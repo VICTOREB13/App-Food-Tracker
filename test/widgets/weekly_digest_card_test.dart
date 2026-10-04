@@ -32,5 +32,35 @@ void main() {
       expect(find.text('Carbos'), findsOneWidget);
       expect(find.text('Grasas'), findsOneWidget);
     });
+
+    testWidgets('renders on narrow 320dp viewport without horizontal overflow', (tester) async {
+      tester.view.physicalSize = const Size(320, 640);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      const goals = DailyGoals(calories: 2000, protein: 150, carbs: 200, fat: 60);
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: WeeklyDigestCard(
+                meals: [],
+                goals: goals,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('RESUMEN SEMANAL (7 DÍAS)'), findsOneWidget);
+      expect(find.text('0 / 7 días con registro'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
   });
 }

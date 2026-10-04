@@ -22,7 +22,7 @@ import '../widgets/dashboard/quick_meal_dialog.dart';
 import '../widgets/dashboard/streak_badge.dart';
 import '../widgets/dashboard/voice_meal_recording_dialog.dart';
 import '../widgets/dashboard/week_calendar_strip.dart';
-import '../widgets/dashboard/what_to_eat_banner_card.dart';
+import '../widgets/recommendations/what_to_eat_sheet.dart';
 import 'meal_detail_screen.dart';
 import 'metrics_screen.dart';
 import 'settings_screen.dart';
@@ -180,6 +180,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
+  void _openWhatToEatSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => WhatToEatSheet(date: _mealController.selectedDate),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final mealsMap = _mealController.mealsByType;
@@ -214,6 +223,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         onQuickWater: _handleQuickWater,
         onQuickMeal: _handleQuickMeal,
         onVoiceDictation: () => showVoiceMealRecordingDialog(context),
+        onWhatToEat: _openWhatToEatSheet,
       ),
       body: RefreshIndicator(
         onRefresh: () => _mealController.loadMeals(),
@@ -246,8 +256,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               currentFat: _mealController.totalFat,
               goals: _mealController.dailyGoals,
             ),
-            const SizedBox(height: 12),
-            WhatToEatBannerCard(selectedDate: _mealController.selectedDate),
             const SizedBox(height: 12),
             const FastingWindowBentoCard(),
             const SizedBox(height: 14),

@@ -123,24 +123,26 @@ class _MetricsScreenState extends State<MetricsScreen> {
             const SizedBox(height: 14),
 
             // 3. Bento row: Calorie compliance & Streak compliance
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: CalorieComplianceBentoCard(
-                    meals: _rangeMeals,
-                    days: _selectedDays,
-                    goals: _mealController.dailyGoals,
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: CalorieComplianceBentoCard(
+                      meals: _rangeMeals,
+                      days: _selectedDays,
+                      goals: _mealController.dailyGoals,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: StreakComplianceBentoCard(
-                    meals: _rangeMeals,
-                    days: _selectedDays,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: StreakComplianceBentoCard(
+                      meals: _rangeMeals,
+                      days: _selectedDays,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             const SizedBox(height: 14),
 

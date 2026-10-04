@@ -12,6 +12,7 @@ class DashboardFabMenu extends StatefulWidget {
   final VoidCallback? onQuickMeal;
   final VoidCallback? onVoiceDictation;
   final VoidCallback? onVideoScan;
+  final VoidCallback? onWhatToEat;
 
   const DashboardFabMenu({
     super.key,
@@ -23,6 +24,7 @@ class DashboardFabMenu extends StatefulWidget {
     this.onQuickMeal,
     this.onVoiceDictation,
     this.onVideoScan,
+    this.onWhatToEat,
   });
 
   @override
@@ -36,10 +38,7 @@ class _DashboardFabMenuState extends State<DashboardFabMenu>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 280),
-    );
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 280));
   }
 
   @override
@@ -56,6 +55,43 @@ class _DashboardFabMenuState extends State<DashboardFabMenu>
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (sheetContext) {
+        final actions = <_FabItem>[
+          _FabItem(Icons.camera_alt_outlined, AppColors.primary, 'Foto con IA', 'Cámara Gemini 2.5', () {
+            Navigator.of(sheetContext).pop();
+            widget.onAiPhotoScan();
+          }),
+          _FabItem(Icons.photo_library_outlined, AppColors.caloriesFlame, 'Galería', 'Elegir del carrete', () {
+            Navigator.of(sheetContext).pop();
+            (widget.onGalleryScan ?? widget.onAiPhotoScan)();
+          }),
+          _FabItem(Icons.qr_code_scanner, AppColors.carbs, 'Código Barras', 'Open Food Facts', () {
+            Navigator.of(sheetContext).pop();
+            widget.onBarcodeScan();
+          }),
+          _FabItem(Icons.edit_note, AppColors.protein, 'Manual', 'Despensa y macros', () {
+            Navigator.of(sheetContext).pop();
+            widget.onManualEntry();
+          }),
+          _FabItem(Icons.water_drop_outlined, AppColors.water, '+250ml Agua', 'Hidratación rápida', () {
+            Navigator.of(sheetContext).pop();
+            widget.onQuickWater?.call();
+          }),
+          _FabItem(Icons.bolt, AppColors.carbsAmber, 'Rápida', 'Calorías directas', () {
+            Navigator.of(sheetContext).pop();
+            widget.onQuickMeal?.call();
+          }),
+          if (widget.onVoiceDictation != null)
+            _FabItem(Icons.mic_none_rounded, const Color(0xFF8B5CF6), 'Voz / Audio', 'Dictado natural', () {
+              Navigator.of(sheetContext).pop();
+              widget.onVoiceDictation!();
+            }),
+          if (widget.onVideoScan != null)
+            _FabItem(Icons.videocam_outlined, const Color(0xFF06B6D4), 'Video Pan', 'Muestreo 3D', () {
+              Navigator.of(sheetContext).pop();
+              widget.onVideoScan!();
+            }),
+        ];
+
         return BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
           child: Container(
@@ -70,155 +106,93 @@ class _DashboardFabMenuState extends State<DashboardFabMenu>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                  Center(
-                    child: Container(
-                      width: 36,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: AppColors.border(context),
-                        borderRadius: BorderRadius.circular(2),
+                    Center(
+                      child: Container(
+                        width: 36,
+                        height: 4,
+                        decoration: BoxDecoration(color: AppColors.border(context), borderRadius: BorderRadius.circular(2)),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'REGISTRAR COMIDA O ACTIVIDAD',
-                        style: GoogleFonts.inter(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.0,
-                          color: AppColors.textSecondary(context),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'REGISTRAR COMIDA O ACTIVIDAD',
+                          style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.0, color: AppColors.textSecondary(context)),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close, size: 20),
+                          onPressed: () => Navigator.of(sheetContext).pop(),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    if (widget.onWhatToEat != null) ...[
+                      InkWell(
+                        key: const Key('what_to_eat_fab_button'),
+                        onTap: () {
+                          Navigator.of(sheetContext).pop();
+                          widget.onWhatToEat!();
+                        },
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: AppColors.protein.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: AppColors.protein.withValues(alpha: 0.35)),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(color: AppColors.protein, borderRadius: BorderRadius.circular(10)),
+                                child: const Icon(Icons.auto_awesome, color: Colors.white, size: 20),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('¿Qué debería comer hoy?', style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary(context))),
+                                    Text('Sugerencias inteligentes según tus macros', style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary(context))),
+                                  ],
+                                ),
+                              ),
+                              const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.protein),
+                            ],
+                          ),
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.close, size: 20),
-                        onPressed: () => Navigator.of(sheetContext).pop(),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-                      ),
+                      const SizedBox(height: 12),
                     ],
-                  ),
-                  const SizedBox(height: 16),
-                  GridView.count(
-                    crossAxisCount: 2,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    mainAxisSpacing: 10,
-                    crossAxisSpacing: 10,
-                    childAspectRatio: 1.85,
-                    children: [
-                      _buildGridAction(
-                        icon: Icons.camera_alt_outlined,
-                        iconColor: AppColors.primary,
-                        title: 'Foto con IA',
-                        subtitle: 'Cámara Gemini 2.5',
-                        onTap: () {
-                          Navigator.of(sheetContext).pop();
-                          widget.onAiPhotoScan();
-                        },
-                      ),
-                      _buildGridAction(
-                        icon: Icons.photo_library_outlined,
-                        iconColor: AppColors.caloriesFlame,
-                        title: 'Galería',
-                        subtitle: 'Elegir del carrete',
-                        onTap: () {
-                          Navigator.of(sheetContext).pop();
-                          (widget.onGalleryScan ?? widget.onAiPhotoScan)();
-                        },
-                      ),
-                      _buildGridAction(
-                        icon: Icons.qr_code_scanner,
-                        iconColor: AppColors.carbs,
-                        title: 'Código Barras',
-                        subtitle: 'Open Food Facts',
-                        onTap: () {
-                          Navigator.of(sheetContext).pop();
-                          widget.onBarcodeScan();
-                        },
-                      ),
-                      _buildGridAction(
-                        icon: Icons.edit_note,
-                        iconColor: AppColors.protein,
-                        title: 'Manual',
-                        subtitle: 'Despensa y macros',
-                        onTap: () {
-                          Navigator.of(sheetContext).pop();
-                          widget.onManualEntry();
-                        },
-                      ),
-                      _buildGridAction(
-                        icon: Icons.water_drop_outlined,
-                        iconColor: AppColors.water,
-                        title: '+250ml Agua',
-                        subtitle: 'Hidratación rápida',
-                        onTap: () {
-                          Navigator.of(sheetContext).pop();
-                          if (widget.onQuickWater != null) {
-                            widget.onQuickWater!();
-                          }
-                        },
-                      ),
-                      _buildGridAction(
-                        icon: Icons.bolt,
-                        iconColor: AppColors.carbsAmber,
-                        title: 'Rápida',
-                        subtitle: 'Calorías directas',
-                        onTap: () {
-                          Navigator.of(sheetContext).pop();
-                          if (widget.onQuickMeal != null) {
-                            widget.onQuickMeal!();
-                          }
-                        },
-                      ),
-                      if (widget.onVoiceDictation != null)
-                        _buildGridAction(
-                          icon: Icons.mic_none_rounded,
-                          iconColor: const Color(0xFF8B5CF6),
-                          title: 'Voz / Audio',
-                          subtitle: 'Dictado natural',
-                          onTap: () {
-                            Navigator.of(sheetContext).pop();
-                            widget.onVoiceDictation!();
-                          },
-                        ),
-                      if (widget.onVideoScan != null)
-                        _buildGridAction(
-                          icon: Icons.videocam_outlined,
-                          iconColor: const Color(0xFF06B6D4),
-                          title: 'Video Pan',
-                          subtitle: 'Muestreo 3D',
-                          onTap: () {
-                            Navigator.of(sheetContext).pop();
-                            widget.onVideoScan!();
-                          },
-                        ),
-                    ],
-                  ),
-                ],
+                    GridView.count(
+                      crossAxisCount: 2,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      mainAxisSpacing: 10,
+                      crossAxisSpacing: 10,
+                      childAspectRatio: 1.85,
+                      children: actions.map(_buildGridAction).toList(),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      );
+        );
       },
     ).then((_) {
       if (mounted) _controller.reverse();
     });
   }
 
-  Widget _buildGridAction({
-    required IconData icon,
-    required Color iconColor,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
+  Widget _buildGridAction(_FabItem item) {
     return InkWell(
-      onTap: onTap,
+      onTap: item.onTap,
       borderRadius: BorderRadius.circular(14),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -231,11 +205,8 @@ class _DashboardFabMenuState extends State<DashboardFabMenu>
           children: [
             Container(
               padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: iconColor.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(icon, color: iconColor, size: 20),
+              decoration: BoxDecoration(color: item.iconColor.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(10)),
+              child: Icon(item.icon, color: item.iconColor, size: 20),
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -243,25 +214,8 @@ class _DashboardFabMenuState extends State<DashboardFabMenu>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.outfit(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary(context),
-                    ),
-                  ),
-                  Text(
-                    subtitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
-                      fontSize: 10,
-                      color: AppColors.textSecondary(context),
-                    ),
-                  ),
+                  Text(item.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary(context))),
+                  Text(item.subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: GoogleFonts.inter(fontSize: 10, color: AppColors.textSecondary(context))),
                 ],
               ),
             ),
@@ -287,4 +241,14 @@ class _DashboardFabMenuState extends State<DashboardFabMenu>
       ),
     );
   }
+}
+
+class _FabItem {
+  final IconData icon;
+  final Color iconColor;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _FabItem(this.icon, this.iconColor, this.title, this.subtitle, this.onTap);
 }

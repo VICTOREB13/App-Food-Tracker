@@ -101,5 +101,71 @@ void main() {
       expect(find.text('Energía y Carbohidratos'), findsOneWidget);
       expect(find.text('Sustituciones Inteligentes Sugeridas:'), findsOneWidget);
     });
+
+    testWidgets('WhatToEatSheet has close button and dismisses modal', (tester) async {
+      const samplePlan = TodayRecommendationPlan(
+        remainingCalories: 550,
+        remainingProtein: 45,
+        remainingCarbs: 60,
+        remainingFat: 15,
+        nextMealType: 'Cena',
+        generalAdvice: 'Prueba una cena ligera.',
+        recommendedOptions: [],
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (ctx) => ElevatedButton(
+                onPressed: () => showModalBottomSheet(
+                  context: ctx,
+                  isScrollControlled: true,
+                  builder: (_) => const WhatToEatSheet(initialPlan: samplePlan),
+                ),
+                child: const Text('Open'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('¿Qué debería comer hoy?'), findsOneWidget);
+      expect(find.byKey(const Key('what_to_eat_close_button')), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('what_to_eat_close_button')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('¿Qué debería comer hoy?'), findsNothing);
+    });
+
+    testWidgets('showRecommendationDiagnosticDialog renders bounded dialog with close button', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (ctx) => ElevatedButton(
+                onPressed: () => showRecommendationDiagnosticDialog(ctx),
+                child: const Text('Open Dialog'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open Dialog'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Diagnóstico Nutricional'), findsOneWidget);
+      expect(find.byIcon(Icons.close), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.close));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Diagnóstico Nutricional'), findsNothing);
+    });
   });
 }
