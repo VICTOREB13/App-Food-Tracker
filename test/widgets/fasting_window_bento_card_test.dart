@@ -98,7 +98,6 @@ void main() {
       );
 
       final controller = FastingController(fastingDao: dao);
-      addTearDown(controller.dispose);
       await controller.init();
 
       await tester.pumpWidget(
@@ -115,6 +114,9 @@ void main() {
       expect(find.text('AYUNO INTERMITENTE'), findsOneWidget);
       expect(find.text('En curso'), findsOneWidget);
       expect(find.text('Terminar'), findsOneWidget);
+
+      await tester.pumpWidget(const SizedBox());
+      controller.dispose();
     });
   });
 }

@@ -182,14 +182,20 @@ class _RecommendationDiagnosticCardState extends State<RecommendationDiagnosticC
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(color: AppColors.border(context).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildGaugeItem('Calorías', '${r.averageDailyCalories.round()} / ${r.targetCalories.round()} kcal', r.averageDailyCalories / (r.targetCalories > 0 ? r.targetCalories : 1), AppColors.primary),
-          _buildGaugeItem('Proteína', '${r.averageDailyProtein.round()} / ${r.targetProtein.round()}g', r.averageDailyProtein / (r.targetProtein > 0 ? r.targetProtein : 1), AppColors.protein),
-          _buildGaugeItem('Carbos', '${r.averageDailyCarbs.round()} / ${r.targetCarbs.round()}g', r.averageDailyCarbs / (r.targetCarbs > 0 ? r.targetCarbs : 1), AppColors.carbs),
-          _buildGaugeItem('Grasas', '${r.averageDailyFat.round()} / ${r.targetFat.round()}g', r.averageDailyFat / (r.targetFat > 0 ? r.targetFat : 1), AppColors.fat),
-        ],
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _buildGaugeItem('Calorías', '${r.averageDailyCalories.round()} / ${r.targetCalories.round()} kcal', r.averageDailyCalories / (r.targetCalories > 0 ? r.targetCalories : 1), AppColors.primary),
+            const SizedBox(width: 14),
+            _buildGaugeItem('Proteína', '${r.averageDailyProtein.round()} / ${r.targetProtein.round()}g', r.averageDailyProtein / (r.targetProtein > 0 ? r.targetProtein : 1), AppColors.protein),
+            const SizedBox(width: 14),
+            _buildGaugeItem('Carbos', '${r.averageDailyCarbs.round()} / ${r.targetCarbs.round()}g', r.averageDailyCarbs / (r.targetCarbs > 0 ? r.targetCarbs : 1), AppColors.carbs),
+            const SizedBox(width: 14),
+            _buildGaugeItem('Grasas', '${r.averageDailyFat.round()} / ${r.targetFat.round()}g', r.averageDailyFat / (r.targetFat > 0 ? r.targetFat : 1), AppColors.fat),
+          ],
+        ),
       ),
     );
   }
