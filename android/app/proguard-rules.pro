@@ -1,4 +1,5 @@
 # Flutter ProGuard Rules
+-dontoptimize
 -keep class io.flutter.** { *; }
 -dontwarn io.flutter.**
 
