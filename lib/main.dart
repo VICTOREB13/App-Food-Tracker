@@ -36,27 +36,44 @@ void main() async {
   setupServiceLocator();
 
   try {
-    await DatabaseService.instance.init();
-    await AnalysisQueueService.instance.init();
+    await DatabaseService.instance.init().timeout(
+      const Duration(seconds: 4),
+      onTimeout: () => debugPrint('DatabaseService init timeout warning'),
+    );
+    await AnalysisQueueService.instance.init().timeout(
+      const Duration(seconds: 3),
+      onTimeout: () => debugPrint('AnalysisQueueService init timeout warning'),
+    );
   } catch (e, stack) {
     debugPrint('Database initialization warning: $e\n$stack');
   }
 
   try {
-    await ThemeManager.instance.loadTheme();
+    await ThemeManager.instance.loadTheme().timeout(
+      const Duration(seconds: 2),
+      onTimeout: () => debugPrint('Theme load timeout warning'),
+    );
   } catch (e, stack) {
     debugPrint('Theme initialization warning: $e\n$stack');
   }
 
   try {
-    await SettingsController.instance.loadLocale();
+    await SettingsController.instance.loadLocale().timeout(
+      const Duration(seconds: 2),
+      onTimeout: () => debugPrint('Locale load timeout warning'),
+    );
   } catch (e) {
     debugPrint('SettingsController loadLocale warning: $e');
   }
 
   bool hasCompletedOnboarding = false;
   try {
-    hasCompletedOnboarding = await SecureStorageService.instance.hasCompletedOnboarding();
+    hasCompletedOnboarding = await SecureStorageService.instance
+        .hasCompletedOnboarding()
+        .timeout(
+          const Duration(seconds: 3),
+          onTimeout: () => false,
+        );
   } catch (e, stack) {
     debugPrint('Onboarding check warning: $e\n$stack');
   }

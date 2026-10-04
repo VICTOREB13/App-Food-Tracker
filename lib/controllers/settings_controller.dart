@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/interfaces/database_service_interface.dart';
@@ -255,8 +256,24 @@ class SettingsController extends ChangeNotifier {
     }
   }
 
-  Future<String> exportBackup() async {
-    return await BackupService.instance.exportToJsonString();
+  Future<String> exportBackup() async => await BackupService.instance.exportToJsonString();
+
+  Future<File> exportBackupToFile() async => await BackupService.instance.exportToJsonFile();
+
+  Future<List<File>> listBackups() async => await BackupService.instance.listAvailableBackups();
+
+  Future<Map<String, int>> importBackupFromFile(File file) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final res = await BackupService.instance.importFromFile(file);
+      _dbStats = await _db.getDatabaseStats();
+      await MealController.instance.loadMeals();
+      return res;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<Map<String, int>> importBackup(String jsonContent) async {

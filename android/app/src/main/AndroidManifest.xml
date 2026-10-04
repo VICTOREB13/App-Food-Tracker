@@ -9,9 +9,10 @@
         android:label="Food Tracker"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
+        android:extractNativeLibs="true"
         android:requestLegacyExternalStorage="true">
         <activity
-            android:name=".MainActivity"
+            android:name="com.victorengineer.foodtracker.MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:theme="@style/LaunchTheme"
@@ -35,9 +36,20 @@
             </intent-filter>
         </activity>
 
+        <!-- Retrocompatibility launcher alias for upgrading users from v1.0.4 -->
+        <activity-alias
+            android:name="com.example.food_tracker.MainActivity"
+            android:targetActivity="com.victorengineer.foodtracker.MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+
         <!-- Compact 2x2 Home Widget Provider -->
         <receiver
-            android:name=".FoodTrackerCompactWidgetProvider"
+            android:name="com.victorengineer.foodtracker.FoodTrackerCompactWidgetProvider"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -49,7 +61,7 @@
 
         <!-- Wide 4x2 Home Widget Provider -->
         <receiver
-            android:name=".FoodTrackerWideWidgetProvider"
+            android:name="com.victorengineer.foodtracker.FoodTrackerWideWidgetProvider"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />

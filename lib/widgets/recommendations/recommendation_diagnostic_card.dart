@@ -1,0 +1,225 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../models/nutritional_recommendation.dart';
+import '../../services/nutritional_recommendation_service.dart';
+import '../../services/theme_manager.dart';
+import '../common/ve_card.dart';
+
+/// Card analyzing 7, 15, or 30 days nutritional history and diagnosing fats, proteins, carbs, and calories.
+class RecommendationDiagnosticCard extends StatefulWidget {
+  const RecommendationDiagnosticCard({super.key});
+
+  @override
+  State<RecommendationDiagnosticCard> createState() => _RecommendationDiagnosticCardState();
+}
+
+class _RecommendationDiagnosticCardState extends State<RecommendationDiagnosticCard> {
+  int _selectedDays = 7;
+  NutritionalAnalysisReport? _report;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReport();
+  }
+
+  Future<void> _loadReport() async {
+    setState(() => _isLoading = true);
+    try {
+      final rep = await NutritionalRecommendationService.instance
+          .analyzeHistory(days: _selectedDays);
+      if (mounted) {
+        setState(() {
+          _report = rep;
+          _isLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return VeCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.analytics_outlined, color: AppColors.protein, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'MOTOR DE RECOMENDACIÓN NUTRICIONAL',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.8,
+                    color: AppColors.textSecondary(context),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Text('Analizar histórico:', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
+              const Spacer(),
+              _buildPeriodChip(7, '7 días'),
+              const SizedBox(width: 6),
+              _buildPeriodChip(15, '15 días'),
+              const SizedBox(width: 6),
+              _buildPeriodChip(30, '30 días'),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (_isLoading)
+            const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator()))
+          else if (_report == null)
+            Text('Sin datos suficientes para este período', style: GoogleFonts.inter(fontSize: 12))
+          else ...[
+            _buildMacroGauges(),
+            const SizedBox(height: 12),
+            _buildInsightTile(
+              title: 'Control de Grasas',
+              content: _report!.fatDiagnosis,
+              color: AppColors.fat,
+              icon: Icons.opacity,
+            ),
+            const SizedBox(height: 8),
+            _buildInsightTile(
+              title: 'Metas de Proteína',
+              content: _report!.proteinDiagnosis,
+              color: AppColors.protein,
+              icon: Icons.fitness_center,
+            ),
+            const SizedBox(height: 8),
+            _buildInsightTile(
+              title: 'Energía y Carbohidratos',
+              content: _report!.carbsDiagnosis,
+              color: AppColors.carbs,
+              icon: Icons.bolt,
+            ),
+            const SizedBox(height: 10),
+            Text('Sustituciones Inteligentes Sugeridas:', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 6),
+            ..._report!.fatReductionSwaps.map((s) => _buildSwapRow(s)),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPeriodChip(int days, String label) {
+    final isSelected = _selectedDays == days;
+    return ChoiceChip(
+      label: Text(label, style: GoogleFonts.inter(fontSize: 11, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+      selected: isSelected,
+      onSelected: (val) {
+        if (val && _selectedDays != days) {
+          setState(() => _selectedDays = days);
+          _loadReport();
+        }
+      },
+      selectedColor: AppColors.protein.withValues(alpha: 0.2),
+      visualDensity: VisualDensity.compact,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    );
+  }
+
+  Widget _buildMacroGauges() {
+    final r = _report!;
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: AppColors.border(context).withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildGaugeItem('Calorías', '${r.averageDailyCalories.round()} / ${r.targetCalories.round()} kcal', r.averageDailyCalories / (r.targetCalories > 0 ? r.targetCalories : 1), AppColors.primary),
+          _buildGaugeItem('Proteína', '${r.averageDailyProtein.round()} / ${r.targetProtein.round()}g', r.averageDailyProtein / (r.targetProtein > 0 ? r.targetProtein : 1), AppColors.protein),
+          _buildGaugeItem('Carbos', '${r.averageDailyCarbs.round()} / ${r.targetCarbs.round()}g', r.averageDailyCarbs / (r.targetCarbs > 0 ? r.targetCarbs : 1), AppColors.carbs),
+          _buildGaugeItem('Grasas', '${r.averageDailyFat.round()} / ${r.targetFat.round()}g', r.averageDailyFat / (r.targetFat > 0 ? r.targetFat : 1), AppColors.fat),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGaugeItem(String label, String fraction, double ratio, Color color) {
+    return Column(
+      children: [
+        Text(label, style: GoogleFonts.inter(fontSize: 10, color: AppColors.textSecondary(context))),
+        const SizedBox(height: 2),
+        Text(fraction, style: GoogleFonts.outfit(fontSize: 11, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 4),
+        SizedBox(
+          width: 54,
+          child: LinearProgressIndicator(
+            value: ratio.clamp(0.0, 1.0),
+            color: color,
+            backgroundColor: color.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInsightTile({required String title, required String content, required Color color, required IconData icon}) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: color, size: 16),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: color)),
+                const SizedBox(height: 2),
+                Text(content, style: GoogleFonts.inter(fontSize: 11, color: AppColors.textPrimary(context), height: 1.3)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSwapRow(FoodSwapSuggestion swap) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.swap_horiz, size: 14, color: AppColors.protein),
+          const SizedBox(width: 6),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: GoogleFonts.inter(fontSize: 11, color: AppColors.textPrimary(context)),
+                children: [
+                  TextSpan(text: '${swap.originalFood} → ', style: const TextStyle(decoration: TextDecoration.lineThrough, color: Colors.grey)),
+                  TextSpan(text: swap.substituteFood, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.protein)),
+                  TextSpan(text: ' (${swap.rationale})', style: TextStyle(color: AppColors.textSecondary(context), fontSize: 10)),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

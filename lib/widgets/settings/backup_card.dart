@@ -1,127 +1,153 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:path/path.dart' as p;
+import '../../services/backup_service.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_card.dart';
+import 'json_file_picker_dialog.dart';
 
+/// Card providing real JSON file export and import functionality.
 class BackupCard extends StatelessWidget {
-  final Future<String> Function() onExport;
-  final Future<Map<String, int>> Function(String) onImport;
+  final Future<String> Function()? onExport;
+  final Future<Map<String, int>> Function(String)? onImport;
+  final Future<File> Function()? onExportFile;
+  final Future<Map<String, int>> Function(File)? onImportFile;
 
   const BackupCard({
     super.key,
-    required this.onExport,
-    required this.onImport,
+    this.onExport,
+    this.onImport,
+    this.onExportFile,
+    this.onImportFile,
   });
 
-  void _handleExport(BuildContext context) async {
+  Future<void> _handleExport(BuildContext context) async {
     try {
-      final jsonString = await onExport();
-      await Clipboard.setData(ClipboardData(text: jsonString));
+      final File file;
+      if (onExportFile != null) {
+        file = await onExportFile!();
+      } else {
+        file = await BackupService.instance.exportToJsonFile();
+      }
+
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Respaldo JSON copiado al portapapeles con éxito.'),
-          backgroundColor: AppColors.protein,
+
+      final fileSizeKb = ((await file.length()) / 1024).toStringAsFixed(1);
+      final fileName = p.basename(file.path);
+
+      await showDialog<void>(
+        context: context,
+        builder: (dialogCtx) => AlertDialog(
+          backgroundColor: AppColors.surface(context),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(color: AppColors.border(context)),
+          ),
+          title: Row(
+            children: [
+              const Icon(Icons.check_circle_outline, color: AppColors.protein, size: 24),
+              const SizedBox(width: 8),
+              Text(
+                'Archivo JSON Creado',
+                style: GoogleFonts.outfit(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary(context),
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Se generó el archivo de respaldo completo en el almacenamiento de tu dispositivo:',
+                style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary(context), height: 1.4),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.protein.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.protein.withValues(alpha: 0.3)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(fileName, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.protein)),
+                    const SizedBox(height: 4),
+                    Text('Tamaño: $fileSizeKb KB', style: GoogleFonts.inter(fontSize: 10, color: AppColors.textSecondary(context))),
+                    const SizedBox(height: 6),
+                    Text(
+                      file.path,
+                      style: GoogleFonts.inter(fontSize: 10, color: AppColors.textMuted(context)),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text: file.path));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Ruta del archivo copiada al portapapeles')),
+                );
+              },
+              child: Text('Copiar ruta', style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: AppColors.protein)),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(dialogCtx).pop(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.protein,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              child: Text('Aceptar', style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
+            ),
+          ],
         ),
       );
     } catch (e) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error al exportar respaldo: $e'),
+          content: Text('Error al generar archivo de respaldo: $e'),
           backgroundColor: AppColors.primary,
         ),
       );
     }
   }
 
-  void _handleImport(BuildContext context) async {
-    final controller = TextEditingController();
-
-    final result = await showDialog<bool>(
+  Future<void> _handleImport(BuildContext context) async {
+    final result = await showDialog<Map<String, int>>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: AppColors.surface(context),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: AppColors.border(context)),
-        ),
-        title: Text(
-          'Pegar Respaldo JSON',
-          style: GoogleFonts.outfit(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary(context),
-          ),
-        ),
-        content: SizedBox(
-          width: 320,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Pega el contenido del archivo de respaldo JSON para restaurar comidas y despensa.',
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  color: AppColors.textSecondary(context),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: controller,
-                maxLines: 6,
-                style: GoogleFonts.inter(fontSize: 12),
-                decoration: const InputDecoration(
-                  hintText: '{\n  "meals": [...]\n}',
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(
-              'Cancelar',
-              style: GoogleFonts.inter(color: AppColors.textSecondary(context)),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            ),
-            child: Text('Importar', style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
-          ),
-        ],
+      builder: (dialogCtx) => JsonFilePickerDialog(
+        onRestoreFile: (file) async {
+          if (onImportFile != null) {
+            return await onImportFile!(file);
+          }
+          return await BackupService.instance.importFromFile(file);
+        },
       ),
     );
 
-    if (result == true && controller.text.trim().isNotEmpty) {
-      try {
-        final counts = await onImport(controller.text.trim());
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Importado: ${counts['imported_meals']} comidas y ${counts['imported_pantry']} artículos.',
-            ),
-            backgroundColor: AppColors.protein,
+    if (result != null && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '¡Restauración exitosa! Se importaron ${result['imported_meals'] ?? 0} comidas y ${result['imported_pantry'] ?? 0} productos.',
           ),
-        );
-      } catch (e) {
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error en importación: $e'),
-            backgroundColor: AppColors.primary,
-          ),
-        );
-      }
+          backgroundColor: AppColors.protein,
+        ),
+      );
     }
   }
 
@@ -136,7 +162,7 @@ class BackupCard extends StatelessWidget {
               const Icon(Icons.sync_alt_outlined, size: 20, color: AppColors.protein),
               const SizedBox(width: 8),
               Text(
-                'RESPALDO Y MIGRACIÓN',
+                'RESPALDO Y MIGRACIÓN EN ARCHIVOS',
                 style: GoogleFonts.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
@@ -148,7 +174,7 @@ class BackupCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Exporta o importa tu historial completo de comidas y biblioteca de alimentos en formato JSON estándar.',
+            'Genera archivos físicos (.json) descargables para guardar tus comidas y despensa, o importa un archivo de respaldo previo sin usar el portapapeles.',
             textAlign: TextAlign.justify,
             style: GoogleFonts.inter(
               fontSize: 12,
@@ -166,7 +192,7 @@ class BackupCard extends StatelessWidget {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   icon: const Icon(Icons.file_upload_outlined, size: 16),
-                  label: Text('Exportar', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                  label: Text('Exportar JSON', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
                 ),
               ),
               const SizedBox(width: 8),
@@ -178,7 +204,7 @@ class BackupCard extends StatelessWidget {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   icon: const Icon(Icons.file_download_outlined, size: 16),
-                  label: Text('Importar', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                  label: Text('Importar JSON', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
                 ),
               ),
             ],

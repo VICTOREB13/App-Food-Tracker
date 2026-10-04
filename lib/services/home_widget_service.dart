@@ -28,13 +28,19 @@ class HomeWidgetService {
     _isInitialized = true;
 
     try {
-      await HomeWidget.setAppGroupId(appGroupId);
+      await HomeWidget.setAppGroupId(appGroupId).timeout(
+        const Duration(seconds: 2),
+        onTimeout: () => debugPrint('HomeWidget setAppGroupId timeout'),
+      );
     } catch (e) {
       debugPrint('HomeWidgetService: Failed to set app group id: $e');
     }
 
     try {
-      final initialUri = await HomeWidget.initiallyLaunchedFromHomeWidget();
+      final initialUri = await HomeWidget.initiallyLaunchedFromHomeWidget().timeout(
+        const Duration(seconds: 2),
+        onTimeout: () => null,
+      );
       if (initialUri != null) {
         _handleDeepLink(initialUri);
       }
