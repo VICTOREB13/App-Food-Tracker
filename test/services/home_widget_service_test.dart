@@ -82,5 +82,28 @@ void main() {
       expect(scanFoodUri.host, equals('scan_food'));
       expect(capturedUri, isNull);
     });
+
+    test('isPlatformSupported exposes platform compatibility flag', () {
+      expect(HomeWidgetService.isPlatformSupported, isA<bool>());
+    });
+
+    test('saveSummaryData and updateWidgets complete safely without errors', () async {
+      await expectLater(
+        service.saveSummaryData(
+          caloriesConsumed: 1200,
+          caloriesTarget: 2000,
+          caloriesLeft: 800,
+          proteinConsumed: 80,
+          proteinLeft: 40,
+          carbsConsumed: 120,
+          carbsLeft: 80,
+          fatConsumed: 40,
+          fatLeft: 20,
+        ),
+        completes,
+      );
+
+      await expectLater(service.updateWidgets(), completes);
+    });
   });
 }

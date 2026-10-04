@@ -80,10 +80,16 @@ class MealController extends ChangeNotifier {
   }
 
   Future<void> init() async {
-    await refreshGoals();
-    await loadMeals();
-    await refreshStreak();
-    await loadWeightLogs();
+    try {
+      await refreshGoals();
+    } catch (e) {
+      debugPrint('MealController: error refreshing goals: $e');
+    }
+    await Future.wait([
+      loadMeals(),
+      refreshStreak(),
+      loadWeightLogs(),
+    ]);
   }
 
   Future<void> refreshStreak() async {
@@ -99,7 +105,11 @@ class MealController extends ChangeNotifier {
       StreakCalculator.calculateStreakFromDates(dates);
 
   Future<void> refreshGoals() async {
-    _dailyGoals = await SecureStorageService.instance.getDailyGoals();
+    try {
+      _dailyGoals = await SecureStorageService.instance.getDailyGoals();
+    } catch (_) {
+      _dailyGoals = const DailyGoals();
+    }
     notifyListeners();
     _syncNativeWidgets();
   }
@@ -229,16 +239,11 @@ class MealController extends ChangeNotifier {
 
       if (isAuto) {
         targetCal = MetabolicCalculator.calculateCaloricGoal(
-          tdee: newTdee,
-          bmr: newBmr,
-          bodyGoal: profile.bodyGoal,
+          tdee: newTdee, bmr: newBmr, bodyGoal: profile.bodyGoal,
         );
         final m = MetabolicCalculator.calculateMacros(
-          targetCalories: targetCal,
-          weightKg: weight,
-          bodyGoal: profile.bodyGoal,
-          heightCm: profile.height,
-          gender: profile.gender,
+          targetCalories: targetCal, weightKg: weight, bodyGoal: profile.bodyGoal,
+          heightCm: profile.height, gender: profile.gender,
         );
         targetProt = m.protein;
         targetCarb = m.carbs;
@@ -246,13 +251,8 @@ class MealController extends ChangeNotifier {
       }
 
       final updated = profile.copyWith(
-        weight: weight,
-        bmr: newBmr,
-        tdee: newTdee,
-        targetCalories: targetCal,
-        targetProtein: targetProt,
-        targetCarbs: targetCarb,
-        targetFat: targetFat,
+        weight: weight, bmr: newBmr, tdee: newTdee, targetCalories: targetCal,
+        targetProtein: targetProt, targetCarbs: targetCarb, targetFat: targetFat,
         updatedAt: DateTime.now(),
       );
       final newPrompt = MetabolicCalculator.generateMasterPrompt(updated);
@@ -279,14 +279,10 @@ class MealController extends ChangeNotifier {
 
   void _syncNativeWidgets() {
     HomeWidgetService.instance.updateFromDailyTotals(
-      consumedCalories: totalCalories,
-      targetCalories: _dailyGoals.calories,
-      consumedProtein: totalProtein,
-      targetProtein: _dailyGoals.protein,
-      consumedCarbs: totalCarbs,
-      targetCarbs: _dailyGoals.carbs,
-      consumedFat: totalFat,
-      targetFat: _dailyGoals.fat,
+      consumedCalories: totalCalories, targetCalories: _dailyGoals.calories,
+      consumedProtein: totalProtein, targetProtein: _dailyGoals.protein,
+      consumedCarbs: totalCarbs, targetCarbs: _dailyGoals.carbs,
+      consumedFat: totalFat, targetFat: _dailyGoals.fat,
     );
   }
 }

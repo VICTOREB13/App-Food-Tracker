@@ -41,99 +41,87 @@ class SecureStorageService {
   static const String _masterPromptKey = 'user_master_prompt';
   static const String _dailyGoalsKey = 'daily_goals_json';
 
-  // --- Gemini API Key ---
-  Future<String?> getGeminiApiKey() async {
+  static const Duration _timeout = Duration(seconds: 2);
+
+  Future<String?> _safeRead(String key) async {
     try {
-      return await _storage.read(key: _geminiApiKeyKey);
-    } catch (_) {
+      return await _storage
+          .read(key: key)
+          .timeout(_timeout, onTimeout: () => null);
+    } catch (e) {
+      debugPrint('SecureStorageService: error reading $key: $e');
       return null;
     }
   }
 
-  Future<void> setGeminiApiKey(String apiKey) async {
-    await _storage.write(key: _geminiApiKeyKey, value: apiKey.trim());
+  Future<void> _safeWrite(String key, String value) async {
+    try {
+      await _storage
+          .write(key: key, value: value)
+          .timeout(_timeout);
+    } catch (e) {
+      debugPrint('SecureStorageService: error writing $key: $e');
+    }
   }
 
-  Future<void> deleteGeminiApiKey() async {
-    await _storage.delete(key: _geminiApiKeyKey);
+  Future<void> _safeDelete(String key) async {
+    try {
+      await _storage
+          .delete(key: key)
+          .timeout(_timeout);
+    } catch (e) {
+      debugPrint('SecureStorageService: error deleting $key: $e');
+    }
   }
+
+  // --- Gemini API Key ---
+  Future<String?> getGeminiApiKey() => _safeRead(_geminiApiKeyKey);
+
+  Future<void> setGeminiApiKey(String apiKey) =>
+      _safeWrite(_geminiApiKeyKey, apiKey.trim());
+
+  Future<void> deleteGeminiApiKey() => _safeDelete(_geminiApiKeyKey);
 
   // --- Gemini Selected Model (R1) ---
-  Future<String?> getSelectedGeminiModel() async {
-    try {
-      return await _storage.read(key: _geminiSelectedModelKey);
-    } catch (_) {
-      return null;
-    }
-  }
+  Future<String?> getSelectedGeminiModel() => _safeRead(_geminiSelectedModelKey);
 
-  Future<void> setSelectedGeminiModel(String model) async {
-    await _storage.write(key: _geminiSelectedModelKey, value: model.trim());
-  }
+  Future<void> setSelectedGeminiModel(String model) =>
+      _safeWrite(_geminiSelectedModelKey, model.trim());
 
-  Future<void> deleteSelectedGeminiModel() async {
-    await _storage.delete(key: _geminiSelectedModelKey);
-  }
+  Future<void> deleteSelectedGeminiModel() => _safeDelete(_geminiSelectedModelKey);
 
   // --- USDA API Key (R2) ---
-  Future<String?> getUsdaApiKey() async {
-    try {
-      return await _storage.read(key: _usdaApiKeyKey);
-    } catch (_) {
-      return null;
-    }
-  }
+  Future<String?> getUsdaApiKey() => _safeRead(_usdaApiKeyKey);
 
-  Future<void> setUsdaApiKey(String key) async {
-    await _storage.write(key: _usdaApiKeyKey, value: key.trim());
-  }
+  Future<void> setUsdaApiKey(String key) =>
+      _safeWrite(_usdaApiKeyKey, key.trim());
 
-  Future<void> deleteUsdaApiKey() async {
-    await _storage.delete(key: _usdaApiKeyKey);
-  }
+  Future<void> deleteUsdaApiKey() => _safeDelete(_usdaApiKeyKey);
 
   // --- Onboarding Completion Status (R3) ---
   Future<bool> hasCompletedOnboarding() async {
-    try {
-      final value = await _storage.read(key: _hasCompletedOnboardingKey);
-      return value == 'true';
-    } catch (_) {
-      return false;
-    }
+    final value = await _safeRead(_hasCompletedOnboardingKey);
+    return value == 'true';
   }
 
-  Future<void> setCompletedOnboarding(bool completed) async {
-    await _storage.write(
-      key: _hasCompletedOnboardingKey,
-      value: completed.toString(),
-    );
-  }
+  Future<void> setCompletedOnboarding(bool completed) =>
+      _safeWrite(_hasCompletedOnboardingKey, completed.toString());
 
-  Future<void> resetCompletedOnboarding() async {
-    await _storage.delete(key: _hasCompletedOnboardingKey);
-  }
+  Future<void> resetCompletedOnboarding() =>
+      _safeDelete(_hasCompletedOnboardingKey);
 
   // --- User Master Prompt (R3 Context) ---
-  Future<String?> getMasterPrompt() async {
-    try {
-      return await _storage.read(key: _masterPromptKey);
-    } catch (_) {
-      return null;
-    }
-  }
+  Future<String?> getMasterPrompt() => _safeRead(_masterPromptKey);
 
-  Future<void> setMasterPrompt(String prompt) async {
-    await _storage.write(key: _masterPromptKey, value: prompt.trim());
-  }
+  Future<void> setMasterPrompt(String prompt) =>
+      _safeWrite(_masterPromptKey, prompt.trim());
 
-  Future<void> deleteMasterPrompt() async {
-    await _storage.delete(key: _masterPromptKey);
-  }
+  Future<void> deleteMasterPrompt() => _safeDelete(_masterPromptKey);
 
   // --- Daily Goals ---
   Future<DailyGoals> getDailyGoals() async {
     try {
-      final raw = await _storage.read(key: _dailyGoalsKey);
+      final raw = await _safeRead(_dailyGoalsKey);
       if (raw != null && raw.isNotEmpty) {
         final decoded = json.decode(raw);
         if (decoded is Map<String, dynamic>) {
@@ -146,6 +134,6 @@ class SecureStorageService {
 
   Future<void> setDailyGoals(DailyGoals goals) async {
     final raw = json.encode(goals.toJson());
-    await _storage.write(key: _dailyGoalsKey, value: raw);
+    await _safeWrite(_dailyGoalsKey, raw);
   }
 }

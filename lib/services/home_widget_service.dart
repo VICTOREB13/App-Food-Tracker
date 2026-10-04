@@ -19,6 +19,10 @@ class HomeWidgetService {
   StreamSubscription<Uri?>? _widgetClickedSubscription;
   bool _isInitialized = false;
 
+  /// Whether the host platform supports Android/iOS native home widgets.
+  static bool get isPlatformSupported =>
+      !kIsWeb && (Platform.isAndroid || Platform.isIOS);
+
   /// Initializes deep link listeners and registers app group id.
   Future<void> init({HomeWidgetDeepLinkHandler? onDeepLink}) async {
     if (onDeepLink != null) {
@@ -28,7 +32,7 @@ class HomeWidgetService {
     if (_isInitialized) return;
     _isInitialized = true;
 
-    if (!kIsWeb && Platform.environment.containsKey('FLUTTER_TEST')) {
+    if (!isPlatformSupported) {
       return;
     }
 
@@ -57,16 +61,20 @@ class HomeWidgetService {
     }
 
     _widgetClickedSubscription?.cancel();
-    _widgetClickedSubscription = HomeWidget.widgetClicked.listen(
-      (Uri? uri) {
-        if (uri != null) {
-          _handleDeepLink(uri);
-        }
-      },
-      onError: (dynamic error) {
-        debugPrint('HomeWidgetService: Widget clicked listener error: $error');
-      },
-    );
+    try {
+      _widgetClickedSubscription = HomeWidget.widgetClicked.listen(
+        (Uri? uri) {
+          if (uri != null) {
+            _handleDeepLink(uri);
+          }
+        },
+        onError: (dynamic error) {
+          debugPrint('HomeWidgetService: Widget clicked listener error: $error');
+        },
+      );
+    } catch (e) {
+      debugPrint('HomeWidgetService: Failed to subscribe to widget clicked: $e');
+    }
   }
 
   /// Sets or updates the active deep link callback.
@@ -94,6 +102,7 @@ class HomeWidgetService {
     required int fatConsumed,
     required int fatLeft,
   }) async {
+    if (!isPlatformSupported) return;
     try {
       await Future.wait([
         HomeWidget.saveWidgetData<int>('calories_consumed', caloriesConsumed),
@@ -113,6 +122,7 @@ class HomeWidgetService {
 
   /// Notifies the Android widget subsystem to re-render the compact and wide widgets.
   Future<void> updateWidgets() async {
+    if (!isPlatformSupported) return;
     try {
       await HomeWidget.updateWidget(
         name: compactWidgetProvider,

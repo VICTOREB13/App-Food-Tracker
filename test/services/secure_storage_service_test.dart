@@ -6,6 +6,7 @@ import 'package:food_tracker/services/secure_storage_service.dart';
 class FakeFlutterSecureStorage extends Fake implements FlutterSecureStorage {
   final Map<String, String> _data = {};
   bool shouldThrow = false;
+  bool shouldHang = false;
 
   @override
   Future<String?> read({
@@ -18,6 +19,7 @@ class FakeFlutterSecureStorage extends Fake implements FlutterSecureStorage {
     WindowsOptions? wOptions,
   }) async {
     if (shouldThrow) throw Exception('Simulated storage failure');
+    if (shouldHang) await Future.delayed(const Duration(seconds: 10));
     return _data[key];
   }
 
@@ -154,6 +156,24 @@ void main() {
       expect(await service.getMasterPrompt(), isNull);
       final goals = await service.getDailyGoals();
       expect(goals.calories, equals(2000.0));
+    });
+
+    test('Gracefully returns null/defaults on Keystore timeout / hang', () {
+      fakeAsync((async) {
+        fakeStorage.shouldHang = true;
+        String? apiKey;
+        service.getGeminiApiKey().then((val) => apiKey = val);
+        bool? onboarding;
+        service.hasCompletedOnboarding().then((val) => onboarding = val);
+        DailyGoals? goals;
+        service.getDailyGoals().then((val) => goals = val);
+
+        async.elapse(const Duration(seconds: 3));
+
+        expect(apiKey, isNull);
+        expect(onboarding, isFalse);
+        expect(goals?.calories, equals(2000.0));
+      });
     });
   });
 }
