@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/controllers/fasting_controller.dart';
+import 'package:food_tracker/core/errors/failures.dart';
 import 'package:food_tracker/core/errors/result.dart';
 import 'package:food_tracker/core/interfaces/fasting_dao_interface.dart';
 import 'package:food_tracker/models/fasting_log.dart';
@@ -37,7 +38,21 @@ class _MockFastingDao implements IFastingDao {
   Future<FastingLog?> getFastingLogById(String id) async => activeLog?.id == id ? activeLog : null;
 
   @override
-  Future<Result<List<FastingLog>>> getRecentFastingLogs({int limit = 10}) async =>
+  Future<List<FastingLog>> getRecentFastingLogs({int limit = 10}) async =>
+      activeLog != null ? [activeLog!] : [];
+
+  @override
+  Future<Result<int, DatabaseFailure>> insertFastingLogResult(FastingLog log) async {
+    final id = await insertFastingLog(log);
+    return Success(id);
+  }
+
+  @override
+  Future<Result<FastingLog?, DatabaseFailure>> getActiveFastingLogResult() async =>
+      Success(activeLog);
+
+  @override
+  Future<Result<List<FastingLog>, DatabaseFailure>> getAllFastingLogsResult() async =>
       Success(activeLog != null ? [activeLog!] : []);
 }
 
