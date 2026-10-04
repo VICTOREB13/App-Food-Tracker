@@ -8,15 +8,17 @@ class SecureStorageService {
   static SecureStorageService get instance => _instance;
 
   final FlutterSecureStorage _storage;
+  final Duration _timeout;
 
-  SecureStorageService._([FlutterSecureStorage? storage])
+  SecureStorageService._([FlutterSecureStorage? storage, Duration? timeout])
       : _storage = storage ??
             const FlutterSecureStorage(
               aOptions: AndroidOptions(resetOnError: true),
               iOptions: IOSOptions(
                 accessibility: KeychainAccessibility.first_unlock_this_device,
               ),
-            );
+            ),
+        _timeout = timeout ?? const Duration(seconds: 2);
 
   @visibleForTesting
   static void setMockInstance(SecureStorageService mockService) {
@@ -29,8 +31,11 @@ class SecureStorageService {
   }
 
   @visibleForTesting
-  factory SecureStorageService.withStorage(FlutterSecureStorage storage) {
-    return SecureStorageService._(storage);
+  factory SecureStorageService.withStorage(
+    FlutterSecureStorage storage, {
+    Duration timeout = const Duration(seconds: 2),
+  }) {
+    return SecureStorageService._(storage, timeout);
   }
 
   // Storage key constants
@@ -40,8 +45,6 @@ class SecureStorageService {
   static const String _hasCompletedOnboardingKey = 'has_completed_onboarding';
   static const String _masterPromptKey = 'user_master_prompt';
   static const String _dailyGoalsKey = 'daily_goals_json';
-
-  static const Duration _timeout = Duration(seconds: 2);
 
   Future<String?> _safeRead(String key) async {
     try {

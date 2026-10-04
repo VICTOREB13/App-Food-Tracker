@@ -149,7 +149,11 @@ tags: [proyecto, tasks, checklist, v1-2-1]
 - [x] (Reviewer & QA) Erradicar bypass de `FLUTTER_TEST` en `lib/main.dart`, implementar `_FakeSecureStorage` y `databaseFactoryFfiNoIsolate` en `nutri_tracker_app_test.dart`.
 - [x] (Reviewer & QA) Sincronizar ciclo de vida de finalización de onboarding con callback `onCompleted` en `OnboardingScreen` y `NutriTrackerApp`.
 - [x] (Reviewer & QA) Incorporar `AnimatedSwitcher` en `NutriTrackerApp` para transición suave sin parpadeo visual en frame 0.
-- [x] (Reviewer & QA) Verificar empaquetado nativo descomprimido (`STORED 0`) y alineación estricta de páginas de 16 KB en todos los binarios `.so` con compilación real en CI (Run 37227297048).
+- [x] (Reviewer & QA R2) Erradicar bypass remanente de `FLUTTER_TEST` en `lib/services/home_widget_service.dart` implementando detección limpia de plataforma `isPlatformSupported` y salvaguarda try-catch en suscripción de eventos.
+- [x] (Reviewer & QA R2) Incorporar defensas contra deadlocks del hardware Keystore en Android 16 con timeout unificado de 2 segundos en `SecureStorageService._safeRead`, `_safeWrite` y `_safeDelete`.
+- [x] (Reviewer & QA R2) Aislar y paralelizar la inicialización de `MealController.init()` para prevenir congelamientos en cascada si Keystore o SQLite demoran en startup.
+- [x] (Reviewer & QA R2) Alinear permisos multimedia en `AndroidManifest.xml` agregando `android:maxSdkVersion="32"` a `READ_EXTERNAL_STORAGE`.
+- [x] (Reviewer & QA R2) Añadir pruebas unitarias de timeouts y resiliencia ante Keystore hang en `secure_storage_service_test.dart` y seguridad multiplataforma en `home_widget_service_test.dart`.
 - [x] (DevOps-Engineer) Documentar versión en `artifacts/planning/changelog_v1.md` bajo `[1.2.1] - 2026-10-04`.
 - [x] (DevOps-Engineer) Publicar release `v1.2.1` en GitHub Actions y GitHub Releases.
 

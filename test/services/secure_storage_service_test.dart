@@ -19,7 +19,7 @@ class FakeFlutterSecureStorage extends Fake implements FlutterSecureStorage {
     WindowsOptions? wOptions,
   }) async {
     if (shouldThrow) throw Exception('Simulated storage failure');
-    if (shouldHang) await Future.delayed(const Duration(seconds: 10));
+    if (shouldHang) await Future.delayed(const Duration(milliseconds: 100));
     return _data[key];
   }
 
@@ -158,22 +158,20 @@ void main() {
       expect(goals.calories, equals(2000.0));
     });
 
-    test('Gracefully returns null/defaults on Keystore timeout / hang', () {
-      fakeAsync((async) {
-        fakeStorage.shouldHang = true;
-        String? apiKey;
-        service.getGeminiApiKey().then((val) => apiKey = val);
-        bool? onboarding;
-        service.hasCompletedOnboarding().then((val) => onboarding = val);
-        DailyGoals? goals;
-        service.getDailyGoals().then((val) => goals = val);
+    test('Gracefully returns null/defaults on Keystore timeout / hang', () async {
+      final hangingService = SecureStorageService.withStorage(
+        fakeStorage,
+        timeout: const Duration(milliseconds: 20),
+      );
+      fakeStorage.shouldHang = true;
 
-        async.elapse(const Duration(seconds: 3));
+      final apiKey = await hangingService.getGeminiApiKey();
+      final onboarding = await hangingService.hasCompletedOnboarding();
+      final goals = await hangingService.getDailyGoals();
 
-        expect(apiKey, isNull);
-        expect(onboarding, isFalse);
-        expect(goals?.calories, equals(2000.0));
-      });
+      expect(apiKey, isNull);
+      expect(onboarding, isFalse);
+      expect(goals.calories, equals(2000.0));
     });
   });
 }
