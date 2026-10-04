@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:food_tracker/controllers/settings_controller.dart';
@@ -6,6 +7,8 @@ import 'package:food_tracker/services/daos/database_schema.dart';
 import 'package:food_tracker/services/database_service.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   setUpAll(() {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
@@ -13,8 +16,11 @@ void main() {
 
   late Database db;
   late SettingsController controller;
+  late Directory tempDir;
 
   setUp(() async {
+    tempDir = await Directory.systemTemp.createTemp('settings_controller_test_');
+
     db = await databaseFactoryFfi.openDatabase(
       inMemoryDatabasePath,
       options: OpenDatabaseOptions(
@@ -32,6 +38,9 @@ void main() {
   tearDown(() async {
     await DatabaseService.instance.closeForTesting();
     SettingsController.resetInstance();
+    if (await tempDir.exists()) {
+      await tempDir.delete(recursive: true);
+    }
   });
 
   group('SettingsController File Backup Integration Tests', () {
@@ -40,11 +49,11 @@ void main() {
         Meal(id: 'm_ctrl', name: 'Meal Test File', calories: 400),
       );
 
-      final file = await controller.exportBackupToFile();
+      final file = await controller.exportBackupToFile(customDirectoryPath: tempDir.path);
       expect(await file.exists(), isTrue);
       expect(file.path.endsWith('.json'), isTrue);
 
-      final backups = await controller.listBackups();
+      final backups = await controller.listBackups(customDirectoryPath: tempDir.path);
       expect(backups.any((f) => f.path == file.path), isTrue);
 
       final importRes = await controller.importBackupFromFile(file);

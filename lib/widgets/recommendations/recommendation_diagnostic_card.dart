@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/interfaces/nutritional_recommendation_service_interface.dart';
 import '../../models/nutritional_recommendation.dart';
 import '../../services/nutritional_recommendation_service.dart';
 import '../../services/theme_manager.dart';
@@ -7,7 +8,14 @@ import '../common/ve_card.dart';
 
 /// Card analyzing 7, 15, or 30 days nutritional history and diagnosing fats, proteins, carbs, and calories.
 class RecommendationDiagnosticCard extends StatefulWidget {
-  const RecommendationDiagnosticCard({super.key});
+  final NutritionalAnalysisReport? initialReport;
+  final INutritionalRecommendationService? service;
+
+  const RecommendationDiagnosticCard({
+    super.key,
+    this.initialReport,
+    this.service,
+  });
 
   @override
   State<RecommendationDiagnosticCard> createState() => _RecommendationDiagnosticCardState();
@@ -21,14 +29,19 @@ class _RecommendationDiagnosticCardState extends State<RecommendationDiagnosticC
   @override
   void initState() {
     super.initState();
-    _loadReport();
+    if (widget.initialReport != null) {
+      _report = widget.initialReport;
+      _isLoading = false;
+    } else {
+      _loadReport();
+    }
   }
 
   Future<void> _loadReport() async {
     setState(() => _isLoading = true);
     try {
-      final rep = await NutritionalRecommendationService.instance
-          .analyzeHistory(days: _selectedDays);
+      final s = widget.service ?? NutritionalRecommendationService.instance;
+      final rep = await s.analyzeHistory(days: _selectedDays);
       if (mounted) {
         setState(() {
           _report = rep;

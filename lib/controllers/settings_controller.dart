@@ -258,9 +258,11 @@ class SettingsController extends ChangeNotifier {
 
   Future<String> exportBackup() async => await BackupService.instance.exportToJsonString();
 
-  Future<File> exportBackupToFile() async => await BackupService.instance.exportToJsonFile();
+  Future<File> exportBackupToFile({String? customDirectoryPath}) async =>
+      await BackupService.instance.exportToJsonFile(customDirectoryPath: customDirectoryPath);
 
-  Future<List<File>> listBackups() async => await BackupService.instance.listAvailableBackups();
+  Future<List<File>> listBackups({String? customDirectoryPath}) async =>
+      await BackupService.instance.listAvailableBackups(customDirectoryPath: customDirectoryPath);
 
   Future<Map<String, int>> importBackupFromFile(File file) async {
     _isLoading = true;

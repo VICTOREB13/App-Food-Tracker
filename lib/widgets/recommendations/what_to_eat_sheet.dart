@@ -12,8 +12,15 @@ import '../../services/theme_manager.dart';
 /// Interactive modal sheet displaying "¿Qué debería comer hoy?" based on remaining macros.
 class WhatToEatSheet extends StatefulWidget {
   final DateTime? date;
+  final TodayRecommendationPlan? initialPlan;
+  final INutritionalRecommendationService? service;
 
-  const WhatToEatSheet({super.key, this.date});
+  const WhatToEatSheet({
+    super.key,
+    this.date,
+    this.initialPlan,
+    this.service,
+  });
 
   @override
   State<WhatToEatSheet> createState() => _WhatToEatSheetState();
@@ -27,14 +34,19 @@ class _WhatToEatSheetState extends State<WhatToEatSheet> {
   @override
   void initState() {
     super.initState();
-    _loadPlan();
+    if (widget.initialPlan != null) {
+      _plan = widget.initialPlan;
+      _isLoading = false;
+    } else {
+      _loadPlan();
+    }
   }
 
   Future<void> _loadPlan() async {
     setState(() => _isLoading = true);
     try {
-      final plan = await NutritionalRecommendationService.instance
-          .getWhatShouldIEatToday(date: widget.date);
+      final s = widget.service ?? NutritionalRecommendationService.instance;
+      final plan = await s.getWhatShouldIEatToday(date: widget.date);
       if (mounted) {
         setState(() {
           _plan = plan;

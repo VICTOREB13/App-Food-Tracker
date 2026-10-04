@@ -23,11 +23,17 @@ class NutritionalRecommendationService implements INutritionalRecommendationServ
   static void setMockInstance(NutritionalRecommendationService? mock) =>
       _mockInstance = mock;
 
+  final IDatabaseService? _dbOverride;
+  final SecureStorageService? _storageOverride;
+
+  IDatabaseService get _db => _dbOverride ?? DatabaseService.instance;
+  SecureStorageService get _storage => _storageOverride ?? SecureStorageService.instance;
+
   NutritionalRecommendationService({
     IDatabaseService? databaseService,
     SecureStorageService? storageService,
-  })  : _db = databaseService ?? DatabaseService.instance,
-        _storage = storageService ?? SecureStorageService.instance;
+  })  : _dbOverride = databaseService,
+        _storageOverride = storageService;
 
   Future<DailyGoals> _resolveGoals() async {
     try {

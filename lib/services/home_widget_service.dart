@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:home_widget/home_widget.dart';
 
@@ -26,6 +27,10 @@ class HomeWidgetService {
 
     if (_isInitialized) return;
     _isInitialized = true;
+
+    if (!kIsWeb && Platform.environment.containsKey('FLUTTER_TEST')) {
+      return;
+    }
 
     try {
       await HomeWidget.setAppGroupId(appGroupId).timeout(
