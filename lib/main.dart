@@ -119,6 +119,19 @@ class _NutriTrackerAppState extends State<NutriTrackerApp> {
             const Duration(seconds: 2),
             onTimeout: () => true,
           );
+      if (!completed) {
+        // Fallback verification against local SQLite profile
+        // If the user already has a persisted profile, avoid booting them into onboarding
+        // due to transient Keystore delay or timeout.
+        final profile = await DatabaseService.instance.getUserProfile().timeout(
+          const Duration(seconds: 1),
+          onTimeout: () => null,
+        );
+        if (profile != null) {
+          unawaited(SecureStorageService.instance.setCompletedOnboarding(true));
+          return;
+        }
+      }
       if (mounted && _hasCompletedOnboarding != completed) {
         setState(() => _hasCompletedOnboarding = completed);
       }

@@ -6,6 +6,7 @@ import 'package:food_tracker/screens/dashboard_screen.dart';
 import 'package:food_tracker/screens/onboarding_screen.dart';
 import 'package:food_tracker/services/daos/database_schema.dart';
 import 'package:food_tracker/services/database_service.dart';
+import 'package:food_tracker/services/metabolic_calculator.dart';
 import 'package:food_tracker/services/secure_storage_service.dart';
 import 'package:food_tracker/services/theme_manager.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -162,5 +163,28 @@ void main() {
     await tester.pump(const Duration(milliseconds: 350));
     await tester.pump(const Duration(milliseconds: 350));
     expect(find.byType(DashboardScreen), findsOneWidget);
+  });
+
+  testWidgets('NutriTrackerApp stays on DashboardScreen when storage is uncompleted but local profile exists', (tester) async {
+    fakeStorage.data.remove('has_completed_onboarding');
+    final profile = MetabolicCalculator.calculateProfile(
+      name: 'Victor',
+      age: 30,
+      gender: 'male',
+      height: 175.0,
+      weight: 75.0,
+      activityLevel: 'moderate',
+      bodyGoal: 'maintenance',
+      estimatedSteps: 8000,
+    );
+    await DatabaseService.instance.saveUserProfile(profile);
+
+    await tester.pumpWidget(const NutriTrackerApp());
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+    await tester.pump(const Duration(milliseconds: 350));
+
+    expect(find.byType(DashboardScreen), findsOneWidget);
+    expect(find.byType(OnboardingScreen), findsNothing);
   });
 }

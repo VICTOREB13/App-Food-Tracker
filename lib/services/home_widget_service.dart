@@ -54,7 +54,7 @@ class HomeWidgetService {
         onTimeout: () => null,
       );
       if (initialUri != null) {
-        _handleDeepLink(initialUri);
+        handleDeepLink(initialUri);
       }
     } catch (e) {
       debugPrint('HomeWidgetService: Error checking initial launch uri: $e');
@@ -65,7 +65,7 @@ class HomeWidgetService {
       _widgetClickedSubscription = HomeWidget.widgetClicked.listen(
         (Uri? uri) {
           if (uri != null) {
-            _handleDeepLink(uri);
+            handleDeepLink(uri);
           }
         },
         onError: (dynamic error) {
@@ -83,7 +83,8 @@ class HomeWidgetService {
   }
 
   /// Dispatches recognized widget deep links to the registered handler.
-  void _handleDeepLink(Uri uri) {
+  @visibleForTesting
+  void handleDeepLink(Uri uri) {
     debugPrint('HomeWidgetService: Received deep link: $uri');
     if (uri.scheme == 'foodtracker') {
       _deepLinkHandler?.call(uri);
@@ -114,7 +115,7 @@ class HomeWidgetService {
         HomeWidget.saveWidgetData<int>('carbs_left', carbsLeft),
         HomeWidget.saveWidgetData<int>('fat_consumed', fatConsumed),
         HomeWidget.saveWidgetData<int>('fat_left', fatLeft),
-      ]);
+      ]).timeout(const Duration(seconds: 2));
     } catch (e) {
       debugPrint('HomeWidgetService: Failed saving widget data: $e');
     }
@@ -124,14 +125,16 @@ class HomeWidgetService {
   Future<void> updateWidgets() async {
     if (!isPlatformSupported) return;
     try {
-      await HomeWidget.updateWidget(
-        name: compactWidgetProvider,
-        androidName: compactWidgetProvider,
-      );
-      await HomeWidget.updateWidget(
-        name: wideWidgetProvider,
-        androidName: wideWidgetProvider,
-      );
+      await Future.wait([
+        HomeWidget.updateWidget(
+          name: compactWidgetProvider,
+          androidName: compactWidgetProvider,
+        ),
+        HomeWidget.updateWidget(
+          name: wideWidgetProvider,
+          androidName: wideWidgetProvider,
+        ),
+      ]).timeout(const Duration(seconds: 2));
     } catch (e) {
       debugPrint('HomeWidgetService: Failed updating native widgets: $e');
     }
@@ -180,6 +183,7 @@ class HomeWidgetService {
   void dispose() {
     _widgetClickedSubscription?.cancel();
     _widgetClickedSubscription = null;
+    _deepLinkHandler = null;
     _isInitialized = false;
   }
 }

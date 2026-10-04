@@ -54,32 +54,20 @@ void main() {
       );
     });
 
-    test('setDeepLinkHandler receives foodtracker deep link actions', () {
+    test('setDeepLinkHandler receives foodtracker deep link actions and filters unknown schemes', () {
       Uri? capturedUri;
       service.setDeepLinkHandler((uri) {
         capturedUri = uri;
       });
 
       final scanFoodUri = Uri.parse('foodtracker://scan_food');
-      service.init(onDeepLink: (uri) {
-        capturedUri = uri;
-      });
+      service.handleDeepLink(scanFoodUri);
+      expect(capturedUri, equals(scanFoodUri));
+      expect(capturedUri?.host, equals('scan_food'));
 
-      // Directly invoke handler
-      service.setDeepLinkHandler((uri) {
-        capturedUri = uri;
-      });
-
-      // Simulate deep link reception by triggering registered handler
-      service.setDeepLinkHandler((uri) {
-        capturedUri = uri;
-      });
-
-      final uri = Uri.parse('foodtracker://scan_barcode');
-      expect(uri.scheme, equals('foodtracker'));
-      expect(uri.host, equals('scan_barcode'));
-      expect(scanFoodUri.scheme, equals('foodtracker'));
-      expect(scanFoodUri.host, equals('scan_food'));
+      // Non-foodtracker schemes should be ignored
+      capturedUri = null;
+      service.handleDeepLink(Uri.parse('https://example.com/unrelated'));
       expect(capturedUri, isNull);
     });
 

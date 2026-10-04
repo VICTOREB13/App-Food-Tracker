@@ -154,6 +154,10 @@ tags: [proyecto, tasks, checklist, v1-2-1]
 - [x] (Reviewer & QA R2) Aislar y paralelizar la inicialización de `MealController.init()` para prevenir congelamientos en cascada si Keystore o SQLite demoran en startup.
 - [x] (Reviewer & QA R2) Alinear permisos multimedia en `AndroidManifest.xml` agregando `android:maxSdkVersion="32"` a `READ_EXTERNAL_STORAGE`.
 - [x] (Reviewer & QA R2) Añadir pruebas unitarias de timeouts y resiliencia ante Keystore hang en `secure_storage_service_test.dart` y seguridad multiplataforma en `home_widget_service_test.dart`.
+- [x] (Reviewer & QA R3) Implementar verificación de contingencia contra SQLite en `NutriTrackerApp._checkOnboardingInBackground()` para evitar expulsión de usuarios ante demoras de Keystore.
+- [x] (Reviewer & QA R3) Incorporar timeouts de 2s y actualización concurrente en `HomeWidgetService.saveSummaryData` y `updateWidgets`, purgando handlers en `dispose()`.
+- [x] (Reviewer & QA R3) Reemplazar aserción pasiva en `home_widget_service_test.dart` con verificación activa de recepción de deep links y filtrado de esquemas externos.
+- [x] (Reviewer & QA R3) Añadir prueba de integración en `nutri_tracker_app_test.dart` validando retención en `DashboardScreen` cuando SecureStorage está vacío pero el perfil existe en SQLite.
 - [x] (DevOps-Engineer) Documentar versión en `artifacts/planning/changelog_v1.md` bajo `[1.2.1] - 2026-10-04`.
 - [x] (DevOps-Engineer) Publicar release `v1.2.1` en GitHub Actions y GitHub Releases.
 

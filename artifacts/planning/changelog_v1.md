@@ -32,6 +32,9 @@ La versión v1.2.1 soluciona de forma crítica problemas de entorno nativo en An
 - **Erradicación de Bypass en Home Widgets y Soporte Multiplataforma:** Reemplazo del hack `FLUTTER_TEST` en `HomeWidgetService` por la comprobación canónica `isPlatformSupported` y captura de excepciones en streams nativos.
 - **Paralelización Resiliente de `MealController.init()`:** Aislamiento con bloque try-catch de `refreshGoals()` y ejecución concurrente de `loadMeals()`, `refreshStreak()` y `loadWeightLogs()`.
 - **Alineación de Permisos Multimedia en AndroidManifest:** Inclusión de `android:maxSdkVersion="32"` en `READ_EXTERNAL_STORAGE` para cumplimiento estricto con las políticas de Android 14+ y 16.
+- **Validación Dual de Arranque contra Base de Datos Local:** Implementación de contingencia en `NutriTrackerApp` que verifica la existencia de un perfil de usuario en SQLite antes de alternar al asistente de bienvenida, evitando falsos positivos cuando el Keystore sufre latencia o reinicios de hardware.
+- **Timeouts Defensivos y Actualización Paralela en Home Widgets:** Inclusión de timeouts de 2 segundos en `HomeWidgetService.saveSummaryData` y `updateWidgets`, con concurrencia vía `Future.wait` y purga de controladores en `dispose()`.
+- **Saneamiento y Rigor de Pruebas Unitarias de Widgets y Deep Links:** Eliminación de pruebas pasivas con validación real de despacho y filtrado de enlaces profundos (`handleDeepLink`), junto con verificación de preservación del dashboard ante almacenamiento vacío con base de datos preexistente.
 
 ---
 
