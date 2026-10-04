@@ -217,22 +217,11 @@ class WeeklyDigestCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.textSecondary(context)),
-          ),
+          Text(title, style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.textSecondary(context))),
           const SizedBox(height: 2),
-          Text(
-            value,
-            style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w700, color: color),
-          ),
+          Text(value, style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w700, color: color)),
           const SizedBox(height: 2),
-          Text(
-            subtitle,
-            style: GoogleFonts.inter(fontSize: 10, color: AppColors.textMuted(context)),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
+          Text(subtitle, style: GoogleFonts.inter(fontSize: 10, color: AppColors.textMuted(context)), maxLines: 1, overflow: TextOverflow.ellipsis),
         ],
       ),
     );
@@ -247,7 +236,7 @@ class WeeklyDigestCard extends StatelessWidget {
   }) {
     final ratio = target > 0 ? (avg / target).clamp(0.0, 1.0) : 0.0;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(10),
@@ -259,10 +248,15 @@ class WeeklyDigestCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                name,
-                style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: color),
+              Flexible(
+                child: Text(
+                  name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.bold, color: color),
+                ),
               ),
+              const SizedBox(width: 2),
               Text(
                 '${(ratio * 100).toInt()}%',
                 style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.bold, color: color),
@@ -281,7 +275,9 @@ class WeeklyDigestCard extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            '${avg.toInt()}g / ${target.toInt()}g',
+            '${avg.toInt()}g/${target.toInt()}g',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.inter(fontSize: 9, color: AppColors.textMuted(context)),
           ),
         ],

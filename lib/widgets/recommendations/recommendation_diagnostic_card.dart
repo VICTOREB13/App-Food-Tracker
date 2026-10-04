@@ -29,7 +29,9 @@ Future<void> showRecommendationDiagnosticDialog(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Diagnóstico Nutricional', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary(context))),
+                  Expanded(
+                    child: Text('Diagnóstico Nutricional', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary(context))),
+                  ),
                   IconButton(
                     icon: const Icon(Icons.close, size: 20),
                     tooltip: 'Cerrar',

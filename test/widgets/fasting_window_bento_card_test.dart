@@ -61,6 +61,7 @@ void main() {
     testWidgets('renders compact pill when inactive and expands on tap', (tester) async {
       final dao = _MockFastingDao();
       final controller = FastingController(fastingDao: dao);
+      addTearDown(controller.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -97,6 +98,7 @@ void main() {
       );
 
       final controller = FastingController(fastingDao: dao);
+      addTearDown(controller.dispose);
       await controller.init();
 
       await tester.pumpWidget(
