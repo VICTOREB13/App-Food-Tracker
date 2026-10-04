@@ -3,7 +3,7 @@ tipo: changelog
 proyecto: App_Food_Tracker
 version: v1
 estado: activo
-fecha: 2026-09-13
+fecha: 2026-10-04
 tags: [proyecto, changelog, versiones]
 ---
 
@@ -15,6 +15,23 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 ---
 
 ## [Unreleased]
+
+---
+
+## [1.1.0] - 2026-10-04
+
+### Added
+- **Widgets Nativos de Android (`home_widget`):** Formatos Compacto (2x2) y Extendido (4x2) con soporte para Modo Claro y Modo Oscuro Zinc/Carmesí, y deep links interactivos (`foodtracker://scan_food`, `foodtracker://scan_barcode`, `foodtracker://new_meal`).
+- **Búsqueda en Vivo de Alimentos por API (Cascada Híbrida):** Integración de `FoodSearchCoordinator` conectando catálogo local, Open Food Facts y USDA FoodData Central con auto-escalado proporcional por gramos y autocompletado en tiempo real en `FoodItemEditorDialog` y `QuickMealDialog`.
+- **Migración de Base de Datos a SQLite v3:** Incorporación de micronutrientes (`fiber`, `sodium`, `sugar`) en `meals` y `meal_items`, y nuevas tablas relacionales `calibrated_dishware`, `meal_templates` y `fasting_logs`.
+- **Protocolo y Temporizador de Ayuno Intermitente:** Controlador reactivo `FastingController` y tarjeta interactiva `FastingWindowBentoCard` con visualización de fases metabólicas y alertas.
+- **Resumen Nutricional Semanal (`WeeklyDigestCard`):** Nueva tarjeta analítica en `MetricsScreen` con desglose promediado de calorías, micronutrientes y consistencia.
+- **Selector Dinámico de Idioma en Caliente:** Selector de idioma (Español / Inglés) en `SettingsScreen` con reactividad instantánea sin reiniciar la aplicación.
+- **Exportación Clínica Tabular en Excel/CSV (`ClinicalExcelExportService`):** Generación de reportes clínicos con cabecera UTF-8 BOM (`\uFEFF`) y estándar RFC 4180 para importación médica sin corrupción de caracteres.
+- **Multimodalidad Omnicanal Avanzada:** Registro y análisis por voz natural (`analyzeSpeechMeal`) y análisis volumétrico tridimensional a partir de fotogramas clave de video (`analyzeVideoFramesMeal`).
+- **Escáner OCR de Tablas Nutricionales:** `NutritionLabelScannerService` para digitalización directa de tablas de información nutrimental desde la cámara.
+- **Escala Métrica de Vajilla Calibrada:** Inyección de dimensiones de vajilla del usuario y contexto de despensa en el prompt de inferencia de Gemini Vision.
+- **Cola Asíncrona Zero-Freeze y Preservación de Fotos:** `AnalysisQueueService` con resiliencia defensiva que garantiza la persistencia física de capturas en disco ante errores de red o cuota.
 
 ---
 

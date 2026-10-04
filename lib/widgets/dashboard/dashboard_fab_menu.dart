@@ -10,6 +10,8 @@ class DashboardFabMenu extends StatefulWidget {
   final VoidCallback onManualEntry;
   final VoidCallback? onQuickWater;
   final VoidCallback? onQuickMeal;
+  final VoidCallback? onVoiceDictation;
+  final VoidCallback? onVideoScan;
 
   const DashboardFabMenu({
     super.key,
@@ -19,6 +21,8 @@ class DashboardFabMenu extends StatefulWidget {
     required this.onManualEntry,
     this.onQuickWater,
     this.onQuickMeal,
+    this.onVoiceDictation,
+    this.onVideoScan,
   });
 
   @override
@@ -170,6 +174,28 @@ class _DashboardFabMenuState extends State<DashboardFabMenu>
                           }
                         },
                       ),
+                      if (widget.onVoiceDictation != null)
+                        _buildGridAction(
+                          icon: Icons.mic_none_rounded,
+                          iconColor: const Color(0xFF8B5CF6),
+                          title: 'Voz / Audio',
+                          subtitle: 'Dictado natural',
+                          onTap: () {
+                            Navigator.of(sheetContext).pop();
+                            widget.onVoiceDictation!();
+                          },
+                        ),
+                      if (widget.onVideoScan != null)
+                        _buildGridAction(
+                          icon: Icons.videocam_outlined,
+                          iconColor: const Color(0xFF06B6D4),
+                          title: 'Video Pan',
+                          subtitle: 'Muestreo 3D',
+                          onTap: () {
+                            Navigator.of(sheetContext).pop();
+                            widget.onVideoScan!();
+                          },
+                        ),
                     ],
                   ),
                 ],

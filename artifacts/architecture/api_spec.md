@@ -1,24 +1,24 @@
 ---
 tipo: api_spec
 proyecto: App_Food_Tracker
-version: v1.0.4
+version: v1.1.0
 estado: activo
-fecha: 2026-09-13
-tags: [proyecto, api, backend, contratos, sqlite, get-it, daos, result-pattern, v1-0-4]
+fecha: 2026-10-04
+tags: [proyecto, api, backend, contratos, sqlite-v3, get-it, daos, result-pattern, android-widgets, v1-1-0]
 ---
 
-# 📡 Especificación de Contrato de Datos, Esquema SQLite v2 y Servicios Backend
+# 📡 Especificación de Contrato de Datos, Esquema SQLite v3 y Servicios Backend (v1.1.0)
 
-> **Backend-Architect:** Este artefacto define formalmente el esquema relacional de base de datos local SQLite v2, los índices B-Tree de cobertura, los modelos de dominio inmutables (Sentinel), los contratos de servicios internos (DAOs, Service Locator, Result Pattern) y externos (Dynamic Gemini API, USDA FoodData Central, Open Food Facts y Calculadora Metabólica).
+> **Backend-Architect:** Este artefacto define formalmente el esquema relacional de base de datos local SQLite v3, los índices B-Tree de cobertura, los modelos de dominio inmutables (Sentinel), los contratos de servicios internos (DAOs, Service Locator, Result Pattern) y externos (Dynamic Gemini API, HomeWidget, USDA FoodData Central, Open Food Facts y Calculadora Metabólica).
 
 ---
 
-## 🗄️ 1. Esquema Relacional de Base de Datos SQLite v2 (DDL)
+## 🗄️ 1. Esquema Relacional de Base de Datos SQLite v3 (DDL)
 
 La base de datos opera localmente bajo el archivo `app_food_tracker.db` en el directorio de documentos de la aplicación, configurada con WAL mode y llaves foráneas (`DatabaseConnectionFactory` y `DatabaseSchema`).
 
-### 1.1. Tabla: `meals`
-Almacena cada registro de comida (desayuno, almuerzo, cena, snack o hidratación).
+### 1.1. Tabla: `meals` (Actualizada v3 con Micronutrientes)
+Almacena cada registro de comida incluyendo micronutrientes críticos (fibra, sodio, azúcar).
 
 ```sql
 CREATE TABLE meals (
@@ -31,13 +31,16 @@ CREATE TABLE meals (
   protein REAL NOT NULL,
   carbs REAL NOT NULL,
   fat REAL NOT NULL,
+  fiber REAL NOT NULL DEFAULT 0.0,
+  sodium REAL NOT NULL DEFAULT 0.0,
+  sugar REAL NOT NULL DEFAULT 0.0,
   notes TEXT,
   ai_breakdown_json TEXT
 );
 ```
 
-### 1.2. Tabla: `meal_items` (Desglose normalizado de items)
-Almacena opcionalmente los ingredientes atómicos de cada comida para persistencia relacional acoplada.
+### 1.2. Tabla: `meal_items` (Desglose normalizado con Micronutrientes)
+Almacena los ingredientes atómicos de cada comida para persistencia relacional acoplada.
 
 ```sql
 CREATE TABLE meal_items (
@@ -48,12 +51,15 @@ CREATE TABLE meal_items (
   protein REAL NOT NULL,
   carbs REAL NOT NULL,
   fat REAL NOT NULL,
+  fiber REAL NOT NULL DEFAULT 0.0,
+  sodium REAL NOT NULL DEFAULT 0.0,
+  sugar REAL NOT NULL DEFAULT 0.0,
   FOREIGN KEY (meal_id) REFERENCES meals (id) ON DELETE CASCADE
 );
 ```
 
-### 1.3. Tabla: `pantry_items`
-Almacena alimentos frecuentes, ingredientes recurrentes y productos escaneados por código de barras.
+### 1.3. Tabla: `pantry_items` (Actualizada v3 con Porciones y OCR)
+Almacena productos de marca, ingredientes de despensa y fotos de tablas nutricionales.
 
 ```sql
 CREATE TABLE pantry_items (
@@ -61,293 +67,164 @@ CREATE TABLE pantry_items (
   name TEXT NOT NULL,
   brand TEXT,
   category TEXT,
+  serving_size REAL DEFAULT 100.0,
+  serving_unit TEXT DEFAULT 'g',
   calories REAL NOT NULL,
   protein REAL NOT NULL,
   carbs REAL NOT NULL,
   fat REAL NOT NULL,
-  is_favorite INTEGER NOT NULL DEFAULT 0
+  fiber REAL DEFAULT 0.0,
+  sodium REAL DEFAULT 0.0,
+  sugar REAL DEFAULT 0.0,
+  is_favorite INTEGER NOT NULL DEFAULT 0,
+  barcode TEXT,
+  nutrition_label_image_path TEXT,
+  is_verified_by_user INTEGER DEFAULT 0,
+  match_keywords TEXT
 );
 ```
 
-### 1.4. Tabla: `analysis_queue` (Cola Asíncrona de Detección)
-Registra las tareas de procesamiento y cubicaje de fotos en segundo plano.
+### 1.4. Tabla: `calibrated_dishware` (Nueva en v3: Escala Métrica)
+Registra los platos y vajilla del usuario con su diámetro real en centímetros para guiar el cubicaje visual volumétrico de la IA.
 
 ```sql
-CREATE TABLE IF NOT EXISTS analysis_queue (
+CREATE TABLE IF NOT EXISTS calibrated_dishware (
   id TEXT PRIMARY KEY,
-  image_path TEXT NOT NULL,
-  meal_type TEXT NOT NULL,
-  date TEXT NOT NULL,
-  status TEXT NOT NULL,
-  progress REAL NOT NULL DEFAULT 0.0,
-  stage TEXT NOT NULL DEFAULT 'En cola',
-  error TEXT,
-  result_meal_id TEXT,
+  name TEXT NOT NULL,
+  diameter_cm REAL NOT NULL,
+  depth_cm REAL DEFAULT 0.0,
+  shape TEXT NOT NULL DEFAULT 'circle',
+  is_default INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL
 );
 ```
 
-### 1.5. Tabla: `weight_logs` (Historial Ponderal de Peso)
-Almacena las mediciones corporales de peso histórico del comensal.
+### 1.5. Tabla: `meal_templates` (Nueva en v3: Comidas Habituales)
+Almacena combinaciones o platos pre-pesados y verificados por el usuario para registro en 1 toque.
 
 ```sql
-CREATE TABLE IF NOT EXISTS weight_logs (
+CREATE TABLE IF NOT EXISTS meal_templates (
   id TEXT PRIMARY KEY,
-  date TEXT NOT NULL,
-  weight REAL NOT NULL,
+  name TEXT NOT NULL,
+  meal_type TEXT NOT NULL,
+  calories REAL NOT NULL,
+  protein REAL NOT NULL,
+  carbs REAL NOT NULL,
+  fat REAL NOT NULL,
+  fiber REAL DEFAULT 0.0,
+  sodium REAL DEFAULT 0.0,
+  sugar REAL DEFAULT 0.0,
+  items_json TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+```
+
+### 1.6. Tabla: `fasting_logs` (Nueva en v3: Ventana de Ayuno Intermitente)
+Controla el protocolo de ayuno (16/8, 18/6, 20/4) y marcas de tiempo inicio/fin.
+
+```sql
+CREATE TABLE IF NOT EXISTS fasting_logs (
+  id TEXT PRIMARY KEY,
+  start_time TEXT NOT NULL,
+  target_hours REAL NOT NULL DEFAULT 16.0,
+  end_time TEXT,
+  is_active INTEGER NOT NULL DEFAULT 1,
   notes TEXT
 );
 ```
 
-### 1.6. Tabla: `user_profile` (Perfil Biométrico y Metas Clínicas)
-Almacena el perfil metabólico del comensal, fórmulas basales calculadas y Master Prompt personalizado.
+### 1.7. Tablas Existentes: `weight_logs`, `user_profile`, `analysis_queue`
+- `weight_logs`: Histórico ponderal de pesajes (`id`, `date`, `weight`, `notes`).
+- `user_profile`: Perfil metabólico Mifflin-St Jeor y metas nutricionales.
+- `analysis_queue`: Tareas asíncronas de cubicaje de fotos.
 
+### 1.8. Índices B-Tree de Cobertura y Rendimiento
 ```sql
-CREATE TABLE IF NOT EXISTS user_profile (
-  id TEXT PRIMARY KEY,
-  name TEXT,
-  age INTEGER NOT NULL,
-  gender TEXT NOT NULL,
-  height REAL NOT NULL,
-  weight REAL NOT NULL,
-  activity_level TEXT NOT NULL,
-  body_goal TEXT NOT NULL,
-  estimated_steps INTEGER NOT NULL DEFAULT 8000,
-  bmr REAL NOT NULL,
-  tdee REAL NOT NULL,
-  target_calories REAL NOT NULL,
-  target_protein REAL NOT NULL,
-  target_carbs REAL NOT NULL,
-  target_fat REAL NOT NULL,
-  master_prompt TEXT,
-  updated_at TEXT NOT NULL
-);
-```
-
-### 1.7. Índices de Cobertura B-Tree y Rendimiento (Zero N+1)
-Para garantizar lecturas masivas e históricos diarios en menos de **2 milisegundos**, se han creado los siguientes índices B-Tree:
-
-```sql
--- Consultas filtradas por fecha en comidas (rango diario y selector semanal):
 CREATE INDEX IF NOT EXISTS idx_meals_date ON meals(date);
-
--- Agrupaciones por categoría de comida:
 CREATE INDEX IF NOT EXISTS idx_meals_meal_type ON meals(meal_type);
-
--- Cobertura compuesta para consultas combinadas de día y tipo:
 CREATE INDEX IF NOT EXISTS idx_meals_date_type ON meals(date, meal_type);
-
--- Búsquedas textuales en despensa sin distinción de mayúsculas/minúsculas:
 CREATE INDEX IF NOT EXISTS idx_pantry_name ON pantry_items(name COLLATE NOCASE);
-
--- Filtrado por categorías en despensa:
-CREATE INDEX IF NOT EXISTS idx_pantry_category ON pantry_items(category);
-
--- Acceso inmediato a alimentos favoritos:
 CREATE INDEX IF NOT EXISTS idx_pantry_favorite ON pantry_items(is_favorite);
-
--- Consultas de tendencias de peso por rangos (7, 30, 90 días):
+CREATE INDEX IF NOT EXISTS idx_pantry_barcode ON pantry_items(barcode);
 CREATE INDEX IF NOT EXISTS idx_weight_logs_date ON weight_logs(date);
-
--- Cascada relacional de items de comida:
 CREATE INDEX IF NOT EXISTS idx_meal_items_meal_id ON meal_items(meal_id);
+CREATE INDEX IF NOT EXISTS idx_calibrated_dishware_default ON calibrated_dishware(is_default);
+CREATE INDEX IF NOT EXISTS idx_meal_templates_meal_type ON meal_templates(meal_type);
+CREATE INDEX IF NOT EXISTS idx_fasting_logs_start ON fasting_logs(start_time);
 ```
 
 ---
 
-## 🧬 2. Modelos de Dominio Inmutables y Patrón Sentinel
+## 🧬 2. Modelos de Dominio Inmutables (v1.1.0)
 
-Todos los modelos incorporan el patrón privado `_sentinel = Object()` en `copyWith` para distinguir la omisión de un parámetro de la asignación explícita de `null`.
-
-### 2.1. Modelo `Meal`
-- `id` (String): UUID v4 único. Truncado a 128 chars.
-- `name` (String): Nombre del plato. Sanitizado a 255 chars máx. Fallback: `'Comida'`.
-- `mealType` (String): Uno de `['Desayuno', 'Almuerzo', 'Cena', 'Snack']`.
-- `date` (DateTime): Fecha y hora del consumo. Fallback: `DateTime.now()`.
-- `imagePath` (String?): Ruta local de la fotografía redimensionada (o `null`). Truncado a 1024 chars.
-- `calories`, `protein`, `carbs`, `fat` (double): Clamped `[0.0, 9999.0]`.
-- `notes` (String?): Comentarios del usuario. Truncado a 2000 chars máx.
-- `aiBreakdownJson` (String?): Payload JSON de inferencia volumétrica. Truncado a 100000 chars.
-- Getter `items`: Deserialización resiliente retornando `List<FoodItem>`.
-- Método `recalculateFromItems(List<FoodItem> newItems)`: Recálculo síncrono de macros y regeneración del JSON.
-
-### 2.2. Modelo `FoodItem`
-- `id` (String): Identificador único (UUID v4).
-- `name` (String): Nombre del ingrediente. Sanitizado a 255 chars máx.
-- `estimatedGrams` (double): Gramaje estimado. Clamped `[0.0, 50000.0]`.
-- `calories`, `protein`, `carbs`, `fat` (double): Clamped `[0.0, 9999.0]`.
-- `visualJustification` (String?): Razón volumétrica. Truncado a 1000 chars.
-
-### 2.3. Modelo `WeightLog`
+### 2.1. Modelo `CalibratedDishware`
 - `id` (String): UUID v4.
-- `weight` (double): Peso corporal en kilogramos. Clamped `[20.0, 500.0]`.
-- `date` (DateTime): Fecha y hora del registro.
-- `notes` (String?): Notas del registro. Truncado a 500 chars.
+- `name` (String): Nombre identificador (ej. "Plato Llano Principal", "Bowl Avena").
+- `diameterCm` (double): Diámetro en centímetros (e.g. 26.0).
+- `depthCm` (double): Profundidad promedio en cm.
+- `shape` (String): 'circle', 'square', 'oval'.
+- `isDefault` (bool): Si es la referencia primaria inyectada en el prompt de Gemini.
+- `createdAt` (DateTime).
 
-### 2.4. Modelo `UserProfile`
-- `sex` (String): `'male'` o `'female'`.
-- `weight` (double): Peso actual en kg.
-- `height` (double): Altura en cm.
-- `age` (int): Edad en años.
-- `activityLevel` (ActivityLevel): Factor de actividad sedentario a muy activo.
-- `dailySteps` (int): Pasos diarios estimados.
-- `goal` (NutritionalGoal): Déficit, mantenimiento o superávit.
-- `masterPrompt` (String): Instrucciones contextualizadas inyectadas en Gemini Vision.
+### 2.2. Modelo `MealTemplate`
+- `id` (String): UUID v4.
+- `name` (String): Nombre del combo/receta (ej. "Arepa con Queso y Huevo").
+- `mealType` (String): 'Desayuno', 'Almuerzo', 'Cena', 'Snack'.
+- `calories`, `protein`, `carbs`, `fat`, `fiber`, `sodium`, `sugar` (double).
+- `items` (List<FoodItem>): Lista completa de ingredientes individuales.
+- `createdAt` (DateTime).
 
-### 2.5. Modelo `GeminiModelInfo`
-- `name` (String): Identificador de recurso (ej. `'models/gemini-2.5-flash'`).
-- `displayName` (String): Nombre amigable del modelo.
-- `description` (String): Descripción de capacidades.
-- `supportedGenerationMethods` (List<String>): Métodos habilitados (`generateContent`).
-- `inputTokenLimit` & `outputTokenLimit` (int): Límites de contexto.
+### 2.3. Modelo `FastingLog`
+- `id` (String): UUID v4.
+- `startTime` (DateTime): Inicio del ayuno.
+- `targetHours` (double): Meta en horas (por defecto 16.0).
+- `endTime` (DateTime?): Fin del ayuno (null si está activo).
+- `isActive` (bool): Estado del ayuno en curso.
+- `notes` (String?): Observaciones.
 
-### 2.6. Modelo `UsdaFoodItem`
-- `fdcId` (int): Identificador en base de datos USDA.
-- `description` (String): Nombre oficial del alimento.
-- `brandOwner` (String?): Fabricante o marca comercial.
-- `calories`, `protein`, `carbs`, `fat` (double): Nutrientes normalizados por 100g.
-- `servingSize` (double?) & `servingSizeUnit` (String?): Ración estándar declarada.
-
----
-
-## 🤖 3. Contratos de Inferencia y Descubrimiento Dinámico de Google Gemini
-
-### 3.1. Descubrimiento Dinámico de Modelos (`GeminiModelService`)
-- **Endpoint:** `GET https://generativelanguage.googleapis.com/v1beta/models?key={API_KEY}`
-- **Criterio de Filtrado:** Modelos que contengan `'generateContent'` en `supportedGenerationMethods` y soporten modalidades multimodales de entrada.
-- **Categorización Semántica en UI:**
-  - *Recomendado (Rápido):* `gemini-2.5-flash`, `gemini-2.0-flash`.
-  - *Recomendado (Pro):* `gemini-1.5-pro`.
-  - *Equilibrado:* `gemini-1.5-flash`.
-
-### 3.2. Contrato de Inferencia de Visión (`GeminiVisionService`)
-- **MIME Type:** `application/json`.
-- **Temperatura:** `0.2` (determinismo).
-- **Inyección Contextual:** Se antepone el **Master Prompt** generado desde el perfil biométrico del usuario.
-- **Esquema JSON Obligatorio (`responseSchema`):**
-  ```json
-  {
-    "type": "OBJECT",
-    "properties": {
-      "plato": { "type": "STRING", "description": "Nombre representativo del plato" },
-      "items": {
-        "type": "ARRAY",
-        "description": "Lista de ingredientes o alimentos identificados",
-        "items": {
-          "type": "OBJECT",
-          "properties": {
-            "alimento": { "type": "STRING" },
-            "gramos_estimados": { "type": "NUMBER" },
-            "calorias": { "type": "NUMBER" },
-            "proteinas_g": { "type": "NUMBER" },
-            "carbohidratos_g": { "type": "NUMBER" },
-            "grasas_g": { "type": "NUMBER" },
-            "justificacion_visual": { "type": "STRING" }
-          },
-          "required": ["alimento", "gramos_estimados", "calorias", "proteinas_g", "carbohidratos_g", "grasas_g"]
-        }
-      },
-      "totales": {
-        "type": "OBJECT",
-        "properties": {
-          "calorias": { "type": "NUMBER" },
-          "proteina_g": { "type": "NUMBER" },
-          "carbohidratos_g": { "type": "NUMBER" },
-          "grasas_g": { "type": "NUMBER" }
-        },
-        "required": ["calorias", "proteina_g", "carbohidratos_g", "grasas_g"]
-      }
-    },
-    "required": ["plato", "items", "totales"]
-  }
-  ```
+### 2.4. Modelo `AnalysisTask`
+- `id` (String): UUID v4.
+- `imagePath` (String): Ruta física inmutable de la foto.
+- `status` (`queued`, `processing`, `completed`, `failed`).
+- `progress` (double): Progreso 0.0 a 1.0.
+- `stage` (String): Texto amigable de la etapa actual.
+- `error` (String?): Excepción amigable mapeada.
+- `resultMealId` (String?): ID de la comida generada en SQLite.
 
 ---
 
-## 🏛️ 4. Contratos de Consulta Nutricional en Cascada
+## 🤖 3. Inferencia de Visión con Escala Métrica y Contexto de Despensa
 
-### 4.1. USDA FoodData Central API (`UsdaFoodDataService`)
-- **Búsqueda por Código de Barras / UPC:**
-  - `GET https://api.nal.usda.gov/fdc/v1/foods/search?api_key={KEY}&query={UPC}&dataType=Branded,Foundation`
-  - Coincidencia exacta estricta normalizando el GTIN a 14 dígitos (`padLeft(14, '0')`). Si no hay coincidencia exacta, retorna `null` para que `BarcodeLookupService` active el fallback transparente a Open Food Facts.
-- **Mapeo de Nutrientes Oficiales (Nutrient IDs):**
-  - Calorías: ID `1008` (`Energy` en kcal) o ID `1062` (`Energy` en kJ, convertida dividiendo por 4.184).
-  - Proteína: ID `1003`.
-  - Grasas totales: ID `1004`.
-  - Carbohidratos por diferencia: ID `1005`.
-- **Control de Frecuencia:** Limitador pasivo que respeta la cuota de 1.000 solicitudes por hora de la API del USDA.
+### 3.1. Inyección de Escala Métrica de Plato Calibrado
+En `GeminiVisionService.analyzeMealImage`:
+```text
+ESCALA MÉTRICA DE REFERENCIA FÍSICA:
+El usuario ha calibrado su plato con un diámetro real de: {diameterCm} cm (profundidad: {depthCm} cm).
+Utiliza esta dimensión exacta para deducir el volumen tridimensional (cm³) de cada porción antes de calcular la masa en gramos.
+```
 
-### 4.2. Fallback Transparente a Open Food Facts (`BarcodeLookupService`)
-- Cuando la búsqueda en USDA no arroja resultados (`totalHits == 0`) o la API Key no está configurada, el servicio conmuta automáticamente a `https://world.openfoodfacts.org/api/v2/product/{barcode}.json` garantizando cero fricción para el usuario.
-
----
-
-## 🧮 5. Motor Metabólico Mifflin-St Jeor (`MetabolicCalculator`)
-
-### 5.1. Ecuaciones Clínicas de TMB
-- **Hombres:** $TMB = (10 \times \text{peso}_{\text{kg}}) + (6.25 \times \text{altura}_{\text{cm}}) - (5 \times \text{edad}) + 5$
-- **Mujeres:** $TMB = (10 \times \text{peso}_{\text{kg}}) + (6.25 \times \text{altura}_{\text{cm}}) - (5 \times \text{edad}) - 161$
-
-### 5.2. Multiplicadores de TDEE y Pasos
-- Multiplicador base según actividad: Sedentario (1.2), Ligero (1.375), Moderado (1.55), Intenso (1.725), Muy Intenso (1.9).
-- Bonus por pasos: $\frac{\text{pasos}}{10000} \times 0.15$ al factor de actividad.
-- Ajuste por objetivo: Déficit (-500 kcal), Mantenimiento (0 kcal), Superávit (+350 kcal).
-
-### 5.3. Peso Corporal Ajustado Clínico (ABW) en Obesidad
-- Para usuarios con $IMC \ge 30$, se calcula el Peso Corporal Ideal ($IBW = 22 \times \text{altura}_{\text{m}}^2$ o fórmula Devine) y el Peso Corporal Ajustado:
-  $$ABW = IBW + 0.4 \times (TBW - IBW)$$
-- Las metas de proteínas y macronutrientes se calculan sobre el $ABW$ en lugar del peso total ($TBW$), previniendo sobrecargas proteicas y calóricas irreales en presencia de alto porcentaje de adiposidad.
+### 3.2. Inyección de Despensa y Productos Favoritos
+```text
+PRODUCTOS Y MARCAS REGISTRADOS POR EL USUARIO:
+- Harina P.A.N. (100g = 360 kcal, 7g prot, 78g carbos, 1.5g grasa)
+- Jamón de Pavo Plumrose (100g = 95 kcal, 18g prot, 1g carbos, 2g grasa)
+Si el plato visualizado contiene alimentos correspondientes a estos productos, prioriza estos valores nutricionales específicos.
+```
 
 ---
 
-## 💾 6. Contrato de Respaldo v2 (`BackupService`)
+## 📱 4. Contratos de Widgets Nativos de Android (`home_widget`)
 
-- **Exportación:** Genera un JSON estructurado con `version: 2`, `timestamp` ISO 8601, metadatos de aplicación, y colecciones completas de `meals`, `pantry_items`, `weight_logs` y `user_profile`.
-- **Importación Atómica:** Ejecución en una única transacción SQLite (`txn.insert` con `ConflictAlgorithm.replace`), revirtiendo automáticamente cualquier cambio si el archivo JSON está truncado o corrompido.
+### 4.1. SharedPreferences Keys
+- `widget_calories_consumed`: Double con las calorías registradas hoy.
+- `widget_calories_target`: Double con la meta calórica.
+- `widget_calories_left`: Double con las calorías remanentes.
+- `widget_protein_consumed`: Double con gramos de proteína consumidos.
+- `widget_carbs_consumed`: Double con gramos de carbohidratos consumidos.
+- `widget_fat_consumed`: Double con gramos de grasas consumidos.
+- `widget_last_updated`: Timestamp de la última sincronización.
 
----
-
-## 🏛️ 7. Contratos de Inyección de Dependencias, DAOs y Result Pattern (v1.0.4)
-
-### 7.1. Service Locator (`lib/core/di/service_locator.dart`)
-- **Instancia Global:** `final getIt = GetIt.instance;`
-- **Registro de Servicios (`setupServiceLocator`):**
-  ```dart
-  void setupServiceLocator({bool isTesting = false});
-  ```
-  Registra contratos desacoplados (`IDatabaseService`, `IImageProcessingService`, `IMealDao`, `IWeightLogDao`, `IUserProfileDao`, `IPantryDao`) y controladores.
-- **Limpieza Aislada (`resetServiceLocator`):**
-  ```dart
-  Future<void> resetServiceLocator() async => await getIt.reset();
-  ```
-
-### 7.2. Contratos de DAOs Especializados (`lib/core/interfaces/daos_interfaces.dart`)
-- **`IMealDao`:**
-  - Operaciones CRUD clásicas: `insertMeal`, `upsertMeal`, `updateMeal`, `deleteMeal`, `getMealById`, `getMealsForDay`, `getAllMeals`, `getMealsByRange`, `getMealByImagePath`, `getDistinctMealDates`, `clearMealImagePath`, `getMealsOlderThanWithImages`.
-  - APIs Funcionales Result: `upsertMealResult`, `getMealByIdResult`, `getMealsForDayResult`, `getMealsByRangeResult`.
-- **`IWeightLogDao`:**
-  - Operaciones CRUD clásicas: `insertWeightLog`, `updateWeightLog`, `deleteWeightLog`, `getWeightLogById`, `getAllWeightLogs`, `getLatestWeightLog`, `getWeightLogsByRange`, `getWeightLogsLastDays`, `batchUpsertWeightLogs`.
-  - APIs Funcionales Result: `insertWeightLogResult`, `getWeightLogsByRangeResult`, `getLatestWeightLogResult`.
-- **`IUserProfileDao`:**
-  - Operaciones CRUD clásicas: `saveUserProfile`, `getUserProfile`, `deleteUserProfile`.
-  - APIs Funcionales Result: `saveUserProfileResult`, `getUserProfileResult`.
-- **`IPantryDao`:**
-  - Operaciones CRUD clásicas: `insertPantryItem`, `updatePantryItem`, `deletePantryItem`, `getPantryItems`.
-  - APIs Funcionales Result: `insertPantryItemResult`, `getPantryItemsResult`.
-
-### 7.3. Contrato de Manejo Funcional de Errores (`lib/core/errors/`)
-- **Tipo Suma Sellado `Result<T, E extends Failure>`:**
-  - `Success<T, E>(T value)`: Portador inmutable del valor de retorno exitoso.
-  - `FailureResult<T, E>(E failure)`: Portador tipado del fallo de dominio.
-- **Combinadores Funcionales:**
-  - `R fold<R>(R Function(T value) onSuccess, R Function(E failure) onFailure)`
-  - `Result<R, E> map<R>(R Function(T value) transform)`
-  - `Result<R, E> flatMap<R>(Result<R, E> Function(T value) transform)`
-  - `T getOrThrow()` & `T getOrDefault(T defaultValue)`
-- **Captura Segura de Excepciones:**
-  - `Result.guard<T>(T Function() computation)`
-  - `Result.guardAsync<T>(Future<T> Function() computation)`
-- **Jerarquía de Fallos de Dominio (`failures.dart`):**
-  - `DatabaseFailure`, `AiServiceFailure`, `NetworkFailure`, `ValidationFailure`, `StorageFailure`, `ImageProcessingFailure`, `UnknownFailure`.
-
-
+### 4.2. Deep Links
+- `foodtracker://scan_food`: Abre directamente la cámara de análisis de comida.
+- `foodtracker://scan_barcode`: Abre directamente el lector de códigos de barras.
+- `foodtracker://new_meal`: Abre el formulario de registro manual.

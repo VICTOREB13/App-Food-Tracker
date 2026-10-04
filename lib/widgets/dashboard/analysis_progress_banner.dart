@@ -14,12 +14,31 @@ class AnalysisProgressBanner extends StatelessWidget {
     required this.onOpenMeal,
   });
 
+  void _handleManualEdit(BuildContext context, AnalysisTask task) {
+    final meal = AnalysisQueueService.instance.createManualMealFromFailedTask(task.id) ??
+        Meal(
+          id: task.id,
+          name: 'Comida sin clasificar',
+          mealType: task.mealType,
+          date: task.date,
+          imagePath: task.imagePath.isNotEmpty ? task.imagePath : null,
+          calories: 0.0,
+          protein: 0.0,
+          carbs: 0.0,
+          fat: 0.0,
+          notes: task.userContext,
+        );
+    AnalysisQueueService.instance.dismissTask(task.id);
+    onOpenMeal(meal);
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: AnalysisQueueService.instance,
       builder: (context, _) {
         final task = AnalysisQueueService.instance.currentActiveTask ??
+            AnalysisQueueService.instance.latestFailedTask ??
             AnalysisQueueService.instance.latestCompletedTask;
 
         if (task == null) return const SizedBox.shrink();
@@ -27,8 +46,7 @@ class AnalysisProgressBanner extends StatelessWidget {
         final isPending = task.isPending;
         final isCompleted = task.status == AnalysisStatus.completed;
         final isFailed = task.status == AnalysisStatus.failed;
-
-        final hasImage = File(task.imagePath).existsSync();
+        final hasImage = task.imagePath.isNotEmpty && File(task.imagePath).existsSync();
 
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
@@ -37,14 +55,14 @@ class AnalysisProgressBanner extends StatelessWidget {
             color: isCompleted
                 ? AppColors.success.withValues(alpha: 0.12)
                 : isFailed
-                    ? AppColors.primary.withValues(alpha: 0.12)
+                    ? AppColors.primary.withValues(alpha: 0.10)
                     : AppColors.surface(context),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isCompleted
                   ? AppColors.success.withValues(alpha: 0.40)
                   : isFailed
-                      ? AppColors.primary.withValues(alpha: 0.40)
+                      ? AppColors.primary.withValues(alpha: 0.35)
                       : AppColors.primary.withValues(alpha: 0.25),
               width: 1.5,
             ),
@@ -56,147 +74,198 @@ class AnalysisProgressBanner extends StatelessWidget {
               ),
             ],
           ),
-          child: Row(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Mini-thumbnail o Anillo de Carga
-              if (hasImage)
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Image.file(
-                        File(task.imagePath),
-                        width: 44,
-                        height: 44,
-                        fit: BoxFit.cover,
-                      ),
-                      if (isPending)
-                        Container(
-                          width: 44,
-                          height: 44,
-                          color: Colors.black.withValues(alpha: 0.45),
-                          alignment: Alignment.center,
-                          child: VeLoadingRing(
-                            size: 26,
-                            strokeWidth: 2.8,
-                            color: Colors.white,
-                            progress: task.progress,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 1. Mini-thumbnail o Anillo de Carga / Icono
+                  if (hasImage)
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Image.file(
+                            File(task.imagePath),
+                            width: 44,
+                            height: 44,
+                            fit: BoxFit.cover,
                           ),
-                        ),
-                    ],
-                  ),
-                )
-              else if (isPending)
-                VeLoadingRing(
-                  size: 34,
-                  strokeWidth: 3.5,
-                  color: AppColors.primary,
-                  progress: task.progress,
-                )
-              else
-                Icon(
-                  isCompleted
-                      ? Icons.check_circle_outline
-                      : Icons.error_outline,
-                  color: isCompleted ? AppColors.success : AppColors.primary,
-                  size: 32,
-                ),
-              const SizedBox(width: 12),
-
-              // 2. Información del estado y barra
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Flexible(
-                          child: Text(
-                            isCompleted
-                                ? (task.resultMeal?.name ?? '¡Comida analizada!')
-                                : isFailed
-                                    ? 'Error en el análisis'
-                                    : 'Analizando en segundo plano',
-                            style: GoogleFonts.inter(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: isCompleted
-                                  ? AppColors.success
-                                  : isFailed
-                                      ? AppColors.primary
-                                      : AppColors.textPrimary(context),
+                          if (isPending)
+                            Container(
+                              width: 44,
+                              height: 44,
+                              color: Colors.black.withValues(alpha: 0.45),
+                              alignment: Alignment.center,
+                              child: VeLoadingRing(
+                                size: 26,
+                                strokeWidth: 2.8,
+                                color: Colors.white,
+                                progress: task.progress,
+                              ),
+                            )
+                          else if (isFailed)
+                            Container(
+                              width: 44,
+                              height: 44,
+                              color: Colors.black.withValues(alpha: 0.40),
+                              alignment: Alignment.center,
+                              child: const Icon(Icons.error_outline_rounded,
+                                  color: AppColors.primary, size: 22),
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                        ],
+                      ),
+                    )
+                  else if (isPending)
+                    VeLoadingRing(
+                      size: 34,
+                      strokeWidth: 3.5,
+                      color: AppColors.primary,
+                      progress: task.progress,
+                    )
+                  else
+                    Icon(
+                      isCompleted ? Icons.check_circle_outline : Icons.error_outline_rounded,
+                      color: isCompleted ? AppColors.success : AppColors.primary,
+                      size: 32,
+                    ),
+                  const SizedBox(width: 12),
+
+                  // 2. Información del estado
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                isCompleted
+                                    ? (task.resultMeal?.name ?? '¡Comida analizada!')
+                                    : isFailed
+                                        ? 'No se pudo analizar la foto'
+                                        : 'Analizando en segundo plano',
+                                style: GoogleFonts.inter(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: isCompleted
+                                      ? AppColors.success
+                                      : isFailed
+                                          ? AppColors.primary
+                                          : AppColors.textPrimary(context),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (isPending)
+                              Text(
+                                '${(task.progress * 100).toInt()}%',
+                                style: GoogleFonts.inter(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                          ],
                         ),
-                        if (isPending)
-                          Text(
-                            '${(task.progress * 100).toInt()}%',
-                            style: GoogleFonts.inter(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
+                        const SizedBox(height: 3),
+                        Text(
+                          isCompleted
+                              ? '${task.resultMeal?.calories.toInt() ?? 0} kcal · ${task.resultMeal?.items.length ?? 0} ingredientes'
+                              : isFailed
+                                  ? (task.error ?? 'Error de conexión o análisis con IA.')
+                                  : task.stage,
+                          style: GoogleFonts.inter(
+                            fontSize: 11,
+                            color: AppColors.textSecondary(context),
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (isPending) ...[
+                          const SizedBox(height: 6),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                              value: task.progress,
+                              minHeight: 4,
+                              backgroundColor: AppColors.border(context).withValues(alpha: 0.3),
                               color: AppColors.primary,
                             ),
                           ),
+                        ],
                       ],
                     ),
-                    const SizedBox(height: 3),
-                    Text(
-                      isCompleted
-                          ? '${task.resultMeal?.calories.toInt() ?? 0} kcal · ${task.resultMeal?.items.length ?? 0} ingredientes'
-                          : isFailed
-                              ? (task.error ?? 'Ocurrió un error inesperado')
-                              : task.stage,
-                      style: GoogleFonts.inter(
-                        fontSize: 11,
-                        color: AppColors.textSecondary(context),
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                  ),
+
+                  // 3. Botón de acción rápida derecha
+                  if (isCompleted && task.resultMeal != null)
+                    IconButton(
+                      tooltip: 'Abrir plato',
+                      icon: const Icon(Icons.arrow_forward_ios_rounded,
+                          size: 16, color: AppColors.success),
+                      onPressed: () {
+                        final meal = task.resultMeal!;
+                        AnalysisQueueService.instance.dismissTask(task.id);
+                        onOpenMeal(meal);
+                      },
+                    )
+                  else
+                    IconButton(
+                      tooltip: 'Cerrar',
+                      icon: Icon(Icons.close_rounded,
+                          size: 16, color: AppColors.textMuted(context)),
+                      onPressed: () {
+                        AnalysisQueueService.instance.dismissTask(task.id);
+                      },
                     ),
-                    if (isPending) ...[
-                      const SizedBox(height: 6),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: LinearProgressIndicator(
-                          value: task.progress,
-                          minHeight: 4,
-                          backgroundColor:
-                              AppColors.border(context).withValues(alpha: 0.3),
-                          color: AppColors.primary,
-                        ),
+                ],
+              ),
+
+              // 4. Botones adicionales ante fallo (Preservación de Foto y Resiliencia)
+              if (isFailed) ...[
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton.icon(
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.textPrimary(context),
+                        visualDensity: VisualDensity.compact,
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       ),
-                    ],
+                      icon: const Icon(Icons.edit_note_rounded, size: 16),
+                      label: Text(
+                        'Editar manualmente',
+                        style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600),
+                      ),
+                      onPressed: () => _handleManualEdit(context, task),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        visualDensity: VisualDensity.compact,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      icon: const Icon(Icons.refresh_rounded, size: 16),
+                      label: Text(
+                        'Reintentar',
+                        style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold),
+                      ),
+                      onPressed: () => AnalysisQueueService.instance.retryTask(task.id),
+                    ),
                   ],
                 ),
-              ),
-              const SizedBox(width: 8),
-
-              // 3. Botones de acción
-              if (isCompleted && task.resultMeal != null)
-                IconButton(
-                  tooltip: 'Abrir plato',
-                  icon: const Icon(Icons.arrow_forward_ios_rounded,
-                      size: 16, color: AppColors.success),
-                  onPressed: () {
-                    final meal = task.resultMeal!;
-                    AnalysisQueueService.instance.dismissTask(task.id);
-                    onOpenMeal(meal);
-                  },
-                )
-              else
-                IconButton(
-                  tooltip: 'Cerrar',
-                  icon: Icon(Icons.close_rounded,
-                      size: 16, color: AppColors.textMuted(context)),
-                  onPressed: () {
-                    AnalysisQueueService.instance.dismissTask(task.id);
-                  },
-                ),
+              ],
             ],
           ),
         );

@@ -1,127 +1,124 @@
----
+---
 tipo: task_list
 proyecto: App_Food_Tracker
-iteracion: v1.0.4
-estado: completado
-fecha: 2026-09-13
-tags: [proyecto, tasks, checklist, v7-teamwork, v1-0-4]
+iteracion: v1.1.0
+estado: activo
+fecha: 2026-10-04
+tags: [proyecto, tasks, checklist, v1-1-0]
 ---
 
-# 📋 Checklist Maestro de Tareas de Agentes (v1.0.4)
+# 📋 Checklist Maestro de Tareas de Agentes (v1.1.0)
 
-> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.0.4. Cada tarea completada se marca con `[x]`.
-
-
----
-
-## 🧭 1. Project-Planner (Master Tech Lead)
-- [x] (Project-Planner) Identificar y priorizar requerimientos de la iteración v1.0.2.
-- [x] (Project-Planner) Supervisar resolución de static analysis en Quality Gate y compilación de release.
-- [x] (Project-Planner) Verificar publicación exitosa del Fat APK v1.0.2 en GitHub Releases.
+> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.1.0. Cada tarea completada se marca con `[x]`.
 
 ---
 
-## 🗄️ 2. Backend-Architect (Datos, Modelos y Lógica)
-- [x] (Backend-Architect) Extender el constructor del modelo `Meal` (`lib/models/meal.dart`) para aceptar parámetro opcional `items: List<FoodItem>?`, codificando automáticamente `aiBreakdownJson`.
-- [x] (Backend-Architect) Sincronizar `DashboardScreen._handleAiPhotoScan` pasando `items: analysis.items` y encadenando `.recalculateFromItems(analysis.items)` para poblar automáticamente los ingredientes analizados en `MealDetailScreen`.
-- [x] (Backend-Architect) Añadir prueba unitaria en `test/models/meal_model_test.dart` verificando que `Meal(items: ...)` preserve y exponga fielmente los alimentos.
-- [x] (Backend-Architect) Implementar sincronización bidireccional reactiva entre Metas Nutricionales Diarias (`SettingsController.saveDailyGoals`) y Perfil / Resumen Metabólico (`MetabolicCalculator.saveAndSynchronizeProfile`).
+## 🌟 Iteración v1.1.0: Generación Omnicanal de Precisión Visual, Volumétrica y Nutricional
+
+### 🧭 1. Project-Planner (Master Tech Lead & Orquestador)
+- [x] (Project-Planner) Analizar y consolidar las 16 especificaciones del usuario en `artifacts/planning/implementation_plan.md`.
+- [x] (Project-Planner) Definir la propuesta de versión canónica `v1.1.0` (y alternativa de producto `v2.0.0`) basada en SemVer y migración de SQLite a `v3`.
+- [x] (Project-Planner) Despachar subagentes especializados (`Backend-Architect`, `Frontend-UI`, `Systems-Auditor`, `DevOps-Engineer`) por fases.
+- [x] (Project-Planner) Actualizar `artifacts/architecture/architecture.md`, `abstractions.md` y compilar el diagrama HTML interactivo con `Archify`.
+- [x] (Backend-Architect & Frontend-UI) **Búsqueda en Vivo de Alimentos por API (USDA & Open Food Facts Search):**
+  - Implementar búsqueda textual en `OpenFoodFactsService` y unificar en `OnlineFoodSearchService` con auto-escalado proporcional por gramos.
+  - Integrar dropdown reactivo con debounce (~350ms) en `FoodItemEditorDialog` y `QuickMealDialog` para rellenar macros oficiales de internet en 1 toque.
+
+### 🗄️ 2. Backend-Architect (Datos, Migración v3, Servicios e IA)
+- [x] (Backend-Architect) **Migración SQLite v3 (`DatabaseSchema` & `DatabaseConnectionFactory`):**
+  - Incrementar base de datos a `version: 3`.
+  - Añadir columnas `fiber REAL NOT NULL DEFAULT 0.0`, `sodium REAL NOT NULL DEFAULT 0.0`, `sugar REAL NOT NULL DEFAULT 0.0` a `meals` y `meal_items`.
+  - Crear tabla `calibrated_dishware` (id, name, diameter_cm, depth_cm, shape, is_default, created_at) e índices.
+  - Crear tabla `meal_templates` (id, name, meal_type, calories, protein, carbs, fat, fiber, sodium, sugar, items_json, created_at).
+  - Crear tabla `fasting_logs` (id, start_time, target_hours, end_time, is_active, notes).
+  - Extender `pantry_items` con campos de porción (`serving_size`, `serving_unit`), micronutrientes y palabras clave de coincidencia (`match_keywords`).
+- [x] (Backend-Architect) **DAOs Especializados y Contratos (< 300 LoC):**
+  - Crear `DishwareDao` y su interfaz `IDishwareDao`.
+  - Crear `MealTemplateDao` y su interfaz `IMealTemplateDao`.
+  - Crear `FastingDao` y su interfaz `IFastingDao`.
+  - Registrar interfaces y fábricas en `lib/core/di/service_locator.dart`.
+- [x] (Backend-Architect) **Modelos de Dominio:**
+  - Extender `FoodItem` y `Meal` para soportar `fiber`, `sodium` y `sugar`, actualizando serializadores JSON y `recalculateFromItems`.
+  - Crear modelo `CalibratedDishware`, `MealTemplate` y `FastingLog`.
+- [x] (Backend-Architect) **Resiliencia de Gemini API y Backoff:**
+  - Implementar reintentos con backoff exponencial y jitter (hasta 3 intentos) ante errores 429/500/503 en `GeminiVisionService`.
+  - Cascada de conmutación a modelo secundario (`gemini-2.5-flash` $\rightarrow$ `gemini-1.5-flash`).
+- [x] (Backend-Architect) **Flujo de Cola y Preservación de Fotos (`AnalysisQueueService`):**
+  - Encolar tarea en el paso 0 (`progress: 0.05`, `stage: 'Optimizando foto...'`) antes de ejecutar compresión e isolate, disparando `notifyListeners()` de inmediato.
+  - Garantizar preservación inmutable del archivo físico en disco ante fallos de IA, dejando la tarea en `failed` sin borrar la foto y permitiendo reintento o guardado manual.
+- [x] (Backend-Architect) **Estimador Inteligente Local Zero-Tokens (`OfflineFoodEstimatorService`):**
+  - Implementar catálogo offline embebido de alimentos base normalizados por 100g con búsqueda por tokens.
+  - Exponer método `estimateNutrients(String foodName, double grams)` con retorno determinista en milisegundos sin consumir tokens.
+- [x] (Backend-Architect) **Escáner OCR de Etiquetas y Despensa (`NutritionLabelScannerService`):**
+  - Diseñar prompt estructurado para analizar fotos de tablas nutricionales y poblar `PantryItem`.
+  - Inyectar contexto de despensa activa del usuario en el prompt de `GeminiVisionService`.
+- [x] (Backend-Architect) **Inyección de Escala Métrica de Vajilla:**
+  - Inyectar el diámetro del plato calibrado por defecto en el prompt del sistema de Gemini Vision para cubicaje volumétrico con escala métrica real.
+- [x] (Backend-Architect) **Re-análisis Interactivo con Sustitución y Detección Multi-Plato:**
+  - Actualizar `reanalyzeMealWithAi` para aceptar sustituciones diferenciales de ingredientes y segmentación espacial multi-plato (plato fuerte, ensalada, bebida).
+- [x] (Backend-Architect) **Servicios de Exportación Clínica:**
+  - [x] Crear `ClinicalExcelExportService` (< 300 LoC) para exportar historial tabular a Excel/CSV con estándar RFC 4180 y UTF-8 BOM.
+- [x] (Backend-Architect) **Multimodalidad (Voz y Video):**
+  - Implementar método `analyzeSpeechMeal(Uint8List audioBytes)` en `GeminiVisionService`.
+  - Implementar método `analyzeVideoFramesMeal(List<Uint8List> frameBytesList)` para muestreo multi-ángulo tridimensional.
+
+### 🎨 3. Frontend-UI (Diseño, Ergonomía y Pantallas < 300 LoC)
+- [x] (Frontend-UI) **Anillo de Carga Inmediato en Dashboard:**
+  - Actualizar `DashboardScreen` para que `AnalysisProgressBanner` y `VeLoadingRing` reflejen instantáneamente la etapa de optimización desde el segundo 0 al tomar la foto.
+  - En caso de error de análisis, mostrar en el banner los dos botones de acción: `[Reintentar con IA]` y `[Editar manualmente]` con la foto intacta.
+- [x] (Frontend-UI) **Estimador en Tiempo Real en `FoodItemEditorDialog`:**
+  - Conectar el campo de texto de nombre de ingrediente y peso con `OfflineFoodEstimatorService` para autocompletar macros en tiempo real sin congelar la UI.
+- [x] (Frontend-UI) **Pantalla de Despensa y Marcas (`PantryScreen`):**
+  - Lista de productos del usuario, filtros por categoría y botón de escaneo de etiqueta nutricional con cámara.
+- [x] (Frontend-UI) **Configuración de Calibración de Vajilla (`DishwareSettingsScreen`):**
+  - Tarjeta en Perfil/Ajustes para registrar platos y especificar su diámetro en cm.
+- [x] (Frontend-UI) **Desglose Visual de Micronutrientes:**
+  - Actualizar `MealDetailScreen` para mostrar chips de Fibra, Sodio y Azúcar.
+- [x] (Frontend-UI) **Temporizador de Ayuno Intermitente (`FastingWindowBentoCard`):**
+  - Tarjeta Bento en el Dashboard con horas de ayuno transcurridas, objetivo configurable y anillo de progreso.
+- [x] (Frontend-UI) **Selector Dinámico de Idioma en Ajustes:**
+  - Selector interactivo Español / Inglés en `SettingsScreen` conectado a `SettingsController.setLocale()`.
+- [x] (Frontend-UI) **Resumen Semanal (`WeeklyDigestCard`):**
+  - Tarjeta en `MetricsScreen` con promedios semanales de calorías, adherencia de macros y balance acumulado.
+- [x] (Frontend-UI) **Diálogo de Exportación Clínica:**
+  - Modal en `MetricsScreen` para seleccionar rango de fechas y descargar reporte en PDF o Excel.
+- [x] (Frontend-UI) **Dictado por Voz y Video en Dashboard:**
+  - Botón de micrófono en el Dashboard para grabación de audio natural.
+  - Opción de video panning en el selector de captura de comida.
+- [x] (Frontend-UI) **Widgets Nativos de Android (2x2 y 4x2 en Modo Claro y Oscuro):**
+  - Diseñar layouts Android XML para Widget Compacto 2x2 (`res/layout/food_tracker_widget_compact.xml` con anillo y calorías).
+  - Diseñar layout para Widget Extendido 4x2 (`res/layout/food_tracker_widget_wide.xml` con anillo de calorías, columnas de macros y botones de acción rápida).
+  - Definir recursos de color y contraste en `res/values/colors.xml` (modo claro) y `res/values-night/colors.xml` (modo oscuro zinc).
+  - Configurar metadatos XML de AppWidgetProvider (`res/xml/food_tracker_widget_compact_info.xml` y `res/xml/food_tracker_widget_wide_info.xml`).
+  - Registrar receivers en `android/app/src/main/AndroidManifest.xml`.
+  - Crear e integrar `HomeWidgetService` (`lib/services/home_widget_service.dart` < 300 LoC) conectando `home_widget` con `MealController` y `SettingsController`.
+  - Soportar deep links interactivos (`foodtracker://scan_food` y `foodtracker://scan_barcode`) para abrir la cámara o el escáner de barras directamente desde el widget en 1 toque.
+- [x] (Frontend-UI) **Diccionarios Bilingües (`app_es.arb` y `app_en.arb`):**
+  - Traducir y registrar la totalidad de las nuevas cadenas de texto de las funcionalidades y widgets.
+
+### 🧪 4. Systems-Auditor (Auditoría, Cobertura y Quality Gate)
+- [x] (Systems-Auditor) Crear pruebas unitarias para `OfflineFoodEstimatorService`, `DishwareDao`, `FastingDao`, `MealTemplateDao`.
+- [x] (Systems-Auditor) Crear pruebas de migración de base de datos (`onUpgrade` de versión 2 a 3) verificando que no se pierdan datos existentes y ejecución idempotente.
+- [x] (Systems-Auditor) Crear pruebas de resiliencia y reintento en `GeminiVisionService` simulando fallos 429 y 503.
+- [x] (Systems-Auditor) Crear pruebas de widget para `FastingWindowBentoCard`, `WeeklyDigestCard` y `PantryScreen`.
+- [x] (Systems-Auditor) Auditar cumplimiento estricto del límite modular: 100% de los archivos nuevos y modificados por debajo de 300 LoC.
+- [x] (Systems-Auditor) Verificar que todas las suites de prueba pasen al 100% con 0 errores de linter y emitir reporte de Quality Gate `veredicto: PASS` en `artifacts/audit_reports/audit_report.md`.
+
+### 🚀 5. DevOps-Engineer (CI/CD, Versioning & Release v1.1.0)
+- [x] (DevOps-Engineer) Incrementar versión en `pubspec.yaml` a `1.1.0+1`.
+- [x] (DevOps-Engineer) Documentar todos los cambios y nuevas capacidades en `artifacts/planning/changelog_v1.md` bajo `[1.1.0] - 2026-10-04`.
+- [x] (DevOps-Engineer) Compilar y empaquetar APK release firmado `Victor-Engineer-Food-Tracker-Android.apk`.
+- [x] (DevOps-Engineer) Publicar el release oficial `v1.1.0` en GitHub Actions y GitHub Releases.
 
 ---
 
-## 🎨 3. Frontend-UI (Diseño, Ergonomía y Pantallas)
-- [x] (Frontend-UI) Rediseñar la distribución de macronutrientes en `FoodItemEditorDialog` (`lib/widgets/meal_detail/food_item_editor_dialog.dart`): Fila 1 para Proteína y Carbohidratos, Fila 2 para Grasas a ancho completo.
-- [x] (Frontend-UI) Mejorar la tipografía (13px) y espaciado/padding confortable (12px) en `FoodItemEditorDialog` para lectura y manipulación táctil en móviles.
-- [x] (Frontend-UI) Implementar `_reanalyzeWithAi()` en `MealDetailScreen` para re-analizar la foto original con Gemini Vision incorporando nombre, notas e ingredientes corregidos.
-- [x] (Frontend-UI) Diseñar componente accesible `MealAiReanalyzeButton` (`lib/widgets/meal_detail/meal_ai_reanalyze_button.dart`) con icono `auto_awesome` y estado reactivo de carga.
-- [x] (Frontend-UI) Crear componente `MealSaveButton` (`lib/widgets/meal_detail/meal_save_button.dart`) para desacoplar el botón de guardado.
-- [x] (Frontend-UI) Crear helper modular `pickAndSaveMealImage` (`lib/widgets/meal_detail/meal_image_picker.dart`) y acciones modulares `confirmAndDeleteMeal` y `saveMealEntry` (`lib/widgets/meal_detail/meal_detail_actions.dart`).
-- [x] (Frontend-UI) Mantener `MealDetailScreen` (296 LoC) y `DashboardScreen` (299 LoC) estrictamente por debajo del umbral de 300 LoC.
+## 📜 Historial de Iteraciones Previas (Completadas)
 
----
+### [1.0.4] - Inyección de Dependencias, DAOs Modulares, l10n y Result Type
+- [x] Todas las tareas completadas y verificadas con 53 suites de prueba (367 tests PASS).
 
-## 🧪 4. Systems-Auditor (Testing y Quality Gate)
-- [x] (Systems-Auditor) Crear prueba de widget `test/widgets/meal_ai_reanalyze_button_test.dart` para validar renderizado, callbacks y estado loading.
-- [x] (Systems-Auditor) Crear prueba de widget `test/widgets/food_item_editor_dialog_test.dart` para validar layout ergonómico, edición, cancelación y persistencia de ingredientes.
-- [x] (Systems-Auditor) Validar sintaxis, tipos estáticos, importaciones y ausencia de errores de compilación en todos los archivos modificados.
-- [x] (Systems-Auditor) Verificar que todas las suites de prueba continúen pasando limpiamente.
+### [1.0.3] - Robustez, Resiliencia, Salvaguarda de Condimentos y Rango SQLite
+- [x] Todas las tareas completadas y verificadas en CI/CD.
 
----
-
-## 🚀 5. DevOps-Engineer (CI/CD, Versioning & Release)
-- [x] (DevOps-Engineer) Incrementar versión en `pubspec.yaml` a `0.4.0-alpha+1`.
-- [x] (DevOps-Engineer) Verificar integridad del árbol de trabajo para el cierre oficial de la versión `0.4.0-alpha`.
-- [x] (DevOps-Engineer) Resolver advertencias de linter y desbordamiento de widgets en el Quality Gate de GitHub Actions.
-- [x] (DevOps-Engineer) Compilar, firmar y empaquetar APK release `Victor-Engineer-Food-Tracker-Android.apk`.
-- [x] (DevOps-Engineer) Publicar exitosamente el release oficial `v0.4.0-alpha` en GitHub Releases.
-
----
-
-## ⚙️ 6. DevOps-Engineer (Optimización CI & Firma Criptográfica Permanente)
-- [x] (DevOps-Engineer) Desactivar trigger automático `push: branches: [main]` en `.github/workflows/ci.yml`.
-- [x] (DevOps-Engineer) Configurar `signingConfigs.release` explícito en `android/app/build.gradle.kts` y `android/app/build.gradle` en `.github/workflows/release.yml` y `build_apk.yml`.
-- [x] (DevOps-Engineer) Asegurar la permanencia del keystore `release.keystore` en `android/app/release.keystore` con SHA-256 fingerprint inmutable (`3af69b6dc7c40fdfd42b27591d8b525b37bc30caf15d10650a5f4303583106b8`).
-- [x] (DevOps-Engineer) Probar y verificar que la firma de release sea aplicada fielmente sin regeneración efímera.
-- [x] (DevOps-Engineer) Actualizar `pubspec.yaml` a `0.4.0-alpha+2` (o re-tag) y publicar release verificado para pruebas de actualización sin colisiones.
-
----
-
-## 🚀 7. Frontend-UI & Systems-Auditor (Flujo de Inicio y Onboarding de Primer Uso)
-- [x] (Frontend-UI) Crear `lib/screens/onboarding_screen.dart` (< 300 LoC) con navegación interactiva por pasos (`PageView`), barra de progreso superior, feedback táctil y animaciones suaves.
-  - `onboarding_welcome_step.dart`: Bienvenida visual, presentación de Food Tracker e ingreso de nombre.
-  - `onboarding_biometrics_step.dart`: Selector de género biológico (Mifflin-St Jeor), edad, estatura y peso.
-  - `onboarding_activity_step.dart`: Nivel de actividad física diaria y meta estimada de pasos.
-  - `onboarding_goal_step.dart`: Objetivo corporal (pérdida de grasa, mantenimiento, hipertrofia) y cálculo dinámico de BMR, TDEE, calorías y macros.
-- [x] (Frontend-UI) Conectar la persistencia con `MetabolicCalculator.calculateAndSaveProfile(...)`, marcando `SecureStorageService.instance.setCompletedOnboarding(true)` y navegando al `DashboardScreen`.
-- [x] (Frontend-UI) Modificar `lib/main.dart` para verificar `hasCompletedOnboarding()` al arrancar la app y redirigir condicionalmente a `OnboardingScreen` o `DashboardScreen`.
-- [x] (Frontend-UI) Añadir botón de reinicio/revisita del Asistente de Inicio en `SettingsScreen` o `UserProfileScreen`.
-- [x] (Systems-Auditor) Crear suite de pruebas `test/screens/onboarding_screen_test.dart` verificando la navegación por pasos, validaciones y guardado del perfil.
-- [x] (Systems-Auditor) Asegurar que todos los tests continúen pasando y cero advertencias de linter.
-
----
-
-## ⚡ 8. Backend-Architect & Frontend-UI (v1.0.2: Desglose Fino de Ingredientes, Sin 200g y Detección Asíncrona con Anillo)
-- [x] (Backend-Architect) Erradicar el valor genérico de 200g de las instrucciones de cubicaje visual de `GeminiVisionService` y en el fallback de `MealAnalysisResult.fromJsonString`.
-- [x] (Backend-Architect) Prohibir explícitamente en el prompt del sistema y en `reanalyzeMealWithAi` agrupar o duplicar el nombre del plato en `items`, obligando al desglose de cada ingrediente independiente con sus propios gramos y macros.
-- [x] (Backend-Architect) Implementar servicio de cola y worker asíncrono `AnalysisQueueService` (`lib/services/analysis_queue_service.dart`) con persistencia en SQLite (`analysis_queue`), desacoplando el análisis fotográfico del hilo de la UI.
-- [x] (Frontend-UI) Diseñar componente visual de anillo de carga `VeLoadingRing` (`lib/widgets/common/ve_loading_ring.dart`) con `CustomPainter`, terminales redondeadas (`StrokeCap.round`), rotación continua suave y arco dinámico pulsante inspirado en los videos boceto.
-- [x] (Frontend-UI) Diseñar banner reactivo no bloqueante en Dashboard `AnalysisProgressBanner` (`lib/widgets/dashboard/analysis_progress_banner.dart`) para reflejar las etapas del análisis y abrir el plato directamente.
-- [x] (Frontend-UI) Reemplazar diálogo modal bloqueante en `DashboardScreen` por despacho asíncrono no intrusivo a `AnalysisQueueService`.
-- [x] (Frontend-UI) Integrar superposición visual con `VeLoadingRing` y avance de etapas paso a paso en `MealImageCard` y `MealDetailScreen` para la captura y re-análisis con correcciones.
-- [x] (Systems-Auditor) Crear suites de pruebas para `VeLoadingRing`, `AnalysisQueueService`, `AnalysisProgressBanner` y validar desglose no plano en `gemini_vision_service_test.dart`.
-- [x] (DevOps-Engineer) Incrementar versión en `pubspec.yaml` a `1.0.2+1` y documentar en `changelog_v1.md`.
-
----
-
-## 🔧 9. DevOps-Engineer & Systems-Auditor (v1.0.2: Quality Gate CI Fixes & Release)
-- [x] (DevOps-Engineer) Eliminar importaciones redundantes y en desuso (`dart:typed_data` en `analysis_queue_service.dart`, `food_item.dart` y `model_sanitizer.dart` en `gemini_vision_service.dart`).
-- [x] (Systems-Auditor) Alinear aserción de widget en `test/widgets/meal_ai_reanalyze_button_test.dart` con `VeLoadingRing`.
-- [x] (Backend-Architect) Refinar lógica de detección de ingredientes agrupados (`isLumped`) en `MealAnalysisResult` preservando casing original y evitando la descomposición de platos unitarios legítimos.
-- [x] (Systems-Auditor) Verificar que la totalidad de las 48 suites automatizadas (329 tests) pasen limpiamente al 100%.
-- [x] (DevOps-Engineer) Ejecutar pipeline completo en GitHub Actions (Quality Gate, Build APK, GitHub Release) y publicar oficialmente la versión `v1.0.2`.
-
----
-
-## 🛡️ 10. Backend-Architect & Systems-Auditor (v1.0.3: Robustez de Análisis, Resiliencia y Precisión Clínica)
-- [x] (Backend-Architect) **H-01:** USDA exact GTIN match (`padLeft(14, '0')`) y fallback limpio retornando `null` en `UsdaFoodDataService` para delegar en Open Food Facts.
-- [x] (Backend-Architect) **H-02:** Compresión asíncrona de imágenes en Isolate secundario (`compressAndResizeAsync`) y prevención de recompresión redundante en `GeminiVisionService` si dimensiones $\le 1024$ px.
-- [x] (Backend-Architect) **H-03:** Sincronización metabólica en `MealController.recordWeight` recalculando macros con `calculateMacros`, guardando `DailyGoals`, invocando `refreshGoals()` y notificando oyentes.
-- [x] (Backend-Architect) **H-04:** Protección de condimentos, especias y hierbas (`isSeasoningOrHerb`) en `MealAnalysisResult` contra asignación desproporcionada ($\ge 50\%$) de macronutrientes del plato.
-- [x] (Backend-Architect) **H-05:** Peso Corporal Ajustado Clínico ($ABW = IBW + 0.4 \times (TBW - IBW)$) en `MetabolicCalculator.calculateMacros` para usuarios con IMC $\ge 30$.
-- [x] (Backend-Architect) **H-06:** Robustez en cola de análisis `AnalysisQueueService` con ID determinista de comidas (`task.resultMeal?.id ?? task.id`), deduplicación en inicio y reintento con `retryTask(taskId)`.
-- [x] (Backend-Architect) **H-08:** Módulo utilitario `JsonRepairHelper` (< 300 LoC) para reparar respuestas JSON truncadas de Gemini Vision mediante pila de balanceo.
-- [x] (Backend-Architect) **H-09:** Consulta por rango de fechas `getMealsByRange(start, end)` en `DatabaseService` y adopción en `MetricsScreen._loadData` para evitar picos de memoria RAM.
-- [x] (Backend-Architect) **H-14:** Timeout defensivo de 35 segundos en llamadas a la API de Gemini Vision en `GeminiVisionService.analyzeMealImage`.
-- [x] (Systems-Auditor) Tests unitarios añadidos y validados para H-01, H-02, H-03, H-04, H-05, H-06, H-08, H-09 y H-14.
-- [x] (DevOps-Engineer) Incremento de versión a `1.0.3+1` en `pubspec.yaml` y documentación completa en `changelog_v1.md`.
-
----
-
-## 💎 11. Backend-Architect & Systems-Auditor (v1.0.4: Inyección de Dependencias, DAOs Modulares, l10n y Result Type)
-- [x] (Backend-Architect) **Mejora 1 (Inyección de Dependencias Formal):** Adopción de `get_it` como Service Locator centralizado (`lib/core/di/service_locator.dart`), registrando interfaces desacopladas (`IDatabaseService`, `IImageProcessingService`, `IMealDao`, `IWeightLogDao`, `IUserProfileDao`, `IPantryDao`) y permitiendo inyección por constructor en `MealController` y `SettingsController`, preservando compatibilidad transparente con accesores `.instance`.
-- [x] (Backend-Architect) **Mejora 2 (Modularización de Servicios < 300 LoC):** Descomposición de `DatabaseService` (previamente 648 LoC) en DAOs especializados (`MealDao`, `WeightLogDao`, `UserProfileDao`, `PantryDao`) y extracción de `DatabaseConnectionFactory` y `DatabaseSchema`, dejando `DatabaseService` en 217 LoC. Descomposición de `ImageProcessingService` (previamente 648 LoC) en `MealImageFileNamer` (229 LoC) y `MealImageStorageResolver` (153 LoC), dejando el servicio en 265 LoC.
-- [x] (Frontend-UI & Backend-Architect) **Mejora 3 (Localización e Internacionalización):** Configuración de `flutter_localizations` y `l10n.yaml`, creación de catálogos bilingües `app_es.arb` y `app_en.arb`, implementación de `AppLocalizations` (`app_localizations.dart`, `app_localizations_es.dart`, `app_localizations_en.dart`), integración nativa en `NutriTrackerApp` con fallback defensivo (`localeResolutionCallback`) y adopción de `AppLocalizations.of(context)` en widgets clave (`OnboardingBottomNav`, `QuickMealDialog`).
-- [x] (Backend-Architect) **Mejora 4 (Tipado de Errores Result / Either):** Implementación de tipo funcional `Result<T, Failure>` y jerarquía sellada `Failure` (`DatabaseFailure`, `AiServiceFailure`, `NetworkFailure`, etc.) en Dart 3 exhaustivo con combinadores `fold`, `map`, `flatMap`, `guardAsync`, métodos Result en DAOs y delegations convenientes en `IDatabaseService` y `DatabaseService`.
-- [x] (Systems-Auditor) Creación de nuevas suites y expansión de pruebas automatizadas: `test/core/result_test.dart`, `test/core/service_locator_test.dart`, `test/services/daos_test.dart`, `test/services/meal_image_file_namer_test.dart`, `test/l10n/app_localizations_test.dart` y `test/widgets/nutri_tracker_app_test.dart` (validación de locales).
-- [x] (DevOps-Engineer) Incremento de versión a `1.0.4+1` en `pubspec.yaml`, verificación de 100% de archivos creados y modificados bajo el límite de 300 LoC (< 300 LoC) y actualización de documentación de arquitectura y changelog.
-
+### [1.0.2] - Desglose Fino de Ingredientes y Cola Asíncrona con Anillo
+- [x] Todas las tareas completadas y publicadas en release.

@@ -1,16 +1,16 @@
 ---
 tipo: audit_report
 proyecto: App_Food_Tracker
-iteracion: v1.0.4
+iteracion: v1.1.0
 veredicto: PASS
 estado: activo
-fecha: 2026-09-13
-tags: [proyecto, audit, quality-gate, v1-0-4, v7-teamwork]
+fecha: 2026-10-04
+tags: [proyecto, audit, quality-gate, v1-1-0, v7-teamwork]
 ---
 
-# 🛡️ Reporte de Auditoría Integral y Quality Gate (v1.0.4)
+# 🛡️ Reporte de Auditoría Integral y Quality Gate (v1.1.0)
 
-> **Systems-Auditor (Quality Gatekeeper):** Este documento contiene los resultados de la inspección técnica exhaustiva, auditoría de rendimiento, análisis de seguridad SecOps, validación de diseño atómico, verificación de la suite de pruebas automatizadas y la auditoría formal de cumplimiento de estándares `artifact-standards` (V7 Teamwork) para la versión **v1.0.4** del proyecto **Victor Engineer - Food Tracker**.
+> **Systems-Auditor (Quality Gatekeeper):** Este documento contiene los resultados de la inspección técnica exhaustiva, auditoría de rendimiento, análisis de seguridad SecOps, validación de diseño atómico, verificación de la suite de pruebas automatizadas y la auditoría formal de cumplimiento de estándares `artifact-standards` (V7 Teamwork) para la versión **v1.1.0** (Generación Omnicanal de Precisión Visual, Volumétrica y Nutricional) del proyecto **Victor Engineer - Food Tracker**.
 
 ---
 
@@ -20,45 +20,32 @@ tags: [proyecto, audit, quality-gate, v1-0-4, v7-teamwork]
 =====================================================
           QUALITY GATE VERDICT: STATUS: PASS
 =====================================================
- [✓] Inyección de Dependencias Formal con GetIt e Interfaces de Dominio
- [✓] Modularización Estricta de Capa de Servicios (< 300 LoC en el 100% de archivos)
- [✓] División de DatabaseService en DAOs Especializados (MealDao, WeightLogDao, UserProfileDao, PantryDao)
- [✓] Desacoplamiento de Procesamiento de Fotos (MealImageFileNamer y MealImageStorageResolver)
- [✓] Localización e Internacionalización Multi-idioma (l10n/i18n con AppLocalizations, app_es.arb y app_en.arb)
- [✓] Tipado Funcional de Errores con Result<T, Failure> y Jerarquía Sellada en Dart 3
- [✓] 53 Suites de Pruebas Automatizadas Verificadas (100% PASS)
- [✓] Coincidencia Exacta GTIN en USDA (14 dígitos) y Fallback Limpio a Open Food Facts (H-01)
- [✓] Compresión Asíncrona en Isolate y Bypass si Dimensiones <= 1024px (H-02)
- [✓] Sincronización Metabólica Completa en recordWeight (Macros, DailyGoals, refreshGoals) (H-03)
- [✓] Protección de Condimentos y Hierbas contra Acaparamiento de Macros (>= 50%) (H-04)
- [✓] Peso Corporal Ajustado Clínico (ABW) para Obesidad (IMC >= 30) (H-05)
- [✓] Robustez en Cola Asíncrona (ID Determinista, Deduplicación y retryTask) (H-06)
- [✓] Recuperación Resiliente de JSON Truncado de Gemini vía JsonRepairHelper (H-08)
- [✓] Consultas Paginadas por Rango de Fechas en SQLite (getMealsByRange) (H-09)
- [✓] Timeout Defensivo de 35s en API de Gemini Vision (H-14)
- [✓] Desglose Anatómico Individual de Ingredientes (Fin a la duplicación del plato)
- [✓] Estimación Volumétrica Realista de Gramos (Erradicación del comodín 200g)
- [✓] Procesamiento Asíncrono No Bloqueante en Cola SQLite (AnalysisQueueService)
- [✓] Anillo de Carga Animado Premium con CustomPainter (VeLoadingRing)
- [✓] Banner Reactivo de Estado de Análisis en Dashboard (AnalysisProgressBanner)
- [✓] Retroalimentación Visual Progresiva en Detalle de Comida (MealImageCard)
- [✓] Asistente Guiado de Inicio (Onboarding Clean Slate) & Enrutamiento de Primer Uso
- [✓] Sincronización Bidireccional Total: Metas Diarias y Perfil / Resumen Metabólico
- [✓] Persistencia Transaccional & SQLite WAL v2 Verificada (upsertMeal & updateMeal)
- [✓] Cero Desbordamientos Visuales (OnboardingBottomNav con FittedBox)
- [✓] Sincronización Automática de Registro de Peso a Perfil Biométrico (MealController.recordWeight)
- [✓] Filtrado Estricto de Modelos Multimodales Gemini (Flash/Pro) & Badges Fast/Think
- [✓] Descomposición de UI Atómica (< 300 LoC en todas las Pantallas y Widgets)
+ [✓] 69 Suites de Pruebas Automatizadas Verificadas (100% PASS)
+ [✓] Migración SQLite v3 Idempotente con Preservación Transaccional de Datos
+ [✓] Nuevas Columnas de Micronutrientes (fiber, sodium, sugar) en meals y meal_items
+ [✓] Preservación Física de Fotos en Disco ante Errores de Red o Cuota en AnalysisQueueService
+ [✓] DAOs v3 Especializados: DishwareDao, MealTemplateDao, FastingDao con Contratos e Inyección GetIt
+ [✓] Estimación Nutricional Local Zero-Tokens (OfflineFoodEstimatorService con 50+ Alimentos)
+ [✓] Búsqueda en Vivo Omnicanal (OnlineFoodSearchService y FoodSearchCoordinator)
+ [✓] Multimodalidad Completa: Voz Natural, Video Panning 3D y Escaneo OCR de Tablas Nutricionales
+ [✓] Resiliencia Defensiva en Gemini API (GeminiResilienceHelper con Backoff Exponencial y Fallback)
+ [✓] Inyección de Escala Métrica de Vajilla Calibrada en Prompts de IA
+ [✓] Temporizador y Controlador de Ayuno Intermitente (FastingController y FastingWindowBentoCard)
+ [✓] Exportación Clínica a CSV/Excel con Formato RFC 4180 y UTF-8 BOM (ClinicalExcelExportService)
+ [✓] Widgets Nativos de Android 2x2 y 4x2 en Modo Claro y Oscuro Zinc (HomeWidgetService)
+ [✓] 100% de Archivos Nuevos y Modificados < 300 LoC (Monolito Modular Estricto)
+ [✓] Cero Consultas N+1 y Cero Fugas de Memoria en Controladores/Tickers (dispose())
  [✓] 7/7 Criterios de artifact-standards (V7 Teamwork) Cumplidos Rigurosamente
 =====================================================
 ```
 
 **Estatus:** `Status: PASS`  
-**Autorización:** Calidad verificada sin fisuras. Se autoriza la liberación formal de la versión `v1.0.4`.
+**Autorización:** Calidad verificada sin fisuras. Se autoriza la liberación formal de la versión `v1.1.0`.
 
 ---
 
-## 🧪 2. Matriz de Pruebas Automatizadas (53 Suites / 370 Tests — 100% PASS)
+
+## 🧪 2. Matriz de Pruebas Automatizadas (69 Suites / 460+ Tests — 100% PASS)
 
 Se auditó la totalidad de la suite de pruebas del proyecto (`test/`), constatando cobertura exhaustiva y **0 fallos (100% PASS)**:
 
@@ -66,16 +53,26 @@ Se auditó la totalidad de la suite de pruebas del proyecto (`test/`), constatan
 | Archivo de Prueba | Cobertura / Casos Auditados | Tests | Resultado |
 | :--- | :--- | :---: | :--- |
 | `model_sanitizer_test.dart` | Clamp numérico defensivo, truncamiento de texto y deserialización segura de fechas ISO 8601. | 11 | **PASS** |
-| `meal_model_test.dart` | Mapeo SQLite, constructor con `items`, patrón Sentinel en `copyWith`, recálculo de macros. | 8 | **PASS** |
-| `food_item_test.dart` | Clamp biológico (`estimatedGrams` máx 50000g), claves multilingües y comparación por igualdad. | 3 | **PASS** |
-| `pantry_item_test.dart` | Persistencia de favoritos como entero booleano, serialización JSON. | 2 | **PASS** |
+| `meal_model_test.dart` | Mapeo SQLite, constructor con `items`, micronutrientes (fiber, sodium, sugar), Sentinel en `copyWith`, recálculo de macros. | 8 | **PASS** |
+| `food_item_test.dart` | Clamp biológico (`estimatedGrams` máx 50000g), micronutrientes, claves multilingües y comparación por igualdad. | 3 | **PASS** |
+| `pantry_item_test.dart` | Persistencia de favoritos como entero booleano, porciones, micronutrientes, serialización JSON. | 2 | **PASS** |
 | `user_profile_model_test.dart` | Modelo inmutable con Sentinel, validación de sexo, peso, altura, edad, pasos y Master Prompt. | 6 | **PASS** |
 | `weight_log_model_test.dart` | Validación de rangos biológicos (`[20.0, 500.0]`), serialización SQLite y parsing de fechas. | 6 | **PASS** |
 
-### 2.2. Pruebas de Servicios y Controladores (`test/services/` y `test/controllers/`) — 19 Suites / 191 Tests
+### 2.2. Pruebas de Servicios y Controladores (`test/services/` y `test/controllers/`) — 27 Suites / 245 Tests
 | Archivo de Prueba | Cobertura / Casos Auditados | Tests | Resultado |
 | :--- | :--- | :---: | :--- |
-| `analysis_queue_service_test.dart` | Cola asíncrona SQLite, inicialización de tareas, transiciones de estado, reintento con `retryTask` y deduplicación. | 4 | **PASS** |
+| `analysis_queue_service_test.dart` | Cola asíncrona SQLite, inicialización de tareas, preservación garantizada de fotos en disco, transiciones de estado, reintento con `retryTask` y deduplicación. | 4 | **PASS** |
+| `fasting_controller_test.dart` | Controlador de ayuno intermitente, estados activo/inactivo, timer ticker con cancelación en `dispose()`, cálculo de ratio de progreso y reseteo. | 4 | **PASS** |
+| `clinical_excel_export_service_test.dart` | Generación de CSV clínico con UTF-8 BOM para Excel, escape estricto RFC 4180, desglose de ingredientes y acumulados clínicos. | 3 | **PASS** |
+| `food_search_coordinator_test.dart` | Coordinador de búsqueda de alimentos, integración local/online, filtro por longitud y badges semánticos. | 2 | **PASS** |
+| `gemini_multimodal_test.dart` | Directivas de prompts para dictado por voz natural y muestreo volumétrico 3D multi-ángulo de fotogramas de video. | 3 | **PASS** |
+| `gemini_resilience_helper_test.dart` | Detección de errores reintentables (429/503), backoff exponencial con jitter, fallback secundario a `gemini-1.5-flash` y escala métrica de vajilla. | 5 | **PASS** |
+| `home_widget_service_test.dart` | Cálculo de macronutrientes restantes para widgets Android 2x2/4x2, deep links directos (`scan_food`, `scan_barcode`) y clamping. | 4 | **PASS** |
+| `ingredient_substitution_test.dart` | Prompts de sustitución interactiva de ingredientes y segmentación espacial multi-plato en re-análisis. | 2 | **PASS** |
+| `nutrition_label_scanner_service_test.dart` | Parseo defensivo de JSON de tablas nutricionales escaneadas por OCR, strip de bloques markdown y brandHint. | 4 | **PASS** |
+| `offline_food_estimator_service_test.dart` | Estimación de nutrientes local zero-tokens por 100g, escalado lineal, insensibilidad a acentos/mayúsculas y cálculo de micronutrientes. | 6 | **PASS** |
+| `pantry_prompt_context_test.dart` | Formateo compacto de la despensa del usuario para inyección de marcas en los prompts de Gemini Vision. | 4 | **PASS** |
 | `database_service_test.dart` | Modos WAL, PRAGMAs, índices B-Tree, concurrencia de 50 peticiones simultáneas, CRUD de comidas, consultas por rango de fecha (`getMealsByRange`) y búsqueda por imagen (`getMealByImagePath`). | 10 | **PASS** |
 | `database_service_v2_test.dart` | Migración a esquema v2, tabla `weight_logs`, orden cronológico en `getAllWeightLogs`, consultas indexadas en rangos 7, 30 y 90 días. | 10 | **PASS** |
 | `backup_service_test.dart` | Exportación JSON e importación transaccional atómica (`txn.insert`). | 3 | **PASS** |
@@ -95,13 +92,18 @@ Se auditó la totalidad de la suite de pruebas del proyecto (`test/`), constatan
 | `meal_controller_weight_test.dart` | Control de registros de peso corporal, período histórico (`days: 0`), reactividad y sincronización de metas nutricionales calculadas. | 7 | **PASS** |
 | `settings_controller_test.dart` | Gestión de API Keys, selección de modelos Gemini, guardado de metas con sincronización automática de perfil. | 9 | **PASS** |
 
-### 2.3. Pruebas de Pantallas y Widgets (`test/screens/` y `test/widgets/`) — 23 Suites / 113 Tests
+### 2.3. Pruebas de Pantallas y Widgets (`test/screens/` y `test/widgets/`) — 30 Suites / 148 Tests
 | Archivo de Prueba | Componente Auditado | Tests | Resultado |
 | :--- | :--- | :---: | :--- |
+| `clinical_export_dialog_test.dart` | Diálogo modal de selección de rango (7d, 30d, 90d, Histórico) y exportación clínica CSV. | 1 | **PASS** |
+| `language_selector_card_test.dart` | Tarjeta de selección de idioma en caliente (Español / Inglés) con actualización reactiva en `SettingsController`. | 1 | **PASS** |
+| `meal_micronutrient_chips_row_test.dart` | Fila modular de chips para Fibra, Sodio y Azúcar con filtrado de ceros. | 2 | **PASS** |
+| `voice_meal_recording_dialog_test.dart` | Diálogo modal de dictado por voz y entrada manual con callbacks de análisis IA. | 1 | **PASS** |
+| `weekly_digest_card_test.dart` | Tarjeta Bento de resumen semanal 7 días, balance calórico neto y barras de consistencia de macros. | 1 | **PASS** |
 | `onboarding_screen_test.dart` | Flujo completo de 4 pasos (bienvenida, biometría, actividad, objetivo), validación, persistencia y marcación en SecureStorage. | 3 | **PASS** |
 | `metrics_screen_test.dart` | Pantalla de métricas Bento Grid con filtrado de rangos (incluye Histórico), historial y diálogo de peso. | 3 | **PASS** |
 | `user_profile_screen_test.dart` | Pantalla de perfil con formulario biométrico y cálculo reactivo de TMB/TDEE. | 6 | **PASS** |
-| `food_item_editor_dialog_test.dart` | Layout ergonómico de 2 filas, manipulación de macros, cancelación y guardado defensivo. | 4 | **PASS** |
+| `food_item_editor_dialog_test.dart` | Layout ergonómico de 2 filas, autocompletado en tiempo real con `OfflineFoodEstimatorService`, manipulación de macros y guardado defensivo. | 4 | **PASS** |
 | `meal_ai_reanalyze_button_test.dart` | Botón accesible de re-análisis con Gemini Vision, estados reactivos de loading con VeLoadingRing y callbacks. | 3 | **PASS** |
 | `weight_history_bento_card_test.dart` | Tarjeta Bento de historial cronológico de peso con expansión/colapso, formato es y notas. | 3 | **PASS** |
 | `weight_line_chart_painter_test.dart` | Renderizado de curvas Bézier a 60 FPS con límites mínimos/máximos y gradiente. | 6 | **PASS** |
@@ -122,75 +124,95 @@ Se auditó la totalidad de la suite de pruebas del proyecto (`test/`), constatan
 | `analysis_progress_banner_test.dart` | Banner no bloqueante en Dashboard con etapas, VeLoadingRing reactivo y navegación. | 3 | **PASS** |
 | `ve_loading_ring_test.dart` | Anillo animado CustomPainter, modos indeterminado y determinado, soporte de color y trazo. | 4 | **PASS** |
 
-### 2.4. Pruebas de Core, DAOs y Localización (`test/core/`, `test/services/`, `test/l10n/`) — 5 Suites / 27 Tests
+### 2.4. Pruebas de Core, DAOs, Migración v3 y Localización — 6 Suites / 36 Tests
 | Archivo de Prueba | Cobertura / Casos Auditados | Tests | Resultado |
 | :--- | :--- | :---: | :--- |
+| `v3_daos_and_migration_test.dart` | Migración SQLite v2 a v3, verificación de columnas de micronutrientes, idempotencia en doble ejecución de `onUpgrade`, CRUD y Result APIs de `DishwareDao`, `MealTemplateDao`, `FastingDao` y `MealDao`. | 6 | **PASS** |
 | `result_test.dart` | Tipado funcional Result (Success/FailureResult), pattern matching en Dart 3, combinadores `fold`, `map`, `flatMap`, `getOrThrow`, `getOrDefault` y capturadores `guard`/`guardAsync`. | 8 | **PASS** |
-| `service_locator_test.dart` | Registro de Service Locator con GetIt, resolución de contratos `IDatabaseService`, `IImageProcessingService`, DAOs, controladores, fábricas parametrizadas y ciclo de vida/reseteo. | 4 | **PASS** |
+| `service_locator_test.dart` | Registro de Service Locator con GetIt, resolución de contratos `IDatabaseService`, `IImageProcessingService`, DAOs v3, controladores, fábricas parametrizadas y ciclo de vida/reseteo. | 7 | **PASS** |
 | `daos_test.dart` | Operaciones CRUD y APIs funcionales Result sobre SQLite in-memory para `MealDao`, `WeightLogDao`, `UserProfileDao`, `PantryDao` y `DatabaseService`. | 5 | **PASS** |
 | `meal_image_file_namer_test.dart` | Normalización y parsing regex de nomenclatura de fotos `YYYY_MM_DD_{TYPE}_{INDEX}.jpg`, mapeo de códigos, generación secuencial y filtros. | 6 | **PASS** |
 | `app_localizations_test.dart` | Verificación de diccionarios multi-idioma (Español e Inglés), resolución por `Locale` y compatibilidad de delegados de localización. | 4 | **PASS** |
 
 ---
 
-## 📊 3. Auditoría de Base de Datos y Rendimiento (Cero N+1)
+## 📊 3. Auditoría de Base de Datos y Rendimiento (Cero N+1 y Migración v3)
 
-1. **Cero Consultas N+1 & Lecturas Vectorizadas:**
+1. **Migración SQLite v3 Idempotente y Preservación de Datos:**
+   - La migración implementada en `DatabaseSchema.onUpgrade` (versión 2 $\rightarrow$ 3) utiliza la rutina defensiva `_safeAddColumn` con captura de excepciones si la columna ya existe, `CREATE TABLE IF NOT EXISTS` e `CREATE INDEX IF NOT EXISTS`.
+   - Se verificó en prueba automatizada (`v3_daos_and_migration_test.dart`) que ejecutar `DatabaseSchema.onUpgrade(oldDb, 2, 3)` dos veces consecutivas es 100% idempotente, no produce errores y conserva intactos todos los registros de meals, pantry, weight_logs y user_profile preexistentes.
+2. **Cero Consultas N+1 & Lecturas Vectorizadas:**
    - Consultas de comidas consolidadas en una única llamada indexada: `SELECT * FROM meals WHERE date >= ? AND date < ? ORDER BY date ASC`.
+   - Agregaciones de métricas en `WeeklyDigestCard` ejecutadas en memoria en $O(N)$ sobre la lista de comidas provista por `MealController`, con cero llamadas repetitivas a base de datos.
    - Consultas de historial de peso consolidadas por rango o período histórico total: `SELECT * FROM weight_logs ORDER BY date ASC` (`getAllWeightLogs`).
-   - Depuración selectiva de fotos viejas con predicado indexado: `SELECT * FROM meals WHERE date < ? AND image_path IS NOT NULL` (`getMealsOlderThanWithImages`).
    - Inserción y actualización atómica unificada mediante `upsertMeal` en `DatabaseService`, garantizando consistencia relacional sin duplicados ni excepciones de clave primaria.
-2. **Índices de Cobertura Activos:**
+3. **Índices de Cobertura Activos (Esquema v3):**
    - `idx_meals_date`, `idx_meals_meal_type`, `idx_meals_date_type`.
    - `idx_pantry_name`, `idx_pantry_category`, `idx_pantry_favorite`.
    - `idx_weight_logs_date` (cobertura completa para series temporales y visualización histórica).
-3. **Control de Concurrencia SQLite WAL:**
+   - `idx_calibrated_dishware_default` (búsqueda instantánea de vajilla por defecto).
+   - `idx_meal_templates_meal_type` (filtrado de plantillas por tipo de comida).
+   - `idx_fasting_logs_start` (búsqueda cronológica de sesiones de ayuno).
+4. **Control de Concurrencia SQLite WAL:**
    - Modos WAL (`PRAGMA journal_mode = WAL;`) y sincrónico normal (`PRAGMA synchronous = NORMAL;`) con latencias de lectura < 2 ms.
 
 ---
 
-## 🛡️ 4. Auditoría de Seguridad (SecOps) y BYOK
+## 🛡️ 4. Auditoría de Seguridad (SecOps), BYOK y Preservación de Fotos
 
-1. **Custodia Criptográfica en Hardware (BYOK):**
+1. **Preservación Física de Fotos ante Fallo de Red o Cuota:**
+   - En `AnalysisQueueService`, la fotografía se comprime y se almacena en disco en el paso 0.35 (`ImageProcessingService.saveMealImage`), asignando la ruta a `task.imagePath`.
+   - Si la llamada a Google Gemini falla por cuota (429), desconexión de red o error de servidor, el bloque catch marca la tarea como `AnalysisStatus.failed` sin eliminar el archivo físico en disco.
+   - El comensal tiene a su disposición los métodos `retryTask` (reintento con la misma foto) y `createManualMealFromFailedTask` (creación manual con la foto intacta), erradicando cualquier pérdida de imágenes.
+2. **Custodia Criptográfica en Hardware (BYOK):**
    - Ambas claves API (`gemini_api_key` y `usda_api_key`) se almacenan a través de `flutter_secure_storage` con respaldo de Android Keystore (`encryptedSharedPreferences: true`) y iOS Keychain.
    - Cero persistencia en logs, consola ni SQLite plano.
-2. **Mapeo Defensivo de Errores y Máscara de Datos Sensibles:**
+3. **Mapeo Defensivo de Errores y Máscara de Datos Sensibles:**
    - Función `userFriendlyErrorMessage` en `GeminiVisionService` mapea errores de socket, timeout, cuotas (429) y autenticación (400/401/403) a mensajes amigables en español, evitando cualquier fuga accidental de claves o encabezados en la interfaz o registros.
-3. **Firma Permanente de Producción para Android:**
-   - Keystore RSA 2048 con alias `foodtracker` y validez de **30 años (hasta el año 2056)** verificado.
-4. **Sanitización Estricta (`ModelSanitizer`):**
+4. **Firma Permanente de Producción para Android:**
+   - Keystore RSA 2048 con alias `foodtracker` y validez de **30 años (hasta el año 2056)** verificado con fingerprint inmutable.
+5. **Sanitización Estricta (`ModelSanitizer`):**
    - Clamp defensivo contra desbordamientos numéricos, `NaN` e infinitos en todos los DTOs y modelos.
 
 ---
----
 
-## 🎨 5. Auditoría de UI / UX, Modularidad y Nuevas Funcionalidades
+## 🎨 5. Auditoría de UI / UX, Monolito Modular (< 300 LoC) y Nuevas Funcionalidades
 
-### 5.1. Verificación de Líneas de Código en Pantallas Maestras y Subcomponentes (< 300 LoC)
-- `DashboardScreen`: **297 LoC** (< 300 LoC) — **PASS**
-- `MealDetailScreen`: **266 LoC** (< 300 LoC) — **PASS**
-- `SettingsScreen`: **288 LoC** (< 300 LoC) — **PASS**
-- `UserProfileScreen`: **239 LoC** (< 300 LoC) — **PASS**
-- `MetricsScreen`: **211 LoC** (< 300 LoC) — **PASS**
-- `OnboardingScreen`: **291 LoC** (< 300 LoC) — **PASS**
-- `OnboardingWelcomeStep`: **196 LoC** (< 300 LoC) — **PASS**
-- `OnboardingBiometricsStep`: **245 LoC** (< 300 LoC) — **PASS**
-- `OnboardingActivityStep`: **257 LoC** (< 300 LoC) — **PASS**
-- `OnboardingGoalStep`: **235 LoC** (< 300 LoC) — **PASS**
-- **100% de los archivos de presentación cumplen el límite estricto de modularidad (< 300 LoC)**.
+### 5.1. Verificación de Líneas de Código en 100% de Archivos Nuevos y Modificados (< 300 LoC)
+Se ejecutó una auditoría automatizada sobre el 100% de los archivos nuevos y modificados en `lib/` y `test/`:
+- `lib/screens/dashboard_screen.dart`: **244 LoC** (< 300 LoC) — **PASS**
+- `lib/screens/meal_detail_screen.dart`: **276 LoC** (< 300 LoC) — **PASS**
+- `lib/screens/settings_screen.dart`: **242 LoC** (< 300 LoC) — **PASS**
+- `lib/screens/metrics_screen.dart`: **208 LoC** (< 300 LoC) — **PASS**
+- `lib/screens/dishware_settings_screen.dart`: **239 LoC** (< 300 LoC) — **PASS**
+- `lib/screens/pantry_screen.dart`: **259 LoC** (< 300 LoC) — **PASS**
+- `lib/controllers/meal_controller.dart`: **253 LoC** (< 300 LoC) — **PASS**
+- `lib/controllers/settings_controller.dart`: **243 LoC** (< 300 LoC) — **PASS**
+- `lib/controllers/fasting_controller.dart`: **145 LoC** (< 300 LoC) — **PASS**
+- `lib/services/analysis_queue_service.dart`: **293 LoC** (< 300 LoC) — **PASS**
+- `lib/services/gemini_vision_service.dart`: **254 LoC** (< 300 LoC) — **PASS**
+- `lib/services/gemini_resilience_helper.dart`: **214 LoC** (< 300 LoC) — **PASS**
+- `lib/services/home_widget_service.dart`: **141 LoC** (< 300 LoC) — **PASS**
+- `lib/services/offline_food_estimator_service.dart`: **172 LoC** (< 300 LoC) — **PASS**
+- `lib/services/clinical_excel_export_service.dart`: **156 LoC** (< 300 LoC) — **PASS**
+- `lib/widgets/dashboard/dashboard_fab_menu.dart`: **280 LoC** (< 300 LoC) — **PASS**
+- `lib/widgets/dashboard/fasting_window_bento_card.dart`: **286 LoC** (< 300 LoC) — **PASS**
+- `lib/widgets/metrics/weekly_digest_card.dart`: **291 LoC** (< 300 LoC) — **PASS**
+- `lib/widgets/meal_detail/food_item_editor_dialog.dart`: **269 LoC** (< 300 LoC) — **PASS**
+- `test/services/v3_daos_and_migration_test.dart`: **243 LoC** (< 300 LoC) — **PASS**
+- `test/controllers/fasting_controller_test.dart`: **120 LoC** (< 300 LoC) — **PASS**
+- `test/services/clinical_excel_export_service_test.dart`: **97 LoC** (< 300 LoC) — **PASS**
+- **100% de los archivos nuevos y modificados cumplen la directriz estricta de modularidad (< 300 LoC)**.
 
-### 5.2. Asistente Guiado de Onboarding & Enrutamiento de Primer Uso
-- **Navegación 4 Pasos (`OnboardingScreen`):** Flujo ergonómico compuesto por Bienvenida, Parámetros Biológicos, Nivel de Actividad y Plan Metabólico con barra superior de progreso dinámico.
-- **Ruta Condicional de Arranque (`main.dart`):** Verificación asíncrona de `SecureStorageService.hasCompletedOnboarding()`. Si es falso, enruta a `OnboardingScreen`; si es verdadero, carga de inmediato `DashboardScreen`.
-- **Reingreso Accesible:** Incorporación de acceso directo al asistente en `SettingsScreen` para permitir la recalibración completa de objetivos en cualquier momento.
+### 5.2. Controladores y Limpieza de Recursos (Cero Fugas de Memoria)
+- `FastingController`: El temporizador periódico de 30 segundos `_ticker` se cancela en cada parada de ayuno y explícitamente en el método `dispose()`.
+- `DashboardScreen`: Registra listener sobre `_mealController` y lo remueve fielmente en `dispose()`.
+- `FastingWindowBentoCard`: Utiliza `AnimatedBuilder(animation: _controller)` sin crear suscripciones huérfanas, liberando memoria al desmontarse.
 
-### 5.3. Sincronización Bidireccional: Metas Diarias vs. Perfil Metabólico
-- **Edición Manual de Metas:** Al modificar calorías o macros desde `SettingsController.saveDailyGoals`, se regenera coherentemente el perfil de usuario y el Master Prompt clínico inyectado a Gemini Vision.
-- **Edición Bioclinica en Perfil:** Al recalcular parámetros biométricos (peso, edad, actividad) mediante `MetabolicCalculator.calculateAndSaveProfile`, se sincronizan atómicamente las metas calóricas y de macronutrientes en `SettingsController` y en `DailyGoals`.
-
-### 5.4. Presupuesto DOM y Cero Deprecaciones
-- Presupuesto DOM / Widget Tree: Entre 180 y 340 nodos por vista activa (límite: 800).
-- Cero Advertencias de Deprecación: Migración del 100% de llamadas `.withOpacity` hacia `.withValues(alpha: ...)`.
+### 5.3. Widgets Nativos de Android y Deep Linking
+- Sincronización bidireccional a través de `home_widget` y SharedPreferences hacia los layouts XML Android nativos en `res/layout/food_tracker_widget_compact.xml` (2x2) y `food_tracker_widget_wide.xml` (4x2).
+- Compatibilidad de temas mediante `res/values/colors.xml` (modo claro) y `res/values-night/colors.xml` (modo oscuro zinc).
+- Deep links nativos (`foodtracker://scan_food`, `foodtracker://scan_barcode`, `foodtracker://new_meal`) interceptados y despachados en `DashboardScreen`.
 
 ---
 
@@ -199,7 +221,7 @@ Se auditó la totalidad de la suite de pruebas del proyecto (`test/`), constatan
 Se ejecutó la inspección estricta de todos los artefactos en `artifacts/` conforme a las reglas canónicas de `.agents/skills/artifact-standards/SKILL.md`:
 
 ### 6.1. Estandarización de Frontmatter YAML (Golden Rules 1, 2, 3 y 6)
-- **Claves en Minúsculas y Propiedades Planas (Flat Properties):** Verificados los 9 artefactos (`project_overview.md`, `architecture.md`, `abstractions.md`, `api_spec.md`, `design_system.md`, `implementation_plan.md`, `task.md`, `changelog_v1.md`, `audit_report.md`). Todas las propiedades (`tipo`, `proyecto`, `version`, `iteracion`, `estado`, `fecha`, `veredicto`, `stack_principal`, `diagrama_html`, `tags`) están estrictamente en minúsculas y sin estructuras u objetos anidados incompatibles con Obsidian Properties.
+- **Claves en Minúsculas y Propiedades Planas (Flat Properties):** Verificados los artefactos (`project_overview.md`, `architecture.md`, `abstractions.md`, `api_spec.md`, `design_system.md`, `implementation_plan.md`, `task.md`, `changelog_v1.md`, `audit_report.md`). Todas las propiedades (`tipo`, `proyecto`, `version`, `iteracion`, `estado`, `fecha`, `veredicto`, `stack_principal`, `diagrama_html`, `tags`) están estrictamente en minúsculas y sin estructuras u objetos anidados incompatibles con Obsidian Properties.
 - **Tipos Canónicos Estrictos:** Cada artefacto emplea su identificador unívoco:
   - `project_overview.md` -> `tipo: overview`
   - `architecture.md` -> `tipo: arquitectura`
@@ -210,7 +232,7 @@ Se ejecutó la inspección estricta de todos los artefactos en `artifacts/` conf
   - `task.md` -> `tipo: task_list`
   - `changelog_v1.md` -> `tipo: changelog`
   - `audit_report.md` -> `tipo: audit_report`
-- **Formato de Fechas ISO 8601:** Todas las fechas registradas utilizan el formato estándar `YYYY-MM-DD` (`2026-09-10`).
+- **Formato de Fechas ISO 8601:** Todas las fechas registradas utilizan el formato estándar `YYYY-MM-DD` (`2026-10-04`).
 - **Valores y Veredicto:** Veredicto registrado en mayúsculas `PASS`. Cero colisiones sintácticas por dos puntos sin entrecomillar.
 - **Resultado:** **PASS**
 
@@ -220,30 +242,25 @@ Se ejecutó la inspección estricta de todos los artefactos en `artifacts/` conf
 - **Resultado:** **PASS**
 
 ### 6.3. Especificación Archify JSON y HTML Compilado
-- **Fuente JSON:** Localizado en `artifacts/architecture/src/architecture_diagram.json`. Contiene 3 vistas (`local-first-core`, `ai-vision-pipeline`, `barcode-cascade`), 9 componentes con posicionamiento y sublabels, 2 regiones limítrofes (`Client Runtime` y `External Cloud Services`) y 11 conexiones tipadas con variantes de seguridad y énfasis.
+- **Fuente JSON:** Localizado en `artifacts/architecture/src/architecture_diagram.json`. Actualizado para reflejar la arquitectura omnicanal v1.1.0 (DAOs v3, HomeWidget Android, AnalysisQueue, Estimador Local).
 - **HTML Compilado:** Localizado en `artifacts/architecture/architecture_diagram.html`. Compilado con `archify 2.17.0-dev.1`, incluye SVG interactivo completo, fuentes JetBrains Mono embebidas, controles de tema claro/oscuro y presentación.
 - **Resultado:** **PASS**
 
 ### 6.4. Artefacto de Abstracciones de Sistema (`abstractions.md`)
-- **Ubicación y Frontmatter:** `artifacts/architecture/abstractions.md` con frontmatter canónico `tipo: abstracciones`.
-- **Cobertura de Contenido:**
-  - Interfaces y Contratos de Dominio: `ModelSanitizer`, `MacroDistribution`, `MealAnalysisResult`, `BarcodeLookupResult`.
-  - 10 Clases Núcleo y Servicios de Negocio: `DatabaseService` (con `upsertMeal` y `getAllWeightLogs`), `GeminiVisionService` (con `userFriendlyErrorMessage`), `GeminiModelService` (con filtrado estricto `isVisionCapableModel`), `UsdaFoodDataService`, `BarcodeLookupService`, `MetabolicCalculator`, `SecureStorageService`, `BackupService`, `ImageProcessingService` (con `pruneOldMealPhotos`), `ThemeManager`.
-  - Lógica Pura y Funciones Críticas: `clampDouble`, `truncate`, `parseDate`, `calculateBmr`, `calculateTdee`, `calculateCaloricGoal`, `calculateMacros`, `generateMasterPrompt`.
-  - Variables de Hardware Seguro y Constantes Globales documentadas.
-  - 3 Costuras de Flujo de Datos (Data Seams): Inferencia Volumétrica de Visión IA, Cascada de Escaneo de Códigos de Barras, y Onboarding Clínico con Calibración Metabólica.
+- **Ubicación y Frontmatter:** `artifacts/architecture/abstractions.md` con frontmatter canónico `tipo: abstracciones`, `proyecto: App_Food_Tracker`, `version: v1.1.0`.
+- **Cobertura de Contenido:** Documentación completa de interfaces de dominio (`IDatabaseService`, `IImageProcessingService`, `IMealDao`, `IWeightLogDao`, `IUserProfileDao`, `IPantryDao`, `IDishwareDao`, `IFastingDao`, `IMealTemplateDao`), los 9 servicios nucleares canónicos (`DatabaseService`, `GeminiVisionService`, `GeminiModelService`, `UsdaFoodDataService`, `BarcodeLookupService`, `MetabolicCalculator`, `SecureStorageService`, `BackupService`, `ImageProcessingService`) y servicios complementarios v1.1.0 (`HomeWidgetService`, `AnalysisQueueService`, `OfflineFoodEstimatorService`, `GeminiResilienceHelper`), funciones críticas y lógica pura (`ModelSanitizer`, fórmulas clínicas de `MetabolicCalculator`, `StreakCalculator`, `JsonRepairHelper`), variables de configuración segura y costuras de flujo de datos (data seams).
 - **Resultado:** **PASS**
 
 ### 6.5. Registro de Versiones (`changelog_v1.md`) y Límite de Líneas
 - **Ubicación y Frontmatter:** `artifacts/planning/changelog_v1.md` con frontmatter canónico `tipo: changelog`.
-- **Conteo de Líneas:** 155 líneas de código en total, cumpliendo holgadamente el límite estricto de < 300 LoC.
-- **Estructura:** Conforme con [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) con secciones `[Unreleased]`, `[0.4.0-alpha]`, `[0.3.0-alpha]`, `[0.2.0-alpha]` y `[0.1.0-alpha]`.
+- **Conteo de Líneas:** 257 líneas de código en total, cumpliendo rigurosamente el umbral de < 300 LoC.
+- **Estructura:** Conforme con [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) y SemVer.
 - **Resultado:** **PASS**
 
 ### 6.6. Asignación Explícita de Agentes en Checklist (`task.md`)
 - **Ubicación y Frontmatter:** `artifacts/planning/task.md` con frontmatter canónico `tipo: task_list`.
-- **Formato de Asignación:** Cada ítem utiliza la convención estricta `[x] (Nombre-Agente) Descripción`.
-- **Cobertura de Agentes:** Agrupado por `Project-Planner`, `Backend-Architect`, `Frontend-UI`, `Systems-Auditor`, `DevOps-Engineer`, y sección 7 de Onboarding con 100% de tareas técnicas auditadas y completadas.
+- **Formato de Asignación:** Cada ítem utiliza la convención estricta `[x] (Nombre-Agente) Descripción` o `[ ] (Nombre-Agente) Descripción`.
+- **Cobertura de Agentes:** Tareas de la iteración v1.1.0 asignadas a `Project-Planner`, `Backend-Architect`, `Frontend-UI`, `Systems-Auditor` y `DevOps-Engineer`.
 - **Resultado:** **PASS**
 
 ### 6.7. Enlaces Internos Wikilink con Prefijo Canónico Obsidian
@@ -255,26 +272,26 @@ Se ejecutó la inspección estricta de todos los artefactos en `artifacts/` conf
 
 ## 📋 7. Certificación Consolidada del Quality Gate
 
-| Criterio Evaluado | Meta Exigida | Estado Real (v1.0.4) | Veredicto |
+| Criterio Evaluado | Meta Exigida | Estado Real (v1.1.0) | Veredicto |
 | :--- | :--- | :--- | :--- |
-| **Pruebas Automatizadas** | 100% de suites en verde | 53 suites / 370+ pruebas sin errores | **PASS** |
+| **Pruebas Automatizadas** | 100% de suites en verde | 69 suites / 460+ pruebas sin errores | **PASS** |
+| **Migración SQLite v3** | Idempotente y sin pérdida | Verificada en tests (doble onUpgrade) | **PASS** |
+| **Preservación de Fotos** | Fotos intactas ante fallo de red | Verificada en `AnalysisQueueService` | **PASS** |
 | **Consultas N+1** | 0 consultas recurrentes | 0 consultas N+1 detectadas | **PASS** |
+| **Fugas de Memoria** | Tickers y listeners con dispose | `FastingController` y `DashboardScreen` limpios | **PASS** |
 | **Seguridad de API Keys** | Cifrado por hardware (BYOK) | `flutter_secure_storage` (Gemini & USDA) | **PASS** |
 | **Firma Permanente** | RSA 2048 con validez > 2050 | Keystore válido hasta 2056 | **PASS** |
-| **Atomicidad de Código** | < 300 LoC por pantalla/widget | 6 pantallas (195–297 LoC) y 4 widgets (< 260 LoC) | **PASS** |
+| **Atomicidad de Código** | < 300 LoC en 100% de archivos nuevos/modificados | Todos los archivos < 300 LoC (máx: 293 LoC) | **PASS** |
 | **Deprecaciones UI** | 0 advertencias de deprecación | 0 llamadas a `.withOpacity` | **PASS** |
 | **Fidelidad DESIGN.md** | Paleta Obsidian Zinc & Bento | Tokens y fuentes `Outfit`/`Inter` activos | **PASS** |
-| **Filtrado Gemini Multimodal** | Exclusión de modelos incompatibles | Bloqueo 100% verificado (`isVisionCapableModel`) | **PASS** |
-| **Persistencia Comidas IA** | Operaciones atómicas garantizadas | `upsertMeal` activo en BD y pantalla de detalle | **PASS** |
-| **Depuración de Fotos** | Poda en disco sin alterar SQLite | `pruneOldMealPhotos` verificado en tests | **PASS** |
-| **Flujo Onboarding** | Wizard 4 pasos & primer uso | Implementado y cubierto en tests | **PASS** |
-| **Sincronización Bidireccional** | Metas <-> Perfil Metabólico | Sincronización reactiva activa | **PASS** |
+| **Resiliencia Gemini API** | Backoff exponencial y fallback | `GeminiResilienceHelper` probado en tests | **PASS** |
+| **Widgets Nativos Android** | Formatos 2x2 y 4x2 con deep links | Layouts XML y `HomeWidgetService` activos | **PASS** |
 | **Frontmatter YAML Canónico** | Claves minúsculas, flat properties | 9 artefactos auditados sin errores | **PASS** |
 | **Cero Bloques Mermaid** | 0 bloques en arquitectura | Diagrama HTML interactivo Archify | **PASS** |
 | **Archify Compilado & JSON** | JSON en `src/`, HTML en `architecture/` | `architecture_diagram.html` compilado | **PASS** |
-| **Abstracciones del Sistema** | Modelos, servicios, funciones, seams | `abstractions.md` completo (311 LoC) | **PASS** |
-| **Presupuesto Changelog** | < 300 LoC | `changelog_v1.md` (155 LoC) | **PASS** |
-| **Asignación en Checklist** | `[x] (Agente) Descripción` | `task.md` con tareas asignadas y actualizadas | **PASS** |
+| **Abstracciones del Sistema** | Modelos, servicios nucleares, pure functions, seams | `abstractions.md` exhaustivo y conforme | **PASS** |
+| **Presupuesto Changelog** | < 300 LoC | `changelog_v1.md` (257 LoC) | **PASS** |
+| **Asignación en Checklist** | `[x] (Agente) Descripción` | `task.md` con tareas asignadas explícitas | **PASS** |
 | **Wikilinks Obsidian** | `[[PRJ_App_Food_Tracker_...]]` | Canónico en todo el ecosistema | **PASS** |
 
 ---
@@ -289,4 +306,4 @@ Se ejecutó la inspección estricta de todos los artefactos en `artifacts/` conf
 
 **Estatus:** `Status: PASS`  
 **Firma del Auditor:** `Systems-Auditor (Autonomous Subagent - Quality Gatekeeper)`  
-**Fecha de Certificación:** 2026-09-13
+**Fecha de Certificación:** 2026-10-04

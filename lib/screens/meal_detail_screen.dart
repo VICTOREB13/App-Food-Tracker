@@ -15,6 +15,7 @@ import '../widgets/meal_detail/meal_form_fields.dart';
 import '../widgets/meal_detail/meal_image_card.dart';
 import '../widgets/meal_detail/meal_image_picker.dart';
 import '../widgets/meal_detail/meal_macro_chips_row.dart';
+import '../widgets/meal_detail/meal_micronutrient_chips_row.dart';
 import '../widgets/meal_detail/meal_save_button.dart';
 
 class MealDetailScreen extends StatefulWidget {
@@ -34,6 +35,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
   String? _imagePath;
   List<FoodItem> _items = [];
   double _calories = 0.0, _protein = 0.0, _carbs = 0.0, _fat = 0.0;
+  double _fiber = 0.0, _sodium = 0.0, _sugar = 0.0;
   bool _isSaving = false, _isReanalyzing = false;
   String? _analysisStage;
   double? _analysisProgress;
@@ -51,10 +53,8 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
 
     if (meal != null) {
       _items = List.from(meal.items);
-      _calories = meal.calories;
-      _protein = meal.protein;
-      _carbs = meal.carbs;
-      _fat = meal.fat;
+      _calories = meal.calories; _protein = meal.protein; _carbs = meal.carbs; _fat = meal.fat;
+      _fiber = meal.fiber; _sodium = meal.sodium; _sugar = meal.sugar;
     }
   }
 
@@ -67,11 +67,15 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
   }
 
   void _recalculateTotals() {
-    double cal = 0, prot = 0, carbs = 0, fat = 0;
+    double cal = 0, prot = 0, carbs = 0, fat = 0, fib = 0, sod = 0, sug = 0;
     for (final item in _items) {
       cal += item.calories; prot += item.protein; carbs += item.carbs; fat += item.fat;
+      fib += item.fiber; sod += item.sodium; sug += item.sugar;
     }
-    setState(() { _calories = cal; _protein = prot; _carbs = carbs; _fat = fat; });
+    setState(() {
+      _calories = cal; _protein = prot; _carbs = carbs; _fat = fat;
+      _fiber = fib; _sodium = sod; _sugar = sug;
+    });
   }
 
   void _startAnalysisProgress() {
@@ -202,10 +206,8 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
     final edited = await showFoodItemEditorDialog(context, initialItem: item);
     if (edited != null) {
       final idx = _items.indexWhere((e) => e.id == item.id);
-      if (idx != -1) {
-        setState(() => _items[idx] = edited);
-        _recalculateTotals();
-      }
+      if (idx != -1) setState(() => _items[idx] = edited);
+      _recalculateTotals();
     }
   }
 
@@ -249,9 +251,11 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
             ),
           ],
           const SizedBox(height: 16),
-          MealMacroChipsRow(
-            calories: _calories, protein: _protein, carbs: _carbs, fat: _fat,
-          ),
+          MealMacroChipsRow(calories: _calories, protein: _protein, carbs: _carbs, fat: _fat),
+          if (_fiber > 0 || _sodium > 0 || _sugar > 0) ...[
+            const SizedBox(height: 8),
+            MealMicronutrientChipsRow(fiber: _fiber, sodium: _sodium, sugar: _sugar),
+          ],
           const SizedBox(height: 16),
           MealFormFields(
             nameController: _nameController,

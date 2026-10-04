@@ -64,5 +64,20 @@
   "activityLevel": "Activity Level",
   "bodyGoal": "Body Goal",
   "bmr": "Basal Metabolic Rate",
-  "tdee": "Total Daily Energy Expenditure"
+  "tdee": "Total Daily Energy Expenditure",
+  "fiber": "Fiber",
+  "sodium": "Sodium",
+  "sugar": "Sugar",
+  "fasting": "Intermittent Fasting",
+  "fastingWindow": "Fasting Window",
+  "startFast": "Start Fast",
+  "endFast": "End Fast",
+  "weeklyDigest": "Weekly Digest",
+  "clinicalReport": "Clinical Report",
+  "calibratedDishware": "Calibrated Dishware",
+  "myPantry": "My Pantry",
+  "voiceDictation": "Voice Dictation",
+  "language": "Language",
+  "spanish": "Spanish",
+  "english": "English"
 }

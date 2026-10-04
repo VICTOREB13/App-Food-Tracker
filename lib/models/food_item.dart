@@ -9,6 +9,9 @@ class FoodItem {
   final double protein;
   final double carbs;
   final double fat;
+  final double fiber;
+  final double sodium;
+  final double sugar;
   final String? visualJustification;
 
   static const Object _sentinel = Object();
@@ -21,6 +24,9 @@ class FoodItem {
     num? protein,
     num? carbs,
     num? fat,
+    num? fiber,
+    num? sodium,
+    num? sugar,
     String? visualJustification,
   })  : id = ModelSanitizer.truncate(id, 128, fallback: const Uuid().v4()),
         name = ModelSanitizer.truncate(name, ModelSanitizer.maxNameLength, fallback: 'Alimento sin nombre'),
@@ -29,6 +35,9 @@ class FoodItem {
         protein = ModelSanitizer.clampDouble(protein),
         carbs = ModelSanitizer.clampDouble(carbs),
         fat = ModelSanitizer.clampDouble(fat),
+        fiber = ModelSanitizer.clampDouble(fiber),
+        sodium = ModelSanitizer.clampDouble(sodium, max: 50000.0),
+        sugar = ModelSanitizer.clampDouble(sugar),
         visualJustification = ModelSanitizer.truncateNullable(
           visualJustification,
           ModelSanitizer.maxJustificationLength,
@@ -42,6 +51,9 @@ class FoodItem {
     double? protein,
     double? carbs,
     double? fat,
+    double? fiber,
+    double? sodium,
+    double? sugar,
     Object? visualJustification = _sentinel,
   }) {
     return FoodItem(
@@ -52,11 +64,28 @@ class FoodItem {
       protein: protein ?? this.protein,
       carbs: carbs ?? this.carbs,
       fat: fat ?? this.fat,
+      fiber: fiber ?? this.fiber,
+      sodium: sodium ?? this.sodium,
+      sugar: sugar ?? this.sugar,
       visualJustification: identical(visualJustification, _sentinel)
           ? this.visualJustification
           : (visualJustification as String?),
     );
   }
+
+  Map<String, dynamic> toMap() => {
+        'id': id,
+        'name': name,
+        'estimated_grams': estimatedGrams,
+        'calories': calories,
+        'protein': protein,
+        'carbs': carbs,
+        'fat': fat,
+        'fiber': fiber,
+        'sodium': sodium,
+        'sugar': sugar,
+        'visual_justification': visualJustification,
+      };
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -66,33 +95,48 @@ class FoodItem {
         'proteinas_g': protein,
         'carbohidratos_g': carbs,
         'grasas_g': fat,
+        'fibra_g': fiber,
+        'sodio_mg': sodium,
+        'azucar_g': sugar,
         'justificacion_visual': visualJustification,
       };
 
-  factory FoodItem.fromJson(Map<String, dynamic> json) {
+  factory FoodItem.fromMap(Map<String, dynamic> map) {
     return FoodItem(
-      id: json['id']?.toString(),
-      name: (json['alimento'] ?? json['nombre'] ?? json['name'] ?? json['ingrediente'] ?? json['item'] ?? 'Alimento').toString(),
+      id: map['id']?.toString(),
+      name: (map['name'] ?? map['alimento'] ?? map['nombre'] ?? map['ingrediente'] ?? map['item'] ?? 'Alimento').toString(),
       estimatedGrams: ModelSanitizer.clampDouble(
-        json['gramos_estimados'] ?? json['gramos'] ?? json['estimated_grams'] ?? json['grams'] ?? json['peso_g'] ?? json['peso'],
+        map['estimated_grams'] ?? map['estimatedGrams'] ?? map['gramos_estimados'] ?? map['gramos'] ?? map['grams'] ?? map['peso_g'] ?? map['peso'],
         min: 0.0,
         max: 50000.0,
       ),
       calories: ModelSanitizer.clampDouble(
-        json['calorias'] ?? json['calories'] ?? json['kcal'] ?? json['total_calorias'],
+        map['calories'] ?? map['calorias'] ?? map['kcal'] ?? map['total_calorias'],
       ),
       protein: ModelSanitizer.clampDouble(
-        json['proteinas_g'] ?? json['proteina_g'] ?? json['protein'] ?? json['proteins_g'] ?? json['proteina'],
+        map['protein'] ?? map['proteinas_g'] ?? map['proteina_g'] ?? map['proteins_g'] ?? map['proteina'],
       ),
       carbs: ModelSanitizer.clampDouble(
-        json['carbohidratos_g'] ?? json['carbohidratos'] ?? json['carbs'] ?? json['carbohydrates_g'] ?? json['carbohidrato_g'] ?? json['carbohidrato'],
+        map['carbs'] ?? map['carbohidratos_g'] ?? map['carbohidratos'] ?? map['carbohydrates_g'] ?? map['carbohidrato_g'] ?? map['carbohidrato'],
       ),
       fat: ModelSanitizer.clampDouble(
-        json['grasas_g'] ?? json['grasa_g'] ?? json['fat'] ?? json['fats_g'] ?? json['lipidos_g'] ?? json['lipidos'] ?? json['grasas'],
+        map['fat'] ?? map['grasas_g'] ?? map['grasa_g'] ?? map['fats_g'] ?? map['lipidos_g'] ?? map['lipidos'] ?? map['grasas'],
       ),
-      visualJustification: (json['justificacion_visual'] ?? json['justificacion'] ?? json['visual_justification'] ?? json['notas'] ?? json['justification'] ?? json['nota'])?.toString(),
+      fiber: ModelSanitizer.clampDouble(
+        map['fiber'] ?? map['fibra_g'] ?? map['fibra'] ?? map['fiber_g'],
+      ),
+      sodium: ModelSanitizer.clampDouble(
+        map['sodium'] ?? map['sodio_mg'] ?? map['sodio'] ?? map['sodium_mg'],
+        max: 50000.0,
+      ),
+      sugar: ModelSanitizer.clampDouble(
+        map['sugar'] ?? map['azucar_g'] ?? map['azucar'] ?? map['azucares_g'] ?? map['sugars'] ?? map['sugar_g'],
+      ),
+      visualJustification: (map['visual_justification'] ?? map['visualJustification'] ?? map['justificacion_visual'] ?? map['justificacion'] ?? map['notas'] ?? map['justification'] ?? map['nota'])?.toString(),
     );
   }
+
+  factory FoodItem.fromJson(Map<String, dynamic> json) => FoodItem.fromMap(json);
 
   @override
   bool operator ==(Object other) =>
@@ -106,6 +150,9 @@ class FoodItem {
           protein == other.protein &&
           carbs == other.carbs &&
           fat == other.fat &&
+          fiber == other.fiber &&
+          sodium == other.sodium &&
+          sugar == other.sugar &&
           visualJustification == other.visualJustification;
 
   @override
@@ -117,5 +164,8 @@ class FoodItem {
       protein.hashCode ^
       carbs.hashCode ^
       fat.hashCode ^
+      fiber.hashCode ^
+      sodium.hashCode ^
+      sugar.hashCode ^
       visualJustification.hashCode;
 }

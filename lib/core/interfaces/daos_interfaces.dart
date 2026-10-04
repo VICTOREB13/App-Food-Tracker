@@ -69,6 +69,7 @@ abstract interface class IPantryDao {
     String? category,
     bool? onlyFavorites,
   });
+  Future<String> getPantryPromptContext();
 
   // Functional Result APIs
   Future<Result<int, DatabaseFailure>> insertPantryItemResult(PantryItem item);
@@ -78,3 +79,8 @@ abstract interface class IPantryDao {
     bool? onlyFavorites,
   });
 }
+
+export 'dishware_dao_interface.dart';
+export 'meal_template_dao_interface.dart';
+export 'fasting_dao_interface.dart';
+

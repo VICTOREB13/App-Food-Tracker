@@ -1,4 +1,4 @@
-﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/models/food_item.dart';
 
 void main() {
@@ -54,6 +54,29 @@ void main() {
       final unchanged = item.copyWith(name: 'Plátano verde');
       expect(unchanged.name, equals('Plátano verde'));
       expect(unchanged.visualJustification, equals('Un tercio de plátano frito'));
+    });
+
+    test('Manejo de micronutrientes (fiber, sodium, sugar) y toMap/fromMap', () {
+      final item = FoodItem(
+        name: 'Avena con manzana',
+        fiber: 5.4,
+        sodium: 120.0,
+        sugar: 8.2,
+      );
+
+      expect(item.fiber, equals(5.4));
+      expect(item.sodium, equals(120.0));
+      expect(item.sugar, equals(8.2));
+
+      final map = item.toMap();
+      expect(map['fiber'], equals(5.4));
+      expect(map['sodium'], equals(120.0));
+      expect(map['sugar'], equals(8.2));
+
+      final restored = FoodItem.fromMap(map);
+      expect(restored.fiber, equals(5.4));
+      expect(restored.sodium, equals(120.0));
+      expect(restored.sugar, equals(8.2));
     });
   });
 }

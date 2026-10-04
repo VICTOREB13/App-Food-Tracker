@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Light Mode Color Palette -->
+    <color name="widget_background">#FFFFFF</color>
+    <color name="widget_surface">#F4F4F5</color>
+    <color name="widget_border">#E4E4E7</color>
+    <color name="widget_text_primary">#18181B</color>
+    <color name="widget_text_secondary">#71717A</color>
+    <color name="widget_text_muted">#A1A1AA</color>
+    <color name="widget_accent">#DC2626</color>
+    <color name="widget_accent_pressed">#B91C1C</color>
+    <color name="widget_protein">#2563EB</color>
+    <color name="widget_carbs">#D97706</color>
+    <color name="widget_fat">#059669</color>
+    <color name="widget_calories">#DC2626</color>
+    <color name="widget_button_bg">#18181B</color>
+    <color name="widget_button_text">#FAFAFA</color>
+    <color name="widget_ring_track">#E4E4E7</color>
+</resources>

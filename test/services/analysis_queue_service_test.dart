@@ -104,5 +104,43 @@ void main() {
       expect(task.status, equals(AnalysisStatus.failed));
       expect(task.error, contains('No se encontró el archivo'));
     });
+
+    test('enqueueMealAnalysis places task immediately in step 0 with progress 0.05', () async {
+      final service = AnalysisQueueService.instance;
+      final dummyBytes = Uint8List.fromList([1, 2, 3, 4]);
+
+      final task = await service.enqueueMealAnalysis(
+        rawImageBytes: dummyBytes,
+        mealType: 'Desayuno',
+        date: DateTime(2026, 10, 4),
+        dishwareDiameterCm: 25.0,
+      );
+
+      expect(service.tasks.isNotEmpty, isTrue);
+      expect(service.tasks.first.id, equals(task.id));
+      expect(task.dishwareDiameterCm, equals(25.0));
+      expect(task.isPending, isTrue);
+    });
+
+    test('createManualMealFromFailedTask creates draft Meal preserving imagePath', () {
+      final service = AnalysisQueueService.instance;
+      final task = AnalysisTask(
+        id: 'failed-task-1',
+        imagePath: '/fake/path/photo.jpg',
+        mealType: 'Almuerzo',
+        date: DateTime(2026, 10, 4),
+        status: AnalysisStatus.failed,
+        error: 'Timeout',
+        userContext: 'Sin sal',
+      );
+      service.addTaskForTesting(task);
+
+      final draft = service.createManualMealFromFailedTask('failed-task-1');
+      expect(draft, isNotNull);
+      expect(draft!.id, equals('failed-task-1'));
+      expect(draft.imagePath, equals('/fake/path/photo.jpg'));
+      expect(draft.mealType, equals('Almuerzo'));
+      expect(draft.notes, equals('Sin sal'));
+    });
   });
 }

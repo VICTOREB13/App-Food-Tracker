@@ -22,6 +22,10 @@ void main() {
       expect(l10n.carbs, equals('Carbohidratos'));
       expect(l10n.fat, equals('Grasa'));
       expect(l10n.streak, equals('Racha'));
+      expect(l10n.fiber, equals('Fibra'));
+      expect(l10n.sodium, equals('Sodio'));
+      expect(l10n.fasting, equals('Ayuno Intermitente'));
+      expect(l10n.clinicalReport, equals('Reporte Clínico'));
     });
 
     test('AppLocalizationsEn contains valid English strings', () {
@@ -40,6 +44,10 @@ void main() {
       expect(l10n.carbs, equals('Carbohydrates'));
       expect(l10n.fat, equals('Fat'));
       expect(l10n.streak, equals('Streak'));
+      expect(l10n.fiber, equals('Fiber'));
+      expect(l10n.sodium, equals('Sodium'));
+      expect(l10n.fasting, equals('Intermittent Fasting'));
+      expect(l10n.clinicalReport, equals('Clinical Report'));
     });
 
     test('lookupAppLocalizations returns appropriate instance for locale', () {

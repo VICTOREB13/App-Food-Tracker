@@ -10,6 +10,15 @@ class PantryItem {
   final double protein;
   final double carbs;
   final double fat;
+  final double servingSize;
+  final String servingUnit;
+  final double fiber;
+  final double sodium;
+  final double sugar;
+  final String? barcode;
+  final String? nutritionLabelImagePath;
+  final bool isVerifiedByUser;
+  final String? matchKeywords;
   final bool isFavorite;
 
   static const Object _sentinel = Object();
@@ -23,6 +32,15 @@ class PantryItem {
     num? protein,
     num? carbs,
     num? fat,
+    num? servingSize = 100.0,
+    String? servingUnit = 'g',
+    num? fiber = 0.0,
+    num? sodium = 0.0,
+    num? sugar = 0.0,
+    String? barcode,
+    String? nutritionLabelImagePath,
+    this.isVerifiedByUser = false,
+    String? matchKeywords,
     this.isFavorite = false,
   })  : id = ModelSanitizer.truncate(id, 128, fallback: const Uuid().v4()),
         name = ModelSanitizer.truncate(name, ModelSanitizer.maxNameLength, fallback: 'Alimento despensa'),
@@ -31,7 +49,15 @@ class PantryItem {
         calories = ModelSanitizer.clampDouble(calories),
         protein = ModelSanitizer.clampDouble(protein),
         carbs = ModelSanitizer.clampDouble(carbs),
-        fat = ModelSanitizer.clampDouble(fat);
+        fat = ModelSanitizer.clampDouble(fat),
+        servingSize = ModelSanitizer.clampDouble(servingSize, min: 0.1, fallback: 100.0),
+        servingUnit = ModelSanitizer.truncate(servingUnit, 32, fallback: 'g'),
+        fiber = ModelSanitizer.clampDouble(fiber),
+        sodium = ModelSanitizer.clampDouble(sodium),
+        sugar = ModelSanitizer.clampDouble(sugar),
+        barcode = ModelSanitizer.truncateNullable(barcode, 64),
+        nutritionLabelImagePath = ModelSanitizer.truncateNullable(nutritionLabelImagePath, 512),
+        matchKeywords = ModelSanitizer.truncateNullable(matchKeywords, 512);
 
   PantryItem copyWith({
     String? id,
@@ -42,6 +68,15 @@ class PantryItem {
     double? protein,
     double? carbs,
     double? fat,
+    double? servingSize,
+    String? servingUnit,
+    double? fiber,
+    double? sodium,
+    double? sugar,
+    Object? barcode = _sentinel,
+    Object? nutritionLabelImagePath = _sentinel,
+    bool? isVerifiedByUser,
+    Object? matchKeywords = _sentinel,
     bool? isFavorite,
   }) {
     return PantryItem(
@@ -53,6 +88,19 @@ class PantryItem {
       protein: protein ?? this.protein,
       carbs: carbs ?? this.carbs,
       fat: fat ?? this.fat,
+      servingSize: servingSize ?? this.servingSize,
+      servingUnit: servingUnit ?? this.servingUnit,
+      fiber: fiber ?? this.fiber,
+      sodium: sodium ?? this.sodium,
+      sugar: sugar ?? this.sugar,
+      barcode: identical(barcode, _sentinel) ? this.barcode : (barcode as String?),
+      nutritionLabelImagePath: identical(nutritionLabelImagePath, _sentinel)
+          ? this.nutritionLabelImagePath
+          : (nutritionLabelImagePath as String?),
+      isVerifiedByUser: isVerifiedByUser ?? this.isVerifiedByUser,
+      matchKeywords: identical(matchKeywords, _sentinel)
+          ? this.matchKeywords
+          : (matchKeywords as String?),
       isFavorite: isFavorite ?? this.isFavorite,
     );
   }
@@ -67,6 +115,15 @@ class PantryItem {
       'protein': protein,
       'carbs': carbs,
       'fat': fat,
+      'serving_size': servingSize,
+      'serving_unit': servingUnit,
+      'fiber': fiber,
+      'sodium': sodium,
+      'sugar': sugar,
+      'barcode': barcode,
+      'nutrition_label_image_path': nutritionLabelImagePath,
+      'is_verified_by_user': isVerifiedByUser ? 1 : 0,
+      'match_keywords': matchKeywords,
       'is_favorite': isFavorite ? 1 : 0,
     };
   }
@@ -81,6 +138,15 @@ class PantryItem {
       protein: ModelSanitizer.clampDouble(map['protein']),
       carbs: ModelSanitizer.clampDouble(map['carbs']),
       fat: ModelSanitizer.clampDouble(map['fat']),
+      servingSize: ModelSanitizer.clampDouble(map['serving_size'], min: 0.1, fallback: 100.0),
+      servingUnit: map['serving_unit']?.toString() ?? 'g',
+      fiber: ModelSanitizer.clampDouble(map['fiber']),
+      sodium: ModelSanitizer.clampDouble(map['sodium']),
+      sugar: ModelSanitizer.clampDouble(map['sugar']),
+      barcode: map['barcode']?.toString(),
+      nutritionLabelImagePath: map['nutrition_label_image_path']?.toString(),
+      isVerifiedByUser: (map['is_verified_by_user'] == 1 || map['is_verified_by_user'] == true),
+      matchKeywords: map['match_keywords']?.toString(),
       isFavorite: (map['is_favorite'] == 1 || map['is_favorite'] == true),
     );
   }

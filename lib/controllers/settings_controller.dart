@@ -1,4 +1,5 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../core/interfaces/database_service_interface.dart';
 import '../models/daily_goals.dart';
 import '../models/gemini_model_info.dart';
@@ -72,10 +73,33 @@ class SettingsController extends ChangeNotifier {
   Map<String, dynamic> get dbStats => Map.unmodifiable(_dbStats);
   bool get isLoading => _isLoading;
 
+  Locale? _currentLocale;
+  Locale? get currentLocale => _currentLocale;
+
+  Future<void> loadLocale() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final code = prefs.getString('app_locale_code');
+      if (code != null && code.isNotEmpty) {
+        _currentLocale = Locale(code);
+      }
+    } catch (_) {}
+  }
+
+  Future<void> setLocale(Locale locale) async {
+    _currentLocale = locale;
+    notifyListeners();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('app_locale_code', locale.languageCode);
+    } catch (_) {}
+  }
+
   Future<void> init() async {
     _isLoading = true;
     notifyListeners();
     try {
+      await loadLocale();
       _geminiApiKey = await SecureStorageService.instance.getGeminiApiKey();
       _selectedGeminiModel = await SecureStorageService.instance.getSelectedGeminiModel();
       _usdaApiKey = await SecureStorageService.instance.getUsdaApiKey();

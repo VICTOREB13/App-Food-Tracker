@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
+import 'controllers/settings_controller.dart';
 import 'core/di/service_locator.dart';
 import 'l10n/app_localizations.dart';
 import 'screens/dashboard_screen.dart';
@@ -47,6 +48,12 @@ void main() async {
     debugPrint('Theme initialization warning: $e\n$stack');
   }
 
+  try {
+    await SettingsController.instance.loadLocale();
+  } catch (e) {
+    debugPrint('SettingsController loadLocale warning: $e');
+  }
+
   bool hasCompletedOnboarding = false;
   try {
     hasCompletedOnboarding = await SecureStorageService.instance.hasCompletedOnboarding();
@@ -69,17 +76,19 @@ class NutriTrackerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Locale? effectiveLocale;
-    if (locale != null) {
-      final isSupported = AppLocalizations.supportedLocales.any(
-        (s) => s.languageCode == locale!.languageCode,
-      );
-      effectiveLocale = isSupported ? locale : const Locale('es');
-    }
-
     return ListenableBuilder(
-      listenable: ThemeManager.instance,
+      listenable: Listenable.merge([ThemeManager.instance, SettingsController.instance]),
       builder: (context, _) {
+        final ctrlLocale = SettingsController.instance.currentLocale;
+        final targetLocale = locale ?? ctrlLocale;
+        Locale? effectiveLocale;
+        if (targetLocale != null) {
+          final isSupported = AppLocalizations.supportedLocales.any(
+            (s) => s.languageCode == targetLocale.languageCode,
+          );
+          effectiveLocale = isSupported ? targetLocale : const Locale('es');
+        }
+
         return MaterialApp(
           title: 'Victor Engineer - Food Tracker',
           debugShowCheckedModeBanner: false,

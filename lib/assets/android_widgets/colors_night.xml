@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark Mode Color Palette (Obsidian Zinc) -->
+    <color name="widget_background">#09090B</color>
+    <color name="widget_surface">#18181B</color>
+    <color name="widget_border">#27272A</color>
+    <color name="widget_text_primary">#FAFAFA</color>
+    <color name="widget_text_secondary">#A1A1AA</color>
+    <color name="widget_text_muted">#71717A</color>
+    <color name="widget_accent">#DC2626</color>
+    <color name="widget_accent_pressed">#EF4444</color>
+    <color name="widget_protein">#3B82F6</color>
+    <color name="widget_carbs">#F59E0B</color>
+    <color name="widget_fat">#10B981</color>
+    <color name="widget_calories">#EF4444</color>
+    <color name="widget_button_bg">#27272A</color>
+    <color name="widget_button_text">#FAFAFA</color>
+    <color name="widget_ring_track">#27272A</color>
+</resources>

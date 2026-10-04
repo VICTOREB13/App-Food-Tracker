@@ -18,6 +18,9 @@ abstract interface class IDatabaseService {
   IWeightLogDao get weightLogDao;
   IUserProfileDao get userProfileDao;
   IPantryDao get pantryDao;
+  IDishwareDao get dishwareDao;
+  IMealTemplateDao get mealTemplateDao;
+  IFastingDao get fastingDao;
 
   // Convenience delegations to DAOs
   Future<int> insertMeal(Meal meal);
@@ -37,6 +40,7 @@ abstract interface class IDatabaseService {
   Future<int> updatePantryItem(PantryItem item);
   Future<int> deletePantryItem(String id);
   Future<List<PantryItem>> getPantryItems({String? query, String? category, bool? onlyFavorites});
+  Future<String> getPantryPromptContext();
 
   Future<int> insertWeightLog(WeightLog log);
   Future<int> updateWeightLog(WeightLog log);

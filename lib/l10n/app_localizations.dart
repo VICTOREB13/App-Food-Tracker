@@ -97,6 +97,21 @@ abstract class AppLocalizations {
   String get bodyGoal;
   String get bmr;
   String get tdee;
+  String get fiber;
+  String get sodium;
+  String get sugar;
+  String get fasting;
+  String get fastingWindow;
+  String get startFast;
+  String get endFast;
+  String get weeklyDigest;
+  String get clinicalReport;
+  String get calibratedDishware;
+  String get myPantry;
+  String get voiceDictation;
+  String get language;
+  String get spanish;
+  String get english;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

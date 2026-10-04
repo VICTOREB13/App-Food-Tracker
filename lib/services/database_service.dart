@@ -11,7 +11,10 @@ import '../models/pantry_item.dart';
 import '../models/user_profile.dart';
 import '../models/weight_log.dart';
 import 'daos/database_connection_factory.dart';
+import 'daos/dishware_dao.dart';
+import 'daos/fasting_dao.dart';
 import 'daos/meal_dao.dart';
+import 'daos/meal_template_dao.dart';
 import 'daos/pantry_dao.dart';
 import 'daos/user_profile_dao.dart';
 import 'daos/weight_log_dao.dart';
@@ -26,12 +29,18 @@ class DatabaseService implements IDatabaseService {
   late final IWeightLogDao _weightLogDao;
   late final IUserProfileDao _userProfileDao;
   late final IPantryDao _pantryDao;
+  late final IDishwareDao _dishwareDao;
+  late final IMealTemplateDao _mealTemplateDao;
+  late final IFastingDao _fastingDao;
 
   DatabaseService._() {
     _mealDao = MealDao(() => database);
     _weightLogDao = WeightLogDao(() => database);
     _userProfileDao = UserProfileDao(() => database);
     _pantryDao = PantryDao(() => database);
+    _dishwareDao = DishwareDao(() => database);
+    _mealTemplateDao = MealTemplateDao(() => database);
+    _fastingDao = FastingDao(() => database);
   }
 
   /// Optional constructor allowing dependency injection of custom DAOs.
@@ -40,11 +49,17 @@ class DatabaseService implements IDatabaseService {
     IWeightLogDao? weightLogDao,
     IUserProfileDao? userProfileDao,
     IPantryDao? pantryDao,
+    IDishwareDao? dishwareDao,
+    IMealTemplateDao? mealTemplateDao,
+    IFastingDao? fastingDao,
   }) {
     _mealDao = mealDao ?? MealDao(() => database);
     _weightLogDao = weightLogDao ?? WeightLogDao(() => database);
     _userProfileDao = userProfileDao ?? UserProfileDao(() => database);
     _pantryDao = pantryDao ?? PantryDao(() => database);
+    _dishwareDao = dishwareDao ?? DishwareDao(() => database);
+    _mealTemplateDao = mealTemplateDao ?? MealTemplateDao(() => database);
+    _fastingDao = fastingDao ?? FastingDao(() => database);
   }
 
   /// Global accessor maintaining backwards compatibility while allowing DI overrides.
@@ -70,6 +85,15 @@ class DatabaseService implements IDatabaseService {
 
   @override
   IPantryDao get pantryDao => _pantryDao;
+
+  @override
+  IDishwareDao get dishwareDao => _dishwareDao;
+
+  @override
+  IMealTemplateDao get mealTemplateDao => _mealTemplateDao;
+
+  @override
+  IFastingDao get fastingDao => _fastingDao;
 
   @visibleForTesting
   void setDatabaseForTesting(Database db) {
@@ -140,6 +164,8 @@ class DatabaseService implements IDatabaseService {
   @override
   Future<List<PantryItem>> getPantryItems({String? query, String? category, bool? onlyFavorites}) =>
       _pantryDao.getPantryItems(query: query, category: category, onlyFavorites: onlyFavorites);
+  @override
+  Future<String> getPantryPromptContext() => _pantryDao.getPantryPromptContext();
 
   @override
   Future<int> insertWeightLog(WeightLog log) => _weightLogDao.insertWeightLog(log);

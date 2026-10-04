@@ -6,6 +6,7 @@ import '../models/meal.dart';
 import '../models/weight_log.dart';
 import '../services/database_service.dart';
 import '../services/image_processing_service.dart';
+import '../services/home_widget_service.dart';
 import '../services/metabolic_calculator.dart';
 import '../services/secure_storage_service.dart';
 import 'settings_controller.dart';
@@ -100,6 +101,7 @@ class MealController extends ChangeNotifier {
   Future<void> refreshGoals() async {
     _dailyGoals = await SecureStorageService.instance.getDailyGoals();
     notifyListeners();
+    _syncNativeWidgets();
   }
 
   Future<void> setSelectedDate(DateTime date) async {
@@ -124,6 +126,7 @@ class MealController extends ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
+      _syncNativeWidgets();
     }
   }
 
@@ -270,5 +273,18 @@ class MealController extends ChangeNotifier {
   Future<void> deleteWeight(String id) async {
     await _db.deleteWeightLog(id);
     await loadWeightLogs(days: _selectedWeightDays);
+  }
+
+  void _syncNativeWidgets() {
+    HomeWidgetService.instance.updateFromDailyTotals(
+      consumedCalories: totalCalories,
+      targetCalories: _dailyGoals.calories,
+      consumedProtein: totalProtein,
+      targetProtein: _dailyGoals.protein,
+      consumedCarbs: totalCarbs,
+      targetCarbs: _dailyGoals.carbs,
+      consumedFat: totalFat,
+      targetFat: _dailyGoals.fat,
+    );
   }
 }

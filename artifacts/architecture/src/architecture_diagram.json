@@ -2,47 +2,49 @@
   "schema_version": 1,
   "diagram_type": "architecture",
   "meta": {
-    "title": "Victor Engineer - Food Tracker Architecture (v1.0.4)",
+    "title": "Victor Engineer - Food Tracker Architecture (v1.1.0)",
     "output": "architecture_diagram.html",
     "quality_profile": "showcase",
     "views": [
       {
         "id": "local-first-core",
-        "label": "Local-First & DI Core",
-        "focus": ["flutter_ui", "controllers", "sqlite_db", "secure_storage"],
-        "note": "GetIt service locator, specialized DAOs, Result pattern and secure key custody."
+        "label": "Local-First & Widgets",
+        "focus": ["flutter_ui", "android_widgets", "controllers", "sqlite_db", "secure_storage"],
+        "note": "GetIt service locator, SQLite v3 DAOs, Android AppWidgets (2x2/4x2) and secure key custody."
       },
       {
         "id": "ai-vision-pipeline",
-        "label": "AI Vision & Async Queue",
+        "label": "AI Vision & Scale Precision",
         "focus": ["flutter_ui", "controllers", "metabolic", "vision_engine", "gemini_api"],
-        "note": "Clinical biometric profile enrichment with Gemini multimodal inference and async SQLite queue."
+        "note": "Calibrated dishware metric scale, zero-freeze async queue, backoff resilience and model cascade."
       },
       {
-        "id": "barcode-cascade",
-        "label": "Barcode Cascade & l10n",
-        "focus": ["flutter_ui", "controllers", "barcode_resolver", "usda_api", "openfood_api"],
-        "note": "Resilient lookup falling back from USDA FoodData to Open Food Facts and multi-language support."
+        "id": "barcode-estimator",
+        "label": "Nutrition & Zero-Tokens",
+        "focus": ["flutter_ui", "controllers", "offline_estimator", "barcode_resolver", "usda_api", "openfood_api"],
+        "note": "Sub-5ms offline nutrient estimation, USDA cascade, and bilingual l10n."
       }
     ]
   },
   "components": [
-    { "id": "flutter_ui", "type": "frontend", "label": "Flutter UI", "sublabel": "Bento Grid & l10n", "pos": [40, 250], "size": [130, 54] },
-    { "id": "controllers", "type": "frontend", "label": "Controllers & DI", "sublabel": "GetIt & Result Engine", "pos": [260, 250], "size": [130, 54] },
-    { "id": "secure_storage", "type": "security", "label": "Secure Storage", "sublabel": "AES Encrypted BYOK", "pos": [260, 360], "size": [130, 54] },
+    { "id": "flutter_ui", "type": "frontend", "label": "Flutter UI", "sublabel": "Bento Grid & l10n", "pos": [40, 200], "size": [130, 54] },
+    { "id": "android_widgets", "type": "frontend", "label": "Android Widgets", "sublabel": "2x2 & 4x2 AppWidgets", "pos": [40, 310], "size": [130, 54] },
+    { "id": "controllers", "type": "frontend", "label": "Controllers & DI", "sublabel": "GetIt & Result Engine", "pos": [260, 200], "size": [130, 54] },
+    { "id": "secure_storage", "type": "security", "label": "Secure Storage", "sublabel": "AES Encrypted BYOK", "pos": [260, 310], "size": [130, 54] },
+    { "id": "offline_estimator", "type": "backend", "label": "Offline Estimator", "sublabel": "Zero-Tokens <5ms", "pos": [260, 90], "size": [130, 54] },
     { "id": "metabolic", "type": "backend", "label": "Metabolic Engine", "sublabel": "Mifflin-St Jeor & ABW", "pos": [490, 40], "size": [140, 54] },
-    { "id": "vision_engine", "type": "backend", "label": "Gemini Vision", "sublabel": "Volumetric & Async Queue", "pos": [490, 145], "size": [140, 54] },
+    { "id": "vision_engine", "type": "backend", "label": "Gemini Vision", "sublabel": "Plate Scale & Queue", "pos": [490, 145], "size": [140, 54] },
     { "id": "barcode_resolver", "type": "backend", "label": "Barcode Resolver", "sublabel": "Cascading Resolution", "pos": [490, 250], "size": [140, 54] },
-    { "id": "sqlite_db", "type": "database", "label": "SQLite & DAOs", "sublabel": "WAL v2 & DAOs (<300 LoC)", "pos": [490, 360], "size": [140, 54] },
-    { "id": "gemini_api", "type": "cloud", "label": "Google Gemini API", "sublabel": "Dynamic Discovery", "pos": [730, 145], "size": [140, 54] },
+    { "id": "sqlite_db", "type": "database", "label": "SQLite v3 & DAOs", "sublabel": "Fasting, Dish & WAL", "pos": [490, 360], "size": [140, 54] },
+    { "id": "gemini_api", "type": "cloud", "label": "Google Gemini API", "sublabel": "Dynamic & Cascade", "pos": [730, 145], "size": [140, 54] },
     { "id": "usda_api", "type": "external", "label": "USDA FoodData", "sublabel": "Primary Nutrient DB", "pos": [730, 250], "size": [140, 54] },
     { "id": "openfood_api", "type": "external", "label": "Open Food Facts", "sublabel": "Fallback Barcode DB", "pos": [730, 360], "size": [140, 54] }
   ],
   "boundaries": [
     {
       "kind": "region",
-      "label": "Client Runtime (Local-First & DI)",
-      "wraps": ["flutter_ui", "controllers", "secure_storage", "metabolic", "vision_engine", "barcode_resolver", "sqlite_db"]
+      "label": "Client Runtime (Local-First & Widgets)",
+      "wraps": ["flutter_ui", "android_widgets", "controllers", "secure_storage", "offline_estimator", "metabolic", "vision_engine", "barcode_resolver", "sqlite_db"]
     },
     {
       "kind": "region",
@@ -52,7 +54,9 @@
   ],
   "connections": [
     { "id": "ui-to-ctrl", "from": "flutter_ui", "to": "controllers", "label": "User Input", "variant": "emphasis" },
+    { "id": "wid-to-ctrl", "from": "android_widgets", "to": "controllers", "label": "Deep Link", "fromSide": "top", "toSide": "bottom" },
     { "id": "ctrl-to-sec", "from": "controllers", "to": "secure_storage", "variant": "security", "fromSide": "bottom", "toSide": "top" },
+    { "id": "ctrl-to-off", "from": "controllers", "to": "offline_estimator", "fromSide": "top", "toSide": "bottom" },
     { "id": "ctrl-to-meta", "from": "controllers", "to": "metabolic", "fromSide": "top", "toSide": "left" },
     { "id": "ctrl-to-vis", "from": "controllers", "to": "vision_engine" },
     { "id": "ctrl-to-bar", "from": "controllers", "to": "barcode_resolver" },
@@ -65,29 +69,29 @@
   "cards": [
     {
       "dot": "emerald",
-      "title": "Local-First & DI Core",
+      "title": "Local-First & Widgets",
       "items": [
-        "GetIt Service Locator & Result pattern",
-        "Specialized DAOs (Meal, Weight, User, Pantry)",
-        "Offline-first SQLite with WAL pragma mode"
+        "Native Android Widgets (2x2 and 4x2 Glance)",
+        "SQLite v3 (calibrated dishware, fasting & templates)",
+        "GetIt Service Locator & Result error pattern"
       ]
     },
     {
       "dot": "cyan",
-      "title": "AI Vision & Async Queue",
+      "title": "AI Vision & Scale Precision",
       "items": [
-        "Live discovery of Gemini multimodal models",
-        "Async SQLite queue & VeLoadingRing",
-        "Mifflin-St Jeor & ABW in obesity"
+        "Calibrated dishware metric scale injection",
+        "Resilient backoff & model fallback cascade",
+        "Zero-freeze SQLite queue & photo preservation"
       ]
     },
     {
       "dot": "amber",
-      "title": "Nutritional Cascade & l10n",
+      "title": "Nutritional Cascade & Zero-Tokens",
       "items": [
+        "Offline food estimator (<5ms, zero API tokens)",
         "USDA FoodData Central primary resolution",
-        "Open Food Facts automated fallback",
-        "Official multi-language l10n (ES / EN)"
+        "Open Food Facts automated fallback & l10n"
       ]
     }
   ]

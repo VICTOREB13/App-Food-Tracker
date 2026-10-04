@@ -67,5 +67,20 @@
   "activityLevel": "Nivel de Actividad",
   "bodyGoal": "Objetivo Corporal",
   "bmr": "Tasa Metabólica Basal",
-  "tdee": "Gasto Energético Total Diario"
+  "tdee": "Gasto Energético Total Diario",
+  "fiber": "Fibra",
+  "sodium": "Sodio",
+  "sugar": "Azúcar",
+  "fasting": "Ayuno Intermitente",
+  "fastingWindow": "Ventana de Ayuno",
+  "startFast": "Comenzar Ayuno",
+  "endFast": "Finalizar Ayuno",
+  "weeklyDigest": "Resumen Semanal",
+  "clinicalReport": "Reporte Clínico",
+  "calibratedDishware": "Calibración de Vajilla",
+  "myPantry": "Mi Despensa",
+  "voiceDictation": "Dictado por Voz",
+  "language": "Idioma",
+  "spanish": "Español",
+  "english": "Inglés"
 }

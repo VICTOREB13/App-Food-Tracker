@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_compact_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/widget_background"
+    android:padding="16dp"
+    android:gravity="center">
+
+    <!-- Header / Label -->
+    <TextView
+        android:id="@+id/widget_label_calories"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CALORÍAS"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.08"
+        android:textColor="@color/widget_accent" />
+
+    <!-- Calories Left Number -->
+    <TextView
+        android:id="@+id/widget_calories_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="---"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        android:textColor="@color/widget_text_primary" />
+
+    <!-- Subtitle: Restantes -->
+    <TextView
+        android:id="@+id/widget_calories_subtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="kcal restantes"
+        android:textSize="11sp"
+        android:textStyle="normal"
+        android:textColor="@color/widget_text_secondary" />
+
+    <!-- Consumed vs Target Summary -->
+    <TextView
+        android:id="@+id/widget_calories_summary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="0 / 2000 kcal"
+        android:textSize="10sp"
+        android:textColor="@color/widget_text_muted" />
+
+    <!-- Quick Action Button -->
+    <LinearLayout
+        android:id="@+id/widget_btn_add"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:background="@drawable/widget_button_accent"
+        android:paddingHorizontal="14dp"
+        android:paddingVertical="7dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="+ Registrar"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF" />
+    </LinearLayout>
+
+</LinearLayout>

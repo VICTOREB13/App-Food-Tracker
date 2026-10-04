@@ -167,5 +167,46 @@ void main() {
       expect(find.text('Añadir Ingrediente'), findsOneWidget);
       expect(returnedItem, isNull);
     });
+
+    testWidgets('auto-estimates nutrients via OfflineFoodEstimatorService when calories are 0', (tester) async {
+      FoodItem? returnedItem;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => ElevatedButton(
+                onPressed: () async {
+                  returnedItem = await showFoodItemEditorDialog(
+                    context,
+                    initialItem: FoodItem(name: '', calories: 0, protein: 0, carbs: 0, fat: 0, estimatedGrams: 100),
+                  );
+                },
+                child: const Text('Open Dialog'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open Dialog'));
+      await tester.pumpAndSettle();
+
+      // Enter food name: 'Huevo'
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Nombre del alimento *'),
+        'Huevo',
+      );
+      await tester.pump();
+
+      // Tap Guardar
+      await tester.tap(find.text('Guardar'));
+      await tester.pumpAndSettle();
+
+      expect(returnedItem, isNotNull);
+      expect(returnedItem!.name, equals('Huevo'));
+      expect(returnedItem!.calories, equals(155.0));
+      expect(returnedItem!.protein, equals(13.0));
+    });
   });
 }

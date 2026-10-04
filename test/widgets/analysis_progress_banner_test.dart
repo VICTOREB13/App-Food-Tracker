@@ -96,5 +96,40 @@ void main() {
       await tester.tap(find.byIcon(Icons.arrow_forward_ios_rounded));
       expect(openedMeal?.name, equals('Arroz con Pollo'));
     });
+
+    testWidgets('AnalysisProgressBanner renders failed task with retry and manual edit buttons', (tester) async {
+      Meal? openedMeal;
+      final task = AnalysisTask(
+        id: 'failed-test-task',
+        imagePath: '/test/photo.jpg',
+        mealType: 'Cena',
+        date: DateTime.now(),
+        status: AnalysisStatus.failed,
+        error: 'No se pudo conectar con el servidor',
+      );
+
+      AnalysisQueueService.instance.addTaskForTesting(task);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: AnalysisProgressBanner(
+              onOpenMeal: (m) => openedMeal = m,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('No se pudo analizar la foto'), findsOneWidget);
+      expect(find.text('No se pudo conectar con el servidor'), findsOneWidget);
+      expect(find.text('Reintentar'), findsOneWidget);
+      expect(find.text('Editar manualmente'), findsOneWidget);
+
+      await tester.tap(find.text('Editar manualmente'));
+      await tester.pumpAndSettle();
+
+      expect(openedMeal, isNotNull);
+      expect(openedMeal?.mealType, equals('Cena'));
+    });
   });
 }

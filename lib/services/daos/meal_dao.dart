@@ -20,28 +20,47 @@ class MealDao implements IMealDao {
   Future<int> upsertMeal(Meal meal) async {
     final db = await _getDatabase();
     return await db.transaction((txn) async {
+      final mealTableInfo = await txn.rawQuery('PRAGMA table_info(meals);');
+      final mealColumns = mealTableInfo.map((c) => c['name'] as String).toSet();
+      final mealMap = Map<String, dynamic>.from(meal.toSqliteMap());
+      if (mealColumns.isNotEmpty) {
+        mealMap.removeWhere((k, _) => !mealColumns.contains(k));
+      }
+
       final result = await txn.insert(
         'meals',
-        meal.toSqliteMap(),
+        mealMap,
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
       final tableCheck = await txn.rawQuery(
         'SELECT name FROM sqlite_master WHERE type = \'table\' AND name = \'meal_items\';',
       );
       if (tableCheck.isNotEmpty) {
+        final itemTableInfo = await txn.rawQuery('PRAGMA table_info(meal_items);');
+        final itemColumns = itemTableInfo.map((c) => c['name'] as String).toSet();
         await txn.delete('meal_items', where: 'meal_id = ?', whereArgs: [meal.id]);
         for (final item in meal.items) {
+          final itemMap = <String, dynamic>{
+            'id': item.id,
+            'meal_id': meal.id,
+            'name': item.name,
+            'calories': item.calories,
+            'protein': item.protein,
+            'carbs': item.carbs,
+            'fat': item.fat,
+          };
+          if (itemColumns.isEmpty || itemColumns.contains('fiber')) {
+            itemMap['fiber'] = item.fiber;
+          }
+          if (itemColumns.isEmpty || itemColumns.contains('sodium')) {
+            itemMap['sodium'] = item.sodium;
+          }
+          if (itemColumns.isEmpty || itemColumns.contains('sugar')) {
+            itemMap['sugar'] = item.sugar;
+          }
           await txn.insert(
             'meal_items',
-            {
-              'id': item.id,
-              'meal_id': meal.id,
-              'name': item.name,
-              'calories': item.calories,
-              'protein': item.protein,
-              'carbs': item.carbs,
-              'fat': item.fat,
-            },
+            itemMap,
             conflictAlgorithm: ConflictAlgorithm.replace,
           );
         }

@@ -73,6 +73,25 @@ class PantryDao implements IPantryDao {
     return results.map((p) => PantryItem.fromSqliteMap(p)).toList();
   }
 
+  @override
+  Future<String> getPantryPromptContext() async {
+    final items = await getPantryItems();
+    if (items.isEmpty) return '';
+
+    final summaries = items.map((item) {
+      final brandPrefix = (item.brand != null && item.brand!.trim().isNotEmpty)
+          ? '${item.brand!.trim()} - '
+          : '';
+      final portion = '${item.servingSize.toStringAsFixed(0)}${item.servingUnit}';
+      final keywords = (item.matchKeywords != null && item.matchKeywords!.trim().isNotEmpty)
+          ? ' | ${item.matchKeywords!.trim()}'
+          : '';
+      return '$brandPrefix${item.name} (${item.calories.toStringAsFixed(0)} kcal/$portion, P: ${item.protein.toStringAsFixed(1)}g, C: ${item.carbs.toStringAsFixed(1)}g, F: ${item.fat.toStringAsFixed(1)}g$keywords)';
+    }).join('; ');
+
+    return 'Despensa del usuario: $summaries';
+  }
+
   // ==========================================
   // FUNCTIONAL RESULT APIS
   // ==========================================

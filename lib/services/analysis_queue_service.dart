@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:uuid/uuid.dart';
 import '../controllers/meal_controller.dart';
+import '../models/analysis_task.dart';
 import '../models/food_item.dart';
 import '../models/meal.dart';
 import 'database_service.dart';
@@ -11,40 +11,9 @@ import 'gemini_vision_service.dart';
 import 'image_processing_service.dart';
 import 'secure_storage_service.dart';
 
-enum AnalysisStatus { queued, processing, completed, failed }
+export '../models/analysis_task.dart';
 
-class AnalysisTask {
-  final String id;
-  final String imagePath;
-  final String mealType;
-  final DateTime date;
-  final String? userContext;
-  AnalysisStatus status;
-  double progress;
-  String stage;
-  String? error;
-  Meal? resultMeal;
-  final DateTime createdAt;
-
-  AnalysisTask({
-    String? id,
-    required this.imagePath,
-    required this.mealType,
-    required this.date,
-    this.userContext,
-    this.status = AnalysisStatus.queued,
-    this.progress = 0.05,
-    this.stage = 'En cola de análisis...',
-    this.error,
-    this.resultMeal,
-    DateTime? createdAt,
-  })  : id = id ?? const Uuid().v4(),
-        createdAt = createdAt ?? DateTime.now();
-
-  bool get isPending =>
-      status == AnalysisStatus.queued || status == AnalysisStatus.processing;
-}
-
+/// Background task orchestrator managing meal photo optimization, AI analysis, and retries.
 class AnalysisQueueService extends ChangeNotifier {
   static final AnalysisQueueService instance = AnalysisQueueService._();
   AnalysisQueueService._();
@@ -53,79 +22,54 @@ class AnalysisQueueService extends ChangeNotifier {
   bool _isWorkerRunning = false;
 
   List<AnalysisTask> get tasks => List.unmodifiable(_tasks);
-  List<AnalysisTask> get activeTasks =>
-      _tasks.where((t) => t.isPending).toList();
+  List<AnalysisTask> get activeTasks => _tasks.where((t) => t.isPending).toList();
 
   AnalysisTask? get currentActiveTask =>
-      _tasks.cast<AnalysisTask?>().firstWhere(
-            (t) => t != null && t.isPending,
-            orElse: () => null,
-          );
+      _tasks.cast<AnalysisTask?>().firstWhere((t) => t != null && t.isPending, orElse: () => null);
 
-  AnalysisTask? get latestCompletedTask =>
-      _tasks.cast<AnalysisTask?>().lastWhere(
-            (t) => t != null && t.status == AnalysisStatus.completed,
-            orElse: () => null,
-          );
+  AnalysisTask? get latestCompletedTask => _tasks.cast<AnalysisTask?>().lastWhere(
+        (t) => t != null && t.status == AnalysisStatus.completed,
+        orElse: () => null,
+      );
+
+  AnalysisTask? get latestFailedTask => _tasks.cast<AnalysisTask?>().lastWhere(
+        (t) => t != null && t.status == AnalysisStatus.failed,
+        orElse: () => null,
+      );
 
   Future<void> init() async {
     try {
       final db = await DatabaseService.instance.database;
       await db.execute('''
         CREATE TABLE IF NOT EXISTS analysis_queue (
-          id TEXT PRIMARY KEY,
-          image_path TEXT NOT NULL,
-          meal_type TEXT NOT NULL,
-          date TEXT NOT NULL,
-          status TEXT NOT NULL,
-          progress REAL NOT NULL DEFAULT 0.0,
-          stage TEXT NOT NULL DEFAULT 'En cola',
-          error TEXT,
-          result_meal_id TEXT,
-          created_at TEXT NOT NULL
+          id TEXT PRIMARY KEY, image_path TEXT NOT NULL, meal_type TEXT NOT NULL,
+          date TEXT NOT NULL, status TEXT NOT NULL, progress REAL NOT NULL DEFAULT 0.0,
+          stage TEXT NOT NULL DEFAULT 'En cola', error TEXT, result_meal_id TEXT, created_at TEXT NOT NULL
         )
       ''');
 
       final rows = await db.query('analysis_queue', orderBy: 'created_at DESC', limit: 8);
       _tasks.clear();
       for (final r in rows) {
-        final status = AnalysisStatus.values.firstWhere(
-          (s) => s.name == (r['status'] as String? ?? ''),
-          orElse: () => AnalysisStatus.failed,
-        );
         Meal? meal;
         final mealId = r['result_meal_id'] as String?;
-        if (mealId != null) {
-          meal = await DatabaseService.instance.getMealById(mealId);
-        }
-        final task = AnalysisTask(
-          id: r['id'] as String,
-          imagePath: r['image_path'] as String,
-          mealType: r['meal_type'] as String,
-          date: DateTime.tryParse(r['date'] as String? ?? '') ?? DateTime.now(),
-          status: status,
-          progress: (r['progress'] as num?)?.toDouble() ?? 0.0,
-          stage: r['stage'] as String? ?? '',
-          error: r['error'] as String?,
-          resultMeal: meal,
-          createdAt: DateTime.tryParse(r['created_at'] as String? ?? '') ?? DateTime.now(),
-        );
-        if (task.status == AnalysisStatus.processing || task.status == AnalysisStatus.queued) {
-          if (meal != null) {
+        if (mealId != null) meal = await DatabaseService.instance.getMealById(mealId);
+
+        final task = AnalysisTask.fromDbMap(r, resultMeal: meal);
+
+        if (task.isPending) {
+          final existing = meal ??
+              await DatabaseService.instance.getMealById(task.id) ??
+              await DatabaseService.instance.getMealByImagePath(task.imagePath);
+          if (existing != null) {
+            task.resultMeal = existing;
             task.status = AnalysisStatus.completed;
             task.progress = 1.0;
             task.stage = '¡Comida analizada y registrada!';
           } else {
-            final existing = await DatabaseService.instance.getMealById(task.id) ??
-                await DatabaseService.instance.getMealByImagePath(task.imagePath);
-            if (existing != null) {
-              task.resultMeal = existing;
-              task.status = AnalysisStatus.completed;
-              task.progress = 1.0;
-              task.stage = '¡Comida analizada y registrada!';
-            } else {
-              task.status = File(task.imagePath).existsSync() ? AnalysisStatus.queued : AnalysisStatus.failed;
-            }
+            task.status = (task.imagePath.isNotEmpty && File(task.imagePath).existsSync())
+                ? AnalysisStatus.queued
+                : AnalysisStatus.failed;
           }
         }
         _tasks.add(task);
@@ -142,30 +86,23 @@ class AnalysisQueueService extends ChangeNotifier {
     required String mealType,
     required DateTime date,
     String? userContext,
+    double? dishwareDiameterCm,
     List<FoodItem>? initialItems,
     String? currentDishName,
   }) async {
-    final compressed = await ImageProcessingService.instance.compressAndResizeAsync(rawImageBytes);
-    final savedPath = await ImageProcessingService.instance.saveMealImage(
-      compressed,
-      mealType: mealType,
-      date: date,
-    );
-
     final task = AnalysisTask(
-      imagePath: savedPath,
+      rawImageBytes: rawImageBytes,
+      dishwareDiameterCm: dishwareDiameterCm,
       mealType: mealType,
       date: date,
       userContext: userContext,
       status: AnalysisStatus.queued,
-      progress: 0.10,
-      stage: 'Imagen guardada. Iniciando análisis...',
+      progress: 0.05,
+      stage: 'Optimizando foto...',
     );
 
     _tasks.insert(0, task);
-    await _persistTaskToDb(task);
     notifyListeners();
-
     _triggerWorker();
     return task;
   }
@@ -191,14 +128,32 @@ class AnalysisQueueService extends ChangeNotifier {
     }
   }
 
-  Future<void> _processTask(AnalysisTask task) async {
-    task.status = AnalysisStatus.processing;
-    task.progress = 0.20;
-    task.stage = 'Optimizando imagen y cubicaje...';
+  Future<void> _updateProgress(AnalysisTask task, double progress, String stage) async {
+    task.progress = progress;
+    task.stage = stage;
     notifyListeners();
     await _persistTaskToDb(task);
+  }
+
+  Future<void> _processTask(AnalysisTask task) async {
+    task.status = AnalysisStatus.processing;
 
     try {
+      if (task.imagePath.isEmpty && task.rawImageBytes != null) {
+        await _updateProgress(task, 0.20, 'Comprimiendo imagen...');
+        final compressed = await ImageProcessingService.instance.compressAndResizeAsync(task.rawImageBytes!);
+
+        await _updateProgress(task, 0.35, 'Guardando foto...');
+        final savedPath = await ImageProcessingService.instance.saveMealImage(
+          compressed,
+          mealType: task.mealType,
+          date: task.date,
+        );
+        task.imagePath = savedPath;
+        task.rawImageBytes = null;
+        await _persistTaskToDb(task);
+      }
+
       final apiKey = await SecureStorageService.instance.getGeminiApiKey();
       if (apiKey == null || apiKey.trim().isEmpty) {
         throw Exception('Configura tu API Key de Gemini en Ajustes.');
@@ -208,10 +163,7 @@ class AnalysisQueueService extends ChangeNotifier {
       final masterPrompt = await SecureStorageService.instance.getMasterPrompt();
       final effectiveModel = selectedModel ?? GeminiVisionService.defaultModel;
 
-      task.progress = 0.40;
-      task.stage = 'Consultando $effectiveModel...';
-      notifyListeners();
-      await _persistTaskToDb(task);
+      await _updateProgress(task, 0.45, 'Consultando $effectiveModel...');
 
       final file = File(task.imagePath);
       if (!await file.exists()) {
@@ -225,29 +177,31 @@ class AnalysisQueueService extends ChangeNotifier {
         masterPrompt: masterPrompt,
       );
 
-      task.progress = 0.65;
-      task.stage = 'Estimando volumen y desglosando componentes...';
-      notifyListeners();
-      await _persistTaskToDb(task);
+      await _updateProgress(task, 0.70, 'Estimando volumen y desglosando componentes...');
+
+      double? diameter = task.dishwareDiameterCm;
+      String? pantryCtx;
+      try {
+        diameter ??= (await DatabaseService.instance.dishwareDao.getDefaultDishware())?.diameterCm;
+        pantryCtx = await DatabaseService.instance.pantryDao.getPantryPromptContext();
+      } catch (_) {}
 
       final analysis = await gemini.analyzeMealPhoto(
         rawImageBytes: bytes,
         userContext: task.userContext,
+        dishwareDiameterCm: diameter,
+        pantryContext: (pantryCtx != null && pantryCtx.isNotEmpty) ? pantryCtx : null,
       );
 
-      task.progress = 0.88;
-      task.stage = 'Calculando macronutrientes y guardando en SQLite...';
-      notifyListeners();
-      await _persistTaskToDb(task);
+      await _updateProgress(task, 0.90, 'Calculando macronutrientes y guardando en SQLite...');
 
       final ingredientsSummary = analysis.items.isNotEmpty
           ? 'Ingredientes: ${analysis.items.map((e) => '${e.name} (${e.estimatedGrams.toStringAsFixed(0)}g)').join(', ')}'
           : null;
 
       final existingMeal = await DatabaseService.instance.getMealByImagePath(task.imagePath);
-      final mealId = task.resultMeal?.id ?? existingMeal?.id ?? task.id;
       final meal = Meal(
-        id: mealId,
+        id: task.resultMeal?.id ?? existingMeal?.id ?? task.id,
         name: analysis.dishName,
         mealType: task.mealType,
         date: task.date,
@@ -265,39 +219,50 @@ class AnalysisQueueService extends ChangeNotifier {
       await MealController.instance.loadMeals();
 
       task.status = AnalysisStatus.completed;
-      task.progress = 1.0;
-      task.stage = '¡Comida analizada y registrada!';
       task.resultMeal = meal;
-      notifyListeners();
-      await _persistTaskToDb(task);
+      await _updateProgress(task, 1.0, '¡Comida analizada y registrada!');
     } catch (e) {
       task.status = AnalysisStatus.failed;
       task.error = GeminiVisionService.userFriendlyErrorMessage(e);
-      task.stage = 'Error al analizar la comida';
+      await _updateProgress(task, task.progress, 'Error al analizar la comida');
+    }
+  }
+
+  Meal? createManualMealFromFailedTask(String taskId) {
+    final task = _tasks.cast<AnalysisTask?>().firstWhere((t) => t != null && t.id == taskId, orElse: () => null);
+    if (task == null || task.imagePath.isEmpty) return null;
+    return Meal(
+      id: task.id,
+      name: 'Comida sin clasificar',
+      mealType: task.mealType,
+      date: task.date,
+      imagePath: task.imagePath,
+      notes: task.userContext,
+    );
+  }
+
+  Future<void> retryTask(String taskId) async {
+    final task = _tasks.cast<AnalysisTask?>().firstWhere((t) => t != null && t.id == taskId, orElse: () => null);
+    if (task == null) return;
+
+    if ((task.imagePath.isEmpty || !File(task.imagePath).existsSync()) && task.rawImageBytes == null) {
+      task.status = AnalysisStatus.failed;
+      task.error = 'No se encontró el archivo de imagen para reintentar.';
       notifyListeners();
       await _persistTaskToDb(task);
+      return;
     }
+
+    task.status = AnalysisStatus.queued;
+    task.error = null;
+    await _updateProgress(task, 0.05, 'En cola para reintento...');
+    _triggerWorker();
   }
 
   Future<void> _persistTaskToDb(AnalysisTask task) async {
     try {
       final db = await DatabaseService.instance.database;
-      await db.insert(
-        'analysis_queue',
-        {
-          'id': task.id,
-          'image_path': task.imagePath,
-          'meal_type': task.mealType,
-          'date': task.date.toIso8601String(),
-          'status': task.status.name,
-          'progress': task.progress,
-          'stage': task.stage,
-          'error': task.error,
-          'result_meal_id': task.resultMeal?.id,
-          'created_at': task.createdAt.toIso8601String(),
-        },
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
+      await db.insert('analysis_queue', task.toDbMap(), conflictAlgorithm: ConflictAlgorithm.replace);
     } catch (_) {}
   }
 
@@ -310,31 +275,6 @@ class AnalysisQueueService extends ChangeNotifier {
     } catch (_) {}
   }
 
-  Future<void> retryTask(String taskId) async {
-    final task = _tasks.cast<AnalysisTask?>().firstWhere(
-          (t) => t != null && t.id == taskId,
-          orElse: () => null,
-        );
-    if (task == null) return;
-
-    if (!File(task.imagePath).existsSync()) {
-      task.status = AnalysisStatus.failed;
-      task.error = 'No se encontró el archivo de imagen para reintentar.';
-      notifyListeners();
-      await _persistTaskToDb(task);
-      return;
-    }
-
-    task.status = AnalysisStatus.queued;
-    task.error = null;
-    task.progress = 0.10;
-    task.stage = 'En cola para reintento...';
-    notifyListeners();
-    await _persistTaskToDb(task);
-
-    _triggerWorker();
-  }
-
   Future<void> clearCompleted() async {
     _tasks.removeWhere((t) => t.status == AnalysisStatus.completed);
     notifyListeners();
@@ -345,14 +285,8 @@ class AnalysisQueueService extends ChangeNotifier {
   }
 
   @visibleForTesting
-  void addTaskForTesting(AnalysisTask task) {
-    _tasks.add(task);
-    notifyListeners();
-  }
+  void addTaskForTesting(AnalysisTask task) { _tasks.add(task); notifyListeners(); }
 
   @visibleForTesting
-  void clearAllTasksForTesting() {
-    _tasks.clear();
-    notifyListeners();
-  }
+  void clearAllTasksForTesting() { _tasks.clear(); notifyListeners(); }
 }

@@ -1,17 +1,17 @@
 ---
 tipo: arquitectura
 proyecto: App_Food_Tracker
-version: v1.0.4
+version: v1.1.0
 estado: activo
-fecha: 2026-09-13
-stack_principal: [Flutter, SQLite WAL v2, Google Gemini API, USDA FoodData Central, Open Food Facts, FlutterSecureStorage, GetIt, Flutter Localizations]
+fecha: 2026-10-04
+stack_principal: [Flutter, SQLite WAL v3, Google Gemini API, USDA FoodData Central, Open Food Facts, FlutterSecureStorage, GetIt, Flutter Localizations, HomeWidget]
 diagrama_html: PRJ_App_Food_Tracker_architecture_diagram.html
-tags: [proyecto, arquitectura, tech-stack, archify, local-first, get-it, l10n, result-pattern]
+tags: [proyecto, arquitectura, tech-stack, archify, local-first, get-it, l10n, result-pattern, android-widgets, sqlite-v3]
 ---
 
-# 🏗️ Arquitectura del Sistema: Victor Engineer - Food Tracker (v1.0.4)
+# 🏗️ Arquitectura del Sistema: Victor Engineer - Food Tracker (v1.1.0)
 
-> **Mesa de Control & Backend-Architect:** Este documento establece los componentes fundamentales, el Tech Stack tecnológico, las decisiones arquitectónicas estructurales y el flujo de datos integral de la aplicación **Victor Engineer - Food Tracker**.
+> **Mesa de Control & Backend-Architect:** Este documento establece los componentes fundamentales, el Tech Stack tecnológico, las decisiones arquitectónicas estructurales y el flujo de datos integral de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.1.0` (Generación Omnicanal de Precisión Visual, Volumétrica y Nutricional).
 
 ---
 
@@ -19,30 +19,38 @@ tags: [proyecto, arquitectura, tech-stack, archify, local-first, get-it, l10n, r
 
 - **Frontend:** Flutter 3.22+ / 3.27+ (Dart SDK `>=3.4.0 <4.0.0`), Google Fonts (Outfit, Inter), CustomPainter (`WeightLineChartPainter` y `VeLoadingRing` a 60 FPS).
 - **Backend & Lógica de Dominio:** Dart Core, Clean Monolith modular (<300 LoC por archivo), Inmutabilidad con Patrón Sentinel, `ModelSanitizer`.
-- **Inyección de Dependencias & Service Locator:** `get_it: ^7.7.0` centralizado en `lib/core/di/service_locator.dart`, registrando contratos abstractos (`IDatabaseService`, `IImageProcessingService`, `IMealDao`, `IWeightLogDao`, `IUserProfileDao`, `IPantryDao`) con inyección por constructor y compatibilidad transparente con accesores estáticos `.instance`.
+- **Inyección de Dependencias & Service Locator:** `get_it: ^7.7.0` centralizado en `lib/core/di/service_locator.dart`, registrando contratos abstractos (`IDatabaseService`, `IImageProcessingService`, `IMealDao`, `IWeightLogDao`, `IUserProfileDao`, `IPantryDao`, `IDishwareDao`, `IMealTemplateDao`, `IFastingDao`) con inyección por constructor y compatibilidad transparente con accesores estáticos `.instance`.
 - **Manejo Funcional de Errores (Result / Either):** Tipo suma sellado en Dart 3 `Result<T, Failure>` (`Success`, `FailureResult`) en `lib/core/errors/result.dart` con combinadores funcionales (`fold`, `map`, `flatMap`, `guardAsync`) y jerarquía exhaustiva `Failure` en `lib/core/errors/failures.dart`.
-- **Internacionalización y Localización Multi-idioma:** `flutter_localizations`, `intl` y `l10n.yaml` con contratos tipados en `AppLocalizations` (`lib/l10n/app_es.arb` y `lib/l10n/app_en.arb`) desacoplados de los widgets.
-- **Base de Datos & Cache (Local-First):** SQLite v2 mediante `sqflite` (móvil) y `sqflite_common_ffi` (escritorio/tests):
+- **Internacionalización y Localización Multi-idioma:** `flutter_localizations`, `intl` y `l10n.yaml` con contratos tipados en `AppLocalizations` (`lib/l10n/app_es.arb` y `lib/l10n/app_en.arb`) desacoplados de los widgets, con selector dinámico en caliente sin reiniciar la app.
+- **Base de Datos & Cache (Local-First):** SQLite v3 mediante `sqflite` (móvil) y `sqflite_common_ffi` (escritorio/tests):
   - `PRAGMA journal_mode = WAL;` (Concurrencia óptima de lecturas y escrituras simultáneas).
   - `PRAGMA synchronous = NORMAL;` (Persistencia confiable y latencia < 16 ms).
   - `PRAGMA foreign_keys = ON;` (Integridad referencial estricta).
-  - Tablas: `meals`, `meal_items`, `pantry_items`, `weight_logs`, `user_profile`, `analysis_queue`.
-  - Capa de DAOs atómicos: `MealDao`, `WeightLogDao`, `UserProfileDao`, `PantryDao`, `DatabaseConnectionFactory` y `DatabaseSchema`.
-- **Inferencia IA & Visión Multimodal:** Google Generative AI SDK (`google_generative_ai: ^0.4.6`) con consulta en vivo para descubrimiento dinámico de modelos (`GET https://generativelanguage.googleapis.com/v1beta/models`), generación estructurada JSON (`responseSchema`), temperatura 0.2, timeout defensivo de 35s, rescate de JSON truncado (`JsonRepairHelper`), salvaguarda de condimentos (`isSeasoningOrHerb`) e inyección de Master Prompt biométrico.
-- **Procesamiento Asíncrono en Background:** Cola de tareas SQLite `AnalysisQueueService` desacoplada del hilo de UI, con anillo de carga dinámico `VeLoadingRing` y banner reactivo en Dashboard.
+  - Tablas v3: `meals`, `meal_items`, `pantry_items`, `weight_logs`, `user_profile`, `analysis_queue`, `calibrated_dishware`, `meal_templates`, `fasting_logs`.
+  - Columnas de micronutrientes: `fiber`, `sodium`, `sugar` en `meals` y `meal_items`.
+  - Capa de DAOs atómicos: `MealDao`, `WeightLogDao`, `UserProfileDao`, `PantryDao`, `DishwareDao`, `MealTemplateDao`, `FastingDao`, `DatabaseConnectionFactory` y `DatabaseSchema`.
+- **Widgets Nativos de Android (AppWidgets):** `home_widget: ^0.7.0` con sincronización en SharedPreferences y layouts XML nativos en `res/layout/`:
+  - **Widget Compacto (2x2):** Anillo de progreso calórico, calorías restantes vs meta, y botón de acción directa `[+ Registrar]`.
+  - **Widget Extendido (4x2):** Anillo de calorías a la izquierda, desglose tri-columna de macronutrientes (Proteína, Carbohidratos, Grasas), y botones táctiles interactivos de 1 toque con deep links directos (`foodtracker://scan_food` para cámara IA y `foodtracker://scan_barcode` para escáner USDA).
+  - **Doble Tema Nativo:** `res/values/colors.xml` (Modo Claro) y `res/values-night/colors.xml` (Modo Oscuro Zinc/Carmesí con esquinas redondeadas de 24dp).
+- **Inferencia IA & Visión Multimodal:** Google Generative AI SDK (`google_generative_ai: ^0.4.6`):
+  - Inyección de Escala Métrica de Vajilla: Inyección del diámetro en cm de la vajilla calibrada en el prompt del sistema para cálculo volumétrico de alta precisión.
+  - Inyección de Contexto de Despensa: Reconocimiento inteligente de marcas del usuario (`PantryItem`).
+  - Resiliencia Defensiva: `GeminiResilienceHelper` con reintentos exponenciales, jitter y conmutación automática de modelo (`gemini-2.5-flash` $\rightarrow$ `gemini-1.5-flash`).
+  - Esquema JSON estructurado (`responseSchema`), temperatura 0.2, timeout defensivo de 35s y rescate de JSON truncado (`JsonRepairHelper`).
+- **Estimación Local Zero-Tokens:** `OfflineFoodEstimatorService` con catálogo normalizado de 50+ alimentos base por 100g para autocompletado y cálculo instantáneo sin coste de red ni consumo de tokens.
+- **Procesamiento Asíncrono en Background (Zero-Freeze):** Cola de tareas SQLite `AnalysisQueueService` con encolamiento en milisegundo 0 antes de la compresión en isolate (`compressAndResizeAsync`), preservación garantizada de fotos en disco ante errores y anillo interactivo `VeLoadingRing`.
 - **Bases de Datos Nutricionales (Cascada Híbrida):**
-  - **Primaria:** USDA FoodData Central API (`https://api.nal.usda.gov/fdc/v1/`) con coincidencia exacta GTIN (`padLeft(14, '0')`), normalización energética ($kJ \rightarrow kcal$ factor 4.184) y control de tasa (1.000 req/hr).
+  - **Primaria:** USDA FoodData Central API (`https://api.nal.usda.gov/fdc/v1/`) con coincidencia exacta GTIN (`padLeft(14, '0')`), normalización energética ($kJ \rightarrow kcal$ factor 4.184) y control de tasa.
   - **Fallback:** Open Food Facts API v2 con timeout defensivo de 10s.
-- **Motor Biométrico & Metabólico:** `MetabolicCalculator` implementando la ecuación clínica internacional **Mifflin-St Jeor** para TMB y TDEE según pasos diarios y actividad física, incorporando la fórmula clínica de Peso Corporal Ajustado ($ABW$) para usuarios con IMC $\ge 30$.
-- **Seguridad Criptográfica & BYOK:** `flutter_secure_storage` con `AndroidOptions(encryptedSharedPreferences: true)` en Android y Keychain en iOS para custodia local de las claves de API de Gemini y USDA.
-- **Procesamiento y Compresión de Imágenes:** Paquete `image: ^4.5.2` con compresión en Isolate secundario (`compressAndResizeAsync`) a un límite máximo de 1024x1024 píxeles y codificación JPEG al 85% de calidad, estandarización de nombres en `MealImageFileNamer` y resolución de directorios en `MealImageStorageResolver`.
-- **Persistencia de Preferencias de UI:** `shared_preferences: ^2.3.5` para el modo de tema y perfil.
+- **Motor Biométrico & Metabólico:** `MetabolicCalculator` implementando Mifflin-St Jeor para TMB/TDEE con ajuste por pasos y fórmula clínica de Peso Corporal Ajustado ($ABW$) para IMC $\ge 30$.
+- **Seguridad Criptográfica & BYOK:** `flutter_secure_storage` con `AndroidOptions(encryptedSharedPreferences: true)` y Keystore permanente RSA 2048 con alias `foodtracker`.
 
 ---
 
 ## 📐 2. Diagrama de Arquitectura Interactivo (Archify)
 
-El diagrama interactivo de componentes, límites de seguridad y flujos de red/persistencia del sistema se mantiene como archivo HTML autónomo con SVG vectorial de alta fidelidad:
+El diagrama interactivo de componentes, límites de seguridad, widgets nativos de Android y flujos de red/persistencia del sistema se mantiene como archivo HTML autónomo con SVG vectorial de alta fidelidad:
 
 🔗 **Ver Diagrama:** [[PRJ_App_Food_Tracker_architecture_diagram.html|Abrir Diagrama de Arquitectura Interactivo]]
 
@@ -50,75 +58,33 @@ El diagrama interactivo de componentes, límites de seguridad y flujos de red/pe
 
 ---
 
-## 🏛️ 3. Principios y Decisiones Clave de Diseño
+## 🏛️ 3. Principios y Decisiones Clave de Diseño v1.1.0
 
 ### 3.1. Local-First & Cero Dependencia de Red para Operaciones Básicas
-- Todas las operaciones CRUD de comidas, despensa, metas calóricas, registros de peso e historial son ejecutadas de manera síncrona/inmediata en SQLite local.
-- La red únicamente se invoca bajo demanda explícita: al fotografiar un plato para estimación visual con Gemini, consultar modelos en vivo o escanear un código de barras. La pérdida de conectividad no interrumpe ninguna función de visualización o registro.
+- Todas las operaciones CRUD de comidas, despensa, calibración de platos, registros de ayuno, metas calóricas, registros de peso e historial son ejecutadas de manera síncrona/inmediata en SQLite local.
+- La red únicamente se invoca bajo demanda explícita: estimación visual con Gemini, consulta de modelos en vivo o escaneo de códigos de barras. La pérdida de conectividad no interrumpe ninguna función de visualización o registro.
 
-### 3.2. Concurrencia y Resiliencia en SQLite v2 (Modo WAL)
+### 3.2. Concurrencia y Resiliencia en SQLite v3 (Modo WAL)
 - Se activa `PRAGMA journal_mode = WAL;` y `PRAGMA synchronous = NORMAL;`.
-- Permite que múltiples llamadas asíncronas lean datos concurrentemente sin bloqueos de escritura.
-- La migración a la versión 2 crea la tabla `weight_logs`, `user_profile` y los índices correspondientes dentro de transacciones.
+- Migración v3 sin pérdida de datos: alteración idempotente de tablas existentes (`meals`, `meal_items`, `pantry_items`) y creación de `calibrated_dishware`, `meal_templates` y `fasting_logs` con sus respectivos índices B-Tree.
 - Bloqueo de inicialización mediante `_initFuture` en `DatabaseConnectionFactory` contra arranques en frío simultáneos.
 
-### 3.3. Inmutabilidad y Patrón Sentinel
-- Los modelos (`Meal`, `FoodItem`, `PantryItem`, `DailyGoals`, `UserProfile`, `WeightLog`, `GeminiModelInfo`) son inmutables.
-- Para distinguir entre "no actualizar un campo" y "limpiar un campo asignándole `null`", el método `copyWith` utiliza una instancia privada centinela:
-  ```dart
-  static const Object _sentinel = Object();
-  Meal copyWith({Object? imagePath = _sentinel, ...}) {
-    return Meal(
-      imagePath: identical(imagePath, _sentinel) ? this.imagePath : (imagePath as String?),
-      ...
-    );
-  }
-  ```
+### 3.3. Arquitectura de Widgets Nativos Android (Glance / RemoteViews)
+- Los widgets de pantalla de inicio operan de forma desacoplada de la VM de Flutter mediante `SharedPreferences` compartidas y `AppWidgetProvider` nativo de Android.
+- `HomeWidgetService` actualiza los estados atómicamente tras cada inserción o edición de comida.
+- El deep linking con esquemas `foodtracker://scan_food` y `foodtracker://scan_barcode` ofrece atajos de latencia cero desde el launcher del sistema operativo.
+- Soporte nativo para modo claro y modo oscuro según la configuración del sistema de Android a través de carpetas de recursos `values` y `values-night`.
 
-### 3.4. Sanitización Defensiva Centralizada (`ModelSanitizer`)
-- Protección contra strings gigantescos (nombres acotados a 255 caracteres, notas a 2000 caracteres, JSON a 100000 caracteres).
-- Valores numéricos acotados contra `NaN`, infinitos y límites plausibles (`clampDouble(val, min: 0.0, max: 9999.0)`).
-- Fechas deserializadas con fallback a `DateTime.now()` en caso de formatos corruptos.
+### 3.4. Resiliencia de IA y Cero-Pérdida de Capturas
+- Las imágenes tomadas por el usuario se guardan de forma permanente antes de cualquier llamada a la API de Gemini.
+- En caso de fallo de red, cuota (429) o indisponibilidad (503), la foto física NUNCA se elimina. La tarea queda en estado `failed` en el banner del Dashboard, permitiendo reintentar con backoff exponencial o editar manualmente precargando la captura.
+- Cascada automática a modelos de respaldo para garantizar continuidad del servicio.
 
 ### 3.5. Monolito Modular (< 300 LoC por Archivo)
-- Ninguna pantalla, widget o servicio en `lib/` excede las 300 líneas de código:
-  - `DashboardScreen`: 294 LoC
-  - `MealDetailScreen`: 287 LoC
-  - `MetricsScreen`: 198 LoC
-  - `SettingsScreen`: 262 LoC
-  - `UserProfileScreen`: 238 LoC
-  - `DatabaseService`: 217 LoC (delegando a DAOs especializados)
-  - `ImageProcessingService`: 265 LoC (delegando a namer y storage resolver)
-- Se extraen tarjetas, diálogos, barras y gráficos en widgets especializados (`widgets/common/`, `widgets/dashboard/`, `widgets/meal_detail/`, `widgets/settings/`, `widgets/profile/`, `widgets/metrics/`).
+- Toda pantalla, widget o servicio en `lib/` respeta el umbral estricto de menos de 300 líneas de código:
+  - DAOs atómicos (`MealDao`, `WeightLogDao`, `UserProfileDao`, `PantryDao`, `DishwareDao`, `MealTemplateDao`, `FastingDao`).
+  - Servicios auxiliares desacoplados (`GeminiResilienceHelper`, `OfflineFoodEstimatorService`, `HomeWidgetService`, `MealImageFileNamer`, `MealImageStorageResolver`).
+  - Widgets Bento modulares en `lib/widgets/`.
 
-### 3.6. Seguridad Criptográfica y Firma Permanente de Producción
-- Claves de Gemini y USDA almacenadas mediante `FlutterSecureStorage` en `EncryptedSharedPreferences` (Android) y Keychain (iOS).
-- Clave Keystore permanente RSA 2048 con alias `foodtracker` y validez hasta 2056 inyectada en CI/CD mediante secretos de GitHub.
-
-### 3.7. Inyección de Dependencias Formal y Service Locator (`GetIt`)
-- Desacoplamiento de componentes concretos mediante la interfaz abstracta `IDatabaseService`, `IImageProcessingService` y DAOs en `lib/core/interfaces/`.
-- Configuración centralizada en `service_locator.dart` permitiendo `setupServiceLocator({bool isTesting = false})` y `resetServiceLocator()` para tests unitarios aislados.
-- Inyección por constructor en `MealController(databaseService, imageProcessingService)` y `SettingsController` con preservación de singletons `.instance` para compatibilidad transparente.
-
-### 3.8. Capa de DAOs Especializados (< 300 LoC) y Separación de Esquema/Conexión
-- `MealDao` (220 LoC): Persistencia y consultas de `meals` y `meal_items`.
-- `WeightLogDao` (185 LoC): Consultas de peso e inserción por lotes (`batchUpsertWeightLogs`).
-- `UserProfileDao` (83 LoC): Perfil biométrico y metas calculadas.
-- `PantryDao` (119 LoC): Alimentos de despensa y favoritos.
-- `DatabaseConnectionFactory` (81 LoC): Conexión de plataforma, WAL pragmas e inicialización memoizada.
-- `DatabaseSchema` (116 LoC): DDL relacional, índices B-Tree de cobertura y migraciones.
-
-### 3.9. Manejo Funcional de Errores con Tipo Suma Sellado (`Result<T, Failure>`)
-- Reemplazo de excepciones no controladas por el tipo monádico `Result<T, Failure>` en Dart 3 con subclases `Success<T, E>` y `FailureResult<T, E>`.
-- Manejo exhaustivo con pattern matching y combinadores funcionales (`fold`, `map`, `flatMap`, `guardAsync`).
-- Jerarquía sellada `Failure` tipada por dominio (`DatabaseFailure`, `AiServiceFailure`, `NetworkFailure`, `ValidationFailure`, `StorageFailure`, `ImageProcessingFailure`).
-
-### 3.10. Internacionalización y Localización Multi-idioma (`AppLocalizations`)
-- Soporte bilingüe completo (español e inglés) mediante archivos de recursos ARB (`app_es.arb` y `app_en.arb`).
-- Clase generada `AppLocalizations` registrada en `NutriTrackerApp` con soporte para detección automática de idioma del dispositivo y fallback a español.
-
-### 3.11. Procesamiento Desacoplado de Fotos (`MealImageFileNamer` y `MealImageStorageResolver`)
-- `MealImageFileNamer` (229 LoC): Formato canónico `YYYY_MM_DD_{TYPE}_{INDEX}.jpg`, inferencia de tiempo de comida por hora del día, y parseo regex.
-- `MealImageStorageResolver` (153 LoC): Detección resiliente del directorio de imágenes (`Pictures/FoodTrackerMeals` en Android) y fallback a `Documents`.
-- Abstracciones detalladas documentadas en [[PRJ_App_Food_Tracker_abstractions|Abstracciones del Sistema y Arquitectura de Código]].
-
+### 3.6. Estimación Inteligente Local Zero-Tokens
+- `OfflineFoodEstimatorService` resuelve búsquedas como "carne molida 100g" en menos de 5 milisegundos sin consumir tokens de IA ni realizar peticiones HTTP, reduciendo la latencia de usuario y los costes operativos.

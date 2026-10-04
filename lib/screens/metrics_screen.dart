@@ -6,11 +6,13 @@ import '../services/database_service.dart';
 import '../services/theme_manager.dart';
 import '../widgets/common/ve_app_bar.dart';
 import '../widgets/metrics/calorie_compliance_bento_card.dart';
+import '../widgets/metrics/clinical_export_dialog.dart';
 import '../widgets/metrics/macro_distribution_bento_card.dart';
 import '../widgets/metrics/quick_weight_entry_dialog.dart';
 import '../widgets/metrics/streak_compliance_bento_card.dart';
 import '../widgets/metrics/weight_history_bento_card.dart';
 import '../widgets/metrics/weight_trend_bento_card.dart';
+import '../widgets/metrics/weekly_digest_card.dart';
 
 /// Dedicated screen with Bento Grid for historical analytics and progress tracking.
 class MetricsScreen extends StatefulWidget {
@@ -76,10 +78,17 @@ class _MetricsScreenState extends State<MetricsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const VeAppBar(
+      appBar: VeAppBar(
         title: 'Métricas y Progreso',
         subtitle: 'Analítica Local-First',
         showVeBadge: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.file_download_outlined, color: AppColors.primary),
+            tooltip: 'Exportar Reporte Clínico',
+            onPressed: () => showClinicalExportDialog(context),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => showQuickWeightEntryDialog(
@@ -142,7 +151,14 @@ class _MetricsScreenState extends State<MetricsScreen> {
             ),
             const SizedBox(height: 14),
 
-            // 5. Weight history bento card with notes
+            // 5. Weekly nutritional digest card
+            WeeklyDigestCard(
+              meals: _rangeMeals,
+              goals: _mealController.dailyGoals,
+            ),
+            const SizedBox(height: 14),
+
+            // 6. Weight history bento card with notes
             WeightHistoryBentoCard(
               logs: _mealController.weightLogs,
             ),

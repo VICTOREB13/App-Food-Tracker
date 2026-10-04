@@ -1,22 +1,22 @@
 ---
 tipo: abstracciones
 proyecto: App_Food_Tracker
-version: v1.0.4
+version: v1.1.0
 estado: activo
-fecha: 2026-09-13
-tags: [proyecto, arquitectura, abstracciones, backend, v1-0-4]
+fecha: 2026-10-04
+tags: [proyecto, arquitectura, abstracciones, backend, android-widgets, sqlite-v3, v1-1-0]
 ---
 
-# Abstracciones del Sistema y Arquitectura de Código: Victor Engineer - Food Tracker
+# Abstracciones del Sistema y Arquitectura de Código: Victor Engineer - Food Tracker (v1.1.0)
 
-> **Mesa de Control & Backend-Architect:** Este documento centraliza las clases maestras, interfaces de dominio, servicios de negocio, funciones utilitarias nucleares, variables de estado seguro y costuras de flujo de datos (data seams) de la aplicación **Victor Engineer - Food Tracker**. Complementa conceptualmente a [[PRJ_App_Food_Tracker_api_spec|Especificación de API y Modelos]] para posibilitar el entendimiento exhaustivo del software sin necesidad de inspeccionar línea por línea el código fuente.
+> **Mesa de Control & Backend-Architect:** Este documento centraliza las clases maestras, interfaces de dominio, servicios de negocio, funciones utilitarias nucleares, variables de estado seguro y costuras de flujo de datos (data seams) de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.1.0` (Generación Omnicanal de Precisión Visual, Volumétrica y Nutricional). Complementa conceptualmente a [[PRJ_App_Food_Tracker_api_spec|Especificación de API y Modelos]] para posibilitar el entendimiento exhaustivo del software sin necesidad de inspeccionar línea por línea el código fuente.
 
 ---
 
 ## 🏛️ Filosofía de Diseño y Paradigmas de Código
 
 1. **Local-First Determinista & Resiliencia Offline:**
-   - Todo el estado transaccional (comidas, despensa, registros de peso, metas calóricas y perfil metabólico) reside localmente en **SQLite v2** optimizado en modo WAL (`PRAGMA journal_mode = WAL;`, `PRAGMA synchronous = NORMAL;`, `PRAGMA foreign_keys = ON;`).
+   - Todo el estado transaccional (comidas, despensa, calibración de platos, ayuno intermitente, plantillas habituales, registros de peso, metas calóricas y perfil metabólico) reside localmente en **SQLite v3** optimizado en modo WAL (`PRAGMA journal_mode = WAL;`, `PRAGMA synchronous = NORMAL;`, `PRAGMA foreign_keys = ON;`).
    - Las operaciones CRUD son síncronas/inmediatas en el dispositivo. La red se invoca exclusivamente bajo demanda explícita del usuario (inferencia visual multimodal y escaneo de códigos de barras).
 2. **Inmutabilidad Estricta & Patrón Sentinel:**
    - Todos los modelos de dominio son inmutables (`@immutable`).
@@ -30,16 +30,20 @@ tags: [proyecto, arquitectura, abstracciones, backend, v1-0-4]
    - Cada pantalla o componente complejo se descompone en submódulos especializados para mantener el archivo principal por debajo de 300 líneas.
 5. **BYOK (Bring Your Own Key) & Custodia Criptográfica en Hardware:**
    - Las credenciales privadas de Google Gemini y USDA FoodData Central son custodiadas en hardware criptográfico seguro mediante `flutter_secure_storage` (`EncryptedSharedPreferences` en Android, `Keychain` en iOS).
+6. **Desacoplamiento de Widgets Nativos y Deep Linking:**
+   - Comunicación asíncrona hacia Android AppWidgets mediante `SharedPreferences` compartidas y `home_widget`.
+   - Rutas semánticas nativas (`foodtracker://scan_food`, `foodtracker://scan_barcode`, `foodtracker://new_meal`) gestionadas directamente en `MainActivity` sin inicialización pesada de Flutter.
 
 ---
 
-## 🧩 Módulos y Capas del Sistema
+## 🧩 Módulos y Capas del Sistema (v1.1.0)
 
 ```text
 lib/
 ├── controllers/          # Controladores de Estado Reactivo con Inyección por Constructor
 │   ├── meal_controller.dart
 │   ├── settings_controller.dart
+│   ├── fasting_controller.dart
 │   └── streak_calculator.dart
 ├── core/                 # Infraestructura Transversal y Contratos
 │   ├── di/
@@ -49,6 +53,9 @@ lib/
 │   │   └── result.dart
 │   └── interfaces/
 │       ├── daos_interfaces.dart
+│       ├── dishware_dao_interface.dart
+│       ├── fasting_dao_interface.dart
+│       ├── meal_template_dao_interface.dart
 │       ├── database_service_interface.dart
 │       └── image_processing_service_interface.dart
 ├── l10n/                 # Localización e Internacionalización Multi-idioma
@@ -57,14 +64,18 @@ lib/
 │   ├── app_localizations.dart
 │   ├── app_localizations_en.dart
 │   └── app_localizations_es.dart
-├── models/               # Modelos de Dominio Inmutables & Sanitizadores
+├── models/               # Modelos de Dominio Inmutables & Sanitizadores (< 300 LoC)
+│   ├── analysis_task.dart
+│   ├── calibrated_dishware.dart
 │   ├── daily_goals.dart
+│   ├── fasting_log.dart
 │   ├── food_item.dart
 │   ├── gemini_model_info.dart
 │   ├── json_repair_helper.dart
 │   ├── meal.dart
 │   ├── meal_analysis_result.dart
 │   ├── meal_image_file_info.dart
+│   ├── meal_template.dart
 │   ├── model_sanitizer.dart
 │   ├── pantry_item.dart
 │   ├── usda_food_item.dart
@@ -77,310 +88,250 @@ lib/
 │   ├── daos/             # Capa de Acceso a Datos Especializada (<300 LoC)
 │   │   ├── database_connection_factory.dart
 │   │   ├── database_schema.dart
+│   │   ├── dishware_dao.dart
+│   │   ├── fasting_dao.dart
 │   │   ├── meal_dao.dart
+│   │   ├── meal_template_dao.dart
 │   │   ├── pantry_dao.dart
 │   │   ├── user_profile_dao.dart
 │   │   └── weight_log_dao.dart
 │   ├── database_service.dart
 │   ├── gemini_model_service.dart
+│   ├── gemini_resilience_helper.dart
 │   ├── gemini_vision_service.dart
+│   ├── home_widget_service.dart
 │   ├── image_processing_service.dart
 │   ├── meal_image_file_namer.dart
 │   ├── meal_image_storage_resolver.dart
 │   ├── metabolic_calculator.dart
+│   ├── offline_food_estimator_service.dart
 │   ├── open_food_facts_service.dart
 │   ├── secure_storage_service.dart
 │   ├── theme_manager.dart
 │   └── usda_food_data_service.dart
 └── widgets/              # Componentes de UI Atómicos y Modulares (<300 LoC)
     ├── common/           # VeLoadingRing, VeAppBar, VeCard, VeLogo...
-    ├── dashboard/        # AnalysisProgressBanner, DailyCalorieSummary...
-    ├── meal_detail/      # MealImageCard con overlay de análisis...
-    ├── metrics/
-    ├── profile/
-    └── settings/
+    ├── dashboard/        # AnalysisProgressBanner, FastingWindowBentoCard...
+    ├── meal_detail/      # FoodItemEditorDialog con autocompletado local...
+    ├── metrics/          # WeeklyDigestCard, CalorieComplianceBentoCard...
+    ├── profile/          # DishwareCalibrationCard, BiometricInputsCard...
+    └── settings/         # LanguageSelectorCard, GeminiModelSelectorCard...
 ```
 
 ---
 
 ## 📐 Interfaces y Contratos de Dominio
 
-### `ModelSanitizer`
-- **Ubicación:** `lib/models/model_sanitizer.dart`
-- **Propósito:** Contrato utilitario puro de sanitización defensiva transversal aplicado en constructores de deserialización `fromJson` y `fromSqliteMap`.
-- **Firmas:**
-  - `truncate(String? value, int maxLength, {String fallback = ''}): String`
-  - `truncateNullable(String? value, int maxLength): String?`
-  - `clampDouble(dynamic value, {double min = 0.0, double max = 9999.0}): double`
-  - `parseDate(dynamic value, {DateTime? fallback}): DateTime`
-  - `formatIsoDate(DateTime? date): String`
+### `IDatabaseService`
+- **Ubicación:** `lib/core/interfaces/database_service_interface.dart`
+- **Propósito:** Contrato unificado para el orquestador de persistencia SQLite local-first y acceso a DAOs.
+- **Firmas:** `get database`, `getAllMeals()`, `upsertMeal(meal)`, `deleteMeal(id)`, `getPantryItems()`, `saveUserProfile(profile)`, `insertWeightLog(log)`, etc.
 
-### `JsonRepairHelper`
-- **Ubicación:** `lib/models/json_repair_helper.dart`
-- **Propósito:** Algoritmo utilitario de recuperación resiliente de payloads JSON truncados emitidos por Gemini Vision mediante balanceo de pila (stack) de comillas, corchetes y llaves.
-- **Firmas:**
-  - `repairJson(String jsonStr): String`
+### `IImageProcessingService`
+- **Ubicación:** `lib/core/interfaces/image_processing_service_interface.dart`
+- **Propósito:** Contrato para el procesamiento, compresión asíncrona en isolate y persistencia de imágenes.
+- **Firmas:** `compressAndResizeAsync(imageBytes, ...): Future<Uint8List>`, `saveMealImage(imageBytes, ...): Future<String>`, `deleteMealImage(path): Future<void>`.
 
-### `MacroDistribution`
-- **Ubicación:** `lib/services/metabolic_calculator.dart`
-- **Propósito:** Objeto de valor inmutable representativo del reparto calórico y de macronutrientes en gramos calculado clínicamente.
-- **Campos:** `protein` (double), `carbs` (double), `fat` (double).
-- **Getters Computados:** `proteinCalories`, `carbsCalories`, `fatCalories`, `totalCalories`.
+### DAOs de Dominio (`IMealDao`, `IWeightLogDao`, `IUserProfileDao`, `IPantryDao`)
+- **Ubicación:** `lib/core/interfaces/daos_interfaces.dart`
+- **Propósito:** Separación de responsabilidades atómicas para comidas, pesajes, perfil de usuario y despensa.
+- **Firmas:** Operaciones CRUD síncronas/asíncronas y variantes funcionales con `Result<T, Failure>`.
 
-### `MealAnalysisResult`
-- **Ubicación:** `lib/models/meal_analysis_result.dart` (re-exportado en `lib/services/gemini_vision_service.dart`)
-- **Propósito:** DTO inmutable resultante del análisis volumétrico y nutricional generado por el motor de visión IA multimodal. Incorpora descomposición automática inteligente de platos compuestos en ingredientes individuales independientes, protección de hierbas/especias (`isSeasoningOrHerb`) y recuperación resiliente con `JsonRepairHelper`.
-- **Campos:** `dishName` (String), `items` (List<FoodItem>), `totalCalories` (double), `totalProtein` (double), `totalCarbs` (double), `totalFat` (double), `rawJson` (String).
-- **Métodos Clave:** `extractComponents(String text): List<String>`, `decomposeCompositeFood(...): List<FoodItem>`, `fromJsonString(String jsonStr): MealAnalysisResult`.
+### `IDishwareDao`
+- **Ubicación:** `lib/core/interfaces/dishware_dao_interface.dart`
+- **Propósito:** Contrato para la persistencia y gestión de platos y vajilla calibrada del usuario.
+- **Firmas:** `insertDishware(dishware)`, `getDishwareList()`, `getDefaultDishware()`, `setDefaultDishware(id)`, `deleteDishware(id)`.
 
-### `BarcodeLookupResult`
-- **Ubicación:** `lib/services/barcode_lookup_service.dart`
-- **Propósito:** DTO que encapsula el alimento resuelto por escaneo de código de barras junto con la fuente exacta de procedencia en la cascada.
-- **Campos:** `item` (PantryItem), `source` (`BarcodeSource.usda` | `BarcodeSource.openFoodFacts`).
+### `IFastingDao`
+- **Ubicación:** `lib/core/interfaces/fasting_dao_interface.dart`
+- **Propósito:** Contrato para el control del protocolo y registros de ayuno intermitente.
+- **Firmas:** `startFast(startTime, {targetHours})`, `stopActiveFast(endTime, {notes})`, `getActiveFast()`, `getFastingHistory({limit})`.
+
+### `IMealTemplateDao`
+- **Ubicación:** `lib/core/interfaces/meal_template_dao_interface.dart`
+- **Propósito:** Contrato para registrar y consultar comidas habituales o plantillas predefinidas.
+- **Firmas:** `saveTemplate(template)`, `getTemplates({mealType})`, `deleteTemplate(id)`.
 
 ---
 
 ## ⚙️ Clases Núcleo y Servicios de Negocio
 
-### 1. `DatabaseService` (Singleton)
+### 1. `DatabaseService`
 - **Ubicación:** `lib/services/database_service.dart`
-- **Responsabilidad:** Gestión del ciclo de vida de la base de datos SQLite v2, configuración de pragmas de alto rendimiento (`WAL`, `NORMAL`, `foreign_keys`), ejecución de migraciones deterministas y operaciones CRUD transaccionales.
+- **Responsabilidad:** Orquestador central de SQLite v3 (modo WAL, sincronización NORMAL, llaves foráneas ON). Delega en DAOs atómicos (`MealDao`, `WeightLogDao`, `UserProfileDao`, `PantryDao`, `DishwareDao`, `MealTemplateDao`, `FastingDao`).
 - **Métodos Clave:**
-  - `init(): Future<void>`: Inicialización perezosa protegida contra carreras concurrentes mediante `_initFuture`.
-  - `insertMeal(Meal meal) / updateMeal(Meal meal) / upsertMeal(Meal meal) / deleteMeal(String id): Future<int>`: Garantiza la persistencia atómica mediante `ConflictAlgorithm.replace`.
-  - `getMealsForDay(DateTime day) / getAllMeals(): Future<List<Meal>>`
-  - `getMealsByRange(DateTime start, DateTime end): Future<List<Meal>>`: Consulta comidas indexadas por `idx_meals_date` en un intervalo temporal específico para alimentar métricas sin sobrecargar RAM.
-  - `getMealByImagePath(String imagePath): Future<Meal?>`: Resuelve la comida asociada a una ruta de imagen en disco.
-  - `clearMealImagePath(String mealId): Future<int>`: Desvincula la imagen borrada del registro SQLite (`image_path = null`) durante la depuración de almacenamiento.
-  - `getMealsOlderThanWithImages(DateTime cutoffDate): Future<List<Meal>>`: Consulta comidas previas a la fecha de corte que conservan imagen en disco.
-  - `insertPantryItem(PantryItem item) / updatePantryItem(PantryItem item) / deletePantryItem(String id): Future<int>`
-  - `insertWeightLog(WeightLog log) / getWeightLogsByRange(DateTime start, DateTime end) / getAllWeightLogs(): Future<List<WeightLog>>`: `getAllWeightLogs()` recupera todos los registros ordenados cronológicamente por `date ASC`.
-  - `saveUserProfile(UserProfile profile) / getUserProfile(): Future<UserProfile?>`
-  - `batchUpsertWeightLogs(List<WeightLog> logs): Future<void>`
+  - `database: Future<Database>`: Inicialización perezosa con lock defensivo `_initFuture`.
+  - `upsertMealResult(Meal meal): Future<Result<int, Failure>>`: Inserción transaccional atómica con retorno `Result`.
+  - `getMealsByRange(DateTime start, DateTime end): Future<List<Meal>>`: Consulta indexada B-Tree sin N+1.
 
 ### 2. `GeminiVisionService`
 - **Ubicación:** `lib/services/gemini_vision_service.dart`
-- **Responsabilidad:** Orquestación de inferencia multimodal visual utilizando Google Generative AI SDK, inyección del Master Prompt biométrico, schema estructurado JSON forzado (`responseSchema`), timeout defensivo de 35 segundos y traducción defensiva de errores amigables al usuario.
-- **Dependencias:** `ImageProcessingService`, `ModelSanitizer`.
+- **Responsabilidad:** Cliente de visión multimodal con Google Generative AI SDK, temperatura 0.2, timeout defensivo de 35s y prompt enriquecido.
 - **Métodos Clave:**
-  - `userFriendlyErrorMessage(dynamic error): String`: Mapea excepciones técnicas (SocketException, 401/403, 429 cuota, fallos de detección/seguridad) a mensajes claros y accionables en español.
-  - `analyzeMealPhoto({required Uint8List rawImageBytes, ...}) / analyzeMealImage(Uint8List imageBytes, ...): Future<MealAnalysisResult>`:
-    1. Decodifica dimensiones y omite recompresión si ancho y alto ya son <= 1024 px; de lo contrario comprime en Isolate asíncrono.
-    2. Construye el modelo `GenerativeModel` con temperatura baja (`0.2`) y esquema estructurado.
-    3. Concatena la instrucción clínica del sistema, el Master Prompt del usuario y las notas contextuales opcionales.
-    4. Ejecuta `generateContent` con timeout defensivo de 35s (`.timeout(Duration(seconds: 35))`), capturando excepciones y envolviéndolas mediante `userFriendlyErrorMessage`.
+  - `analyzeMealImage(Uint8List imageBytes, ...): Future<MealAnalysisResult>`: Inferencia visual con inyección de escala métrica de vajilla y contexto de despensa.
+  - `analyzeSpeechMeal(Uint8List audioBytes): Future<MealAnalysisResult>`: Procesamiento multimodal de voz natural.
+  - `analyzeVideoFramesMeal(List<Uint8List> frameBytesList): Future<MealAnalysisResult>`: Muestreo 3D multi-ángulo.
+  - `reanalyzeMealWithAi(Meal meal, String prompt): Future<MealAnalysisResult>`: Ajuste interactivo y sustitución de ingredientes.
 
 ### 3. `GeminiModelService`
 - **Ubicación:** `lib/services/gemini_model_service.dart`
-- **Responsabilidad:** Introspección en vivo de modelos multimodales reales mediante llamada HTTP a `GET https://generativelanguage.googleapis.com/v1beta/models`, filtrado estricto por soporte multimodal y fallback offline curado.
+- **Responsabilidad:** Descubrimiento dinámico de modelos de IA vía `GET https://generativelanguage.googleapis.com/v1beta/models`.
 - **Métodos Clave:**
-  - `fetchAvailableModels(String apiKey, {Duration timeout}): Future<List<GeminiModelInfo>>`
-  - `parseModelsResponse(String responseBody): List<GeminiModelInfo>`
-  - `isVisionCapableModel(Map<String, dynamic> model): bool`: Filtro estricto que exige 'gemini', presencia de 'flash' o 'pro', soporte de 'generateContent', y exclusión de lista negra (`banana`, `nano`, `transcribe`, `omni`, `computer-use`, `robotics`, `live`, `custom`, `preview-10-2025`, `embedding`, `imagen`, `tts`, `audio`, `veo`, `bison`).
-  - `_fallbackModels / fallbackModels`: Modelos canónicos de producción (`gemini-2.5-flash`, `gemini-1.5-flash`, `gemini-1.5-pro`, `gemini-2.0-flash`).
+  - `getAvailableModels({bool forceRefresh}): Future<List<GeminiModelInfo>>`: Consulta en vivo filtrando por generación estructurada y visión, con catálogo offline fallback resiliente.
 
 ### 4. `UsdaFoodDataService`
 - **Ubicación:** `lib/services/usda_food_data_service.dart`
-- **Responsabilidad:** Cliente HTTP para la API oficial de USDA FoodData Central (`api.nal.usda.gov/fdc/v1`).
-- **Capacidades Defensivas:**
-  - Ventana deslizante de limitación de tasa (1.000 solicitudes/hora) y lectura defensiva de headers `x-ratelimit-remaining`.
-  - Coincidencia exacta de GTIN mediante normalización de 14 dígitos (`padLeft(14, '0')`) y fallback limpio retornando `null` para activar delegación transparente a Open Food Facts.
-  - Normalización energética de kilojulios a kilocalorías ($kJ \rightarrow kcal$ factor 4.184).
-  - Manejo de excepciones tipadas: `UsdaRateLimitException`, `UsdaAuthenticationException`.
+- **Responsabilidad:** Cliente HTTP para USDA FoodData Central API (`https://api.nal.usda.gov/fdc/v1`).
 - **Métodos Clave:**
-  - `searchFoodsByQuery(String query, {int pageSize = 10, String? apiKey}): Future<List<UsdaFoodItem>>`
-  - `searchByGtinUpc(String gtinUpc, {String? apiKey}): Future<PantryItem?>`
+  - `lookupBarcode(String barcode): Future<UsdaFoodItem?>`: Búsqueda GTIN normalizada a 14 dígitos (`padLeft(14, '0')`), normalización energética ($kJ \rightarrow kcal$) y rate limiting deslizante (1.000 req/h).
 
 ### 5. `BarcodeLookupService`
 - **Ubicación:** `lib/services/barcode_lookup_service.dart`
-- **Responsabilidad:** Implementación del motor en cascada de códigos de barras: consulta primero USDA FoodData Central si la clave de API está presente; si retorna nulo o falla, conmuta automáticamente a Open Food Facts API v2.
+- **Responsabilidad:** Cascada híbrida de resolución de códigos de barras (USDA FoodData Central $\rightarrow$ Open Food Facts v2).
 - **Métodos Clave:**
-  - `lookup(String barcode): Future<BarcodeLookupResult?>`
+  - `lookup(String barcode): Future<BarcodeLookupResult?>`: Despacha primero a USDA; si no hay coincidencia exacta o falla, conmuta limpiamente a Open Food Facts.
 
 ### 6. `MetabolicCalculator`
 - **Ubicación:** `lib/services/metabolic_calculator.dart`
-- **Responsabilidad:** Motor de cálculo clínico biométrico implementando la ecuación internacional **Mifflin-St Jeor**, cálculo de TMB, TDEE por nivel de actividad y pasos diarios, ajuste por objetivos corporales y síntesis del Master Prompt.
+- **Responsabilidad:** Motor biométrico clínico implementando Mifflin-St Jeor, factores de actividad y metas nutricionales.
 - **Métodos Clave:**
-  - `calculateBmr({required String gender, required double weightKg, required double heightCm, required int age}): double`
-  - `calculateTdee({required double bmr, required String activityLevel}): double`
-  - `calculateCaloricGoal({required double tdee, required double bmr, required String bodyGoal}): double`
-  - `calculateMacros({required double targetCalories, required double weightKg, required String bodyGoal, double? heightCm, String? gender}): MacroDistribution`: Aplica la fórmula de Peso Corporal Ajustado ($ABW = IBW + 0.4 \times (TBW - IBW)$) cuando el IMC $\ge 30$, protegiendo contra la sobreestimación proteica en obesidad.
-  - `generateMasterPrompt(UserProfile profile): String`
-  - `calculateProfile(...): UserProfile`
-  - `saveAndSynchronizeProfile(UserProfile profile): Future<UserProfile>`: Persiste en SQLite, sincroniza DailyGoals y Master Prompt en SecureStorage, actualiza reactivamente `MealController` y sincroniza en memoria `SettingsController`.
-  - `calculateAndSaveProfile(...): Future<UserProfile>`
+  - `calculateBmr(UserProfile profile): double`: TMB estandarizada por sexo biológico.
+  - `calculateTdee(UserProfile profile): double`: Gasto energético diario total según multiplicador de actividad y pasos.
+  - `calculateMacros(UserProfile profile): DailyGoals`: Cálculo de macros con Peso Corporal Ajustado ($ABW$) para IMC $\ge 30$.
+  - `generateMasterPrompt(UserProfile profile): String`: Síntesis del contexto metabólico para el prompt de Gemini.
 
-### 7. `AnalysisQueueService` (Singleton)
-- **Ubicación:** `lib/services/analysis_queue_service.dart`
-- **Responsabilidad:** Motor asíncrono no bloqueante con persistencia en SQLite (`analysis_queue`) para desacoplar el procesamiento fotográfico del hilo de la UI.
-- **Métodos Clave:**
-  - `init(): Future<void>`: Carga y recupera tareas pendientes, deduplicando contra comidas ya persistidas en SQLite.
-  - `enqueueTask(String imagePath, {String? mealType, String? notes, DateTime? targetDate}): Future<AnalysisTask>`
-  - `retryTask(String taskId): Future<void>`: Reintenta tareas fallidas restableciendo su estado sin perder los datos originales.
-  - `purgeCompletedTasks(): Future<void>`
-
-### 8. `SecureStorageService` (Singleton)
+### 7. `SecureStorageService`
 - **Ubicación:** `lib/services/secure_storage_service.dart`
-- **Responsabilidad:** Almacenamiento seguro en hardware cifrado para credenciales BYOK y tokens sensibles.
+- **Responsabilidad:** Custodia de claves privadas y configuraciones sensibles con hardware seguro (`flutter_secure_storage`).
 - **Métodos Clave:**
-  - `getGeminiApiKey() / setGeminiApiKey(String key) / deleteGeminiApiKey(): Future<void>`
-  - `getUsdaApiKey() / setUsdaApiKey(String key) / deleteUsdaApiKey(): Future<void>`
-  - `getSelectedGeminiModel() / setSelectedGeminiModel(String model): Future<void>`
-  - `getMasterPrompt() / setMasterPrompt(String prompt): Future<void>`
-  - `getDailyGoals() / setDailyGoals(DailyGoals goals): Future<void>`
-  - `hasCompletedOnboarding() / setCompletedOnboarding(bool completed): Future<void>`
+  - `getGeminiApiKey() / setGeminiApiKey(key)`: Lectura/escritura segura de clave Gemini.
+  - `getUsdaApiKey() / setUsdaApiKey(key)`: Lectura/escritura segura de clave USDA.
+  - `getDailyGoals() / setDailyGoals(goals)`: Persistencia segura de metas nutricionales.
 
-### 9. `BackupService`
+### 8. `BackupService`
 - **Ubicación:** `lib/services/backup_service.dart`
-- **Responsabilidad:** Exportación e importación atómica de copias de seguridad en formato JSON v2 estructurado dentro de transacciones SQLite.
+- **Responsabilidad:** Exportación e importación completa de la base de datos en JSON estructurado para copias de seguridad locales.
 - **Métodos Clave:**
-  - `exportToJsonString(): Future<String>`
-  - `importFromJsonString(String jsonContent): Future<Map<String, int>>`
+  - `exportToJsonString(): Future<String>`: Serialización transaccional de comidas, despensa, pesos y perfil.
+  - `importFromJsonString(String jsonContent): Future<Map<String, int>>`: Restauración determinista con `ConflictAlgorithm.replace`.
 
-### 10. `ImageProcessingService`
+### 9. `ImageProcessingService`
 - **Ubicación:** `lib/services/image_processing_service.dart`
-- **Responsabilidad:** Compresión y redimensionamiento defensivo de fotografías de platos (máximo 1024x1024 px, JPEG 85%), gestión del almacenamiento en la carpeta pública visible del usuario con cascada de fallbacks, y compresión asíncrona en Isolate secundario para mantener 60 FPS en UI.
+- **Responsabilidad:** Pipeline de preprocesamiento, escalado y compresión de capturas fotográficas.
 - **Métodos Clave:**
-  - `compressAndResize(Uint8List rawBytes, {int targetMaxDimension = 1024, int quality = 85}): Uint8List`
-  - `compressAndResizeAsync(Uint8List rawBytes, {int targetMaxDimension = 1024, int quality = 85}): Future<Uint8List>`: Ejecuta la compresión en `Isolate.run`.
-  - `saveMealImage(Uint8List imageBytes, ...): Future<String>`
-  - `generateMealImageFileName(...): Future<String>`
-  - `pruneOldMealPhotos({required int retentionDays}): Future<int>`
-  - `deleteMealImage(String? filePath): Future<void>`
+  - `compressAndResizeAsync(Uint8List imageBytes, ...): Future<Uint8List>`: Compresión en Isolate secundario a 1024x1024 px, JPEG 85%.
+  - `saveMealImage(Uint8List imageBytes, ...): Future<String>`: Almacenamiento físico seguro con nombres normalizados.
 
-### 11. `ThemeManager`
-- **Ubicación:** `lib/services/theme_manager.dart`
-- **Responsabilidad:** Gestión reactiva del modo de visualización (`ThemeMode.light`, `ThemeMode.dark`, `ThemeMode.system`) persistido en `SharedPreferences`.
+### 10. `HomeWidgetService`
+- **Ubicación:** `lib/services/home_widget_service.dart`
+- **Responsabilidad:** Sincronización bidireccional entre estado reactivo y AppWidgets nativos de Android (2x2 y 4x2).
+- **Métodos Clave:**
+  - `updateWidgetData(...)`: Actualización atómica en SharedPreferences y recarga de RemoteViews.
+  - `handleWidgetLaunch(Uri uri)`: Manejo de deep links (`foodtracker://scan_food`, `foodtracker://scan_barcode`).
 
----
+### 11. `AnalysisQueueService`
+- **Ubicación:** `lib/services/analysis_queue_service.dart`
+- **Responsabilidad:** Cola asíncrona no bloqueante con persistencia SQLite y preservación física garantizada de imágenes.
+- **Métodos Clave:**
+  - `enqueueTask(imagePath, ...)`: Encolado en milisegundo 0 antes de compresión, disparando `notifyListeners()`.
+  - `retryTask(taskId)`: Reintento con backoff sobre la foto preservada.
+  - `createManualMealFromFailedTask(taskId)`: Creación manual sin pérdida de foto.
 
-## 🛠️ Funciones Críticas y Lógica Pura
+### 12. `OfflineFoodEstimatorService`
+- **Ubicación:** `lib/services/offline_food_estimator_service.dart`
+- **Responsabilidad:** Estimador local determinista con catálogo de 50+ alimentos normalizados por 100g para autocompletado instantáneo (<5ms, 0 tokens).
 
-| Función | Módulo | Entradas | Salida / Comportamiento |
-| :--- | :--- | :--- | :--- |
-| `clampDouble` | `models/model_sanitizer.dart` | `dynamic value`, `min: 0.0`, `max: 9999.0` | `double` truncado a 2 decimales, protegido contra `null`, `NaN` y valores fuera de rango. |
-| `truncate` | `models/model_sanitizer.dart` | `String? value`, `int maxLength`, `fallback` | `String` acotada a longitud máxima sin desbordar memoria. |
-| `parseDate` | `models/model_sanitizer.dart` | `dynamic value`, `DateTime? fallback` | `DateTime` válido; si el formato falla, retorna el fallback seguro. |
-| `calculateBmr` | `services/metabolic_calculator.dart` | `gender`, `weightKg`, `heightCm`, `age` | `double` (kcal/día) según Mifflin-St Jeor ($10W + 6.25H - 5A + s$). |
-| `calculateTdee` | `services/metabolic_calculator.dart` | `bmr`, `activityLevel` | `double` (kcal/día) multiplicando por factores (1.2, 1.375, 1.55, 1.725). |
-| `calculateCaloricGoal` | `services/metabolic_calculator.dart` | `tdee`, `bmr`, `bodyGoal` | `double` (kcal/día): Déficit (-500 kcal piso en BMR), Mantenimiento (TDEE) o Superávit (+300 kcal). |
-| `calculateMacros` | `services/metabolic_calculator.dart` | `targetCalories`, `weightKg`, `bodyGoal` | `MacroDistribution` (Proteína por kg, Grasa al 25% mín 0.8g/kg, Carbohidratos remanentes). |
-| `generateMasterPrompt` | `services/metabolic_calculator.dart` | `UserProfile` | `String` estructurada en Markdown con biometría y pautas clínicas para inyección en Gemini. |
-
----
-
-## 🌐 Variables de Estado, Constantes Globales y Configuración
-
-### Claves de Hardware Seguro (`FlutterSecureStorage`):
-- `gemini_api_key`: Clave privada de API para Google Generative AI SDK.
-- `gemini_selected_model`: Nombre del modelo seleccionado (e.g., `gemini-2.5-flash`, `gemini-1.5-pro`).
-- `usda_api_key`: Clave privada de API para USDA FoodData Central.
-- `has_completed_onboarding`: Booleano en String (`true`/`false`) que rige la ruta inicial de la aplicación.
-- `user_master_prompt`: Markdown compilado con el contexto metabólico inyectado a la visión IA.
-- `daily_goals_json`: Serialización JSON de los objetivos diarios de calorías y macros.
-
-### Constantes Globales de Operación:
-- `ModelSanitizer.maxNameLength`: `255`
-- `ModelSanitizer.maxNotesLength`: `2000`
-- `ModelSanitizer.maxJsonLength`: `100000`
-- `UsdaFoodDataService.maxRequestsPerHour`: `1000`
-- `ImageProcessingService.maxDimension`: `1024`
-- `ImageProcessingService.jpegQuality`: `85`
-- `DatabaseService.version`: `2`
+### 13. `GeminiResilienceHelper`
+- **Ubicación:** `lib/services/gemini_resilience_helper.dart`
+- **Responsabilidad:** Resiliencia de red con reintentos exponenciales, jitter y cascada automática de modelos.
 
 ---
 
-## 🔄 Costuras de Flujo de Datos (Data Seams)
+## 🛠️ Funciones Críticas y Lógica Pura (Pure Functions)
 
-### 1. Inferencia Volumétrica de Visión IA:
+### 1. `ModelSanitizer`
+- **Módulo:** `lib/models/model_sanitizer.dart`
+- **Lógica Pura:**
+  - `clampDouble(double? val, {double min = 0.0, double max = 9999.0}): double`: Sanitización matemática estricta contra `NaN`, infinitos y negativos.
+  - `sanitizeText(String? raw, {int maxLength = 255}): String`: Truncamiento seguro y remoción de caracteres nulos/corruptos.
+  - `parseIsoDateTimeSafe(String? raw): DateTime`: Parsing determinista con fallback a fecha actual ante strings inválidos.
+
+### 2. `MetabolicCalculator` (Fórmulas Clínicas Puras)
+- **Módulo:** `lib/services/metabolic_calculator.dart`
+- **Lógica Pura:**
+  - Fórmula Mifflin-St Jeor: $TMB_{m} = 10 \times peso + 6.25 \times altura - 5 \times edad + 5$ (Varones), $- 161$ (Mujeres).
+  - Peso Corporal Ajustado ($ABW$): $ABW = IBW + 0.4 \times (TBW - IBW)$ para usuarios con $IMC \ge 30$.
+  - Distribución de Macronutrientes: Proteína ($2.0$ g/kg objetivo), Grasa mínima ($0.8$ g/kg) y balance restante a Carbohidratos.
+
+### 3. `StreakCalculator`
+- **Módulo:** `lib/controllers/streak_calculator.dart`
+- **Lógica Pura:**
+  - `calculateCurrentStreak(List<DateTime> loggedDates): int`: Computa la racha ininterrumpida de días consecutivos con registros válidos sin efectos secundarios ni dependencias externas.
+
+### 4. `JsonRepairHelper`
+- **Módulo:** `lib/models/json_repair_helper.dart`
+- **Lógica Pura:**
+  - `repairTruncatedJson(String jsonString): String`: Algoritmo determinista de balanceo de corchetes `]`, llaves `}` y comillas `"` para rescatar payloads JSON incompletos de la API de IA.
+
+---
+
+## 🌐 Variables de Estado, Configuración y Almacenamiento Seguro
+
+- **Claves Criptográficas en `FlutterSecureStorage` (Hardware Keystore):**
+  - `gemini_api_key`: Token de autenticación de Google Gemini API.
+  - `usda_api_key`: Token de autenticación de USDA FoodData Central.
+  - `gemini_selected_model`: Identificador del modelo preferido por el usuario.
+  - `user_master_prompt`: Prompt enriquecido con biometría y preferencias.
+  - `daily_goals_json`: Serialización JSON de los objetivos nutricionales diarios.
+- **Configuración de Persistencia SQLite v3:**
+  - `PRAGMA journal_mode = WAL;`: Concurrencia de lecturas y escrituras sin contención.
+  - `PRAGMA synchronous = NORMAL;`: Rendimiento óptimo en I/O sin riesgo de corrupción.
+  - `PRAGMA foreign_keys = ON;`: Integridad referencial con eliminación en cascada.
+
+---
+
+## 🔄 Costuras de Flujo de Datos Actualizadas (Data Seams v1.1.0)
+
+### 1. Captura de Foto Zero-Freeze y Pipeline Volumétrico:
 ```text
 [Cámara / Galería]
-       │ (Uint8List)
+       │ (imageBytes)
        ▼
-ImageProcessingService.compressAndResize (1024x1024 px, JPEG 85%)
+AnalysisQueueService.enqueueTask (Estado 0: queued, progress: 0.05, stage: 'Optimizando foto...')
+       ├── Disparo inmediato notifyListeners() ──> Dashboard muestra VeLoadingRing instantáneamente
+       │
+       ▼ (Isolate secundario en background)
+ImageProcessingService.compressAndResizeAsync (1024x1024 px, JPEG 85%)
        │
        ▼
 GeminiVisionService.analyzeMealImage
-   ├── Inyección de Master Prompt (desde UserProfile / SecureStorage)
-   ├── Inyección de Notas Contextuales del Usuario
-   └── Forzado de Schema Estructurado JSON (responseSchema)
-       │ (HTTP POST generativelanguage.googleapis.com)
-       ▼
-MealAnalysisResult.fromJsonString
-       │ (Desglose de alimentos + totales clampDouble)
-       ▼
-MealDetailScreen (Revisión interactiva y edición por el usuario)
-       │
-       ▼
-MealController.upsertMeal -> DatabaseService.upsertMeal (SQLite WAL v2)
+       ├── Inyección de Diámetro de Vajilla Calibrada (e.g. "Diámetro plato: 26.0 cm")
+       ├── Inyección de Contexto de Despensa Activa (Marcas y productos registrados por usuario)
+       └── GeminiResilienceHelper (Reintentos con Backoff + Cascada a modelo fallback)
+              │
+              ├── ÉXITO:
+              │     ▼
+              │   MealAnalysisResult.fromJsonString
+              │     ▼
+              │   Estado: completed -> Notifica UI y actualiza HomeWidgetService
+              │
+              └── FALLO:
+                    ▼
+                  Foto física PRESERVADA intacta en disco
+                    ▼
+                  Estado: failed -> Banner ofrece [Reintentar con IA] o [Editar manualmente]
 ```
 
-### 2. Cascada de Escaneo de Códigos de Barras:
+### 2. Sincronización Bidireccional con Widgets Nativos de Android:
 ```text
-[Lector de Código de Barras] (UPC / EAN)
+[MealController.addMeal / deleteMeal]
        │
        ▼
-BarcodeLookupService.lookup(barcode)
-       │
-       ├── ¿Existe USDA API Key configurada?
-       │     ├── SÍ ──> UsdaFoodDataService.searchByGtinUpc(barcode)
-       │     │            │
-       │     │            ├── Éxito: Retorna BarcodeLookupResult(source: usda)
-       │     │            └── Fallo / Null: Salta al fallback
-       │     └── NO ──> Salta directo al fallback
-       │
-       └── Fallback Automático: OpenFoodFactsService.lookupBarcode(barcode)
-             │
-             ├── Éxito: Retorna BarcodeLookupResult(source: openFoodFacts)
-             └── Fallo: Retorna null (Producto no encontrado)
-```
-
-### 3. Onboarding Clínico y Calibración Metabólica:
-```text
-[UserProfileScreen] (Edad, Género, Estatura, Peso, Actividad, Meta)
-       │
+HomeWidgetService.updateFromDailyTotals(consumed, target)
+       │ (SharedPreferences nativo de Android)
        ▼
-MetabolicCalculator.calculateProfile
-   ├── calculateBmr (Mifflin-St Jeor)
-   ├── calculateTdee (Multiplicador de actividad + pasos)
-   ├── calculateCaloricGoal (Déficit / Mantenimiento / Superávit)
-   ├── calculateMacros (Proteína g/kg + Grasa 25% + Carbos)
-   └── generateMasterPrompt (Markdown de contexto clínico)
+AppWidgetManager.updateAppWidget(FoodTrackerCompactWidgetProvider & WideWidgetProvider)
        │
-       ├── DatabaseService.saveUserProfile (Persistencia SQLite v2)
-       ├── SecureStorageService.setMasterPrompt (Custodia para IA)
-       └── MealController.updateGoals (Sincronización reactiva del Dashboard)
+       ├── Modo Claro: res/values/colors.xml
+       └── Modo Oscuro: res/values-night/colors.xml
 ```
-
----
-
-## 🏛️ Nuevas Abstracciones de Arquitectura (v1.0.4)
-
-### 1. Inyección de Dependencias y Service Locator (`lib/core/di/service_locator.dart`)
-- **`GetIt getIt`**: Instancia central del Service Locator para desacoplar implementaciones concretas de sus contratos.
-- **`setupServiceLocator({bool isTesting = false})`**: Registra `IDatabaseService`, `IImageProcessingService`, DAOs (`IMealDao`, `IWeightLogDao`, etc.), controladores y fábrica parametrizada de `GeminiVisionService`.
-- **`resetServiceLocator()`**: Limpia los registros para garantizar aislamiento total entre pruebas unitarias.
-
-### 2. Manejo Funcional de Errores: Patrón Result / Either (`lib/core/errors/`)
-- **`Result<T, E extends Failure>`**: Tipo suma sellado (`sealed class`) en Dart 3 con subtipos `Success<T, E>` y `FailureResult<T, E>`.
-- **Métodos Funcionales**: `fold(onSuccess, onFailure)`, `map(fn)`, `flatMap(fn)`, `mapError(fn)`, `getOrThrow()`, `getOrDefault(def)`.
-- **Captura Segura**: `Result.guard(() => syncCode)` y `Result.guardAsync(() => asyncCode)` capturan excepciones y las transforman en fallos de dominio.
-- **Jerarquía `Failure`**: `DatabaseFailure`, `AiServiceFailure`, `NetworkFailure`, `ValidationFailure`, `StorageFailure`, `ImageProcessingFailure`, `UnknownFailure`.
-- **Delegaciones de Dominio**: `IDatabaseService` y `DatabaseService` exponen directamente métodos Result (`upsertMealResult`, `getMealByIdResult`, etc.) delegando a los DAOs especializados.
-
-### 3. Capa de DAOs Especializados (`lib/services/daos/`)
-- **`MealDao`**: Manejo de persistencia de comidas y alimentos asociados (`meal_items`).
-- **`WeightLogDao`**: Control de registros de peso corporal, time-series e inserciones por lote (`batchUpsertWeightLogs`).
-- **`UserProfileDao`**: Gestión de perfil de usuario, biometría y metas calóricas.
-- **`PantryDao`**: Catálogo de despensa y favoritos.
-- **`DatabaseConnectionFactory`**: Resuelve la ruta SQLite dependiente de plataforma, inicializa WAL y pragmas de integridad.
-- **`DatabaseSchema`**: DDL centralizado de tablas, índices B-Tree y migraciones de versión.
-
-### 4. Capa de Nomenclatura y Almacenamiento de Fotos (`lib/services/`)
-- **`MealImageFileNamer`**: Estandarización de nombres de fotos `YYYY_MM_DD_{TYPE}_{INDEX}.jpg`, mapeo de códigos, parseo regex e inferencia por hora del día.
-- **`MealImageStorageResolver`**: Resolución en cascada de directorios de almacenamiento en Android y plataformas de escritorio con anti-colisión determinista.
-
-### 5. Localización e Internacionalización (`lib/l10n/`)
-- **`AppLocalizations`**: Contrato tipado de textos multi-idioma (`app_es.arb` y `app_en.arb`) con delegados `localizationsDelegates` integrados en `NutriTrackerApp`.
-- **`localeResolutionCallback`**: Algoritmo de resolución defensivo que respeta idiomas soportados y redirige de forma segura a español en caso de idiomas no soportados sin lanzar `FlutterError`.
-- **Desacoplamiento de Widgets**: Extracción de textos a `AppLocalizations.of(context)` en componentes clave (`OnboardingBottomNav`, `QuickMealDialog`).

@@ -13,16 +13,13 @@ class Meal {
   final double protein;
   final double carbs;
   final double fat;
+  final double fiber;
+  final double sodium;
+  final double sugar;
   final String? notes;
   final String? aiBreakdownJson;
 
-  static const List<String> validMealTypes = [
-    'Desayuno',
-    'Almuerzo',
-    'Cena',
-    'Snack',
-  ];
-
+  static const List<String> validMealTypes = ['Desayuno', 'Almuerzo', 'Cena', 'Snack'];
   static const Object _sentinel = Object();
 
   Meal({
@@ -31,10 +28,8 @@ class Meal {
     String mealType = 'Almuerzo',
     DateTime? date,
     String? imagePath,
-    num? calories,
-    num? protein,
-    num? carbs,
-    num? fat,
+    num? calories, num? protein, num? carbs, num? fat,
+    num? fiber, num? sodium, num? sugar,
     String? notes,
     String? aiBreakdownJson,
     List<FoodItem>? items,
@@ -47,6 +42,9 @@ class Meal {
         protein = ModelSanitizer.clampDouble(protein),
         carbs = ModelSanitizer.clampDouble(carbs),
         fat = ModelSanitizer.clampDouble(fat),
+        fiber = ModelSanitizer.clampDouble(fiber),
+        sodium = ModelSanitizer.clampDouble(sodium, max: 50000.0),
+        sugar = ModelSanitizer.clampDouble(sugar),
         notes = ModelSanitizer.truncateNullable(notes, ModelSanitizer.maxNotesLength),
         aiBreakdownJson = ModelSanitizer.truncateNullable(
           _resolveBreakdownJson(
@@ -57,6 +55,9 @@ class Meal {
             protein: protein,
             carbs: carbs,
             fat: fat,
+            fiber: fiber,
+            sodium: sodium,
+            sugar: sugar,
           ),
           ModelSanitizer.maxJsonLength,
         );
@@ -69,6 +70,9 @@ class Meal {
     num? protein,
     num? carbs,
     num? fat,
+    num? fiber,
+    num? sodium,
+    num? sugar,
   }) {
     if (items != null && items.isNotEmpty) {
       return json.encode({
@@ -79,6 +83,9 @@ class Meal {
           'proteina_g': ModelSanitizer.clampDouble(protein),
           'carbohidratos_g': ModelSanitizer.clampDouble(carbs),
           'grasas_g': ModelSanitizer.clampDouble(fat),
+          'fibra_g': ModelSanitizer.clampDouble(fiber),
+          'sodio_mg': ModelSanitizer.clampDouble(sodium, max: 50000.0),
+          'azucar_g': ModelSanitizer.clampDouble(sugar),
         }
       });
     }
@@ -95,9 +102,7 @@ class Meal {
   }
 
   List<FoodItem> get items {
-    if (aiBreakdownJson == null || aiBreakdownJson!.trim().isEmpty) {
-      return const [];
-    }
+    if (aiBreakdownJson == null || aiBreakdownJson!.trim().isEmpty) return const [];
     try {
       var raw = aiBreakdownJson!.trim();
       final fenceMatch = RegExp(r'```(?:json)?\s*([\s\S]*?)\s*```').firstMatch(raw);
@@ -118,10 +123,7 @@ class Meal {
 
       final decoded = json.decode(raw);
       if (decoded is List) {
-        return decoded
-            .whereType<Map<String, dynamic>>()
-            .map((e) => FoodItem.fromJson(e))
-            .toList();
+        return decoded.whereType<Map<String, dynamic>>().map((e) => FoodItem.fromJson(e)).toList();
       } else if (decoded is Map<String, dynamic>) {
         final dynamic itemsList = decoded['items'] ??
             decoded['ingredientes'] ??
@@ -137,14 +139,7 @@ class Meal {
             if (entry is Map<String, dynamic>) {
               parsed.add(FoodItem.fromJson(entry));
             } else if (entry is String && entry.trim().isNotEmpty) {
-              parsed.add(FoodItem(
-                name: entry.trim(),
-                estimatedGrams: 100,
-                calories: 0,
-                protein: 0,
-                carbs: 0,
-                fat: 0,
-              ));
+              parsed.add(FoodItem(name: entry.trim(), estimatedGrams: 100, calories: 0, protein: 0, carbs: 0, fat: 0));
             }
           }
           return parsed;
@@ -158,14 +153,7 @@ class Meal {
               }
               parsed.add(FoodItem.fromJson(map));
             } else {
-              parsed.add(FoodItem(
-                name: entry.key,
-                estimatedGrams: 100,
-                calories: 0,
-                protein: 0,
-                carbs: 0,
-                fat: 0,
-              ));
+              parsed.add(FoodItem(name: entry.key, estimatedGrams: 100, calories: 0, protein: 0, carbs: 0, fat: 0));
             }
           }
           return parsed;
@@ -174,14 +162,7 @@ class Meal {
               .split(RegExp(r'[,;\n]'))
               .map((e) => e.trim())
               .where((e) => e.isNotEmpty)
-              .map((name) => FoodItem(
-                    name: name,
-                    estimatedGrams: 100,
-                    calories: 0,
-                    protein: 0,
-                    carbs: 0,
-                    fat: 0,
-                  ))
+              .map((name) => FoodItem(name: name, estimatedGrams: 100, calories: 0, protein: 0, carbs: 0, fat: 0))
               .toList();
         }
       }
@@ -190,25 +171,27 @@ class Meal {
   }
 
   Meal recalculateFromItems(List<FoodItem> newItems) {
-    if (newItems.isEmpty) {
-      return this;
-    }
-    double totalCalories = 0.0;
-    double totalProtein = 0.0;
-    double totalCarbs = 0.0;
-    double totalFat = 0.0;
+    if (newItems.isEmpty) return this;
+    double totalCalories = 0.0, totalProtein = 0.0, totalCarbs = 0.0, totalFat = 0.0;
+    double totalFiber = 0.0, totalSodium = 0.0, totalSugar = 0.0;
 
     for (final item in newItems) {
       totalCalories += item.calories;
       totalProtein += item.protein;
       totalCarbs += item.carbs;
       totalFat += item.fat;
+      totalFiber += item.fiber;
+      totalSodium += item.sodium;
+      totalSugar += item.sugar;
     }
 
     final effectiveCal = (totalCalories == 0.0 && calories > 0) ? calories : totalCalories;
     final effectiveProt = (totalProtein == 0.0 && protein > 0) ? protein : totalProtein;
     final effectiveCarbs = (totalCarbs == 0.0 && carbs > 0) ? carbs : totalCarbs;
     final effectiveFat = (totalFat == 0.0 && fat > 0) ? fat : totalFat;
+    final effectiveFiber = (totalFiber == 0.0 && fiber > 0) ? fiber : totalFiber;
+    final effectiveSodium = (totalSodium == 0.0 && sodium > 0) ? sodium : totalSodium;
+    final effectiveSugar = (totalSugar == 0.0 && sugar > 0) ? sugar : totalSugar;
 
     final newBreakdown = json.encode({
       'plato': name,
@@ -218,6 +201,9 @@ class Meal {
         'proteina_g': effectiveProt,
         'carbohidratos_g': effectiveCarbs,
         'grasas_g': effectiveFat,
+        'fibra_g': effectiveFiber,
+        'sodio_mg': effectiveSodium,
+        'azucar_g': effectiveSugar,
       }
     });
 
@@ -226,6 +212,9 @@ class Meal {
       protein: effectiveProt,
       carbs: effectiveCarbs,
       fat: effectiveFat,
+      fiber: effectiveFiber,
+      sodium: effectiveSodium,
+      sugar: effectiveSugar,
       aiBreakdownJson: newBreakdown,
     );
   }
@@ -236,10 +225,8 @@ class Meal {
     String? mealType,
     DateTime? date,
     Object? imagePath = _sentinel,
-    double? calories,
-    double? protein,
-    double? carbs,
-    double? fat,
+    double? calories, double? protein, double? carbs, double? fat,
+    double? fiber, double? sodium, double? sugar,
     Object? notes = _sentinel,
     Object? aiBreakdownJson = _sentinel,
   }) {
@@ -253,6 +240,9 @@ class Meal {
       protein: protein ?? this.protein,
       carbs: carbs ?? this.carbs,
       fat: fat ?? this.fat,
+      fiber: fiber ?? this.fiber,
+      sodium: sodium ?? this.sodium,
+      sugar: sugar ?? this.sugar,
       notes: identical(notes, _sentinel) ? this.notes : (notes as String?),
       aiBreakdownJson: identical(aiBreakdownJson, _sentinel)
           ? this.aiBreakdownJson
@@ -260,21 +250,22 @@ class Meal {
     );
   }
 
-  Map<String, dynamic> toSqliteMap() {
-    return {
-      'id': id,
-      'name': name,
-      'meal_type': mealType,
-      'date': date.toIso8601String(),
-      'image_path': imagePath,
-      'calories': calories,
-      'protein': protein,
-      'carbs': carbs,
-      'fat': fat,
-      'notes': notes,
-      'ai_breakdown_json': aiBreakdownJson,
-    };
-  }
+  Map<String, dynamic> toSqliteMap() => {
+        'id': id,
+        'name': name,
+        'meal_type': mealType,
+        'date': date.toIso8601String(),
+        'image_path': imagePath,
+        'calories': calories,
+        'protein': protein,
+        'carbs': carbs,
+        'fat': fat,
+        'fiber': fiber,
+        'sodium': sodium,
+        'sugar': sugar,
+        'notes': notes,
+        'ai_breakdown_json': aiBreakdownJson,
+      };
 
   factory Meal.fromSqliteMap(Map<String, dynamic> map) {
     return Meal(
@@ -287,12 +278,16 @@ class Meal {
       protein: ModelSanitizer.clampDouble(map['protein']),
       carbs: ModelSanitizer.clampDouble(map['carbs']),
       fat: ModelSanitizer.clampDouble(map['fat']),
+      fiber: ModelSanitizer.clampDouble(map['fiber']),
+      sodium: ModelSanitizer.clampDouble(map['sodium'], max: 50000.0),
+      sugar: ModelSanitizer.clampDouble(map['sugar']),
       notes: map['notes']?.toString(),
       aiBreakdownJson: map['ai_breakdown_json']?.toString(),
     );
   }
 
+  Map<String, dynamic> toMap() => toSqliteMap();
+  factory Meal.fromMap(Map<String, dynamic> map) => Meal.fromSqliteMap(map);
   Map<String, dynamic> toJson() => toSqliteMap();
-
   factory Meal.fromJson(Map<String, dynamic> json) => Meal.fromSqliteMap(json);
 }

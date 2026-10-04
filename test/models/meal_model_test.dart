@@ -105,9 +105,9 @@ void main() {
     test('recalculateFromItems recalcula totales y actualiza aiBreakdownJson', () {
       final meal = Meal(name: 'Bandeja');
       final items = [
-        FoodItem(name: 'Arroz blanco', estimatedGrams: 150, calories: 195, protein: 4.0, carbs: 42.0, fat: 0.5),
-        FoodItem(name: 'Pechuga asada', estimatedGrams: 120, calories: 198, protein: 37.0, carbs: 0.0, fat: 4.5),
-        FoodItem(name: 'Aceite sofrito', estimatedGrams: 10, calories: 90, protein: 0.0, carbs: 0.0, fat: 10.0),
+        FoodItem(name: 'Arroz blanco', estimatedGrams: 150, calories: 195, protein: 4.0, carbs: 42.0, fat: 0.5, fiber: 1.0, sodium: 5.0, sugar: 0.2),
+        FoodItem(name: 'Pechuga asada', estimatedGrams: 120, calories: 198, protein: 37.0, carbs: 0.0, fat: 4.5, fiber: 0.0, sodium: 85.0, sugar: 0.0),
+        FoodItem(name: 'Aceite sofrito', estimatedGrams: 10, calories: 90, protein: 0.0, carbs: 0.0, fat: 10.0, fiber: 0.0, sodium: 0.0, sugar: 0.0),
       ];
 
       final updated = meal.recalculateFromItems(items);
@@ -115,6 +115,9 @@ void main() {
       expect(updated.protein, equals(41.0));
       expect(updated.carbs, equals(42.0));
       expect(updated.fat, equals(15.0));
+      expect(updated.fiber, equals(1.0));
+      expect(updated.sodium, equals(90.0));
+      expect(updated.sugar, equals(0.2));
       expect(updated.items.length, equals(3));
       expect(updated.items.first.name, equals('Arroz blanco'));
     });

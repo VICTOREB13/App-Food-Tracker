@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_compact_name">Food Tracker - Resumen</string>
+    <string name="widget_compact_description">Resumen rápido de calorías y registro de comida</string>
+    <string name="widget_wide_name">Food Tracker - Completo</string>
+    <string name="widget_wide_description">Resumen de calorías, desglose de macronutrientes y accesos directos de escaneo</string>
+</resources>

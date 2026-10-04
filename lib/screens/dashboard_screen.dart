@@ -5,6 +5,7 @@ import '../models/food_item.dart';
 import '../models/meal.dart';
 import '../models/pantry_item.dart';
 import '../services/analysis_queue_service.dart';
+import '../services/home_widget_service.dart';
 import '../services/image_processing_service.dart';
 import '../services/secure_storage_service.dart';
 import '../services/theme_manager.dart';
@@ -15,9 +16,11 @@ import '../widgets/dashboard/api_key_prompt_dialog.dart';
 import '../widgets/dashboard/daily_calorie_summary_card.dart';
 import '../widgets/dashboard/dashboard_fab_menu.dart';
 import '../widgets/dashboard/date_selector_bar.dart';
+import '../widgets/dashboard/fasting_window_bento_card.dart';
 import '../widgets/dashboard/meal_section_card.dart';
 import '../widgets/dashboard/quick_meal_dialog.dart';
 import '../widgets/dashboard/streak_badge.dart';
+import '../widgets/dashboard/voice_meal_recording_dialog.dart';
 import '../widgets/dashboard/week_calendar_strip.dart';
 import 'meal_detail_screen.dart';
 import 'metrics_screen.dart';
@@ -38,6 +41,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
     super.initState();
     _mealController.addListener(_onControllerChange);
     _mealController.init();
+    HomeWidgetService.instance.init(onDeepLink: _handleWidgetDeepLink);
+  }
+
+  void _handleWidgetDeepLink(Uri uri) {
+    if (!mounted) return;
+    final action = uri.host.isNotEmpty ? uri.host : uri.path.replaceAll('/', '');
+    switch (action) {
+      case 'scan_food':
+        _handleAiPhotoScan(ImageSource.camera);
+        break;
+      case 'scan_barcode':
+        _handleBarcodeScan();
+        break;
+      case 'new_meal':
+        _openManualEntry();
+        break;
+    }
   }
 
   @override
@@ -192,6 +212,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         onManualEntry: () => _openManualEntry(),
         onQuickWater: _handleQuickWater,
         onQuickMeal: _handleQuickMeal,
+        onVoiceDictation: () => showVoiceMealRecordingDialog(context),
       ),
       body: RefreshIndicator(
         onRefresh: () => _mealController.loadMeals(),
@@ -224,6 +245,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               currentFat: _mealController.totalFat,
               goals: _mealController.dailyGoals,
             ),
+            const SizedBox(height: 12),
+            const FastingWindowBentoCard(),
             const SizedBox(height: 14),
             for (final type in Meal.validMealTypes) ...[
               MealSectionCard(

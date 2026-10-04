@@ -135,4 +135,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bmr => 'Basal Metabolic Rate';
   @override
   String get tdee => 'Total Daily Energy Expenditure';
+  @override
+  String get fiber => 'Fiber';
+  @override
+  String get sodium => 'Sodium';
+  @override
+  String get sugar => 'Sugar';
+  @override
+  String get fasting => 'Intermittent Fasting';
+  @override
+  String get fastingWindow => 'Fasting Window';
+  @override
+  String get startFast => 'Start Fast';
+  @override
+  String get endFast => 'End Fast';
+  @override
+  String get weeklyDigest => 'Weekly Digest';
+  @override
+  String get clinicalReport => 'Clinical Report';
+  @override
+  String get calibratedDishware => 'Calibrated Dishware';
+  @override
+  String get myPantry => 'My Pantry';
+  @override
+  String get voiceDictation => 'Voice Dictation';
+  @override
+  String get language => 'Language';
+  @override
+  String get spanish => 'Spanish';
+  @override
+  String get english => 'English';
 }
