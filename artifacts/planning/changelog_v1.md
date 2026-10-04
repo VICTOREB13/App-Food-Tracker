@@ -18,6 +18,18 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [1.2.3] - 2026-10-04
+
+La versión v1.2.3 soluciona de raíz el fallo fatal `Failed to create an instance of class androidx.work.impl.WorkDatabase` diagnosticado en tiempo real mediante ADB y logcat en Android 16.
+
+### Fixed
+- **Desactivación de `WorkManagerInitializer` en `AndroidManifest.xml`:** Se eliminó la inicialización automática de `androidx.work.WorkManagerInitializer` a través de `androidx.startup.InitializationProvider` (`tools:node="remove"`). Los widgets nativos de `home_widget` utilizan `SharedPreferences` y `AppWidgetManager` sin requerir tareas en segundo plano de WorkManager, evitando que el proveedor de contenido falle durante `ActivityThread.handleBindApplication`.
+- **Reglas ProGuard / R8 Antifallo (`android/app/proguard-rules.pro`):** Creación de reglas explícitas para preservar clases y constructores reflectivos de `androidx.work.**`, `androidx.room.RoomDatabase`, `WorkDatabase_Impl`, `androidx.startup.**` y `es.antonborri.home_widget.**`.
+- **Desactivación de Minificación Agresiva en Release (`build.gradle`):** Configuración de `minifyEnabled false` y `shrinkResources false` en el tipo de build release con inclusión de `proguard-rules.pro` para garantizar que la reflexión de dependencias nativas permanezca intacta.
+- **Preservación de ProGuard en Pipelines CI/CD:** Sincronización de `proguard-rules.pro` y registro del namespace XML `xmlns:tools` en los workflows de GitHub Actions (`release.yml` y `build_apk.yml`).
+
+---
+
 ## [1.2.2] - 2026-10-04
 
 La versión v1.2.2 resuelve definitivamente el crash fatal de inicio en Android 16 (API 36), certificada mediante 3 rondas de revisión adversarial y auditoría de victoria independiente con 442 pruebas automatizadas al 100%.

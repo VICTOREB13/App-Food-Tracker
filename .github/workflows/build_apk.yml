@@ -35,6 +35,7 @@ jobs:
           cp pubspec.yaml /tmp/pubspec.yaml.canonical 2>/dev/null || true
           cp android/app/build.gradle /tmp/build.gradle.canonical 2>/dev/null || true
           cp android/app/build.gradle.kts /tmp/build.gradle.kts.canonical 2>/dev/null || true
+          cp android/app/proguard-rules.pro /tmp/proguard-rules.pro.canonical 2>/dev/null || true
           flutter create --org com.victorengineer --project-name foodtracker --platforms android .
           if [ -f "/tmp/pubspec.yaml.canonical" ]; then
             cp /tmp/pubspec.yaml.canonical pubspec.yaml
@@ -47,6 +48,9 @@ jobs:
           fi
           if [ -f "/tmp/build.gradle.kts.canonical" ]; then
             cp /tmp/build.gradle.kts.canonical android/app/build.gradle.kts
+          fi
+          if [ -f "/tmp/proguard-rules.pro.canonical" ]; then
+            cp /tmp/proguard-rules.pro.canonical android/app/proguard-rules.pro
           fi
           cp -r /tmp/res_backup/* android/app/src/main/res/ 2>/dev/null || true
           cp -r /tmp/kotlin_backup/* android/app/src/main/kotlin/ 2>/dev/null || true
@@ -112,6 +116,7 @@ jobs:
 
           manifest_path = "android/app/src/main/AndroidManifest.xml"
           ET.register_namespace('android', 'http://schemas.android.com/apk/res/android')
+          ET.register_namespace('tools', 'http://schemas.android.com/tools')
           tree = ET.parse(manifest_path)
           root = tree.getroot()
 
