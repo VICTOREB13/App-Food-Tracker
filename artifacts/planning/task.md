@@ -1,15 +1,15 @@
 ---
 tipo: task_list
 proyecto: App_Food_Tracker
-iteracion: v1.1.0
-estado: activo
+iteracion: v1.1.1
+estado: completado
 fecha: 2026-10-04
-tags: [proyecto, tasks, checklist, v1-1-0]
+tags: [proyecto, tasks, checklist, v1-1-1]
 ---
 
-# 📋 Checklist Maestro de Tareas de Agentes (v1.1.0)
+# 📋 Checklist Maestro de Tareas de Agentes (v1.1.1)
 
-> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.1.0. Cada tarea completada se marca con `[x]`.
+> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.1.1. Cada tarea completada se marca con `[x]`.
 
 ---
 
@@ -112,7 +112,21 @@ tags: [proyecto, tasks, checklist, v1-1-0]
 
 ---
 
+## 🌟 Iteración v1.1.1: Modernización de Dependencias, Higiene de Compilador y Estabilidad Criptográfica
+- [x] (DevOps-Engineer) Incrementar versión en `pubspec.yaml` a `1.1.1+1`.
+- [x] (DevOps-Engineer) Modernizar dependencias mayores (`flutter_secure_storage: ^11.2.0`, `get_it: ^9.0.0`, `home_widget: '>=0.9.0 <0.10.0'`, `sqflite: ^2.4.4`, `sqlite3_flutter_libs: ^0.5.42`, `google_fonts: ^9.0.0`, `flutter_lints: ^5.0.0`).
+- [x] (DevOps-Engineer) Purgar paquete redundante `mobile_scanner: ^5.2.3` y directiva deprecada `synthetic-package: false` en `l10n.yaml`.
+- [x] (DevOps-Engineer) Migrar `SecureStorageService` a `AndroidOptions(resetOnError: true)`.
+- [x] (DevOps-Engineer) Alinear 8 suites de prueba con `FakeFlutterSecureStorage` actualizando parámetros a `AppleOptions`.
+- [x] (DevOps-Engineer) Configurar scripts de Gradle para resolver compatibilidad con Java 17 y Android SDK 34 (`sqflite_android`, `androidx.work:2.9.1`).
+- [x] (DevOps-Engineer) Compilar, firmar y publicar APK oficial `v1.1.1` (`Victor-Engineer-Food-Tracker-Android.apk`) en GitHub Releases.
+
+---
+
 ## 📜 Historial de Iteraciones Previas (Completadas)
+
+### [1.1.0] - Generación Omnicanal de Precisión Visual, Volumétrica y Nutricional
+- [x] Todas las tareas completadas y verificadas con 69 suites de prueba (100% PASS).
 
 ### [1.0.4] - Inyección de Dependencias, DAOs Modulares, l10n y Result Type
 - [x] Todas las tareas completadas y verificadas con 53 suites de prueba (367 tests PASS).
