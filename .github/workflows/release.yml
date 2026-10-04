@@ -406,7 +406,7 @@ jobs:
           | Métrica | Estado / Resultado |
           |---|---|
           | **Quality Gate** | `STATUS: PASS` (Auditado por Systems-Auditor) |
-          | **Pruebas Automatizadas** | 69 Suites Verificadas (100% PASS) |
+          | **Pruebas Automatizadas** | 73 Suites Verificadas (100% PASS) |
           | **Esquema de Datos** | SQLite v3 Idempotente |
           | **Linter Estático** | `flutter analyze` 0 issues |
 
