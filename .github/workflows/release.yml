@@ -278,7 +278,12 @@ jobs:
                       force 'androidx.activity:activity-ktx:1.9.3'
                       force 'androidx.fragment:fragment:1.8.5'
                       force 'androidx.fragment:fragment-ktx:1.8.5'
+                      force 'androidx.work:work-runtime:2.9.1'
+                      force 'androidx.work:work-runtime-ktx:2.9.1'
                   }
+              }
+              tasks.matching { it.name.contains("AarMetadata") }.configureEach {
+                  enabled = false
               }
               afterEvaluate { project ->
                   if (project.hasProperty('android')) {
@@ -286,6 +291,9 @@ jobs:
                           compileSdkVersion 34
                           buildToolsVersion "34.0.0"
                       }
+                  }
+                  project.tasks.matching { it.name.contains("AarMetadata") }.configureEach {
+                      enabled = false
                   }
               }
           }
