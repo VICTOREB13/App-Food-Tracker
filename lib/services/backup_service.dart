@@ -88,9 +88,21 @@ class BackupService {
   }
 
   /// Lists all `.json` backup files discovered in the default backup locations, sorted newest first.
-  Future<List<File>> listAvailableBackups() async {
+  Future<List<File>> listAvailableBackups({String? customDirectoryPath}) async {
     final results = <File>[];
     try {
+      if (customDirectoryPath != null) {
+        final customDir = Directory(customDirectoryPath);
+        if (await customDir.exists()) {
+          for (final e in customDir.listSync()) {
+            if (e is File && e.path.toLowerCase().endsWith('.json')) {
+              results.add(e);
+            }
+          }
+        }
+        return results;
+      }
+
       final backupDir = await getBackupDirectory();
       if (await backupDir.exists()) {
         final entities = backupDir.listSync();

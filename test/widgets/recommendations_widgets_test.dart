@@ -7,7 +7,7 @@ import 'package:food_tracker/widgets/recommendations/what_to_eat_sheet.dart';
 void main() {
   group('Recommendation Widgets UI Tests', () {
     testWidgets('WhatToEatSheet renders remaining macros and dish recommendations', (tester) async {
-      final samplePlan = TodayRecommendationPlan(
+      const samplePlan = TodayRecommendationPlan(
         remainingCalories: 550,
         remainingProtein: 45,
         remainingCarbs: 60,
@@ -24,7 +24,8 @@ void main() {
             carbs: 45,
             fat: 8,
             fitScore: 95,
-            ingredients: const ['Pollo', 'Quinoa', 'Espárragos'],
+            description: 'Plato alto en proteína y bajo en grasas',
+            ingredients: ['Pollo', 'Quinoa', 'Espárragos'],
             whyRecommended: 'Excelente balance proteico y bajo en grasas',
           ),
         ],
@@ -52,7 +53,7 @@ void main() {
     });
 
     testWidgets('RecommendationDiagnosticCard renders period chips and macro gauges', (tester) async {
-      final sampleReport = NutritionalAnalysisReport(
+      const sampleReport = NutritionalAnalysisReport(
         daysAnalyzed: 7,
         mealsLogged: 5,
         averageDailyCalories: 1900,
@@ -67,16 +68,16 @@ void main() {
         proteinDiagnosis: 'Consumo de proteína adecuado.',
         carbsDiagnosis: 'Balance adecuado.',
         calorieDiagnosis: 'Calorías en rango.',
-        fatReductionSwaps: const [
+        fatReductionSwaps: [
           FoodSwapSuggestion(
             originalFood: 'Aceite común',
-            healthierAlternative: 'Spray antiadherente',
+            substituteFood: 'Spray antiadherente',
+            rationale: 'Usa spray',
             fatSavedGrams: 10,
-            tip: 'Usa spray',
           ),
         ],
-        proteinIncreaseSuggestions: const [],
-        suggestedPlates: const [],
+        proteinIncreaseSuggestions: [],
+        suggestedPlates: [],
       );
 
       await tester.pumpWidget(

@@ -5,6 +5,7 @@ import '../../controllers/meal_controller.dart';
 import '../../models/food_item.dart';
 import '../../models/meal.dart';
 import '../../models/nutritional_recommendation.dart';
+import '../../core/interfaces/nutritional_recommendation_service_interface.dart';
 import '../../services/database_service.dart';
 import '../../services/nutritional_recommendation_service.dart';
 import '../../services/theme_manager.dart';

@@ -9,9 +9,6 @@ import 'secure_storage_service.dart';
 
 /// Intelligent recommendation engine evaluating macronutrient intake and suggesting meal strategies.
 class NutritionalRecommendationService implements INutritionalRecommendationService {
-  final IDatabaseService _db;
-  final SecureStorageService _storage;
-
   static NutritionalRecommendationService? _mockInstance;
   static final NutritionalRecommendationService _defaultInstance =
       NutritionalRecommendationService();
