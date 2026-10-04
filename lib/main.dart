@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -12,7 +13,7 @@ import 'services/database_service.dart';
 import 'services/secure_storage_service.dart';
 import 'services/theme_manager.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Intercept uncaught framework and asynchronous errors to prevent native black screen crashes
@@ -29,24 +30,11 @@ void main() async {
   // Synchronously configure service locator for dependency injection
   setupServiceLocator();
 
+  // Render UI immediately at frame 0 to prevent Android 16 ANR/Watchdog kills
+  runApp(const NutriTrackerApp());
+
   // Initialize heavy background services asynchronously without blocking initial frame
-  _initializeBackgroundServices();
-
-  // Fast, non-blocking check for onboarding with strict 150ms fallback to avoid Watchdog kills
-  bool hasCompletedOnboarding = true;
-  try {
-    hasCompletedOnboarding = await SecureStorageService.instance
-        .hasCompletedOnboarding()
-        .timeout(
-          const Duration(milliseconds: 150),
-          onTimeout: () => true,
-        );
-  } catch (e) {
-    debugPrint('Onboarding check warning: $e');
-  }
-
-  // Render UI immediately to prevent Android 16 ANR/Watchdog kills
-  runApp(NutriTrackerApp(hasCompletedOnboarding: hasCompletedOnboarding));
+  unawaited(_initializeBackgroundServices());
 }
 
 Future<void> _initializeBackgroundServices() async {
@@ -88,15 +76,47 @@ Future<void> _initializeBackgroundServices() async {
   }
 }
 
-class NutriTrackerApp extends StatelessWidget {
-  final bool hasCompletedOnboarding;
+class NutriTrackerApp extends StatefulWidget {
+  final bool? hasCompletedOnboarding;
   final Locale? locale;
 
   const NutriTrackerApp({
     super.key,
-    this.hasCompletedOnboarding = true,
+    this.hasCompletedOnboarding,
     this.locale,
   });
+
+  @override
+  State<NutriTrackerApp> createState() => _NutriTrackerAppState();
+}
+
+class _NutriTrackerAppState extends State<NutriTrackerApp> {
+  late bool _hasCompletedOnboarding;
+
+  @override
+  void initState() {
+    super.initState();
+    _hasCompletedOnboarding = widget.hasCompletedOnboarding ?? true;
+    if (widget.hasCompletedOnboarding == null) {
+      _checkOnboardingInBackground();
+    }
+  }
+
+  Future<void> _checkOnboardingInBackground() async {
+    try {
+      final completed = await SecureStorageService.instance
+          .hasCompletedOnboarding()
+          .timeout(
+            const Duration(seconds: 2),
+            onTimeout: () => true,
+          );
+      if (mounted && _hasCompletedOnboarding != completed) {
+        setState(() => _hasCompletedOnboarding = completed);
+      }
+    } catch (e) {
+      debugPrint('Onboarding background check warning: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +124,7 @@ class NutriTrackerApp extends StatelessWidget {
       listenable: Listenable.merge([ThemeManager.instance, SettingsController.instance]),
       builder: (context, _) {
         final ctrlLocale = SettingsController.instance.currentLocale;
-        final targetLocale = locale ?? ctrlLocale;
+        final targetLocale = widget.locale ?? ctrlLocale;
         Locale? effectiveLocale;
         if (targetLocale != null) {
           final isSupported = AppLocalizations.supportedLocales.any(
@@ -133,7 +153,7 @@ class NutriTrackerApp extends StatelessWidget {
             }
             return const Locale('es');
           },
-          home: hasCompletedOnboarding
+          home: _hasCompletedOnboarding
               ? const DashboardScreen()
               : const OnboardingScreen(),
         );

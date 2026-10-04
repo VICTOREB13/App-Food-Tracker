@@ -102,11 +102,12 @@ jobs:
                   content = re.sub(r'android\s*\{', 'android {\n    namespace = "com.victorengineer.foodtracker"', content)
               if 'applicationId = "com.victorengineer.foodtracker"' not in content and 'applicationId "com.victorengineer.foodtracker"' not in content:
                   content = re.sub(r'defaultConfig\s*\{', 'defaultConfig {\n        applicationId = "com.victorengineer.foodtracker"', content)
+              content = re.sub(r'useLegacyPackaging\s*=?\s*true', 'useLegacyPackaging = false', content)
               if 'useLegacyPackaging' not in content:
-                  content = re.sub(r'android\s*\{', 'android {\n    packagingOptions {\n        jniLibs {\n            useLegacyPackaging = true\n        }\n    }', content)
+                  content = re.sub(r'android\s*\{', 'android {\n    packagingOptions {\n        jniLibs {\n            useLegacyPackaging = false\n        }\n    }', content)
               with open(fpath, "w", encoding="utf-8") as f:
                   f.write(content)
-              print(f"✅ {fpath} verificado con namespace y applicationId com.victorengineer.foodtracker y useLegacyPackaging = true")
+              print(f"✅ {fpath} verificado con namespace y applicationId com.victorengineer.foodtracker y useLegacyPackaging = false")
           EOF
 
       - name: Configurar Compatibilidad de Android SDK (compileSdk 34)

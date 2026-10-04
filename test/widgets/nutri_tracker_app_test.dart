@@ -1,6 +1,8 @@
 import 'dart:ui';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/main.dart';
+import 'package:food_tracker/screens/dashboard_screen.dart';
+import 'package:food_tracker/screens/onboarding_screen.dart';
 import 'package:food_tracker/services/database_service.dart';
 import 'package:food_tracker/services/theme_manager.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -85,5 +87,19 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
 
     expect(find.byType(NutriTrackerApp), findsOneWidget);
+  });
+
+  testWidgets('NutriTrackerApp renders OnboardingScreen when hasCompletedOnboarding is false', (tester) async {
+    await tester.pumpWidget(const NutriTrackerApp(hasCompletedOnboarding: false));
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(find.byType(OnboardingScreen), findsOneWidget);
+  });
+
+  testWidgets('NutriTrackerApp renders DashboardScreen when hasCompletedOnboarding is true', (tester) async {
+    await tester.pumpWidget(const NutriTrackerApp(hasCompletedOnboarding: true));
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(find.byType(DashboardScreen), findsOneWidget);
   });
 }
