@@ -68,7 +68,7 @@ void main() {
         proteinDiagnosis: 'Consumo de proteína adecuado.',
         carbsDiagnosis: 'Balance adecuado.',
         calorieDiagnosis: 'Calorías en rango.',
-        fatReductionSwaps: const [
+        fatReductionSwaps: [
           FoodSwapSuggestion(
             originalFood: 'Aceite común',
             substituteFood: 'Spray antiadherente',
@@ -76,8 +76,8 @@ void main() {
             fatSavedGrams: 10,
           ),
         ],
-        proteinIncreaseSuggestions: const [],
-        suggestedPlates: const [],
+        proteinIncreaseSuggestions: [],
+        suggestedPlates: [],
       );
 
       await tester.pumpWidget(
