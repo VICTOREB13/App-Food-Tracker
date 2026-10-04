@@ -1,10 +1,10 @@
 ---
 tipo: api_spec
 proyecto: App_Food_Tracker
-version: v1.1.0
+version: v1.2.4
 estado: activo
 fecha: 2026-10-04
-tags: [proyecto, api, backend, contratos, sqlite-v3, get-it, daos, result-pattern, android-widgets, v1-1-0]
+tags: [proyecto, api, backend, contratos, sqlite-v4, backup-normalizer, pantry-scaling, v1-2-4]
 ---
 
 # 📡 Especificación de Contrato de Datos, Esquema SQLite v3 y Servicios Backend (v1.1.0)
@@ -58,8 +58,8 @@ CREATE TABLE meal_items (
 );
 ```
 
-### 1.3. Tabla: `pantry_items` (Actualizada v3 con Porciones y OCR)
-Almacena productos de marca, ingredientes de despensa y fotos de tablas nutricionales.
+### 1.3. Tabla: `pantry_items` (Actualizada v4 con Gramajes y Peso de Empaque)
+Almacena productos de marca, ingredientes de despensa, porción de referencia y peso neto del empaque.
 
 ```sql
 CREATE TABLE pantry_items (
@@ -69,6 +69,7 @@ CREATE TABLE pantry_items (
   category TEXT,
   serving_size REAL DEFAULT 100.0,
   serving_unit TEXT DEFAULT 'g',
+  package_weight REAL,
   calories REAL NOT NULL,
   protein REAL NOT NULL,
   carbs REAL NOT NULL,

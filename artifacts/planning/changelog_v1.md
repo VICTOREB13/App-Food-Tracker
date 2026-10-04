@@ -18,6 +18,30 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [1.2.4] - 2026-10-04
+
+La versión v1.2.4 introduce el selector de archivos nativo del sistema operativo (SAF) para respaldos, normalización adaptativa resiliente para versiones anteriores (v1.0.4 y previas), optimización de importación/exportación a 60 FPS con Isolates y SQLite Batch, reestructuración ergonómica del Dashboard (Bento de Ayuno colapsable y "¿Qué debería comer hoy?" en el menú `+`), porciones y gramajes de referencia en despensa con escalado matemático, y la corrección de inflado en el widget nativo 4x2 en Android.
+
+### Added
+- **Selector de Archivos Nativo de Android (`file_picker ^13.1.0`):** Reemplazo de la entrada manual de rutas de archivo por un botón de un toque que abre el explorador de archivos del sistema operativo móvil (Storage Access Framework).
+- **Normalizador Adaptativo de Respaldos (`BackupNormalizer`):** Traducción y mapeo automático de esquemas JSON de versiones anteriores (v1.0.4 y previas), soportando listas crudas de comidas, claves en español (`comidas`, `despensa`, `perfil`, `pesos`) y atributos heterogéneos sin arrojar `FormatException`.
+- **Procesamiento de Respaldos en Segundo Plano (`Isolate.run`):** La decodificación y parseo de JSON se desacopló del hilo de la interfaz de usuario, garantizando 60 FPS constantes durante importaciones grandes.
+- **Persistencia Transaccional por Lotes en SQLite (`batch.commit()`):** Escritura masiva en lote en la base de datos local, reduciendo el tiempo de inserción de cientos de comidas de varios segundos a menos de 100 ms.
+- **Esquema SQLite v4 & Despensa con Gramajes:** Migración de esquema añadiendo `package_weight` en `pantry_items`. Campo de porción base de referencia (ej. cada 100g) y peso total de empaque en `PantryItem` con escalado proporcional automático (`toScaledFoodItem`) al registrar comidas.
+- **Diálogos de Despensa:** `PantryItemEditorDialog` y `PantryConsumptionDialog` con cálculo reactivo de macronutrientes en tiempo real.
+
+### Changed
+- **Reubicación de "¿Qué Debería Comer Hoy?":** Retirada la tarjeta fija del Dashboard principal para evitar sobrecarga visual; reubicada como una acción destacada e intuitiva dentro del menú del botón flotante `+` (`dashboard_fab_menu.dart`).
+- **Rediseño Ergonómico de `WhatToEatSheet`:** Envoltorio `SafeArea` completo para prevenir colisión con el notch y barra de estado del sistema, cabecera con botón de cierre explícito (`X`), y restricciones de altura (`maxHeight: 0.85`) con scroll independiente.
+- **Ayuno Intermitente en Formato Bento Colapsable:** `fasting_window_bento_card.dart` opera en estado compacto discreto (~44px) por defecto y se expande con animación fluida únicamente al iniciar un ayuno o al interactuar con la tarjeta.
+
+### Fixed
+- **Corrección de InflateException en Widget Nativo 4x2:** Reemplazadas las etiquetas genéricas `<View>` prohibidas en Android `RemoteViews` por `<FrameLayout>` en `food_tracker_widget_wide.xml`, permitiendo que el launcher del dispositivo infle el widget 4x2 correctamente.
+- **Corrección de Desbordamiento en Resumen Semanal de Métricas:** Eliminado el desbordamiento horizontal del badge "1/7 días con registro" en `WeeklyDigestCard` mediante `Flexible` y alineación adaptativa.
+- **Corrección de Solapamiento en Diagnóstico de Recomendaciones:** Desacoplado el scroll de sugerencias en `RecommendationDiagnosticCard` para prevenir RenderFlex overflow y permitir lectura completa sobre el botón de cierre.
+
+---
+
 ## [1.2.3] - 2026-10-04
 
 La versión v1.2.3 soluciona de raíz el fallo fatal `Failed to create an instance of class androidx.work.impl.WorkDatabase` diagnosticado en tiempo real mediante ADB y logcat en Android 16.

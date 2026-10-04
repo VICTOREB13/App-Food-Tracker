@@ -44,7 +44,7 @@ class WeeklyDigestCard extends StatelessWidget {
       totalFat += m.fat;
     }
 
-    final loggedDaysCount = daysMap.isEmpty ? 1 : daysMap.length;
+    final loggedDaysCount = daysMap.length;
     final avgCalories = totalCalories / 7.0;
     final avgProtein = totalProtein / 7.0;
     final avgCarbs = totalCarbs / 7.0;

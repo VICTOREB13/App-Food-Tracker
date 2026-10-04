@@ -19,9 +19,11 @@ Future<void> showRecommendationDiagnosticDialog(
       backgroundColor: AppColors.surface(context),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: AppColors.border(context))),
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 420, maxHeight: MediaQuery.of(context).size.height * 0.85),
-        child: Column(
+      child: SizedBox(
+        width: 400,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.85),
+          child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
@@ -49,6 +51,7 @@ Future<void> showRecommendationDiagnosticDialog(
             ),
           ],
         ),
+      ),
       ),
     ),
   );
@@ -115,15 +118,23 @@ class _RecommendationDiagnosticCardState extends State<RecommendationDiagnosticC
             ],
           ),
           const SizedBox(height: 10),
-          Row(
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Text('Analizar histórico:', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
-              const Spacer(),
-              _buildPeriodChip(7, '7 días'),
-              const SizedBox(width: 6),
-              _buildPeriodChip(15, '15 días'),
-              const SizedBox(width: 6),
-              _buildPeriodChip(30, '30 días'),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildPeriodChip(7, '7 días'),
+                  const SizedBox(width: 6),
+                  _buildPeriodChip(15, '15 días'),
+                  const SizedBox(width: 6),
+                  _buildPeriodChip(30, '30 días'),
+                ],
+              ),
             ],
           ),
           const SizedBox(height: 12),

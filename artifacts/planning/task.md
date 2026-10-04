@@ -211,11 +211,11 @@ tags: [proyecto, tasks, checklist, v1-2-4]
   - Crear pruebas de widgets para `JsonFilePickerDialog`, `WhatToEatSheet`, `FastingWindowBentoCard` y `WeeklyDigestCard`.
 
 ### 🛡️ 4. Systems-Auditor (Auditoría de Calidad, Integridad y Modularidad)
-- [ ] (Systems-Auditor) Ejecutar `flutter analyze` garantizando 0 errores y 0 advertencias.
-- [ ] (Systems-Auditor) Ejecutar 100% de la suite de pruebas unitarias y de widgets (`flutter test`).
-- [ ] (Systems-Auditor) Auditar estricto cumplimiento modular: todos los archivos creados o modificados deben tener < 300 LoC.
-- [ ] (Forensic Auditor) Ejecutar auditoría forense de integridad (`teamwork_preview_auditor`) confirmando implementaciones reales sin hardcoding ni fachadas.
-- [ ] (Systems-Auditor) Emitir `artifacts/audit_reports/audit_report.md` con veredicto `PASS`.
+- [x] (Systems-Auditor) Ejecutar `flutter analyze` garantizando 0 errores y 0 advertencias.
+- [x] (Systems-Auditor) Ejecutar 100% de la suite de pruebas unitarias y de widgets (`flutter test`).
+- [x] (Systems-Auditor) Auditar estricto cumplimiento modular: todos los archivos creados o modificados deben tener < 300 LoC.
+- [x] (Forensic Auditor) Ejecutar auditoría forense de integridad (`teamwork_preview_auditor`) confirmando implementaciones reales sin hardcoding ni fachadas.
+- [x] (Systems-Auditor) Emitir `artifacts/audit_reports/audit_report.md` con veredicto `PASS`.
 
 ### 🚀 5. DevOps-Engineer (Empaquetado y Certificación de Release)
 - [ ] (DevOps-Engineer) Verificar sincronización de versión `1.2.4+1` en `pubspec.yaml` y Gradle.

@@ -109,11 +109,14 @@ void main() {
         ),
       );
 
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
 
       expect(find.text('AYUNO INTERMITENTE'), findsOneWidget);
       expect(find.text('En curso'), findsOneWidget);
       expect(find.text('Terminar'), findsOneWidget);
+
+      controller.dispose();
     });
   });
 }

@@ -1,0 +1,44 @@
+# Frontend-UI Progress
+Last visited: 2026-10-04T22:38:00Z
+
+- [x] Read ORIGINAL_REQUEST.md, handoffs, and planning artifacts
+- [x] Investigate target files, line counts, contracts, and XML layouts
+- [x] 1. Fix Android RemoteViews in `android/app/src/main/res/layout/food_tracker_widget_wide.xml` & `lib/assets/android_widgets/food_tracker_widget_wide.xml` (<View> -> <FrameLayout>)
+- [x] 2. R1 UI: Refactor `lib/widgets/settings/json_file_picker_dialog.dart` (< 250 LoC) to use native `FilePicker.platform.pickFiles` 1-tap button, remove manual text input
+- [x] 3. R2 UI:
+  - Remove fixed `WhatToEatBannerCard` from `lib/screens/dashboard_screen.dart`
+  - Add prominent "¿Qué Debería Comer Hoy?" button in `lib/widgets/dashboard/dashboard_fab_menu.dart` (< 300 LoC)
+  - Redesign `lib/widgets/recommendations/what_to_eat_sheet.dart` (< 300 LoC) with `SafeArea`, explicit close `IconButton`, `maxHeight: 0.85`, and bounded scroll
+- [x] 4. R3 UI:
+  - Transform `lib/widgets/dashboard/fasting_window_bento_card.dart` (< 280 LoC) into collapsible Bento card (~44px compact state when inactive)
+  - Fix `lib/widgets/recommendations/recommendation_diagnostic_card.dart` dialog text overlap with scrollable view separate from close button
+  - Fix `lib/widgets/metrics/weekly_digest_card.dart` (< 300 LoC) header badge overflow using `Flexible`/`Expanded`
+  - Fix `lib/screens/metrics_screen.dart` Bento row with `IntrinsicHeight`
+- [x] 5. R4 UI:
+  - Create `lib/widgets/pantry/pantry_item_editor_dialog.dart` (< 200 LoC) with `servingSize` & `packageWeight`
+  - Create `lib/widgets/pantry/pantry_consumption_dialog.dart` (< 200 LoC) with live macro scaling via `toScaledFoodItem`
+  - Refactor `lib/screens/pantry_screen.dart` (< 250 LoC) to use extracted dialogs and consumption action
+  - Update `lib/widgets/meal_detail/food_item_editor_dialog.dart` (< 300 LoC) to dynamically scale macros when grams are typed
+- [x] 6. Create/update widget test suites in `test/widgets/`:
+  - `test/widgets/json_file_picker_dialog_test.dart`
+  - `test/widgets/fasting_window_bento_card_test.dart`
+  - `test/widgets/weekly_digest_card_test.dart`
+  - `test/widgets/recommendations_widgets_test.dart`
+  - `test/widgets/dashboard_fab_menu_test.dart`
+  - `test/widgets/pantry_item_editor_dialog_test.dart`
+  - `test/widgets/pantry_consumption_dialog_test.dart`
+- [x] 7. LoC audit on all created/modified files (< 300 LoC strict limit):
+  - `lib/widgets/settings/json_file_picker_dialog.dart`: 222 lines (< 250)
+  - `lib/widgets/dashboard/dashboard_fab_menu.dart`: 241 lines (< 300)
+  - `lib/widgets/recommendations/what_to_eat_sheet.dart`: 237 lines (< 300)
+  - `lib/screens/dashboard_screen.dart`: 254 lines (< 300)
+  - `lib/widgets/dashboard/fasting_window_bento_card.dart`: 246 lines (< 280)
+  - `lib/widgets/recommendations/recommendation_diagnostic_card.dart`: 244 lines (< 300)
+  - `lib/widgets/metrics/weekly_digest_card.dart`: 277 lines (< 300)
+  - `lib/screens/metrics_screen.dart`: 210 lines (< 300)
+  - `lib/widgets/pantry/pantry_item_editor_dialog.dart`: 125 lines (< 200)
+  - `lib/widgets/pantry/pantry_consumption_dialog.dart`: 170 lines (< 200)
+  - `lib/screens/pantry_screen.dart`: 221 lines (< 250)
+  - `lib/widgets/meal_detail/food_item_editor_dialog.dart`: 276 lines (< 300)
+- [ ] 8. Verify CI Quality Gate (`flutter analyze` 0 issues, `flutter test` 100% pass)
+- [ ] 9. Complete BRIEFING.md and write `handoff.md`

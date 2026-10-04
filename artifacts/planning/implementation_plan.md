@@ -1,10 +1,10 @@
 ---
 tipo: implementation_plan
 proyecto: App_Food_Tracker
-iteracion: v1.1.0
+iteracion: v1.2.4
 estado: activo
 fecha: 2026-10-04
-tags: [proyecto, planning, v1-1-0, omnicanal, multimodal, micronutrientes, ayuno-intermitente, despensa-marcas, reportes-clinicos, calibracion-vajilla, l10n]
+tags: [proyecto, planning, v1-2-4, file-picker, retrocompatible-json, dashboard-redesign, bento-fasting, pantry-grammage]
 ---
 
 # 🎯 Plan de Implementación Maestro: Food Tracker (v1.1.0)
@@ -197,6 +197,60 @@ tags: [proyecto, planning, v1-1-0, omnicanal, multimodal, micronutrientes, ayuno
 - Incrementar versión en `pubspec.yaml` a `1.1.0+1`.
 - Emitir veredicto formal `PASS` en `artifacts/audit_reports/audit_report.md`.
 - Compilar y empaquetar APK release firmado en GitHub Actions.
+
+---
+
+## 🚀 3.5. Plan de Ejecución Iteración v1.2.4 (File Picker, Retrocompatibilidad JSON, Dashboard Ergonómico y Gramajes)
+
+### Fase A: Backend Architecture & Storage (Backend-Architect)
+1. **Versionado & Dependencias:**
+   - Actualizar `pubspec.yaml` a `version: 1.2.4+1`.
+   - Añadir `file_picker: ^8.1.7` (soporte multiplataforma, SAF sin permisos invasivos en Android).
+2. **Normalización Retrocompatible de JSON (`BackupNormalizer`):**
+   - Crear `lib/services/backup_normalizer.dart` (< 250 LoC) para traducir esquemas legados (v1.0.4 y anteriores):
+     - Mapeo de claves en español (`comidas` $\rightarrow$ `meals`, `despensa` $\rightarrow$ `pantry_items`, `perfil` $\rightarrow$ `user_profile`, `pesos` $\rightarrow$ `weight_logs`).
+     - Soporte para arrays crudos `[...]` envolviéndolos en `{"meals": [...]}`.
+     - Ejecución de decodificación y parseo JSON en segundo plano mediante `Isolate.run`.
+3. **Persistencia SQLite de Alto Rendimiento:**
+   - Modificar `BackupService` (`lib/services/backup_service.dart` < 250 LoC) para persistir registros dentro de una única transacción usando `txn.batch()` y `batch.commit(noResult: true)` garantizando 60 FPS sin stutters en respaldos mayores a 500 registros.
+4. **Esquema SQLite v4 y Gramaje de Despensa:**
+   - Incrementar versión en `DatabaseConnectionFactory.dart` a 4.
+   - Añadir columna `package_weight REAL` en `createPantryTable` y migración defensiva `_safeAddColumn(db, 'pantry_items', 'package_weight REAL')` en `DatabaseSchema.dart`.
+   - Extender `PantryItem` (`lib/models/pantry_item.dart`): añadir `packageWeight`, serialización tolerante a nulos, y método `toScaledFoodItem({required double gramsConsumed})`.
+5. **Pruebas Automatizadas Backend:**
+   - `test/services/backup_normalizer_test.dart` y `test/models/pantry_item_portion_scaling_test.dart`.
+
+### Fase B: Frontend UX/UI & Modales (Frontend-UI)
+1. **Selector Nativo de Respaldos (R1 UI):**
+   - Actualizar `JsonFilePickerDialog` (`lib/widgets/settings/json_file_picker_dialog.dart` < 250 LoC) con botón de 1 toque que invoca el selector nativo del sistema (`FilePicker.platform.pickFiles`), eliminando entradas de texto manuales.
+2. **Reubicación Ergonómica de "¿Qué Debería Comer Hoy?" (R2 UI):**
+   - Retirar la tarjeta fija `WhatToEatBannerCard` de `lib/screens/dashboard_screen.dart`.
+   - Incorporar banner/botón destacado dentro del menú flotante `lib/widgets/dashboard/dashboard_fab_menu.dart`.
+   - Rediseñar `WhatToEatSheet` (`lib/widgets/recommendations/what_to_eat_sheet.dart`): envolver en `SafeArea`, barra superior con botón explícito de cerrar (`IconButton(icon: Icon(Icons.close))`), límite de altura (`0.85`), y scroll fluido.
+3. **Bento Card Colapsable de Ayuno Intermitente (R3 UI):**
+   - Refactorizar `FastingWindowBentoCard` (`lib/widgets/dashboard/fasting_window_bento_card.dart` < 280 LoC) con diseño compacto (~44px) por defecto en estado inactivo, expandiéndose con animación al estar en ayuno o al pulsar.
+4. **Corrección de Diálogo de Recomendaciones y Métricas (R3 UI):**
+   - En `RecommendationDiagnosticCard` / diálogo: encapsular en `Dialog` con cabecera fija y scroll desacoplado para eliminar solapamiento con el botón de cierre.
+   - En `WeeklyDigestCard` (`lib/widgets/metrics/weekly_digest_card.dart`): evitar desbordamiento horizontal del badge envolviendo en `Flexible`.
+   - En `MetricsScreen` (`lib/screens/metrics_screen.dart`): aplicar `IntrinsicHeight` en fila calórica/racha para prevenir recorte del contenedor sobre tarjeta de macronutrientes.
+5. **Editor de Despensa y Registro con Escalado Automático (R4 UI):**
+   - Extraer `PantryItemEditorDialog` (`lib/widgets/pantry/pantry_item_editor_dialog.dart` < 200 LoC) con campos para porción de referencia (ej. 100g) y peso neto de empaque (ej. 500g).
+   - Crear `PantryConsumptionDialog` (`lib/widgets/pantry/pantry_consumption_dialog.dart` < 200 LoC) con cálculo reactivo de macros escalados al registrar hacia comidas.
+   - Añadir pruebas de widgets frontend.
+6. **Corrección de InflateException en Widget Nativo 4x2 (Android RemoteViews):**
+   - Sustituir etiquetas `<View>` en `android/app/src/main/res/layout/food_tracker_widget_wide.xml` y `lib/assets/android_widgets/food_tracker_widget_wide.xml` (líneas 96, 129, 197) por `<FrameLayout>` compatibles con `RemoteViews` para evitar `InflateException`.
+
+### Fase C: Auditoría de Calidad y Verificación (Systems-Auditor)
+1. `flutter analyze` con 0 errores y 0 advertencias.
+2. 100% pruebas automatizadas exitosas (`flutter test`).
+3. Verificación de modularidad: todos los archivos < 300 LoC.
+4. Auditoría forense de integridad con veredicto CLEAN.
+5. Emisión de `artifacts/audit_reports/audit_report.md` con veredicto PASS.
+
+### Fase D: DevOps & Certificación de Release (DevOps-Engineer)
+1. Verificación de Gradle / pubspec `1.2.4+1`.
+2. Documentación formal en `artifacts/planning/changelog_v1.md` `[1.2.4]`.
+3. Quality Gate final y reporte a Sentinel.
 
 ---
 

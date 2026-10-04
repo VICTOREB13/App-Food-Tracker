@@ -1,10 +1,10 @@
 ---
 tipo: abstracciones
 proyecto: App_Food_Tracker
-version: v1.1.0
+version: v1.2.4
 estado: activo
 fecha: 2026-10-04
-tags: [proyecto, arquitectura, abstracciones, backend, android-widgets, sqlite-v3, v1-1-0]
+tags: [proyecto, arquitectura, abstracciones, backend, backup-normalizer, pantry-scaling, v1-2-4]
 ---
 
 # Abstracciones del Sistema y Arquitectura de Código: Victor Engineer - Food Tracker (v1.1.0)
@@ -335,3 +335,62 @@ AppWidgetManager.updateAppWidget(FoodTrackerCompactWidgetProvider & WideWidgetPr
        ├── Modo Claro: res/values/colors.xml
        └── Modo Oscuro: res/values-night/colors.xml
 ```
+
+### 3. Normalización Resiliente de Respaldos y Escalado de Despensa (v1.2.4)
+
+#### Flujo de Importación Resiliente en Isolate:
+```text
+Usuario pulsa "Importar JSON" -> FilePicker nativo (SAF) selecciona archivo
+       │
+       ▼
+BackupService.importBackupFile(filePath)
+       │
+       ▼
+Isolate.run(() => BackupNormalizer.decodeAndNormalize(jsonString))
+       │
+       ├── Detección de formato (Map o List)
+       ├── Si es List: envuelve en {'meals': list}
+       ├── Mapeo de claves legadas:
+       │     'comidas'      -> 'meals'
+       │     'despensa'     -> 'pantry_items'
+       │     'perfil'       -> 'user_profile'
+       │     'pesos'        -> 'weight_logs'
+       │     'plantillas'   -> 'meal_templates'
+       │     'ayuno'        -> 'fasting_logs'
+       │     'vajilla'      -> 'calibrated_dishware'
+       └── Sanitización de tipos y campos nulos
+       │
+       ▼ Retorna Map<String, dynamic> normalizado
+db.transaction((txn) async {
+  final batch = txn.batch();
+  // batch.insert(...) para comidas, despensa, etc.
+  await batch.commit(noResult: true);
+})
+       │
+       ▼
+Refresco reactivo de controladores -> 60 FPS sin stutters en UI
+```
+
+#### Modelo y Escalado Proporcional de Despensa:
+```text
+PantryItem {
+  ...
+  final double servingSize;        // e.g. 100.0g (porción de referencia)
+  final String servingUnit;        // e.g. 'g'
+  final double? packageWeight;     // e.g. 500.0g (peso neto empaque)
+  ...
+  FoodItem toScaledFoodItem({required double gramsConsumed}) {
+    final factor = gramsConsumed / (servingSize > 0 ? servingSize : 100.0);
+    return FoodItem(
+      name: name,
+      calories: calories * factor,
+      protein: protein * factor,
+      carbs: carbs * factor,
+      fat: fat * factor,
+      grams: gramsConsumed,
+      ...
+    );
+  }
+}
+```
+
