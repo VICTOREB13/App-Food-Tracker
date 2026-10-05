@@ -11,18 +11,18 @@
 ## 1. Observation
 
 1. **Análisis Estático (Linter):**
-   - Ejecutado en GitHub Actions CI (Run ID `37244378457`, Job ID `111559237287`):
-   - `flutter analyze`: `No issues found! (ran in 17.0s)`
+   - Ejecutado en GitHub Actions CI (Run ID `37246644238`, Job ID `111565743113`):
+   - `flutter analyze`: `No issues found! (ran in 17.7s)`
    - Cero errores, cero advertencias, cero hints.
 
 2. **Ejecución de Suites de Prueba Automatizadas:**
-   - Ejecutado en GitHub Actions CI (Run ID `37244378457`):
-   - `flutter test --coverage`: `🎉 467 tests passed.` (0 failed, 100% PASS).
-   - Incluye las 9 suites nuevas añadidas y verificadas en v1.2.4:
+   - Ejecutado en GitHub Actions CI (Run ID `37246644238`):
+   - `flutter test --coverage`: `🎉 469 tests passed.` (0 failed, 100% PASS).
+   - Incluye las suites verificadas en v1.2.4:
      - `test/services/backup_normalizer_test.dart` (PASS)
      - `test/models/pantry_item_portion_scaling_test.dart` (PASS)
      - `test/widgets/dashboard_fab_menu_test.dart` (PASS)
-     - `test/widgets/fasting_window_bento_card_test.dart` (PASS)
+     - `test/widgets/fasting_window_bento_card_test.dart` (PASS - Píldora inactiva colapsable y vista activa expandida con desmontaje limpio)
      - `test/widgets/json_file_picker_dialog_test.dart` (PASS)
      - `test/widgets/pantry_consumption_dialog_test.dart` (PASS)
      - `test/widgets/pantry_item_editor_dialog_test.dart` (PASS)
@@ -42,7 +42,7 @@
      - `lib/services/daos/database_connection_factory.dart`: 80 LoC (< 300)
      - `lib/services/daos/database_schema.dart`: 222 LoC (< 300)
      - `lib/widgets/dashboard/dashboard_fab_menu.dart`: 254 LoC (< 300)
-     - `lib/widgets/dashboard/fasting_window_bento_card.dart`: 257 LoC (< 300)
+     - `lib/widgets/dashboard/fasting_window_bento_card.dart`: 281 LoC (< 300)
      - `lib/widgets/meal_detail/food_item_editor_dialog.dart`: 294 LoC (< 300)
      - `lib/widgets/metrics/weekly_digest_card.dart`: 287 LoC (< 300)
      - `lib/widgets/pantry/pantry_consumption_dialog.dart`: 186 LoC (< 300)
@@ -84,7 +84,7 @@
 
 El Quality Gate para la versión **Food Tracker v1.2.4** queda **APROBADO (veredicto: PASS)**:
 - 0 errores y 0 advertencias en análisis estático.
-- 467 pruebas unitarias y de widgets ejecutadas con 100% PASS.
+- 469 pruebas unitarias y de widgets ejecutadas con 100% PASS.
 - 29/29 archivos cumplen con < 300 LoC.
 - Se autoriza a `DevOps-Engineer` para la certificación de release y congelamiento del changelog.
 

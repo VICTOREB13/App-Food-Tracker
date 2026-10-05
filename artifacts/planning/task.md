@@ -1,10 +1,10 @@
 ---
 tipo: task_list
 proyecto: App_Food_Tracker
-iteracion: v1.2.4
+iteracion: v1.2.5
 estado: activo
 fecha: 2026-10-04
-tags: [proyecto, tasks, checklist, v1-2-4]
+tags: [proyecto, tasks, checklist, v1-2-5]
 ---
 
 # 📋 Checklist Maestro de Tareas de Agentes (v1.2.1)
@@ -221,6 +221,35 @@ tags: [proyecto, tasks, checklist, v1-2-4]
 - [x] (DevOps-Engineer) Verificar sincronización de versión `1.2.4+1` en `pubspec.yaml` y Gradle.
 - [x] (DevOps-Engineer) Redactar y formalizar la sección `## [1.2.4] - 2026-10-04` en `artifacts/planning/changelog_v1.md`.
 - [x] (DevOps-Engineer) Certificar Quality Gate para cierre formal de la iteración.
+
+---
+
+## 🌟 Iteración v1.2.5: Auto-Reparación Resiliente de Respaldos Truncados, Rediseño Ergonómico de Ayuno Bento y Depuración de Raíz
+
+### 🗄️ 1. Backend-Architect (Resiliencia y Auto-Reparación de Respaldos)
+- [x] (Backend-Architect) **Auto-Reparación de JSON Truncado (`BackupNormalizer`):**
+  - Implementar `_tryRepairTruncatedJson` en `lib/services/backup_normalizer.dart` (< 300 LoC).
+  - Cierre automático de strings incompletos (`Unterminated string`), recorte de separadores huérfanos y cierre LIFO de llaves/corchetes `{`, `[`.
+  - Crear suite `test/services/backup_normalizer_test.dart` validando recuperación de JSON cortado abruptamente.
+  - Generar copia de seguridad reparada en `Downloads/food_tracker_backup_restaurado.json` con las 11 comidas, perfil y pesos intactos.
+
+### 🎨 2. Frontend-UI (Rediseño y Alineación Ergonómica de Ayuno Intermitente)
+- [x] (Frontend-UI) **Alineación de Tarjeta Bento de Ayuno (`FastingWindowBentoCard`):**
+  - Refactorizar `lib/widgets/dashboard/fasting_window_bento_card.dart` (< 300 LoC, 281 LoC).
+  - Estado colapsado: diseño en `Row` con `Expanded` de 2 líneas de texto y botón pill `Iniciar v` a la derecha sin superposición.
+  - Estado expandido: cabecera superior con botón `Colapsar ^` alineado a la derecha, cuerpo principal con anillo 52px y botón centrado verticalmente.
+
+### 🛡️ 3. Systems-Auditor (Quality Gate & LoC Audit)
+- [x] (Systems-Auditor) Corregir teardown de timer en `test/widgets/fasting_window_bento_card_test.dart`.
+- [x] (Systems-Auditor) Auditar cumplimiento estricto del límite modular: 100% de los archivos < 300 LoC.
+- [x] (Systems-Auditor) Verificar que la suite de pruebas (469 tests) pase al 100% con 0 fallos y linter limpio en CI.
+- [x] (Systems-Auditor) Ratificar `veredicto: PASS` en `artifacts/audit_reports/audit_report.md`.
+
+### 🚀 4. DevOps-Engineer (Depuración de Raíz, Versionado & Release v1.2.5)
+- [x] (DevOps-Engineer) Incrementar versión en `pubspec.yaml` a `1.2.5+1`.
+- [x] (DevOps-Engineer) Depurar archivos obsoletos, imágenes de captura y respaldos de la raíz del proyecto.
+- [x] (DevOps-Engineer) Documentar la versión en `artifacts/planning/changelog_v1.md` bajo `[1.2.5] - 2026-10-04`.
+- [x] (DevOps-Engineer) Compilar y publicar release oficial `v1.2.5` en GitHub Releases.
 
 ---
 

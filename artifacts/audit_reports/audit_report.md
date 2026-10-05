@@ -1,16 +1,16 @@
 ---
 tipo: audit_report
 proyecto: App_Food_Tracker
-iteracion: v1.2.4
+iteracion: v1.2.5
 veredicto: PASS
 estado: activo
 fecha: 2026-10-04
-tags: [proyecto, audit, quality-gate, v1-2-4]
+tags: [proyecto, audit, quality-gate, v1-2-5]
 ---
 
-# 🛡️ Reporte de Auditoría Integral y Quality Gate (v1.2.4)
+# 🛡️ Reporte de Auditoría Integral y Quality Gate (v1.2.5)
 
-> **Systems-Auditor (Quality Gatekeeper):** Este documento contiene los resultados de la inspección técnica exhaustiva, auditoría de análisis estático, ejecución completa de suites de pruebas automatizadas, auditoría modular de líneas de código (LoC < 300) y certificación de integridad técnica para la versión **v1.2.4** (Selector Nativo de Archivos JSON, Normalización Retrocompatible, Rediseño Ergonómico del Dashboard, Ayuno Bento Colapsable, Gramaje Proporcional de Despensa y Corrección de RemoteViews en Widgets Android) del proyecto **Victor Engineer - Food Tracker**.
+> **Systems-Auditor (Quality Gatekeeper):** Este documento contiene los resultados de la inspección técnica exhaustiva, auditoría de análisis estático, ejecución completa de suites de pruebas automatizadas, auditoría modular de líneas de código (LoC < 300) y certificación de integridad técnica para la versión **v1.2.5** (Auto-Reparación de Respaldos Truncados, Rediseño Ergonómico de Ayuno Bento y Depuración Raíz) del proyecto **Victor Engineer - Food Tracker**.
 
 ---
 
@@ -21,15 +21,15 @@ tags: [proyecto, audit, quality-gate, v1-2-4]
           QUALITY GATE VERDICT: STATUS: PASS
 =====================================================
  [✓] Análisis Estático (flutter analyze): 0 Errores, 0 Advertencias (No issues found)
- [✓] Suite Automatizada (flutter test): 467 Tests Verificados (100% PASS, 0 fallos)
- [✓] GitHub Actions CI Quality Gate: Run ID 37244378457 (Status: Success / PASS)
+ [✓] Suite Automatizada (flutter test): 469 Tests Verificados (100% PASS, 0 fallos)
+ [✓] GitHub Actions CI Quality Gate: Run ID 37246644238 (Status: Success / PASS)
  [✓] Selector Nativo de Archivos JSON (file_picker ^13.1.0 SAF) integrado sin fricción
  [✓] Normalizador Adaptativo Retrocompatible (BackupNormalizer) con soporte a v1.0.4 y arrays planos
  [✓] Persistencia Transaccional por Lotes (txn.batch().commit()) para 60 FPS garantizados
  [✓] Esquema SQLite v4 con migración no destructiva de package_weight en pantry_items
  [✓] Modelo de Despensa (PantryItem) con escalado matemático exacto y Sentinel Pattern
  [✓] Modal "¿Qué debería comer hoy?" rediseñado con SafeArea, botón de cierre y límite de altura (0.85)
- [✓] Ayuno Intermitente en Dashboard rediseñado como tarjeta Bento compacta (~44px) colapsable
+ [✓] Ayuno Intermitente en Dashboard rediseñado como tarjeta Bento compacta (~44px) colapsable (281 LoC)
  [✓] Diálogo de Recomendaciones desacoplado con scroll independiente y sin solapamiento
  [✓] Erradicación de desbordamientos RenderFlex en pantallas angostas (320dp) en WeeklyDigestCard y RecommendationDiagnosticCard
  [✓] Layouts de RemoteViews en Widget 4x2 corregidos (<FrameLayout> en lugar de etiquetas prohibidas <View>)
@@ -39,17 +39,17 @@ tags: [proyecto, audit, quality-gate, v1-2-4]
 ```
 
 **Estatus:** `Status: PASS`  
-**Autorización:** Calidad verificada al 100% con cero defectos residuales. Se autoriza formalmente a `DevOps-Engineer` para la certificación de release y empaquetado de la versión `v1.2.4`.
+**Autorización:** Calidad verificada al 100% con cero defectos residuales. Se autoriza formalmente a `DevOps-Engineer` para la certificación de release y empaquetado de la versión `v1.2.5`.
 
 ---
 
 ## 🔬 2. Análisis Estático y Linter (`flutter analyze`)
 
-- **Comando Ejecutado:** `flutter analyze` en entorno canónico de CI (Runner Ubuntu 24.04, Flutter 3.47.6).
+- **Comando Ejecutado:** `flutter analyze` en entorno canónico de CI (Runner Ubuntu 24.04, Flutter 3.47.6, Run ID `37246644238`).
 - **Resultado Oficial:**
   ```text
   Analyzing App-Food-Tracker...
-  No issues found! (ran in 17.0s)
+  No issues found! (ran in 17.7s)
   ```
 - **Métricas:**
   - **Errores:** 0
@@ -59,12 +59,12 @@ tags: [proyecto, audit, quality-gate, v1-2-4]
 
 ---
 
-## 🧪 3. Matriz de Pruebas Automatizadas (467 Tests — 100% PASS)
+## 🧪 3. Matriz de Pruebas Automatizadas (469 Tests — 100% PASS)
 
-Se auditó la totalidad de la suite de pruebas del proyecto (`test/`), constatando cobertura exhaustiva y **0 fallos (100% PASS)** en GitHub Actions Run ID `37244378457` (Job ID: `111559237287`):
+Se auditó la totalidad de la suite de pruebas del proyecto (`test/`), constatando cobertura exhaustiva y **0 fallos (100% PASS)** en GitHub Actions Run ID `37246644238` (Job ID: `111565743113`):
 
 ```text
-🎉 467 tests passed. (0 failed)
+🎉 469 tests passed. (0 failed)
 ```
 
 ### 3.1. Nuevas Suites de Prueba Introducidas y Verificadas en v1.2.4
@@ -99,7 +99,7 @@ Se realizó la medición física de líneas con PowerShell `(Get-Content <file>)
 | `lib/services/daos/database_connection_factory.dart` | Persistencia / Conexión SQLite v4 | 80 | < 300 LoC | **CUMPLE** |
 | `lib/services/daos/database_schema.dart` | Persistencia / Esquema & Migraciones | 222 | < 300 LoC | **CUMPLE** |
 | `lib/widgets/dashboard/dashboard_fab_menu.dart` | UI / Menú Flotante Speed Dial | 254 | < 300 LoC | **CUMPLE** |
-| `lib/widgets/dashboard/fasting_window_bento_card.dart` | UI / Bento Card Colapsable | 257 | < 300 LoC | **CUMPLE** |
+| `lib/widgets/dashboard/fasting_window_bento_card.dart` | UI / Bento Card Colapsable | 281 | < 300 LoC | **CUMPLE** |
 | `lib/widgets/meal_detail/food_item_editor_dialog.dart` | UI / Editor con Escalado en Vivo | 294 | < 300 LoC | **CUMPLE** |
 | `lib/widgets/metrics/weekly_digest_card.dart` | UI / Resumen Semanal 320dp | 287 | < 300 LoC | **CUMPLE** |
 | `lib/widgets/pantry/pantry_consumption_dialog.dart` | UI / Consumo de Despensa | 186 | < 300 LoC | **CUMPLE** |
@@ -134,6 +134,10 @@ Se realizó la medición física de líneas con PowerShell `(Get-Content <file>)
    - El escalado nutricional aplica la razón matemática exacta $\text{factor} = \frac{\text{gramos}}{\text{porción\_referencia}}$, calculando con precisión de punto flotante calorías, proteínas, carbohidratos, grasas, fibra, sodio y azúcares con protección sanitaria contra división por cero (`ModelSanitizer`).
 4. **Validación de Android RemoteViews:**
    - Se corroboró la eliminación total de `<View>` en `android/app/src/main/res/layout/food_tracker_widget_wide.xml` y `lib/assets/android_widgets/food_tracker_widget_wide.xml`, sustituyéndolos por `<FrameLayout>`, eliminando la causa raíz de `InflateException` en Android 16.
+5. **Integridad del Rediseño de Ayuno Intermitente (`FastingWindowBentoCard`):**
+   - La tarjeta Bento opera de modo reactivo con `FastingController`, manteniendo una presentación colapsada (~44px) tipo píldora cuando no hay sesión activa y desplegando dinámicamente el progreso (`VeLoadingRing`), metas y controles al activarse o expandirse manualmente.
+   - El widget cuenta con 281 LoC, cumpliendo estrictamente con el umbral modular mandatorio (< 300 LoC).
+   - Su suite de pruebas `test/widgets/fasting_window_bento_card_test.dart` (122 LoC) verifica ambos estados (inactivo compacto y activo expandido) sin fugas de temporizadores ni dobles disposes.
 
 ---
 

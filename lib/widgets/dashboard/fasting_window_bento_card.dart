@@ -132,28 +132,44 @@ class _FastingWindowBentoCardState extends State<FastingWindowBentoCard> {
         ),
         child: Row(
           children: [
-            const Icon(Icons.timer_outlined, size: 18, color: AppColors.primary),
+            Container(
+              padding: const EdgeInsets.all(7),
+              decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
+              child: const Icon(Icons.timer_outlined, size: 16, color: AppColors.primary),
+            ),
             const SizedBox(width: 10),
             Expanded(
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('AYUNO INTERMITENTE', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.6, color: AppColors.textSecondary(context))),
-                  const SizedBox(width: 8),
-                  Text('• Sin ayuno activo', style: GoogleFonts.inter(fontSize: 11, color: AppColors.textMuted(context))),
+                  Text(
+                    'AYUNO INTERMITENTE',
+                    style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5, color: AppColors.textSecondary(context)),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 1),
+                  Text('• Sin ayuno activo', style: GoogleFonts.inter(fontSize: 11, color: AppColors.textMuted(context)), maxLines: 1, overflow: TextOverflow.ellipsis),
                 ],
               ),
             ),
-            TextButton(
+            const SizedBox(width: 8),
+            InkWell(
               key: const Key('fasting_compact_start_button'),
-              onPressed: _showStartFastDialog,
-              style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('Iniciar', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primary)),
-                  const SizedBox(width: 2),
-                  const Icon(Icons.keyboard_arrow_down, size: 16, color: AppColors.primary),
-                ],
+              onTap: _showStartFastDialog,
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20)),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('Iniciar', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                    const SizedBox(width: 2),
+                    const Icon(Icons.keyboard_arrow_down_rounded, size: 15, color: AppColors.primary),
+                  ],
+                ),
               ),
             ),
           ],
@@ -177,78 +193,86 @@ class _FastingWindowBentoCardState extends State<FastingWindowBentoCard> {
         ),
         boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
       ),
-      child: Row(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Stack(
-            alignment: Alignment.center,
+          Row(
             children: [
-              VeLoadingRing(
-                size: 56,
-                strokeWidth: 4.5,
-                progress: isActive ? progress : 0.0,
-                color: isGoalReached ? AppColors.success : AppColors.primary,
-                trackColor: AppColors.border(context).withValues(alpha: 0.4),
-              ),
-              Icon(isActive ? Icons.timer_outlined : Icons.hourglass_empty_rounded, color: isActive ? (isGoalReached ? AppColors.success : AppColors.primary) : AppColors.textMuted(context), size: 24),
-            ],
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    Text('AYUNO INTERMITENTE', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.6, color: isActive ? AppColors.primary : AppColors.textSecondary(context))),
-                    if (isActive) ...[
-                      const SizedBox(width: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(color: (isGoalReached ? AppColors.success : AppColors.primary).withValues(alpha: 0.12), borderRadius: BorderRadius.circular(6)),
-                        child: Text(isGoalReached ? '¡Meta Lograda!' : 'En curso', style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.bold, color: isGoalReached ? AppColors.success : AppColors.primary)),
-                      ),
-                    ],
-                    if (!isActive && _isManuallyExpanded) ...[
-                      const Spacer(),
-                      IconButton(
-                        icon: const Icon(Icons.keyboard_arrow_up, size: 18),
-                        onPressed: () => setState(() => _isManuallyExpanded = false),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  isActive ? _controller.fastingDurationFormatted : 'Sin ayuno activo',
-                  style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary(context)),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  isActive
-                      ? (isGoalReached ? 'Meta superada (+${(progress * 100).toInt()}%)' : 'Restan ${_controller.remainingDurationFormatted} de ${_controller.targetHours.toInt()}h')
-                      : 'Inicia para dar seguimiento a tu ventana de comida',
-                  style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary(context)),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+              Icon(Icons.timer_outlined, size: 14, color: isActive ? AppColors.primary : AppColors.textSecondary(context)),
+              const SizedBox(width: 6),
+              Text('AYUNO INTERMITENTE', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5, color: isActive ? AppColors.primary : AppColors.textSecondary(context))),
+              if (isActive) ...[
+                const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(color: (isGoalReached ? AppColors.success : AppColors.primary).withValues(alpha: 0.12), borderRadius: BorderRadius.circular(6)),
+                  child: Text(isGoalReached ? '¡Meta Lograda!' : 'En curso', style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.bold, color: isGoalReached ? AppColors.success : AppColors.primary)),
                 ),
               ],
-            ),
+              const Spacer(),
+              if (!isActive && _isManuallyExpanded)
+                InkWell(
+                  onTap: () => setState(() => _isManuallyExpanded = false),
+                  borderRadius: BorderRadius.circular(6),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('Colapsar', style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.textMuted(context))),
+                        const SizedBox(width: 2),
+                        Icon(Icons.keyboard_arrow_up_rounded, size: 16, color: AppColors.textMuted(context)),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
           ),
-          const SizedBox(width: 8),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: isActive ? AppColors.surface(context) : AppColors.primary,
-              foregroundColor: isActive ? AppColors.primary : Colors.white,
-              side: isActive ? const BorderSide(color: AppColors.primary, width: 1.2) : BorderSide.none,
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            ),
-            onPressed: isActive ? _confirmStopFast : _showStartFastDialog,
-            child: Text(isActive ? 'Terminar' : 'Iniciar', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 12),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  VeLoadingRing(size: 52, strokeWidth: 4.5, progress: isActive ? progress : 0.0, color: isGoalReached ? AppColors.success : AppColors.primary, trackColor: AppColors.border(context).withValues(alpha: 0.4)),
+                  Icon(isActive ? Icons.timer_outlined : Icons.hourglass_empty_rounded, color: isActive ? (isGoalReached ? AppColors.success : AppColors.primary) : AppColors.textMuted(context), size: 22),
+                ],
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(isActive ? _controller.fastingDurationFormatted : 'Sin ayuno activo', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary(context))),
+                    const SizedBox(height: 2),
+                    Text(
+                      isActive
+                          ? (isGoalReached ? 'Meta superada (+${(progress * 100).toInt()}%)' : 'Restan ${_controller.remainingDurationFormatted} de ${_controller.targetHours.toInt()}h')
+                          : 'Inicia para dar seguimiento a tu ventana de comida',
+                      style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary(context)),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isActive ? AppColors.surface(context) : AppColors.primary,
+                  foregroundColor: isActive ? AppColors.primary : Colors.white,
+                  side: isActive ? const BorderSide(color: AppColors.primary, width: 1.2) : BorderSide.none,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                onPressed: isActive ? _confirmStopFast : _showStartFastDialog,
+                child: Text(isActive ? 'Terminar' : 'Iniciar', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold)),
+              ),
+            ],
           ),
         ],
       ),

@@ -18,6 +18,24 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [1.2.5] - 2026-10-04
+
+La versión v1.2.5 soluciona el fallo de respaldos con cadenas de texto incompletas o corruptas mediante un motor de auto-reparación resiliente en `BackupNormalizer`, rediseña ergonómicamente la tarjeta Bento de Ayuno Intermitente eliminando colisiones visuales entre texto y botones, y ejecuta una depuración integral del directorio raíz del repositorio.
+
+### Added
+- **Motor de Auto-Reparación de JSON Truncado (`BackupNormalizer._tryRepairTruncatedJson`):** Capacidad de recuperar respaldos interrumpidos abruptamente (`FormatException: Unterminated string`), cerrando automáticamente cadenas incompletas, limpiando separadores pendientes y balanceando corchetes y llaves `{`, `[` en orden LIFO antes de decodificar.
+- **Suite de Pruebas de Auto-Reparación:** Test unitario en `test/services/backup_normalizer_test.dart` verificando decodificación y restauración exitosa de comidas a partir de JSON interrumpido.
+
+### Changed
+- **Rediseño Ergonómico de Bento Card de Ayuno (`FastingWindowBentoCard`):**
+  - **Modo Compacto:** Encabezado en `Expanded(Column)` de 2 líneas con elipsis para evitar que "AYUNO INTERMITENTE • Sin ayuno activo" choque con el botón de acción, y botón pill `fasting_compact_start_button` con flecha `keyboard_arrow_down_rounded`.
+  - **Modo Expandido:** Fila superior con título y botón de colapso "Colapsar ^" posicionado en la esquina superior derecha sin superponerse con el botón principal de inicio/término de ayuno.
+
+### Removed
+- **Depuración Integral del Directorio Raíz:** Eliminación de imágenes temporales de capturas (`Actual.png`, `Deseado.png`, `Screenshot_*.jpg`), archivos de respaldo residuales y carpetas de pruebas locales (`test_apks/`), reduciendo el tamaño del repositorio y preservando exclusivamente los artefactos esenciales del proyecto.
+
+---
+
 ## [1.2.4] - 2026-10-04
 
 La versión v1.2.4 introduce el selector de archivos nativo del sistema operativo (SAF) para respaldos, normalización adaptativa resiliente para versiones anteriores (v1.0.4 y previas), optimización de importación/exportación a 60 FPS con Isolates y SQLite Batch, reestructuración ergonómica del Dashboard (Bento de Ayuno colapsable y "¿Qué debería comer hoy?" en el menú `+`), porciones y gramajes de referencia en despensa con escalado matemático, y la corrección de inflado en el widget nativo 4x2 en Android.
