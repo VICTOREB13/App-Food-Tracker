@@ -217,5 +217,49 @@ void main() {
       expect(meal['calories'], equals(0.0));
       expect(meal['meal_type'], equals('Almuerzo'));
     });
+
+    test('recupera exitosamente comidas válidas de JSON truncado con string sin terminar', () {
+      const truncatedJson = '''
+{
+  "app": "Victor Engineer Food Tracker",
+  "version": "2.0.0",
+  "meals": [
+    {
+      "id": "m1",
+      "name": "Comida Completa",
+      "calories": 450.0,
+      "protein": 30.0
+    },
+    {
+      "id": "m2",
+      "name": "Huevo Frito con Arepa",
+      "meal_type": "Desayuno",
+      "calories": 350.0,
+      "protein": 18.0,
+      "notes": "Ingredientes: Huevo frito entero
+''';
+
+      final normalized = BackupNormalizer.decodeAndNormalize(truncatedJson);
+      expect(normalized['meals'], isA<List>());
+      final meals = normalized['meals'] as List;
+      expect(meals.length, equals(2));
+      expect(meals[0]['name'], equals('Comida Completa'));
+      expect(meals[0]['calories'], equals(450.0));
+      expect(meals[1]['name'], equals('Huevo Frito con Arepa'));
+      expect(meals[1]['meal_type'], equals('Desayuno'));
+      expect(meals[1]['calories'], equals(350.0));
+      expect(meals[1]['protein'], equals(18.0));
+      expect(meals[1]['notes'], startsWith('Ingredientes: Huevo frito entero'));
+    });
+
+    test('recupera JSON truncado en separador pendiente o clave incompleta', () {
+      const danglingColonJson = '{"meals": [{"name": "Avena", "calories": 200.0, "notes": ';
+      final normalized1 = BackupNormalizer.decodeAndNormalize(danglingColonJson);
+      expect((normalized1['meals'] as List).first['name'], equals('Avena'));
+
+      const danglingCommaJson = '{"meals": [{"name": "Avena", "calories": 200.0}, ';
+      final normalized2 = BackupNormalizer.decodeAndNormalize(danglingCommaJson);
+      expect((normalized2['meals'] as List).first['name'], equals('Avena'));
+    });
   });
 }
