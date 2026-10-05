@@ -1,19 +1,19 @@
 ---
 tipo: api_spec
 proyecto: App_Food_Tracker
-version: v1.2.4
+version: v1.2.5
 estado: activo
 fecha: 2026-10-04
-tags: [proyecto, api, backend, contratos, sqlite-v4, backup-normalizer, pantry-scaling, v1-2-4]
+tags: [proyecto, api, backend, contratos, sqlite-v4, backup-normalizer, pantry-scaling, v1-2-5]
 ---
 
-# 📡 Especificación de Contrato de Datos, Esquema SQLite v3 y Servicios Backend (v1.1.0)
+# 📡 Especificación de Contrato de Datos, Esquema SQLite v4 y Servicios Backend (v1.2.5)
 
-> **Backend-Architect:** Este artefacto define formalmente el esquema relacional de base de datos local SQLite v3, los índices B-Tree de cobertura, los modelos de dominio inmutables (Sentinel), los contratos de servicios internos (DAOs, Service Locator, Result Pattern) y externos (Dynamic Gemini API, HomeWidget, USDA FoodData Central, Open Food Facts y Calculadora Metabólica).
+> **Backend-Architect:** Este artefacto define formalmente el esquema relacional de base de datos local SQLite v4, los índices B-Tree de cobertura, los modelos de dominio inmutables (Sentinel), los contratos de servicios internos (DAOs, Service Locator, Result Pattern, BackupNormalizer con auto-reparación) y externos (Dynamic Gemini API, HomeWidget, USDA FoodData Central, Open Food Facts y Calculadora Metabólica).
 
 ---
 
-## 🗄️ 1. Esquema Relacional de Base de Datos SQLite v3 (DDL)
+## 🗄️ 1. Esquema Relacional de Base de Datos SQLite v4 (DDL)
 
 La base de datos opera localmente bajo el archivo `app_food_tracker.db` en el directorio de documentos de la aplicación, configurada con WAL mode y llaves foráneas (`DatabaseConnectionFactory` y `DatabaseSchema`).
 
@@ -229,3 +229,21 @@ Si el plato visualizado contiene alimentos correspondientes a estos productos, p
 - `foodtracker://scan_food`: Abre directamente la cámara de análisis de comida.
 - `foodtracker://scan_barcode`: Abre directamente el lector de códigos de barras.
 - `foodtracker://new_meal`: Abre el formulario de registro manual.
+
+---
+
+## 💾 5. Contrato de Respaldo Adaptativo y Auto-Reparación (`BackupNormalizer`)
+
+### 5.1. Estructura Canónica de Exportación (v1.2.5)
+- `app`: String ("Victor Engineer Food Tracker")
+- `version`: String ("1.2.5")
+- `schema_version`: Integer (2)
+- `meals`: Array de comidas (`Meal`) con micronutrientes (`fiber`, `sodium`, `sugar`).
+- `pantry_items`: Array de despensa (`PantryItem`) con porción y `package_weight`.
+- `user_profile`: Objeto biométrico y metabólico.
+- `weight_logs`: Array de pesajes cronológicos.
+
+### 5.2. Motor de Auto-Reparación Sintáctica (`_tryRepairTruncatedJson`)
+- Cierre automático de strings interrumpidos sin comilla de cierre (`FormatException: Unterminated string`).
+- Recorte de tokens colgantes y separadores huérfanos (`:`, `,`).
+- Conteo y balanceo LIFO de llaves `{` y corchetes `[` para garantizar decodificación determinista sin pérdida de datos válidos.

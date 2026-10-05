@@ -1,13 +1,13 @@
 ---
 tipo: design_system
 proyecto: App_Food_Tracker
-version: v1.0.4
+version: v1.2.5
 estado: activo
-fecha: 2026-09-13
-tags: [proyecto, design-system, ui-ux, bento-grid, tokens, l10n]
+fecha: 2026-10-04
+tags: [proyecto, design-system, ui-ux, bento-grid, tokens, l10n, fasting-bento, saf-picker, v1-2-5]
 ---
 
-# 🎨 Especificación de Diseño: Victor Engineer - Food Tracker (v1.0.4)
+# 🎨 Especificación de Diseño: Victor Engineer - Food Tracker (v1.2.5)
 
 Documento maestro de interfaz de usuario (UI), experiencia de usuario (UX), sistema de tokens visuales y animaciones fluidas para la aplicación móvil y de escritorio **Victor Engineer - Food Tracker**.
 
@@ -188,4 +188,9 @@ lib/
 - [x] `DashboardFabMenu` con física elástica `Curves.easeOutBack`.
 - [x] Trazador vectorial acelerado por hardware `WeightLineChartPainter` a 60 FPS.
 - [x] Descomposición de las 5 pantallas maestras cumpliendo la directriz < 300 LoC.
+- [x] Bento Card de Ayuno Intermitente colapsable `FastingWindowBentoCard` (~44px compact pill, full expansion sin solapamiento).
+- [x] Modal acotado `WhatToEatSheet` con `SafeArea`, cabecera fija con botón de cierre `X` y `maxHeight: 0.85`.
+- [x] Selector nativo SAF `JsonFilePickerDialog` para respaldos JSON con previsualización reactiva.
+- [x] Widgets nativos Android 2x2 y 4x2 con `<FrameLayout>` certificados libres de `InflateException`.
+
 

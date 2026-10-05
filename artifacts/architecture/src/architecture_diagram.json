@@ -2,7 +2,7 @@
   "schema_version": 1,
   "diagram_type": "architecture",
   "meta": {
-    "title": "Victor Engineer - Food Tracker Architecture (v1.1.0)",
+    "title": "Victor Engineer - Food Tracker Architecture (v1.2.5)",
     "output": "architecture_diagram.html",
     "quality_profile": "showcase",
     "views": [
@@ -10,7 +10,7 @@
         "id": "local-first-core",
         "label": "Local-First & Widgets",
         "focus": ["flutter_ui", "android_widgets", "controllers", "sqlite_db", "secure_storage"],
-        "note": "GetIt service locator, SQLite v3 DAOs, Android AppWidgets (2x2/4x2) and secure key custody."
+        "note": "GetIt service locator, SQLite v4 DAOs, Android AppWidgets (2x2/4x2) and secure key custody."
       },
       {
         "id": "ai-vision-pipeline",
@@ -35,7 +35,7 @@
     { "id": "metabolic", "type": "backend", "label": "Metabolic Engine", "sublabel": "Mifflin-St Jeor & ABW", "pos": [490, 40], "size": [140, 54] },
     { "id": "vision_engine", "type": "backend", "label": "Gemini Vision", "sublabel": "Plate Scale & Queue", "pos": [490, 145], "size": [140, 54] },
     { "id": "barcode_resolver", "type": "backend", "label": "Barcode Resolver", "sublabel": "Cascading Resolution", "pos": [490, 250], "size": [140, 54] },
-    { "id": "sqlite_db", "type": "database", "label": "SQLite v3 & DAOs", "sublabel": "Fasting, Dish & WAL", "pos": [490, 360], "size": [140, 54] },
+    { "id": "sqlite_db", "type": "database", "label": "SQLite v4 & DAOs", "sublabel": "Fasting, Dish & WAL", "pos": [490, 360], "size": [140, 54] },
     { "id": "gemini_api", "type": "cloud", "label": "Google Gemini API", "sublabel": "Dynamic & Cascade", "pos": [730, 145], "size": [140, 54] },
     { "id": "usda_api", "type": "external", "label": "USDA FoodData", "sublabel": "Primary Nutrient DB", "pos": [730, 250], "size": [140, 54] },
     { "id": "openfood_api", "type": "external", "label": "Open Food Facts", "sublabel": "Fallback Barcode DB", "pos": [730, 360], "size": [140, 54] }
@@ -72,7 +72,7 @@
       "title": "Local-First & Widgets",
       "items": [
         "Native Android Widgets (2x2 and 4x2 Glance)",
-        "SQLite v3 (calibrated dishware, fasting & templates)",
+        "SQLite v4 (pantry gram scaling, dishware, fasting & templates)",
         "GetIt Service Locator & Result error pattern"
       ]
     },

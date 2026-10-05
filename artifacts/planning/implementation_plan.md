@@ -1,10 +1,10 @@
 ---
 tipo: implementation_plan
 proyecto: App_Food_Tracker
-iteracion: v1.2.4
+iteracion: v1.2.5
 estado: activo
 fecha: 2026-10-04
-tags: [proyecto, planning, v1-2-4, file-picker, retrocompatible-json, dashboard-redesign, bento-fasting, pantry-grammage]
+tags: [proyecto, planning, v1-2-5, file-picker, retrocompatible-json, auto-repair-json, fasting-bento-alignment, root-depuration]
 ---
 
 # 🎯 Plan de Implementación Maestro: Food Tracker (v1.1.0)
@@ -251,6 +251,34 @@ tags: [proyecto, planning, v1-2-4, file-picker, retrocompatible-json, dashboard-
 1. Verificación de Gradle / pubspec `1.2.4+1`.
 2. Documentación formal en `artifacts/planning/changelog_v1.md` `[1.2.4]`.
 3. Quality Gate final y reporte a Sentinel.
+
+---
+
+## 🌟 Iteración v1.2.5: Auto-Reparación de Respaldos, Rediseño Bento de Ayuno y Depuración Raíz
+
+### Fase A: Backend & Resiliencia de Respaldos (Backend-Architect)
+1. **Auto-Reparación de JSON Truncado (`BackupNormalizer._tryRepairTruncatedJson`):**
+   - Detección de cadenas sin comilla de cierre (`FormatException: Unterminated string`).
+   - Cierre automático de strings, sanitización de tokens pendientes y balanceo LIFO de llaves `{` y corchetes `[`.
+   - Recuperación íntegra de la copia de respaldo en `Downloads/food_tracker_backup_restaurado.json` (11 comidas, perfil y pesos).
+   - Suite de prueba unitaria en `test/services/backup_normalizer_test.dart` (PASS).
+
+### Fase B: Frontend & Ergonomía Visual (Frontend-UI)
+1. **Alineación de Tarjeta Bento de Ayuno (`FastingWindowBentoCard` < 300 LoC):**
+   - Modo compacto: `Row` con `Expanded(Column)` de 2 líneas con elipsis y botón pill `Iniciar v` a la derecha sin superposición.
+   - Modo expandido: Cabecera superior con título y botón de colapso en esquina derecha, cuerpo principal con anillo 52px y botón centrado verticalmente.
+
+### Fase C: Auditoría de Calidad (Systems-Auditor)
+1. Corrección de teardown en `test/widgets/fasting_window_bento_card_test.dart`.
+2. Verificación de modularidad (< 300 LoC en todos los archivos modificados).
+3. 100% de la suite automatizada superada (469 tests PASS) y 0 lints en CI.
+4. Ratificación de `veredicto: PASS` en `artifacts/audit_reports/audit_report.md`.
+
+### Fase D: DevOps, Higiene y Release (DevOps-Engineer)
+1. Depuración completa de la carpeta raíz del proyecto (`Actual.png`, `Deseado.png`, `Screenshot_*.jpg`, respaldos y `test_apks/`).
+2. Sincronización de versión a `1.2.5+1` en `pubspec.yaml` y `changelog_v1.md`.
+3. Creación y push del tag anotado `v1.2.5`.
+4. Monitoreo y publicación oficial del release en GitHub Actions (APK binario verificado).
 
 ---
 

@@ -1,22 +1,22 @@
 ---
 tipo: abstracciones
 proyecto: App_Food_Tracker
-version: v1.2.4
+version: v1.2.5
 estado: activo
 fecha: 2026-10-04
-tags: [proyecto, arquitectura, abstracciones, backend, backup-normalizer, pantry-scaling, v1-2-4]
+tags: [proyecto, arquitectura, abstracciones, backend, backup-normalizer, pantry-scaling, v1-2-5]
 ---
 
-# Abstracciones del Sistema y Arquitectura de Código: Victor Engineer - Food Tracker (v1.1.0)
+# Abstracciones del Sistema y Arquitectura de Código: Victor Engineer - Food Tracker (v1.2.5)
 
-> **Mesa de Control & Backend-Architect:** Este documento centraliza las clases maestras, interfaces de dominio, servicios de negocio, funciones utilitarias nucleares, variables de estado seguro y costuras de flujo de datos (data seams) de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.1.0` (Generación Omnicanal de Precisión Visual, Volumétrica y Nutricional). Complementa conceptualmente a [[PRJ_App_Food_Tracker_api_spec|Especificación de API y Modelos]] para posibilitar el entendimiento exhaustivo del software sin necesidad de inspeccionar línea por línea el código fuente.
+> **Mesa de Control & Backend-Architect:** Este documento centraliza las clases maestras, interfaces de dominio, servicios de negocio, funciones utilitarias nucleares, variables de estado seguro y costuras de flujo de datos (data seams) de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.2.5` (Selector SAF, Auto-Reparación de Respaldos Truncados, Rediseño Ergonómico de Ayuno Bento, SQLite v4 con Gramajes y Blindaje Android 16). Complementa conceptualmente a [[PRJ_App_Food_Tracker_api_spec|Especificación de API y Modelos]] para posibilitar el entendimiento exhaustivo del software sin necesidad de inspeccionar línea por línea el código fuente.
 
 ---
 
 ## 🏛️ Filosofía de Diseño y Paradigmas de Código
 
 1. **Local-First Determinista & Resiliencia Offline:**
-   - Todo el estado transaccional (comidas, despensa, calibración de platos, ayuno intermitente, plantillas habituales, registros de peso, metas calóricas y perfil metabólico) reside localmente en **SQLite v3** optimizado en modo WAL (`PRAGMA journal_mode = WAL;`, `PRAGMA synchronous = NORMAL;`, `PRAGMA foreign_keys = ON;`).
+   - Todo el estado transaccional (comidas, despensa, calibración de platos, ayuno intermitente, plantillas habituales, registros de peso, metas calóricas y perfil metabólico) reside localmente en **SQLite v4** optimizado en modo WAL (`PRAGMA journal_mode = WAL;`, `PRAGMA synchronous = NORMAL;`, `PRAGMA foreign_keys = ON;`).
    - Las operaciones CRUD son síncronas/inmediatas en el dispositivo. La red se invoca exclusivamente bajo demanda explícita del usuario (inferencia visual multimodal y escaneo de códigos de barras).
 2. **Inmutabilidad Estricta & Patrón Sentinel:**
    - Todos los modelos de dominio son inmutables (`@immutable`).
@@ -244,6 +244,13 @@ lib/
 ### 13. `GeminiResilienceHelper`
 - **Ubicación:** `lib/services/gemini_resilience_helper.dart`
 - **Responsabilidad:** Resiliencia de red con reintentos exponenciales, jitter y cascada automática de modelos.
+
+### 14. `BackupNormalizer`
+- **Ubicación:** `lib/services/backup_normalizer.dart`
+- **Responsabilidad:** Normalización adaptativa de esquemas legados (v1.0.4 y anteriores) y auto-reparación de respaldos incompletos.
+- **Métodos Clave:**
+  - `normalize(String jsonString): Future<Map<String, dynamic>>`: Procesa en `Isolate.run`, detecta formatos de arrays planos, traduce claves en español y devuelve el mapa canónico.
+  - `_tryRepairTruncatedJson(String jsonString): String`: Auto-cierre de strings sin terminar (`FormatException: Unterminated string`), limpieza de separadores huérfanos y balanceo LIFO de llaves y corchetes.
 
 ---
 

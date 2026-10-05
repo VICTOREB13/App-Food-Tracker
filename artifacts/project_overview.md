@@ -1,13 +1,13 @@
 ---
 tipo: overview
 proyecto: App_Food_Tracker
-version: v1.0.4
+version: v1.2.5
 estado: activo
-fecha: 2026-09-13
-tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid, get-it, l10n, result-pattern]
+fecha: 2026-10-04
+tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid, get-it, l10n, result-pattern, android-widgets, sqlite-v4, recommendations, saf-backup, auto-repair]
 ---
 
-# 🚀 Visión General del Proyecto: Victor Engineer - Food Tracker (v1.0.4)
+# 🚀 Visión General del Proyecto: Victor Engineer - Food Tracker (v1.2.5)
 
 > **Mesa de Control (Project-Planner):** Este documento centraliza la visión del producto, capacidades técnicas, directrices de arquitectura y el índice de navegación interconectado de todos los artefactos del proyecto según la metodología de Prototipado Evolutivo y estándares Obsidian.
 
@@ -68,7 +68,31 @@ tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid, get-it, 
     - Paleta monocromática de alta fidelidad: *Obsidian Zinc* (`#09090B`) para modo oscuro y *Crisp Zinc* (`#FAFAFA`) para modo claro, con acento carmesí corporativo `#DC2626`.
     - Tipografía `Outfit` para métricas numéricas display e `Inter` para datos secundarios y cuerpos de texto.
     - 100% de pantallas, widgets y archivos de servicios bajo el límite estricto de 300 líneas de código (< 300 LoC).
-    - Suite de pruebas de regresión automatizada: 53 suites, 370 tests pasando (100% PASS).
+    - Suite de pruebas de regresión automatizada: 73 suites, 469 tests pasando (100% PASS).
+
+11. **Selector de Archivos Nativo (SAF) y Normalizador Adaptativo Auto-Sanador:**
+    - Integración de `file_picker` delegando la selección de respaldos JSON al gestor de archivos nativo del sistema operativo (Storage Access Framework), erradicando entradas manuales de rutas.
+    - `BackupNormalizer`: Motor adaptativo que traduce estructuras de esquemas legados (v1.0.4 y anteriores, listas crudas, claves en español) a objetos canónicos modernos.
+    - Motor de auto-reparación (`_tryRepairTruncatedJson`): Recupera respaldos interrumpidos con strings sin cerrar (`FormatException: Unterminated string`) y balancea estructuras `{`, `[` en orden LIFO.
+    - Decodificación en segundo plano con `Isolate.run` y persistencia transaccional masiva por lotes con `txn.batch()` para 60 FPS garantizados.
+
+12. **Despensa con Gramajes Proporcionales y SQLite v4:**
+    - Modelo `PantryItem` con porción de referencia (ej. 100g) y peso total de empaque (`package_weight`).
+    - Escalado matemático de calorías y macronutrientes (`toScaledFoodItem`) en tiempo real al registrar consumos.
+    - Migración idempotente de base de datos a `Schema Version 4` con alteración de tablas sin pérdida de datos.
+
+13. **Dashboard Ergonómico y Ayuno Intermitente Bento:**
+    - Tarjeta Bento colapsable `FastingWindowBentoCard`: Modo compacto (~44px) tipo píldora sin solapamiento y modo expandido con controles de inicio y fin.
+    - Reubicación de "¿Qué debería comer hoy?" dentro del menú flotante `+` (`DashboardFabMenu`), con modal desacoplado `WhatToEatSheet` acotado con `SafeArea` y scroll independiente.
+
+14. **Widgets Nativos Android 2x2 y 4x2 con RemoteViews Certificado:**
+    - Layouts XML nativos optimizados para Android 14, 15 y 16, erradicando `<View>` prohibidas en favor de `<FrameLayout>`, eliminando cualquier `InflateException`.
+    - Deep links semánticos (`foodtracker://scan_food`, `foodtracker://scan_barcode`) para registrar desde la pantalla de inicio del teléfono en 1 toque.
+
+15. **Estabilidad y Blindaje en Android 16 (API 36):**
+    - `applicationId` y `namespace` unificados permanentemente como `com.victorengineer.foodtracker`.
+    - Certificado criptográfico Keystore permanente RSA 2048 garantizando actualizaciones in-place sin desinstalar.
+    - Desactivación de `WorkManagerInitializer` para evitar fallos de reflexión en arranque y timeouts defensivos de 2s contra deadlocks de Keystore.
 
 ---
 

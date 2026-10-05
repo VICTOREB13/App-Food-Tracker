@@ -1,17 +1,17 @@
 ---
 tipo: arquitectura
 proyecto: App_Food_Tracker
-version: v1.2.0
+version: v1.2.5
 estado: activo
 fecha: 2026-10-04
-stack_principal: [Flutter, SQLite WAL v3, Google Gemini API, USDA FoodData Central, Open Food Facts, FlutterSecureStorage, GetIt, Flutter Localizations, HomeWidget, NutritionalRecommendationService]
+stack_principal: [Flutter, SQLite WAL v4, Google Gemini API, USDA FoodData Central, Open Food Facts, FlutterSecureStorage, GetIt, Flutter Localizations, HomeWidget, BackupNormalizer, NutritionalRecommendationService]
 diagrama_html: PRJ_App_Food_Tracker_architecture_diagram.html
-tags: [proyecto, arquitectura, tech-stack, archify, local-first, get-it, l10n, result-pattern, android-widgets, sqlite-v3, recommendations, file-backups, android-16]
+tags: [proyecto, arquitectura, tech-stack, archify, local-first, get-it, l10n, result-pattern, android-widgets, sqlite-v4, recommendations, saf-backup, auto-repair, android-16]
 ---
 
-# 🏗️ Arquitectura del Sistema: Victor Engineer - Food Tracker (v1.2.0)
+# 🏗️ Arquitectura del Sistema: Victor Engineer - Food Tracker (v1.2.5)
 
-> **Mesa de Control & Backend-Architect:** Este documento establece los componentes fundamentales, el Tech Stack tecnológico, las decisiones arquitectónicas estructurales y el flujo de datos integral de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.2.0` (Motor de Recomendaciones Nutricionales, Exportación Física e Higiene Android 16).
+> **Mesa de Control & Backend-Architect:** Este documento establece los componentes fundamentales, el Tech Stack tecnológico, las decisiones arquitectónicas estructurales y el flujo de datos integral de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.2.5` (Selector SAF, Auto-Reparación de Respaldos Truncados, Rediseño Ergonómico de Ayuno Bento, SQLite v4 con Gramajes y Blindaje Android 16).
 
 ---
 
@@ -19,16 +19,20 @@ tags: [proyecto, arquitectura, tech-stack, archify, local-first, get-it, l10n, r
 
 - **Frontend:** Flutter 3.22+ / 3.27+ (Dart SDK `>=3.4.0 <4.0.0`), Google Fonts (Outfit, Inter), CustomPainter (`WeightLineChartPainter` y `VeLoadingRing` a 60 FPS).
 - **Backend & Lógica de Dominio:** Dart Core, Clean Monolith modular (<300 LoC por archivo), Inmutabilidad con Patrón Sentinel, `ModelSanitizer`.
-- **Inyección de Dependencias & Service Locator:** `get_it: ^7.7.0` centralizado en `lib/core/di/service_locator.dart`, registrando contratos abstractos (`IDatabaseService`, `IImageProcessingService`, `IMealDao`, `IWeightLogDao`, `IUserProfileDao`, `IPantryDao`, `IDishwareDao`, `IMealTemplateDao`, `IFastingDao`) con inyección por constructor y compatibilidad transparente con accesores estáticos `.instance`.
+- **Inyección de Dependencias & Service Locator:** `get_it: ^9.0.0` centralizado en `lib/core/di/service_locator.dart`, registrando contratos abstractos (`IDatabaseService`, `IImageProcessingService`, `IMealDao`, `IWeightLogDao`, `IUserProfileDao`, `IPantryDao`, `IDishwareDao`, `IMealTemplateDao`, `IFastingDao`, `INutritionalRecommendationService`) con inyección por constructor y compatibilidad transparente con accesores estáticos `.instance`.
 - **Manejo Funcional de Errores (Result / Either):** Tipo suma sellado en Dart 3 `Result<T, Failure>` (`Success`, `FailureResult`) en `lib/core/errors/result.dart` con combinadores funcionales (`fold`, `map`, `flatMap`, `guardAsync`) y jerarquía exhaustiva `Failure` en `lib/core/errors/failures.dart`.
 - **Internacionalización y Localización Multi-idioma:** `flutter_localizations`, `intl` y `l10n.yaml` con contratos tipados en `AppLocalizations` (`lib/l10n/app_es.arb` y `lib/l10n/app_en.arb`) desacoplados de los widgets, con selector dinámico en caliente sin reiniciar la app.
-- **Base de Datos & Cache (Local-First):** SQLite v3 mediante `sqflite` (móvil) y `sqflite_common_ffi` (escritorio/tests):
+- **Base de Datos & Cache (Local-First):** SQLite v4 mediante `sqflite` (móvil) y `sqflite_common_ffi` (escritorio/tests):
   - `PRAGMA journal_mode = WAL;` (Concurrencia óptima de lecturas y escrituras simultáneas).
   - `PRAGMA synchronous = NORMAL;` (Persistencia confiable y latencia < 16 ms).
   - `PRAGMA foreign_keys = ON;` (Integridad referencial estricta).
-  - Tablas v3: `meals`, `meal_items`, `pantry_items`, `weight_logs`, `user_profile`, `analysis_queue`, `calibrated_dishware`, `meal_templates`, `fasting_logs`.
+  - Tablas v4: `meals`, `meal_items`, `pantry_items` (con `package_weight`), `weight_logs`, `user_profile`, `analysis_queue`, `calibrated_dishware`, `meal_templates`, `fasting_logs`.
   - Columnas de micronutrientes: `fiber`, `sodium`, `sugar` en `meals` y `meal_items`.
   - Capa de DAOs atómicos: `MealDao`, `WeightLogDao`, `UserProfileDao`, `PantryDao`, `DishwareDao`, `MealTemplateDao`, `FastingDao`, `DatabaseConnectionFactory` y `DatabaseSchema`.
+- **Normalización y Respaldo Resiliente (`BackupNormalizer` & `BackupService`):**
+  - Selector nativo de archivos SAF (`file_picker ^13.1.0`) para integración fluida sin tipeo manual de rutas.
+  - Normalización en Isolate secundario (`Isolate.run`) y persistencia atómica por lotes con `txn.batch()` y `batch.commit(noResult: true)` a 60 FPS.
+  - Motor auto-reparador de JSON truncado (`_tryRepairTruncatedJson`): Cierre de strings huérfanos, balanceo LIFO de `{`, `[` y sanitización sintáctica.
 - **Widgets Nativos de Android (AppWidgets):** `home_widget: ^0.7.0` con sincronización en SharedPreferences y layouts XML nativos en `res/layout/`:
   - **Widget Compacto (2x2):** Anillo de progreso calórico, calorías restantes vs meta, y botón de acción directa `[+ Registrar]`.
   - **Widget Extendido (4x2):** Anillo de calorías a la izquierda, desglose tri-columna de macronutrientes (Proteína, Carbohidratos, Grasas), y botones táctiles interactivos de 1 toque con deep links directos (`foodtracker://scan_food` para cámara IA y `foodtracker://scan_barcode` para escáner USDA).
@@ -98,7 +102,14 @@ El diagrama interactivo de componentes, límites de seguridad, widgets nativos d
 - Sustitución de portapapeles por exportación física de archivos `.json` deterministas en directorios accesibles del dispositivo (`Downloads/FoodTracker_Backups` en Android / Documentos en Desktop).
 - Diálogo interactivo `JsonFilePickerDialog` para detección de respaldos existentes, lectura previa de metadatos (conteo de comidas, peso, vajilla, perfil) y restauración atómica en transacción SQLite con salvaguarda de estado previo.
 
-### 3.9. Retrocompatibilidad de Actualización (`applicationId`) y Arquitectura Android 16 (16KB)
-- Mantenimiento explícito de `applicationId = "com.example.food_tracker"` en `build.gradle` para permitir actualizaciones transparentes de binarios sin generar aplicaciones duplicadas ni desvincular bases de datos locales.
-- Adición de `android:extractNativeLibs="true"` en `AndroidManifest.xml` y eliminación de bibliotecas nativas incompatibles (`sqlite3_flutter_libs`) para cumplimiento estricto del alineamiento de páginas de 16KB en Android 16.
-- Timeouts defensivos (2-4s) con fallback silencioso en el arranque de servicios asíncronos en `main.dart` para garantizar que `runApp()` se invoque sin retrasos ni ANR en arranques en frío.
+### 3.9. Identidad Permanente (`applicationId`), Firma Permanente y Arquitectura Android 16 (16KB)
+- Consolidación canónica de `applicationId = "com.victorengineer.foodtracker"` y `namespace` unificado, blindado para prevenir duplicación de iconos o pérdida de sandbox de datos en actualizaciones.
+- Configuración de `useLegacyPackaging = false` en Gradle (sin `extractNativeLibs` deprecado) para alineación nativa de páginas de 16 KB en Android 16 (API 36).
+- Timeouts defensivos (2s) con fallback a SQLite local en caso de demoras o bloqueos de hardware en el Keystore de Android 16.
+- Preservación de certificado criptográfico RSA 2048 permanente en `lib/assets/keystore/release.keystore` para instalaciones in-place continuas.
+
+### 3.10. Motor de Normalización Adaptativo y Respaldo Auto-Sanador (v1.2.5)
+- Desacoplamiento de la decodificación JSON del hilo de UI mediante `Isolate.run`.
+- Persistencia masiva por lotes con `txn.batch()` y `batch.commit(noResult: true)` garantizando 60 FPS en importaciones grandes.
+- Motor de auto-reparación sintáctica (`_tryRepairTruncatedJson`): recupera respaldos incompletos o con strings sin terminar (`FormatException`), equilibrando llaves y corchetes en orden LIFO.
+- Ergonomía de Dashboard: Ayuno Bento colapsable (~44px) sin superposiciones y modal `WhatToEatSheet` acotado con `SafeArea`.
