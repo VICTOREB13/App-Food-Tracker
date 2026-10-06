@@ -10,6 +10,7 @@ class VeAppBar extends StatelessWidget implements PreferredSizeWidget {
   final List<Widget>? actions;
   final Widget? leading;
   final bool showVeBadge;
+  final bool automaticallyImplyLeading;
 
   const VeAppBar({
     super.key,
@@ -18,6 +19,7 @@ class VeAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.actions,
     this.leading,
     this.showVeBadge = true,
+    this.automaticallyImplyLeading = true,
   });
 
   @override
@@ -29,6 +31,7 @@ class VeAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: 0,
       scrolledUnderElevation: 0,
       backgroundColor: AppColors.background(context),
+      automaticallyImplyLeading: automaticallyImplyLeading,
       leading: leading,
       titleSpacing: leading != null ? 0 : 16,
       title: Row(

@@ -1,10 +1,10 @@
 ---
 tipo: implementation_plan
 proyecto: App_Food_Tracker
-iteracion: v1.2.5
+iteracion: v1.3.0
 estado: activo
-fecha: 2026-10-04
-tags: [proyecto, planning, v1-2-5, file-picker, retrocompatible-json, auto-repair-json, fasting-bento-alignment, root-depuration]
+fecha: 2026-10-05
+tags: [proyecto, planning, v1-3-0, in-app-updater, github-releases, microinteractions, visual-polish, adb-audit]
 ---
 
 # 🎯 Plan de Implementación Maestro: Food Tracker (v1.1.0)
@@ -279,6 +279,56 @@ tags: [proyecto, planning, v1-2-5, file-picker, retrocompatible-json, auto-repai
 2. Sincronización de versión a `1.2.5+1` en `pubspec.yaml` y `changelog_v1.md`.
 3. Creación y push del tag anotado `v1.2.5`.
 4. Monitoreo y publicación oficial del release en GitHub Actions (APK binario verificado).
+
+---
+
+## 🌟 Iteración v1.3.0: Auto-Actualizador In-App Sincronizado con GitHub, Microinteracciones y Refinamiento Visual ADB
+
+### Fase A: Backend & Servicio de Actualización In-App (Backend-Architect)
+1. **Servicio de Actualización GitHub (`AppUpdateService` < 250 LoC):**
+   - Integración con API pública de GitHub Releases (`https://api.github.com/repos/VICTOREB13/App-Food-Tracker/releases/latest`).
+   - Modelo de dominio `GitHubReleaseModel` (tag, title, notes/body, apkUrl, apkSizeBytes, publishedAt).
+   - Comparador de SemVer estricto (`isUpdateAvailable(String currentVersion, String latestTag)`).
+   - Descarga progresiva de bytes del APK en `cache/updates/` reportando ratio de progreso continuo (`onProgress(double ratio, int receivedBytes, int totalBytes)`).
+2. **Servicio Instalador Nativo (`AppInstallerService` < 150 LoC):**
+   - Canal de plataforma `MethodChannel("com.victorengineer.foodtracker/app_installer")`.
+   - Métodos: `installApk(String filePath)`, `canRequestPackageInstalls()`, `openInstallPermissionSettings()`.
+   - Fallback resiliente con `url_launcher` para abrir la URL de descarga web en navegador si el usuario deniega permisos o falla el provider nativo.
+3. **Capa Nativa Android (`MainActivity.kt`, `AndroidManifest.xml`, `file_paths.xml`):**
+   - `FileProvider` (`androidx.core.content.FileProvider`) apuntando a caché y archivos con URI segura `content://com.victorengineer.foodtracker.fileprovider/...`.
+   - Permiso `<uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>`.
+   - Intent `Intent.ACTION_VIEW` con `FLAG_GRANT_READ_URI_PERMISSION` y tipo `application/vnd.android.package-archive`.
+4. **Registro DI y Pruebas Unitarias:**
+   - Registro en `lib/core/di/service_locator.dart`.
+   - Pruebas unitarias de parsing, SemVer, descargas y fallback en `test/services/app_update_service_test.dart`.
+
+### Fase B: Frontend, Diálogos y Microinteracciones (Frontend-UI)
+1. **Diálogo Modal y Comprobación de Versión (`InAppUpdateDialog` & Ajustes < 250 LoC):**
+   - Diálogo modal con release notes en markdown/texto, tamaño de descarga, botón "Actualizar Ahora" con barra de progreso reactiva y botón "Descargar desde GitHub".
+   - Verificación en segundo plano al abrir el Dashboard (banner no intrusivo o snackbar sutil).
+   - Sección dedicada "Actualizaciones de la Aplicación" en `SettingsScreen` con botón manual "Buscar actualizaciones", estado de versión actual y última comprobación.
+2. **Microinteracciones Hápticas y Elásticas (`VeBounceable` & `VeAnimatedCounter`):**
+   - `VeBounceable` (< 120 LoC): componente con feedback elástico `Transform.scale(0.96)` y física amortiguada `Curves.easeOutBack` al presionar botones principales (FAB `+`, Ayuno `Iniciar`, Acciones).
+   - `VeAnimatedCounter` (< 120 LoC): transiciones numéricas fluidas para calorías y macros en el Dashboard.
+   - Feedback háptico táctil con `HapticFeedback.lightImpact()` y `selectionClick()` en FAB, registro de agua (+250ml), temporizador de ayuno y selectores.
+   - Animación "Breathing Glow" en anillo y badge de ayuno cuando esté activo.
+3. **Refinamiento Visual Ergonómico (Hallazgos Auditoría ADB):**
+   - `DashboardScreen`: eliminar flecha `<-` residual con `automaticallyImplyLeading: false` en `VeAppBar`.
+   - `PantryItemEditorDialog`: corregir etiqueta recortada "Peso n..." ajustando diseño a dos líneas o label conciso "Peso total (g)".
+   - `WeeklyDigestCard`: asegurar ancho adecuado para el título "RESUMEN SEMANAL" sin elipsis.
+   - `PantryScreen`: optimizar padding y scroll horizontal de chips de categorías.
+
+### Fase C: Auditoría de Calidad (Systems-Auditor)
+1. Verificación del límite modular (< 300 LoC en el 100% de archivos creados y modificados).
+2. Ejecución de `flutter analyze` con 0 errores y 0 warnings.
+3. Ejecución de la suite completa de pruebas unitarias y de widgets (`flutter test`).
+4. Ratificación formal de `veredicto: PASS` en `artifacts/audit_reports/audit_report.md`.
+
+### Fase D: DevOps & Publicación de Release (DevOps-Engineer)
+1. Incremento de versión en `pubspec.yaml` a `1.3.0+1`.
+2. Documentación formal en `artifacts/planning/changelog_v1.md` `[1.3.0] - 2026-10-05`.
+3. Sincronización y actualización de todos los artefactos.
+4. Creación y push del tag anotado `v1.3.0` para compilar y publicar el APK oficial en GitHub Actions.
 
 ---
 

@@ -29,6 +29,10 @@ import '../../services/nutrition_label_scanner_service.dart';
 import '../../services/clinical_excel_export_service.dart';
 import '../../services/nutritional_recommendation_service.dart';
 import '../../services/home_widget_service.dart';
+import '../interfaces/app_update_service_interface.dart';
+import '../interfaces/app_installer_service_interface.dart';
+import '../../services/app_update_service.dart';
+import '../../services/app_installer_service.dart';
 
 /// Global Service Locator instance backed by GetIt.
 final GetIt getIt = GetIt.instance;
@@ -87,6 +91,12 @@ void setupServiceLocator({bool isTesting = false}) {
   getIt.registerLazySingleton<ClinicalExcelExportService>(() => ClinicalExcelExportService.instance);
   getIt.registerLazySingleton<INutritionalRecommendationService>(() => NutritionalRecommendationService.instance);
   getIt.registerLazySingleton<NutritionalRecommendationService>(() => NutritionalRecommendationService.instance);
+
+  // App Update & Installation Services
+  getIt.registerLazySingleton<IAppUpdateService>(() => AppUpdateService.instance);
+  getIt.registerLazySingleton<AppUpdateService>(() => AppUpdateService.instance);
+  getIt.registerLazySingleton<IAppInstallerService>(() => AppInstallerService.instance);
+  getIt.registerLazySingleton<AppInstallerService>(() => AppInstallerService.instance);
 
   // State Management Controllers
   getIt.registerLazySingleton<SettingsController>(() => SettingsController.instance);

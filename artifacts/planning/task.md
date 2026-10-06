@@ -1,10 +1,10 @@
 ---
 tipo: task_list
 proyecto: App_Food_Tracker
-iteracion: v1.2.5
+iteracion: v1.3.0
 estado: activo
-fecha: 2026-10-04
-tags: [proyecto, tasks, checklist, v1-2-5]
+fecha: 2026-10-05
+tags: [proyecto, tasks, checklist, v1-3-0, in-app-updater, github-releases, microinteractions, visual-polish]
 ---
 
 # 📋 Checklist Maestro de Tareas de Agentes (v1.2.1)
@@ -250,6 +250,59 @@ tags: [proyecto, tasks, checklist, v1-2-5]
 - [x] (DevOps-Engineer) Depurar archivos obsoletos, imágenes de captura y respaldos de la raíz del proyecto.
 - [x] (DevOps-Engineer) Documentar la versión en `artifacts/planning/changelog_v1.md` bajo `[1.2.5] - 2026-10-04`.
 - [x] (DevOps-Engineer) Compilar y publicar release oficial `v1.2.5` en GitHub Releases.
+
+---
+
+## 🌟 Iteración v1.3.0: Auto-Actualizador In-App Sincronizado con GitHub, Microinteracciones Hápticas/Elásticas y Refinamiento Visual ADB
+
+### 🧭 1. Project-Planner (Master Tech Lead & Orquestador)
+- [x] (Project-Planner) Auditar la aplicación en vivo en dispositivo físico Android mediante Android CLI y capturas de pantalla ADB.
+- [x] (Project-Planner) Consolidar requerimientos de auto-actualización in-app sincronizada con GitHub Releases en `prompt_draft.md`.
+- [x] (Project-Planner) Definir catálogo de microinteracciones (`microinteractions`) y refinamientos visuales de la auditoría.
+- [ ] (Project-Planner) Despachar subagentes (`Backend-Architect`, `Frontend-UI`, `Systems-Auditor`, `DevOps-Engineer`).
+- [ ] (Project-Planner) Monitorear el Quality Gate y presentar los entregables finales al usuario.
+
+### 🗄️ 2. Backend-Architect (Servicio de Actualización, Cliente GitHub y MethodChannel)
+- [ ] (Backend-Architect) Diseñar e implementar `AppUpdateService` (`lib/services/app_update_service.dart` < 250 LoC):
+  - Consulta `https://api.github.com/repos/VICTOREB13/App-Food-Tracker/releases/latest`.
+  - Parseo de `GitHubReleaseModel` (tag, título, changelog en markdown, asset URL de `Victor-Engineer-Food-Tracker-Android.apk`).
+  - Comparador de versiones semánticas (SemVer): `isUpdateAvailable(String currentVersion, String latestTag)`.
+  - Descarga progresiva de bytes del APK en directorio temporal/caché con reporte de progreso (`onProgress(double ratio, int bytes, int total)`).
+- [ ] (Backend-Architect) Implementar `AppInstallerService` (`lib/services/app_installer_service.dart` < 150 LoC):
+  - Invocación de MethodChannel `com.victorengineer.foodtracker/app_installer`.
+  - Fallback con `url_launcher` hacia la URL web del release si falla la instalación nativa.
+- [ ] (Backend-Architect / Android) Configurar canal nativo en `MainActivity.kt`:
+  - Manejador de método `installApk(filePath: String)` que despacha `Intent.ACTION_VIEW` con `FileProvider` y `FLAG_GRANT_READ_URI_PERMISSION`.
+  - Agregar permiso `REQUEST_INSTALL_PACKAGES` y `FileProvider` en `AndroidManifest.xml` y `res/xml/file_paths.xml`.
+- [ ] (Backend-Architect) Registrar `IAppUpdateService` en `service_locator.dart`.
+- [ ] (Backend-Architect) Crear suite unitaria `test/services/app_update_service_test.dart`.
+
+### 🎨 3. Frontend-UI (Diálogo de Actualización, Ajustes, Microinteracciones y Polish Visual)
+- [ ] (Frontend-UI) Diseñar diálogo modal de actualización `InAppUpdateDialog` (`lib/widgets/settings/in_app_update_dialog.dart` < 250 LoC):
+  - Visualización de nueva versión, badge de release, notas en markdown, botón "Actualizar Ahora" con barra de progreso reactiva y botón "Ver en GitHub".
+- [ ] (Frontend-UI) Integrar verificación no intrusiva de actualización en `DashboardScreen` y tarjeta "Actualizaciones de la Aplicación" en `SettingsScreen`.
+- [ ] (Frontend-UI) Construir widget reutilizable `VeBounceable` (`lib/widgets/common/ve_bounceable.dart` < 120 LoC):
+  - Efecto de rebote elástico táctil (`Transform.scale: 0.96` en toque con `Curves.easeOutBack`).
+  - Integrar en FAB `+`, botón `Iniciar` de ayuno y tarjetas de acción del FAB.
+- [ ] (Frontend-UI) Construir contador numérico animado `VeAnimatedCounter` (`lib/widgets/common/ve_animated_counter.dart` < 120 LoC) e integrarlo en el resumen de calorías y macronutrientes del Dashboard.
+- [ ] (Frontend-UI) Incorporar feedback háptico (`HapticFeedback.lightImpact()` y `selectionClick()`) en FAB (`+250ml Agua`, `Rápida`), botones de ayuno, y selectores de fecha/período.
+- [ ] (Frontend-UI) Implementar animación de respiración sutil ("Breathing Glow") en el anillo y badge de ayuno cuando esté activo.
+- [ ] (Frontend-UI) Corregir detalles visuales de la auditoría ADB:
+  - Eliminar flecha `<-` en el Dashboard (`VeAppBar.automaticallyImplyLeading: false`).
+  - Ajustar etiqueta y ancho en `PantryItemEditorDialog` para evitar `"Peso n..."`.
+  - Reorganizar cabecera en `WeeklyDigestCard` para mostrar `"RESUMEN SEMANAL"` sin elipsis.
+  - Ajustar visualización y scroll horizontal de chips en `PantryScreen`.
+
+### 🛡️ 4. Systems-Auditor (Auditoría de Calidad, LoC y Suite Automatizada)
+- [ ] (Systems-Auditor) Auditar que el 100% de los archivos creados o modificados tengan estrictamente < 300 LoC.
+- [ ] (Systems-Auditor) Ejecutar `flutter analyze` y asegurar 0 errores y 0 warnings.
+- [ ] (Systems-Auditor) Ejecutar la suite completa de pruebas unitarias y de widgets (`flutter test`).
+- [ ] (Systems-Auditor) Actualizar `artifacts/audit_reports/audit_report.md` con veredicto formal `PASS`.
+
+### 🚀 5. DevOps-Engineer (Versionado v1.3.0, Changelog y Release)
+- [ ] (DevOps-Engineer) Incrementar versión en `pubspec.yaml` a `1.3.0+1`.
+- [ ] (DevOps-Engineer) Documentar la versión en `artifacts/planning/changelog_v1.md` bajo `[1.3.0] - 2026-10-05`.
+- [ ] (DevOps-Engineer) Crear y publicar el tag anotado `v1.3.0` en GitHub Actions para compilar el APK oficial.
 
 ---
 

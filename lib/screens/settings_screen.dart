@@ -6,6 +6,7 @@ import '../widgets/common/ve_app_bar.dart';
 import '../widgets/common/ve_card.dart';
 import '../widgets/common/ve_logo.dart';
 import '../widgets/settings/api_key_input_card.dart';
+import '../widgets/settings/app_update_card.dart';
 import '../widgets/settings/backup_card.dart';
 import '../widgets/settings/daily_goals_card.dart';
 import '../widgets/settings/database_maintenance_card.dart';
@@ -202,6 +203,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 16),
           const PhotoPruningCard(),
+          const SizedBox(height: 16),
+          const AppUpdateCard(),
           const SizedBox(height: 16),
           BackupCard(
             onExport: () => _controller.exportBackup(),

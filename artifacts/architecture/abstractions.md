@@ -1,10 +1,10 @@
 ---
 tipo: abstracciones
 proyecto: App_Food_Tracker
-version: v1.2.5
+version: v1.3.0
 estado: activo
-fecha: 2026-10-04
-tags: [proyecto, arquitectura, abstracciones, backend, backup-normalizer, pantry-scaling, v1-2-5]
+fecha: 2026-10-05
+tags: [proyecto, arquitectura, abstracciones, backend, in-app-updater, microinteractions, v1-3-0]
 ---
 
 # Abstracciones del Sistema y Arquitectura de Código: Victor Engineer - Food Tracker (v1.2.5)
@@ -400,4 +400,68 @@ PantryItem {
   }
 }
 ```
+
+---
+
+## 🚀 8. Abstracciones de Auto-Actualizador In-App y Microinteracciones (v1.3.0)
+
+### 8.1. Modelo: `GitHubReleaseModel`
+Entidad inmutable que representa el release de GitHub obtenido vía REST API.
+```dart
+@immutable
+class GitHubReleaseModel {
+  final String tagName;             // e.g. "v1.3.0"
+  final String title;               // e.g. "Release v1.3.0"
+  final String releaseNotes;        // Markdown del changelog
+  final String? apkDownloadUrl;     // URL directa de Victor-Engineer-Food-Tracker-Android.apk
+  final int? apkSizeBytes;          // Tamaño en bytes del asset
+  final DateTime publishedAt;       // Fecha de publicación
+  final String htmlUrl;             // URL web del release en GitHub
+}
+```
+
+### 8.2. Contrato de Servicio: `IAppUpdateService`
+```dart
+abstract interface class IAppUpdateService {
+  Future<Result<GitHubReleaseModel?, Failure>> checkLatestRelease();
+  bool isUpdateAvailable(String currentVersion, String latestTag);
+  Future<Result<String, Failure>> downloadApk({
+    required String downloadUrl,
+    required String destinationFileName,
+    void Function(double ratio, int receivedBytes, int totalBytes)? onProgress,
+  });
+}
+```
+
+### 8.3. Contrato de Servicio Instalador: `IAppInstallerService`
+```dart
+abstract interface class IAppInstallerService {
+  Future<Result<bool, Failure>> installApk(String filePath);
+  Future<bool> canRequestPackageInstalls();
+  Future<void> openInstallPermissionSettings();
+  Future<bool> openWebRelease(String url);
+}
+```
+
+### 8.4. Widgets de Microinteracciones UI
+```dart
+// VeBounceable: Revestimiento con física elástica de toque (scale: 0.96)
+class VeBounceable extends StatefulWidget {
+  final Widget child;
+  final VoidCallback? onTap;
+  final double scaleFactor; // default: 0.96
+  final Duration duration;  // default: 120ms
+  const VeBounceable({super.key, required this.child, this.onTap, this.scaleFactor = 0.96, ...});
+}
+
+// VeAnimatedCounter: Transición rodante/fluida para cifras numéricas
+class VeAnimatedCounter extends StatelessWidget {
+  final num value;
+  final TextStyle? style;
+  final String Function(num)? formatter;
+  final Duration duration; // default: 600ms
+  const VeAnimatedCounter({super.key, required this.value, this.style, ...});
+}
+```
+
 

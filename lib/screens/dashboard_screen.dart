@@ -22,7 +22,10 @@ import '../widgets/dashboard/quick_meal_dialog.dart';
 import '../widgets/dashboard/streak_badge.dart';
 import '../widgets/dashboard/voice_meal_recording_dialog.dart';
 import '../widgets/dashboard/week_calendar_strip.dart';
+import '../core/di/service_locator.dart';
+import '../core/interfaces/app_update_service_interface.dart';
 import '../widgets/recommendations/what_to_eat_sheet.dart';
+import '../widgets/settings/in_app_update_dialog.dart';
 import 'meal_detail_screen.dart';
 import 'metrics_screen.dart';
 import 'settings_screen.dart';
@@ -35,6 +38,7 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  static bool _hasCheckedForUpdatesInSession = false;
   final MealController _mealController = MealController.instance;
 
   @override
@@ -43,6 +47,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _mealController.addListener(_onControllerChange);
     _mealController.init();
     HomeWidgetService.instance.init(onDeepLink: _handleWidgetDeepLink);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkUpdateSilently());
+  }
+
+  void _checkUpdateSilently() async {
+    if (_hasCheckedForUpdatesInSession) return;
+    _hasCheckedForUpdatesInSession = true;
+    try {
+      if (!getIt.isRegistered<IAppUpdateService>()) return;
+      final updateService = getIt<IAppUpdateService>();
+      final release = await updateService.checkLatestRelease();
+      if (!mounted || release == null) return;
+      if (updateService.isUpdateAvailable('1.3.0', release.tagName)) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Nueva versión disponible: ${release.tagName}'),
+          duration: const Duration(seconds: 8),
+          action: SnackBarAction(label: 'Ver actualización', textColor: Colors.white, onPressed: () => showInAppUpdateDialog(context, release: release)),
+        ));
+      }
+    } catch (_) {}
   }
 
   void _handleWidgetDeepLink(Uri uri) {
@@ -195,24 +218,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     return Scaffold(
       appBar: VeAppBar(
+        automaticallyImplyLeading: false,
         title: 'Food Tracker',
         subtitle: 'Victor Engineer',
         actions: [
           Center(child: StreakBadge(streakDays: _mealController.currentStreak)),
-          IconButton(
-            icon: const Icon(Icons.insights_outlined),
-            tooltip: 'Métricas',
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const MetricsScreen()),
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            tooltip: 'Ajustes',
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const SettingsScreen()),
-            ),
-          ),
+          IconButton(icon: const Icon(Icons.insights_outlined), tooltip: 'Métricas', onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MetricsScreen()))),
+          IconButton(icon: const Icon(Icons.settings_outlined), tooltip: 'Ajustes', onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SettingsScreen()))),
         ],
       ),
       floatingActionButton: DashboardFabMenu(

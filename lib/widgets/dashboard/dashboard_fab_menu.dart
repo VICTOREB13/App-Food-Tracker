@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../services/theme_manager.dart';
 
@@ -48,6 +49,7 @@ class _DashboardFabMenuState extends State<DashboardFabMenu>
   }
 
   void _openSpeedDialSheet() {
+    HapticFeedback.lightImpact();
     _controller.forward(from: 0.0);
 
     showModalBottomSheet(
@@ -123,7 +125,10 @@ class _DashboardFabMenuState extends State<DashboardFabMenu>
                         ),
                         IconButton(
                           icon: const Icon(Icons.close, size: 20),
-                          onPressed: () => Navigator.of(sheetContext).pop(),
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            Navigator.of(sheetContext).pop();
+                          },
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
                         ),
@@ -134,6 +139,7 @@ class _DashboardFabMenuState extends State<DashboardFabMenu>
                       InkWell(
                         key: const Key('what_to_eat_fab_button'),
                         onTap: () {
+                          HapticFeedback.lightImpact();
                           Navigator.of(sheetContext).pop();
                           widget.onWhatToEat!();
                         },
@@ -192,7 +198,10 @@ class _DashboardFabMenuState extends State<DashboardFabMenu>
 
   Widget _buildGridAction(_FabItem item) {
     return InkWell(
-      onTap: item.onTap,
+      onTap: () {
+        HapticFeedback.lightImpact();
+        item.onTap();
+      },
       borderRadius: BorderRadius.circular(14),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),

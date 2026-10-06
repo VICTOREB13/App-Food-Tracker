@@ -1,12 +1,12 @@
 ---
 tipo: arquitectura
 proyecto: App_Food_Tracker
-version: v1.2.5
+version: v1.3.0
 estado: activo
-fecha: 2026-10-04
-stack_principal: [Flutter, SQLite WAL v4, Google Gemini API, USDA FoodData Central, Open Food Facts, FlutterSecureStorage, GetIt, Flutter Localizations, HomeWidget, BackupNormalizer, NutritionalRecommendationService]
+fecha: 2026-10-05
+stack_principal: [Flutter, SQLite WAL v4, Google Gemini API, USDA FoodData Central, Open Food Facts, FlutterSecureStorage, GetIt, Flutter Localizations, HomeWidget, BackupNormalizer, NutritionalRecommendationService, GitHubReleasesUpdateService, MethodChannelAppInstaller]
 diagrama_html: PRJ_App_Food_Tracker_architecture_diagram.html
-tags: [proyecto, arquitectura, tech-stack, archify, local-first, get-it, l10n, result-pattern, android-widgets, sqlite-v4, recommendations, saf-backup, auto-repair, android-16]
+tags: [proyecto, arquitectura, tech-stack, archify, local-first, get-it, l10n, result-pattern, android-widgets, sqlite-v4, recommendations, saf-backup, auto-repair, in-app-updater, microinteractions, android-16]
 ---
 
 # 🏗️ Arquitectura del Sistema: Victor Engineer - Food Tracker (v1.2.5)
@@ -113,3 +113,20 @@ El diagrama interactivo de componentes, límites de seguridad, widgets nativos d
 - Persistencia masiva por lotes con `txn.batch()` y `batch.commit(noResult: true)` garantizando 60 FPS en importaciones grandes.
 - Motor de auto-reparación sintáctica (`_tryRepairTruncatedJson`): recupera respaldos incompletos o con strings sin terminar (`FormatException`), equilibrando llaves y corchetes en orden LIFO.
 - Ergonomía de Dashboard: Ayuno Bento colapsable (~44px) sin superposiciones y modal `WhatToEatSheet` acotado con `SafeArea`.
+
+### 3.11. Auto-Actualizador In-App Sincronizado y Sistema de Microinteracciones (v1.3.0)
+- **Cliente de Actualización GitHub Releases (`AppUpdateService`):**
+  - Consulta en tiempo real al endpoint REST de GitHub Releases (`VICTOREB13/App-Food-Tracker`).
+  - Detección de versión con comparador de semántica SemVer tolerante a prefijos `v` (`v1.3.0` vs `1.2.5`).
+  - Streaming de bytes hacia directorio de caché (`update_vX.Y.Z.apk`) con emisión continua de ratio (`0.0` a `1.0`) para renderizado a 60 FPS de barra de progreso.
+- **Canal de Plataforma e Instalador Nativo Android (`AppInstallerService` & `MainActivity.kt`):**
+  - `MethodChannel("com.victorengineer.foodtracker/app_installer")` con métodos `installApk`, `canRequestPackageInstalls` y `openInstallPermissionSettings`.
+  - Android `FileProvider` con `androidx.core.content.FileProvider` y XML `file_paths.xml` para compartir URI con `FLAG_GRANT_READ_URI_PERMISSION`.
+  - Permiso nativo `<uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>` para Android 8.0+ (API 26) hasta Android 16 (API 36).
+  - Fallback defensivo a navegador web mediante URL directa del release si la instalación nativa no es autorizada.
+- **Microinteracciones y Polish Visual:**
+  - `VeBounceable`: Física de rebote táctil (`scale: 0.96`, `Curves.easeOutBack`) para botones de alto impacto.
+  - `VeAnimatedCounter`: Animación numérica continua para métricas de calorías y macronutrientes.
+  - Feedback háptico (`HapticFeedback.lightImpact()` y `selectionClick()`) en FAB de comidas, agua y ayuno.
+  - Eliminación de flecha `<-` errónea en Dashboard (`automaticallyImplyLeading: false` en `VeAppBar`).
+

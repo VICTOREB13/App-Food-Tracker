@@ -1,10 +1,10 @@
 ---
 tipo: api_spec
 proyecto: App_Food_Tracker
-version: v1.2.5
+version: v1.3.0
 estado: activo
-fecha: 2026-10-04
-tags: [proyecto, api, backend, contratos, sqlite-v4, backup-normalizer, pantry-scaling, v1-2-5]
+fecha: 2026-10-05
+tags: [proyecto, api, backend, contratos, sqlite-v4, github-releases, methodchannel-installer, v1-3-0]
 ---
 
 # 📡 Especificación de Contrato de Datos, Esquema SQLite v4 y Servicios Backend (v1.2.5)
@@ -247,3 +247,35 @@ Si el plato visualizado contiene alimentos correspondientes a estos productos, p
 - Cierre automático de strings interrumpidos sin comilla de cierre (`FormatException: Unterminated string`).
 - Recorte de tokens colgantes y separadores huérfanos (`:`, `,`).
 - Conteo y balanceo LIFO de llaves `{` y corchetes `[` para garantizar decodificación determinista sin pérdida de datos válidos.
+
+---
+
+## 🔄 6. Contrato de Auto-Actualizador In-App (v1.3.0)
+
+### 6.1. GitHub Releases API Contract
+- **Endpoint:** `GET https://api.github.com/repos/VICTOREB13/App-Food-Tracker/releases/latest`
+- **Headers:** `Accept: application/vnd.github.v3+json`, `User-Agent: VictorEngineer-FoodTracker`
+- **Campos consumidos del Payload JSON:**
+  - `tag_name`: String (ej. `"v1.3.0"`)
+  - `name`: String (ej. `"Release v1.3.0: In-App Auto-Updater & Microinteractions"`)
+  - `body`: String (Notas de la versión en markdown)
+  - `published_at`: String ISO-8601
+  - `html_url`: String (Enlace web del release en GitHub)
+  - `assets`: Array de objetos. Filtro prioritario:
+    - Buscar asset cuyo `name` termine en `.apk` (preferentemente `Victor-Engineer-Food-Tracker-Android.apk`).
+    - Extraer `browser_download_url` y `size` (bytes).
+
+### 6.2. Native Android MethodChannel Contract
+- **Channel ID:** `com.victorengineer.foodtracker/app_installer`
+- **Métodos expuestos:**
+  1. `installApk(filePath: String)`:
+     - Entrada: `{"filePath": "/data/user/0/.../app_flutter/updates/update_v1.3.0.apk"}`
+     - Comportamiento: Valida existencia del archivo, obtiene URI segura con `FileProvider.getUriForFile`, configura `Intent.ACTION_VIEW` con `FLAG_ACTIVITY_NEW_TASK` y `FLAG_GRANT_READ_URI_PERMISSION`, y lanza la actividad del instalador del sistema.
+     - Retorno: `true` en éxito, o lanza `PlatformException`.
+  2. `canRequestPackageInstalls()`:
+     - Comportamiento: Si Android API >= 26 (`Build.VERSION_CODES.O`), consulta `packageManager.canRequestPackageInstalls()`. Si es menor, retorna `true`.
+     - Retorno: `Boolean`.
+  3. `openInstallPermissionSettings()`:
+     - Comportamiento: En Android API >= 26, despacha `Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:$packageName"))`.
+     - Retorno: `null`.
+

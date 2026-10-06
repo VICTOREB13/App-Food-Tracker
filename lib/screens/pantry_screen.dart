@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/pantry_item.dart';
@@ -141,20 +142,36 @@ class _PantryScreenState extends State<PantryScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: _categories.map((c) {
+                SizedBox(
+                  height: 38,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: _categories.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 8),
+                    itemBuilder: (context, index) {
+                      final c = _categories[index];
                       final sel = _selectedCategory == c;
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: ChoiceChip(
-                          label: Text(c),
-                          selected: sel,
-                          onSelected: (s) { if (s) setState(() => _selectedCategory = c); },
+                      return ChoiceChip(
+                        label: Text(c),
+                        labelStyle: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
+                          color: sel ? Colors.white : AppColors.textPrimary(context),
                         ),
+                        selected: sel,
+                        selectedColor: AppColors.primary,
+                        backgroundColor: AppColors.surface(context),
+                        visualDensity: VisualDensity.compact,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        onSelected: (s) {
+                          if (s) {
+                            HapticFeedback.selectionClick();
+                            setState(() => _selectedCategory = c);
+                          }
+                        },
                       );
-                    }).toList(),
+                    },
                   ),
                 ),
                 const SizedBox(height: 12),

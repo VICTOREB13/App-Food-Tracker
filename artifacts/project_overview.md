@@ -1,13 +1,13 @@
 ---
 tipo: overview
 proyecto: App_Food_Tracker
-version: v1.2.5
+version: v1.3.0
 estado: activo
-fecha: 2026-10-04
-tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid, get-it, l10n, result-pattern, android-widgets, sqlite-v4, recommendations, saf-backup, auto-repair]
+fecha: 2026-10-05
+tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid, get-it, l10n, result-pattern, android-widgets, sqlite-v4, recommendations, saf-backup, auto-repair, in-app-updater, microinteractions]
 ---
 
-# 🚀 Visión General del Proyecto: Victor Engineer - Food Tracker (v1.2.5)
+# 🚀 Visión General del Proyecto: Victor Engineer - Food Tracker (v1.3.0)
 
 > **Mesa de Control (Project-Planner):** Este documento centraliza la visión del producto, capacidades técnicas, directrices de arquitectura y el índice de navegación interconectado de todos los artefactos del proyecto según la metodología de Prototipado Evolutivo y estándares Obsidian.
 
@@ -93,6 +93,12 @@ tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid, get-it, 
     - `applicationId` y `namespace` unificados permanentemente como `com.victorengineer.foodtracker`.
     - Certificado criptográfico Keystore permanente RSA 2048 garantizando actualizaciones in-place sin desinstalar.
     - Desactivación de `WorkManagerInitializer` para evitar fallos de reflexión en arranque y timeouts defensivos de 2s contra deadlocks de Keystore.
+
+16. **Auto-Actualizador In-App Sincronizado y Microinteracciones (v1.3.0):**
+    - Sincronización en tiempo real con GitHub Releases API (`VICTOREB13/App-Food-Tracker`) para verificar nuevas versiones tanto en el arranque como desde Ajustes.
+    - Descarga progresiva de APK con barra reactiva de progreso y despacho automático al instalador del sistema operativo Android mediante `MethodChannel` y `FileProvider`.
+    - Catálogo de microinteracciones de alta fidelidad: botones elásticos con física de resorte (`VeBounceable`), transiciones numéricas rodantes (`VeAnimatedCounter`) y feedback háptico (`HapticFeedback.lightImpact()`).
+    - Pulido ergonómico visual de la interfaz derivado de auditoría en vivo por ADB (corrección de flecha atrás en Dashboard, etiquetas de despensa y cabeceras de métricas).
 
 ---
 

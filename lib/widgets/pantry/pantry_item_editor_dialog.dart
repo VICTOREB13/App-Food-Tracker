@@ -88,22 +88,24 @@ class _PantryItemEditorDialogState extends State<PantryItemEditorDialog> {
       backgroundColor: AppColors.surface(context),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: AppColors.border(context))),
       title: Text(isEditing ? 'Editar Producto' : 'Añadir Producto a Despensa', style: GoogleFonts.outfit(fontWeight: FontWeight.w700, fontSize: 18)),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(key: const Key('pantry_name_input'), controller: _nameCtrl, decoration: const InputDecoration(labelText: 'Nombre del producto *', isDense: true)),
-            const SizedBox(height: 8),
-            TextField(key: const Key('pantry_brand_input'), controller: _brandCtrl, decoration: const InputDecoration(labelText: 'Marca (opcional)', isDense: true)),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(child: TextField(key: const Key('pantry_serving_input'), controller: _servingSizeCtrl, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Porción ref.', suffixText: 'g', isDense: true))),
-                const SizedBox(width: 8),
-                Expanded(child: TextField(key: const Key('pantry_package_input'), controller: _packageWeightCtrl, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Peso neto pack', suffixText: 'g', isDense: true))),
-              ],
-            ),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(key: const Key('pantry_name_input'), controller: _nameCtrl, decoration: const InputDecoration(labelText: 'Nombre del producto *', isDense: true)),
+              const SizedBox(height: 8),
+              TextField(key: const Key('pantry_brand_input'), controller: _brandCtrl, decoration: const InputDecoration(labelText: 'Marca (opcional)', isDense: true)),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(child: TextField(key: const Key('pantry_serving_input'), controller: _servingSizeCtrl, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Porción (g)', isDense: true))),
+                  const SizedBox(width: 8),
+                  Expanded(child: TextField(key: const Key('pantry_package_input'), controller: _packageWeightCtrl, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Envase (g)', isDense: true))),
+                ],
+              ),
             const SizedBox(height: 4),
             Text('Nutrientes por cada porción de referencia:', style: GoogleFonts.inter(fontSize: 10, color: AppColors.textSecondary(context))),
             const SizedBox(height: 8),
@@ -125,6 +127,7 @@ class _PantryItemEditorDialogState extends State<PantryItemEditorDialog> {
           ],
         ),
       ),
+    ),
       actions: [
         TextButton(onPressed: () => Navigator.of(context).pop(), child: Text('Cancelar', style: GoogleFonts.inter(color: AppColors.textSecondary(context)))),
         ElevatedButton(

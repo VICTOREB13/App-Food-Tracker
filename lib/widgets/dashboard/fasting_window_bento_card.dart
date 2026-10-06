@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../controllers/fasting_controller.dart';
 import '../../services/theme_manager.dart';
@@ -64,6 +65,7 @@ class _FastingWindowBentoCardState extends State<FastingWindowBentoCard> {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
                 onPressed: () {
+                  HapticFeedback.mediumImpact();
                   setState(() { _selectedTargetHours = hours; _isManuallyExpanded = true; });
                   _controller.startFast(targetHours: hours);
                   Navigator.pop(ctx);
@@ -90,6 +92,7 @@ class _FastingWindowBentoCardState extends State<FastingWindowBentoCard> {
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
             onPressed: () {
+              HapticFeedback.mediumImpact();
               setState(() => _isManuallyExpanded = false);
               _controller.stopActiveFast();
               Navigator.pop(ctx);
