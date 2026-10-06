@@ -39,25 +39,16 @@ class MetabolicCalculator {
   static String normalizeGender(String? raw) {
     if (raw == null) return 'male';
     final lower = raw.trim().toLowerCase();
-    if (lower == 'female' || lower == 'femenino' || lower == 'mujer' || lower == 'f') {
-      return 'female';
-    }
-    return 'male';
+    return (lower == 'female' || lower == 'femenino' || lower == 'mujer' || lower == 'f') ? 'female' : 'male';
   }
 
   /// Sanitizes activity level key
   static String normalizeActivityLevel(String? raw) {
     if (raw == null) return 'sedentary';
     final lower = raw.trim().toLowerCase();
-    if (lower.contains('very') || lower.contains('muy') || lower.contains('intenso')) {
-      return 'very_active';
-    }
-    if (lower.contains('moderat') || lower.contains('moderado')) {
-      return 'moderate';
-    }
-    if (lower.contains('light') || lower.contains('ligero')) {
-      return 'light';
-    }
+    if (lower.contains('very') || lower.contains('muy') || lower.contains('intenso')) return 'very_active';
+    if (lower.contains('moderat') || lower.contains('moderado')) return 'moderate';
+    if (lower.contains('light') || lower.contains('ligero')) return 'light';
     return 'sedentary';
   }
 
@@ -79,15 +70,10 @@ class MetabolicCalculator {
   /// Returns the numeric multiplier associated with an activity level
   static double getActivityMultiplier(String activityLevel) {
     switch (normalizeActivityLevel(activityLevel)) {
-      case 'very_active':
-        return multiplierVeryActive;
-      case 'moderate':
-        return multiplierModerate;
-      case 'light':
-        return multiplierLight;
-      case 'sedentary':
-      default:
-        return multiplierSedentary;
+      case 'very_active': return multiplierVeryActive;
+      case 'moderate': return multiplierModerate;
+      case 'light': return multiplierLight;
+      default: return multiplierSedentary;
     }
   }
 
@@ -98,42 +84,23 @@ class MetabolicCalculator {
     required double heightCm,
     required int age,
   }) {
-    final isFemale = normalizeGender(gender) == 'female';
-    final offset = isFemale ? -161.0 : 5.0;
+    final offset = normalizeGender(gender) == 'female' ? -161.0 : 5.0;
     final bmr = (10.0 * weightKg) + (6.25 * heightCm) - (5.0 * age) + offset;
     return double.parse(bmr.toStringAsFixed(1));
   }
 
   /// Calculates Total Daily Energy Expenditure (TDEE): BMR * ActivityMultiplier
-  static double calculateTdee({
-    required double bmr,
-    required String activityLevel,
-  }) {
-    final multiplier = getActivityMultiplier(activityLevel);
-    final tdee = bmr * multiplier;
+  static double calculateTdee({required double bmr, required String activityLevel}) {
+    final tdee = bmr * getActivityMultiplier(activityLevel);
     return double.parse(tdee.toStringAsFixed(1));
   }
 
   /// Calculates Daily Caloric Goal based on body goal
-  static double calculateCaloricGoal({
-    required double tdee,
-    required double bmr,
-    required String bodyGoal,
-  }) {
+  static double calculateCaloricGoal({required double tdee, required double bmr, required String bodyGoal}) {
     final goal = normalizeBodyGoal(bodyGoal);
-    double target;
-    switch (goal) {
-      case 'fat_loss':
-        target = math.max(bmr, tdee - fatLossDeficit);
-        break;
-      case 'muscle_gain':
-        target = tdee + muscleGainSurplus;
-        break;
-      case 'maintenance':
-      default:
-        target = tdee;
-        break;
-    }
+    final target = goal == 'fat_loss'
+        ? math.max(bmr, tdee - fatLossDeficit)
+        : (goal == 'muscle_gain' ? tdee + muscleGainSurplus : tdee);
     return double.parse(target.toStringAsFixed(1));
   }
 
@@ -167,16 +134,9 @@ class MetabolicCalculator {
 
     double proteinFactor;
     switch (goal) {
-      case 'fat_loss':
-        proteinFactor = proteinFactorFatLoss;
-        break;
-      case 'muscle_gain':
-        proteinFactor = proteinFactorMuscleGain;
-        break;
-      case 'maintenance':
-      default:
-        proteinFactor = proteinFactorMaintenance;
-        break;
+      case 'fat_loss': proteinFactor = proteinFactorFatLoss; break;
+      case 'muscle_gain': proteinFactor = proteinFactorMuscleGain; break;
+      default: proteinFactor = proteinFactorMaintenance; break;
     }
     final rawProtein = effectiveWeight * proteinFactor;
     final proteinGrams = double.parse(rawProtein.toStringAsFixed(1));
@@ -216,21 +176,9 @@ class MetabolicCalculator {
     int estimatedSteps = 8000,
     DateTime? updatedAt,
   }) {
-    final bmr = calculateBmr(
-      gender: gender,
-      weightKg: weight,
-      heightCm: height,
-      age: age,
-    );
-    final tdee = calculateTdee(
-      bmr: bmr,
-      activityLevel: activityLevel,
-    );
-    final targetCalories = calculateCaloricGoal(
-      tdee: tdee,
-      bmr: bmr,
-      bodyGoal: bodyGoal,
-    );
+    final bmr = calculateBmr(gender: gender, weightKg: weight, heightCm: height, age: age);
+    final tdee = calculateTdee(bmr: bmr, activityLevel: activityLevel);
+    final targetCalories = calculateCaloricGoal(tdee: tdee, bmr: bmr, bodyGoal: bodyGoal);
     final macros = calculateMacros(
       targetCalories: targetCalories,
       weightKg: weight,
@@ -300,14 +248,8 @@ class MetabolicCalculator {
     int estimatedSteps = 8000,
   }) async {
     final profile = calculateProfile(
-      id: id,
-      name: name,
-      age: age,
-      gender: gender,
-      height: height,
-      weight: weight,
-      activityLevel: activityLevel,
-      bodyGoal: bodyGoal,
+      id: id, name: name, age: age, gender: gender, height: height,
+      weight: weight, activityLevel: activityLevel, bodyGoal: bodyGoal,
       estimatedSteps: estimatedSteps,
     );
     return await saveAndSynchronizeProfile(profile);
