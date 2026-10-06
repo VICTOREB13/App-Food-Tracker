@@ -266,10 +266,9 @@ jobs:
                       force 'androidx.work:work-runtime:2.9.1'
                       force 'androidx.work:work-runtime-ktx:2.9.1'
                       force 'androidx.browser:browser:1.8.0'
+                      force 'androidx.annotation:annotation:1.8.2'
+                      force 'androidx.annotation:annotation-jvm:1.8.2'
                   }
-              }
-              tasks.matching { it.name.contains("AarMetadata") }.configureEach {
-                  enabled = false
               }
               afterEvaluate { project ->
                   if (project.hasProperty('android')) {
