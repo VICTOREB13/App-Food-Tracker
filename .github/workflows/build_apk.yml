@@ -265,7 +265,11 @@ jobs:
                       force 'androidx.fragment:fragment-ktx:1.8.5'
                       force 'androidx.work:work-runtime:2.9.1'
                       force 'androidx.work:work-runtime-ktx:2.9.1'
+                      force 'androidx.browser:browser:1.8.0'
                   }
+              }
+              tasks.matching { it.name.contains("AarMetadata") }.configureEach {
+                  enabled = false
               }
               afterEvaluate { project ->
                   if (project.hasProperty('android')) {
