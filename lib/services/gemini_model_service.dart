@@ -2,24 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import '../core/errors/gemini_api_exception.dart';
 import '../models/gemini_model_info.dart';
+import 'gemini_vision_filter.dart';
 
-/// Typed exception for Google Gemini API errors
-class GeminiApiException implements Exception {
-  final int statusCode;
-  final String message;
-  final String? details;
-
-  const GeminiApiException({
-    required this.statusCode,
-    required this.message,
-    this.details,
-  });
-
-  @override
-  String toString() =>
-      'GeminiApiException($statusCode): $message${details != null ? ' - $details' : ''}';
-}
+export '../core/errors/gemini_api_exception.dart';
 
 class GeminiModelService {
   final http.Client _client;
@@ -29,47 +16,12 @@ class GeminiModelService {
 
   static final GeminiModelService instance = GeminiModelService();
 
-  /// Curated offline fallback models used when device is offline or API fails
-  static const List<GeminiModelInfo> _fallbackModels = [
-    GeminiModelInfo(
-      name: 'gemini-2.5-flash',
-      displayName: 'Gemini 2.5 Flash',
-      description: 'Modelo multimodal de última generación, ultrarrápido y de alta precisión visual.',
-      isRecommended: true,
-      recommendationLabel: 'Fast',
-      inputTokenLimit: 1048576,
-      outputTokenLimit: 8192,
-    ),
-    GeminiModelInfo(
-      name: 'gemini-1.5-flash',
-      displayName: 'Gemini 1.5 Flash',
-      description: 'Modelo heredado rápido con amplia compatibilidad.',
-      isRecommended: false,
-      recommendationLabel: 'Fast',
-      inputTokenLimit: 1048576,
-      outputTokenLimit: 8192,
-    ),
-    GeminiModelInfo(
-      name: 'gemini-1.5-pro',
-      displayName: 'Gemini 1.5 Pro',
-      description: 'Modelo de razonamiento avanzado y amplio contexto multimodal.',
-      isRecommended: false,
-      recommendationLabel: 'Think',
-      inputTokenLimit: 2097152,
-      outputTokenLimit: 8192,
-    ),
-    GeminiModelInfo(
-      name: 'gemini-2.0-flash',
-      displayName: 'Gemini 2.0 Flash',
-      description: 'Modelo multimodal de producción estable y alta velocidad de inferencia.',
-      isRecommended: true,
-      recommendationLabel: 'Fast',
-      inputTokenLimit: 1048576,
-      outputTokenLimit: 8192,
-    ),
-  ];
+  /// Curated offline fallback models delegated to GeminiVisionFilter
+  static const List<GeminiModelInfo> fallbackModels = GeminiVisionFilter.fallbackModels;
 
-  static const List<GeminiModelInfo> fallbackModels = _fallbackModels;
+  /// Multimodal vision validation delegated to GeminiVisionFilter
+  static bool isVisionCapableModel(Map<String, dynamic> model) =>
+      GeminiVisionFilter.isVisionCapableModel(model);
 
   /// Queries Google Generative Language API and returns sorted, filtered models
   Future<List<GeminiModelInfo>> fetchAvailableModels(
@@ -102,7 +54,6 @@ class GeminiModelService {
         return parseModelsResponse(response.body);
       }
 
-      // Handle non-200 error bodies
       String errorMessage = 'Error al consultar modelos (${response.statusCode})';
       String? errorDetails;
       try {
@@ -157,14 +108,13 @@ class GeminiModelService {
 
     for (final item in rawList) {
       if (item is! Map<String, dynamic>) continue;
-
-      if (!isVisionCapableModel(item)) continue;
+      if (!GeminiVisionFilter.isVisionCapableModel(item)) continue;
 
       final rawName = (item['name'] ?? '').toString();
       final cleanName = rawName.startsWith('models/') ? rawName.substring(7) : rawName;
 
-      final tier = _calculateTierRank(cleanName);
-      final label = _calculateRecommendationLabel(cleanName);
+      final tier = GeminiVisionFilter.calculateTierRank(cleanName);
+      final label = GeminiVisionFilter.calculateRecommendationLabel(cleanName);
       final isRecommended = tier <= 3;
 
       filtered.add(GeminiModelInfo.fromGoogleJson(
@@ -175,158 +125,14 @@ class GeminiModelService {
       ));
     }
 
-    // Sort by tier rank ascending (1 -> 2 -> 3 -> 99), then alphabetically by name
     filtered.sort((a, b) {
-      final rankA = _calculateTierRank(a.name);
-      final rankB = _calculateTierRank(b.name);
+      final rankA = GeminiVisionFilter.calculateTierRank(a.name);
+      final rankB = GeminiVisionFilter.calculateTierRank(b.name);
       if (rankA != rankB) return rankA.compareTo(rankB);
       return a.displayName.compareTo(b.displayName);
     });
 
     return filtered;
-  }
-
-  /// Strict multimodal vision filtering for Google Gemini models.
-  /// Allows ONLY official multimodal Gemini Flash and Pro models, strictly rejecting
-  /// custom / fine-tuned models created in Google AI Studio, and non-vision models.
-  static bool isVisionCapableModel(Map<String, dynamic> model) {
-    // 1. Exclude tuned models or models created in Google AI Studio
-    if (model.containsKey('baseModel') || model.containsKey('tunedModelSource')) {
-      return false;
-    }
-
-    final rawName = (model['name'] ?? '').toString().toLowerCase();
-    if (rawName.startsWith('tunedmodels/') || rawName.contains('tuned') || rawName.contains('tuning')) {
-      return false;
-    }
-
-    // 2. Generation Method Filter: Must contain 'generateContent'
-    final methods = (model['supportedGenerationMethods'] as List<dynamic>?)
-            ?.map((e) => e.toString())
-            .toList() ??
-        [];
-    if (!methods.contains('generateContent')) {
-      return false;
-    }
-
-    // 3. Name must be an official Gemini model
-    final cleanName = rawName.startsWith('models/') ? rawName.substring(7) : rawName;
-    if (!cleanName.startsWith('gemini-')) {
-      return false;
-    }
-
-    // 4. Must strictly contain 'flash' or 'pro' in cleanName
-    if (!cleanName.contains('flash') && !cleanName.contains('pro')) {
-      return false;
-    }
-
-    // 5. Display name check:
-    // Reject custom tuned names (e.g. '2', 'Nano Banana Pro', or names not containing 'gemini')
-    final displayName = (model['displayName'] ?? '').toString().toLowerCase();
-    if (displayName.isNotEmpty) {
-      if (!displayName.contains('gemini')) {
-        return false;
-      }
-      if (!displayName.contains('flash') && !displayName.contains('pro')) {
-        return false;
-      }
-    }
-
-    // 6. Prohibited keywords exclusion across name, displayName, and description
-    final description = (model['description'] ?? '').toString().toLowerCase();
-    const prohibitedKeywords = [
-      'banana',
-      'nano',
-      'transcribe',
-      'omni',
-      'computer-use',
-      'robotics',
-      'live',
-      'custom',
-      'preview-10-2025',
-      'embedding',
-      'imagen',
-      'tts',
-      'audio',
-      'veo',
-      'bison',
-      'tuned',
-      'tuning',
-    ];
-
-    for (final keyword in prohibitedKeywords) {
-      if (keyword == 'custom') {
-        if (cleanName.endsWith('custom') ||
-            cleanName.endsWith('-custom') ||
-            displayName.contains('custom')) {
-          return false;
-        }
-      } else {
-        if (cleanName.contains(keyword) ||
-            displayName.contains(keyword) ||
-            description.contains(keyword)) {
-          return false;
-        }
-      }
-    }
-
-    // 7. Multimodal Verification:
-    // If inputModalities is provided by Google API, verify IMAGE capability.
-    final modalities = (model['inputModalities'] as List<dynamic>?)
-            ?.map((e) => e.toString().toUpperCase())
-            .toList() ??
-        [];
-
-    if (modalities.isNotEmpty && !modalities.contains('IMAGE')) {
-      return false;
-    }
-
-    return true;
-  }
-
-  /// Assigns priority rank to model ID:
-  /// 1: gemini-2.5-flash / gemini-3.*-flash (Top recommendation)
-  /// 2: gemini-2.0-flash (Estable)
-  /// 3: gemini-2.5-pro / gemini-3.*-pro (Máxima Precisión)
-  /// 4: gemini-2.0-flash-lite
-  /// 5: gemini-1.5-flash
-  /// 6: gemini-1.5-pro
-  /// 99: All other models
-  static int _calculateTierRank(String modelName) {
-    final lower = modelName.toLowerCase();
-    if (lower.startsWith('gemini-2.5-flash') ||
-        (lower.startsWith('gemini-3') && lower.contains('flash'))) {
-      return 1;
-    }
-    if (lower.startsWith('gemini-2.0-flash') && !lower.contains('lite')) {
-      return 2;
-    }
-    if (lower.startsWith('gemini-2.5-pro') ||
-        (lower.startsWith('gemini-3') && lower.contains('pro'))) {
-      return 3;
-    }
-    if (lower.contains('flash-lite')) {
-      return 4;
-    }
-    if (lower.startsWith('gemini-1.5-flash')) {
-      return 5;
-    }
-    if (lower.startsWith('gemini-1.5-pro')) {
-      return 6;
-    }
-    return 99;
-  }
-
-  /// Assigns compact semantic badge label displayed in UI ('Fast' or 'Think')
-  static String? _calculateRecommendationLabel(String modelName) {
-    final lower = modelName.toLowerCase();
-    if (lower.contains('pro')) {
-      return 'Think';
-    }
-    if (lower.contains('flash')) {
-      return 'Fast';
-    }
-    return null;
   }
 
   /// Resolves the effective model ID to use given the available models and stored preference
@@ -339,7 +145,6 @@ class GeminiModelService {
       if (exists) return savedSelection.trim();
     }
 
-    // Default to the first available recommended model or fallback
     final recommended = availableModels.firstWhere(
       (m) => m.isRecommended,
       orElse: () => availableModels.isNotEmpty
