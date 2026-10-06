@@ -18,6 +18,51 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [1.3.0] - 2026-10-05
+
+La versión v1.3.0 introduce un sistema integral de Auto-Actualización In-App conectado a la API de GitHub Releases con instalador nativo en Android mediante MethodChannel y FileProvider, un catálogo completo de microinteracciones táctiles con física elástica de resorte y contadores cinemáticos, optimizaciones visuales derivadas de auditorías en vivo vía ADB, y la descomposición modular histórica que certifica el 100% de los archivos del repositorio bajo el límite estricto de < 300 LoC.
+
+### Added
+- **Auto-Actualizador In-App en Tiempo Real (`AppUpdateService` & `GitHubReleaseModel`):**
+  - Consulta automática y manual del último release contra el endpoint oficial de GitHub Releases (`https://api.github.com/repos/VICTOREB13/App-Food-Tracker/releases/latest`).
+  - Parser semántico robusto (`GitHubReleaseModel`) con validación de versión (`isUpdateAvailable`), extracción de notas de versión en Markdown y resolución del asset binario `Victor-Engineer-Food-Tracker-Android.apk`.
+  - Descarga progresiva de APK por streaming con reporte porcentual reactivo (`Stream<double>`).
+- **Canal de Plataforma e Instalador Nativo de Android (`AppInstallerService` & `MainActivity.kt`):**
+  - Implementación de `MethodChannel` (`com.victorengineer.foodtracker/installer`) en Kotlin con soporte seguro de `FileProvider` (`content://`) y `Intent.ACTION_VIEW` con flags `FLAG_GRANT_READ_URI_PERMISSION` y `FLAG_ACTIVITY_NEW_TASK`.
+  - Configuración de permisos `REQUEST_INSTALL_PACKAGES` y rutas seguras en `file_paths.xml` para almacenamiento temporal de paquetes.
+  - Mecanismo de fallback resiliente con `url_launcher` para navegación al release en GitHub en caso de plataformas no soportadas.
+- **Experiencia Interactiva de Actualización en UI:**
+  - `InAppUpdateDialog`: Modal con visor de changelog en Markdown, visualizador de versión actual vs. disponible, barra de progreso lineal de descarga y botón de instalación inmediata.
+  - `AppUpdateCard`: Tarjeta dedicada en `SettingsScreen` con estado de versión, botón de comprobación manual y acceso a la descarga.
+  - Verificación no intrusiva de nuevas versiones en el inicio de `DashboardScreen`.
+- **Catálogo de Microinteracciones Hápticas y Elásticas:**
+  - `VeBounceable`: Widget con animación elástica de resorte (`Curves.easeInOut`, factor de escala 0.95) y cancelación gestual limpia aplicado en el FAB principal `+`, botones de ayuno y acciones rápidas.
+  - `VeAnimatedCounter`: Contador cinemático suave con `TweenAnimationBuilder` para transiciones fluidas de métricas calóricas y macronutrientes a 60/120 FPS.
+  - Feedback háptico táctil sutil (`HapticFeedback.lightImpact()` y `selectionClick()`) en el botón flotante (FAB), selector de agua (+250ml) y controles de temporizador de ayuno.
+
+### Changed
+- **Unificación de Barra Superior (`VeAppBar`):**
+  - Estandarización de `VeAppBar` en `DashboardScreen`, `PantryScreen` y `SettingsScreen` con eliminación definitiva de la flecha atrás residual (`automaticallyImplyLeading: false`) en el inicio.
+- **Refinamiento Ergonómico en Despensa y Diálogos:**
+  - Ajuste de espaciado y anchos en `PantryItemEditorDialog` para erradicar el truncamiento de etiquetas (como `"Peso n..."`).
+  - Navegación horizontal fluida en chips de categorías de alimentos en `PantryScreen`.
+- **Descomposición Modular Histórica (< 300 LoC):**
+  - Refactorización y desacoplamiento de componentes heredados que superaban las 300 líneas de código:
+    - `metabolic_calculator.dart` dividida con `metabolic_prompt_generator.dart`.
+    - `gemini_model_service.dart` desacoplada con `gemini_vision_filter.dart`.
+    - `usda_food_item.dart` extraída con `usda_nutrient_parser.dart`.
+    - `quick_weight_entry_dialog.dart` dividida con `quick_weight_adjuster_row.dart`.
+    - `activity_goal_selector_card.dart` desacoplada con `activity_level_option_tile.dart` y `body_goal_option_tile.dart`.
+    - `weight_line_chart_painter.dart` modularizada con `weight_chart_render_utils.dart`.
+  - Certificación del 100% del repositorio en cumplimiento estricto de < 300 LoC.
+
+### Fixed
+- **Desbordamientos Visuales en Viewports Estrechos (320dp):**
+  - Visualización completa sin elipsis del título `"RESUMEN SEMANAL"` y reestructuración adaptativa en `WeeklyDigestCard` con `Flexible` y espaciado elástico para pantallas compactas.
+  - Erradicación de excepciones de renderizado `RenderFlex overflow` en dispositivos de densidad extrema.
+
+---
+
 ## [1.2.5] - 2026-10-04
 
 La versión v1.2.5 soluciona el fallo de respaldos con cadenas de texto incompletas o corruptas mediante un motor de auto-reparación resiliente en `BackupNormalizer`, rediseña ergonómicamente la tarjeta Bento de Ayuno Intermitente eliminando colisiones visuales entre texto y botones, y ejecuta una depuración integral del directorio raíz del repositorio.
