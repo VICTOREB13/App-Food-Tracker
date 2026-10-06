@@ -44,7 +44,10 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
-      final transformFinder = find.byType(Transform);
+      final transformFinder = find.descendant(
+        of: find.byType(VeBounceable),
+        matching: find.byType(Transform),
+      );
       expect(transformFinder, findsOneWidget);
       final transform = tester.widget<Transform>(transformFinder);
       expect(transform.transform.getMaxScaleOnAxis(), closeTo(0.90, 0.05));

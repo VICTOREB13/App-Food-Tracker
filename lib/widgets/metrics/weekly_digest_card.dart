@@ -90,13 +90,17 @@ class WeeklyDigestCard extends StatelessWidget {
                 children: [
                   const Icon(Icons.auto_graph_rounded, color: AppColors.primary, size: 18),
                   const SizedBox(width: 6),
-                  Text(
-                    'RESUMEN SEMANAL (7 DÍAS)',
-                    style: GoogleFonts.inter(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.5,
-                      color: AppColors.textSecondary(context),
+                  Flexible(
+                    child: Text(
+                      'RESUMEN SEMANAL (7 DÍAS)',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.5,
+                        color: AppColors.textSecondary(context),
+                      ),
                     ),
                   ),
                 ],
@@ -217,7 +221,7 @@ class WeeklyDigestCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.textSecondary(context))),
+          Text(title, style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.textSecondary(context)), maxLines: 1, overflow: TextOverflow.ellipsis),
           const SizedBox(height: 2),
           Text(value, style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w700, color: color)),
           const SizedBox(height: 2),
