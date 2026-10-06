@@ -7,9 +7,9 @@ fecha: 2026-10-05
 tags: [proyecto, arquitectura, abstracciones, backend, in-app-updater, microinteractions, v1-3-0]
 ---
 
-# Abstracciones del Sistema y Arquitectura de Código: Victor Engineer - Food Tracker (v1.2.5)
+# Abstracciones del Sistema y Arquitectura de Código: Victor Engineer - Food Tracker (v1.3.0)
 
-> **Mesa de Control & Backend-Architect:** Este documento centraliza las clases maestras, interfaces de dominio, servicios de negocio, funciones utilitarias nucleares, variables de estado seguro y costuras de flujo de datos (data seams) de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.2.5` (Selector SAF, Auto-Reparación de Respaldos Truncados, Rediseño Ergonómico de Ayuno Bento, SQLite v4 con Gramajes y Blindaje Android 16). Complementa conceptualmente a [[PRJ_App_Food_Tracker_api_spec|Especificación de API y Modelos]] para posibilitar el entendimiento exhaustivo del software sin necesidad de inspeccionar línea por línea el código fuente.
+> **Mesa de Control & Backend-Architect:** Este documento centraliza las clases maestras, interfaces de dominio, servicios de negocio, funciones utilitarias nucleares, variables de estado seguro y costuras de flujo de datos (data seams) de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.3.0` (Auto-Actualizador In-App, Canal Nativo de Instalación Android, Microinteracciones Elásticas, Pulido Visual ADB y Descomposición Modular Estricta < 300 LoC). Complementa conceptualmente a [[PRJ_App_Food_Tracker_api_spec|Especificación de API y Modelos]] para posibilitar el entendimiento exhaustivo del software sin necesidad de inspeccionar línea por línea el código fuente.
 
 ---
 
@@ -463,5 +463,33 @@ class VeAnimatedCounter extends StatelessWidget {
   const VeAnimatedCounter({super.key, required this.value, this.style, ...});
 }
 ```
+
+---
+
+## 🧩 9. Descomposición Modular y Submódulos Especializados (< 300 LoC)
+
+Para garantizar la estricta mantenibilidad del monolito modular sin romper compatibilidad previa, se extrajeron los siguientes submódulos atómicos:
+
+### 9.1. Capa de Dominio Metabólico
+- **`MacroDistribution` (`lib/models/macro_distribution.dart` - 21 LoC):** Modelo inmutable de reparto de macronutrientes en gramos y calorías derivadas.
+- **`MetabolicPromptGenerator` (`lib/services/metabolic_prompt_generator.dart` - 90 LoC):** Síntesis del Master Prompt Markdown para Gemini Vision con formatters clínicos de TDEE y objetivos.
+- **`MetabolicCalculator` (`lib/services/metabolic_calculator.dart` - 257 LoC):** Reducido de 450 LoC; conserva exclusivamente la lógica clínica pura de Mifflin-St Jeor, BMR, TDEE, y persistencia/sincronización.
+
+### 9.2. Capa de IA y Catálogo Nutricional
+- **`GeminiApiException` (`lib/core/errors/gemini_api_exception.dart` - 16 LoC):** Excepción tipada para respuestas HTTP erróneas de la API de Google Gemini.
+- **`GeminiVisionFilter` (`lib/services/gemini_vision_filter.dart` - 127 LoC):** Filtrado estricto multimodal (`isVisionCapableModel`), lista de exclusión de modelos experimentales/banana, fallback models y ranking de recomendación.
+- **`GeminiModelService` (`lib/services/gemini_model_service.dart` - 156 LoC):** Reducido de 352 LoC; orquesta consultas remotas y delegación al filtro.
+- **`UsdaNutrientParser` (`lib/models/usda_nutrient_parser.dart` - 71 LoC):** Parser de IDs de nutrientes USDA (1008, 1003, 1004, 1005), conversión de kJ a kcal y navegación anidada defensiva.
+- **`UsdaFoodItem` (`lib/models/usda_food_item.dart` - 235 LoC):** Reducido de 344 LoC; entidad inmutable de alimentos FDC.
+
+### 9.3. Capa de Presentación y Métricas
+- **`QuickWeightAdjusterRow` (`lib/widgets/metrics/quick_weight_adjuster_row.dart` - 51 LoC):** Selector táctil de chips de ajuste rápido (`+/- 0.5`, `+/- 1.0 kg`).
+- **`QuickWeightEntryDialog` (`lib/widgets/metrics/quick_weight_entry_dialog.dart` - 218 LoC):** Reducido de 444 LoC.
+- **`ActivityLevelOptionTile` (`lib/widgets/profile/activity_level_option_tile.dart` - 78 LoC):** Selector bento de factor de actividad física.
+- **`BodyGoalOptionTile` (`lib/widgets/profile/body_goal_option_tile.dart` - 76 LoC):** Selector bento de objetivo metabólico y déficit calórico.
+- **`ActivityGoalSelectorCard` (`lib/widgets/profile/activity_goal_selector_card.dart` - 166 LoC):** Reducido de 406 LoC.
+- **`WeightChartRenderUtils` (`lib/widgets/metrics/weight_chart_render_utils.dart` - 79 LoC):** Renderizado de estado vacío y punto único en gráfico de peso.
+- **`WeightLineChartPainter` (`lib/widgets/metrics/weight_line_chart_painter.dart` - 185 LoC):** Reducido de 342 LoC.
+
 
 

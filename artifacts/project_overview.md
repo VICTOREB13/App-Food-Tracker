@@ -68,7 +68,7 @@ tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid, get-it, 
     - Paleta monocromática de alta fidelidad: *Obsidian Zinc* (`#09090B`) para modo oscuro y *Crisp Zinc* (`#FAFAFA`) para modo claro, con acento carmesí corporativo `#DC2626`.
     - Tipografía `Outfit` para métricas numéricas display e `Inter` para datos secundarios y cuerpos de texto.
     - 100% de pantallas, widgets y archivos de servicios bajo el límite estricto de 300 líneas de código (< 300 LoC).
-    - Suite de pruebas de regresión automatizada: 73 suites, 469 tests pasando (100% PASS).
+    - Suite de pruebas de regresión automatizada: 495 tests pasando (100% PASS) y 0 linter issues.
 
 11. **Selector de Archivos Nativo (SAF) y Normalizador Adaptativo Auto-Sanador:**
     - Integración de `file_picker` delegando la selección de respaldos JSON al gestor de archivos nativo del sistema operativo (Storage Access Framework), erradicando entradas manuales de rutas.
@@ -99,6 +99,9 @@ tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid, get-it, 
     - Descarga progresiva de APK con barra reactiva de progreso y despacho automático al instalador del sistema operativo Android mediante `MethodChannel` y `FileProvider`.
     - Catálogo de microinteracciones de alta fidelidad: botones elásticos con física de resorte (`VeBounceable`), transiciones numéricas rodantes (`VeAnimatedCounter`) y feedback háptico (`HapticFeedback.lightImpact()`).
     - Pulido ergonómico visual de la interfaz derivado de auditoría en vivo por ADB (corrección de flecha atrás en Dashboard, etiquetas de despensa y cabeceras de métricas).
+
+17. **Saneamiento y Descomposición Modular Integral (< 300 LoC):**
+    - Descomposición de la totalidad de archivos históricos del proyecto que superaban las 300 líneas (`metabolic_calculator.dart`, `gemini_model_service.dart`, `usda_food_item.dart`, `quick_weight_entry_dialog.dart`, `activity_goal_selector_card.dart`, `weight_line_chart_painter.dart`), alcanzando el 100% de conformidad con la regla de oro arquitectónica.
 
 ---
 

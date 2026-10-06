@@ -1,13 +1,13 @@
 ---
 tipo: design_system
 proyecto: App_Food_Tracker
-version: v1.2.5
+version: v1.3.0
 estado: activo
-fecha: 2026-10-04
-tags: [proyecto, design-system, ui-ux, bento-grid, tokens, l10n, fasting-bento, saf-picker, v1-2-5]
+fecha: 2026-10-05
+tags: [proyecto, design-system, ui-ux, bento-grid, tokens, l10n, fasting-bento, microinteractions, in-app-updater, v1-3-0]
 ---
 
-# 🎨 Especificación de Diseño: Victor Engineer - Food Tracker (v1.2.5)
+# 🎨 Especificación de Diseño: Victor Engineer - Food Tracker (v1.3.0)
 
 Documento maestro de interfaz de usuario (UI), experiencia de usuario (UX), sistema de tokens visuales y animaciones fluidas para la aplicación móvil y de escritorio **Victor Engineer - Food Tracker**.
 
@@ -192,5 +192,10 @@ lib/
 - [x] Modal acotado `WhatToEatSheet` con `SafeArea`, cabecera fija con botón de cierre `X` y `maxHeight: 0.85`.
 - [x] Selector nativo SAF `JsonFilePickerDialog` para respaldos JSON con previsualización reactiva.
 - [x] Widgets nativos Android 2x2 y 4x2 con `<FrameLayout>` certificados libres de `InflateException`.
+- [x] Revestimiento táctil elástico `VeBounceable` con escala 0.96 y física de resorte en botones de acción.
+- [x] Interpolación continua de métricas con `VeAnimatedCounter` a 60/120 FPS.
+- [x] Diálogo reactivo `InAppUpdateDialog` con visualización de changelog, barra de progreso continua y canal nativo.
+- [x] Pulido visual ADB: eliminación de flecha atrás en Dashboard (`automaticallyImplyLeading: false`), etiquetas de despensa sin truncamiento, y `RESUMEN SEMANAL` responsivo sin elipsis.
+- [x] Saneamiento modular: 100% de la base de código respetando estrictamente el límite < 300 LoC.
 
 
