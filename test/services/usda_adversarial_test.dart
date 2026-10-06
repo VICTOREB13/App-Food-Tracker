@@ -233,6 +233,9 @@ void main() {
         servingSize: 0.0,
         servingSizeUnit: 'g',
         calories: 120.0,
+        protein: 0.0,
+        fat: 0.0,
+        carbs: 0.0,
       );
       final zeroScaled = zeroServingItem.toFoodItem(estimatedGrams: 50.0);
       expect(zeroScaled.calories, equals(120.0));
@@ -244,6 +247,9 @@ void main() {
         servingSize: -40.0,
         servingSizeUnit: 'g',
         calories: 100.0,
+        protein: 0.0,
+        fat: 0.0,
+        carbs: 0.0,
       );
       final negScaled = negServingItem.toFoodItem(estimatedGrams: 80.0);
       expect(negScaled.calories, equals(100.0));
@@ -255,6 +261,9 @@ void main() {
         servingSize: 240.0,
         servingSizeUnit: 'ml',
         calories: 150.0,
+        protein: 0.0,
+        fat: 0.0,
+        carbs: 0.0,
       );
       final mlScaled = mlItem.toFoodItem(estimatedGrams: 200.0);
       // ratio = 200 / 100 = 2.0
