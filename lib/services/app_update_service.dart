@@ -135,7 +135,7 @@ class AppUpdateService implements IAppUpdateService {
 
   Future<Directory> _getUpdatesDirectory() async {
     final baseDir = _baseDirectoryProvider != null
-        ? await _baseDirectoryProvider!()
+        ? await _baseDirectoryProvider()
         : await getTemporaryDirectory();
     final updatesDir = Directory(path.join(baseDir.path, 'updates'));
     if (!await updatesDir.exists()) {

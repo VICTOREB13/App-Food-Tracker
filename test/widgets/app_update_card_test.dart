@@ -4,6 +4,7 @@ import 'package:food_tracker/core/interfaces/app_installer_service_interface.dar
 import 'package:food_tracker/core/interfaces/app_update_service_interface.dart';
 import 'package:food_tracker/models/github_release_model.dart';
 import 'package:food_tracker/widgets/settings/app_update_card.dart';
+import 'package:food_tracker/widgets/settings/in_app_update_dialog.dart';
 
 class _FakeUpdateService implements IAppUpdateService {
   final GitHubReleaseModel? releaseToReturn;
