@@ -26,7 +26,7 @@ class NutritionLabelScannerService implements INutritionLabelScannerService {
   })  : _apiKey = apiKey,
         _secureStorage = secureStorageService ?? SecureStorageService.instance;
 
-  static const String defaultModel = 'gemini-2.5-flash';
+  static const String defaultModel = 'gemini-3.8-flash';
   static const String fallbackModel = 'gemini-1.5-flash';
 
   static Schema get _labelSchema => Schema.object(

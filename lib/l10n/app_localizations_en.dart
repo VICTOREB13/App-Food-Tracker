@@ -165,4 +165,80 @@ class AppLocalizationsEn extends AppLocalizations {
   String get spanish => 'Spanish';
   @override
   String get english => 'English';
+  @override
+  String remainingCalories(String count) => '$count remaining';
+  @override
+  String overCalories(String count) => '+$count over';
+  @override
+  String get today => 'Today';
+  @override
+  String get yesterday => 'Yesterday';
+  @override
+  String get tomorrow => 'Tomorrow';
+  @override
+  String get previousDayTooltip => 'Previous day';
+  @override
+  String get nextDayTooltip => 'Next day';
+  @override
+  String get goToTodayTooltip => 'Go to today';
+  @override
+  String get noMealsForSection => 'No meals logged in this section.';
+  @override
+  String addToMealSection(String mealType) => 'Add to $mealType';
+  @override
+  String get mealDetails => 'Meal Details';
+  @override
+  String get newMeal => 'New Meal';
+  @override
+  String get deleteMealTooltip => 'Delete meal';
+  @override
+  String get dishNameLabel => 'Dish name *';
+  @override
+  String get dishNameHint => 'E.g., Grilled chicken breast with rice';
+  @override
+  String get mealTypeLabel => 'Meal Type';
+  @override
+  String get notesLabel => 'Notes / Observations';
+  @override
+  String get notesHint => 'E.g., Light oil used, medium portion';
+  @override
+  String get inspectMeal => 'Inspect meal';
+  @override
+  String get changePhoto => 'Change photo';
+  @override
+  String get takePhotoAction => 'Take photo';
+  @override
+  String get noMealImage => 'No meal image';
+  @override
+  String get saving => 'Saving...';
+  @override
+  String get updateMeal => 'Update Meal';
+  @override
+  String get registerMeal => 'Register Meal';
+  @override
+  String get addManualIngredient => 'Add manual ingredient';
+  @override
+  String get editIngredient => 'Edit ingredient';
+  @override
+  String get deleteIngredient => 'Delete ingredient';
+  @override
+  String get gramsLabel => 'Grams';
+  @override
+  String get estimationLabel => 'Estimation';
+  @override
+  String get reanalyzeWithAi => 'Re-analyze with corrections';
+  @override
+  String get reanalyzingAi => 'Re-analyzing with AI...';
+  @override
+  String get analysisStageOptimizing => 'Optimizing photo and dish calibration...';
+  @override
+  String get analysisStageConnecting => 'Securely connecting to Gemini Vision...';
+  @override
+  String get analysisStageVolumetric => 'Estimating 3D geometry and volumetric portion...';
+  @override
+  String get analysisStageDensities => 'Deducing food densities and hidden fats/oils...';
+  @override
+  String get analysisStageMacros => 'Nutritional breakdown and macro cross-checking...';
+  @override
+  String get analysisStageComplete => 'Nutritional breakdown complete!';
 }

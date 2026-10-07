@@ -165,4 +165,80 @@ class AppLocalizationsEs extends AppLocalizations {
   String get spanish => 'Español';
   @override
   String get english => 'Inglés';
+  @override
+  String remainingCalories(String count) => '$count restantes';
+  @override
+  String overCalories(String count) => '+$count exceso';
+  @override
+  String get today => 'Hoy';
+  @override
+  String get yesterday => 'Ayer';
+  @override
+  String get tomorrow => 'Mañana';
+  @override
+  String get previousDayTooltip => 'Día anterior';
+  @override
+  String get nextDayTooltip => 'Día siguiente';
+  @override
+  String get goToTodayTooltip => 'Ir a hoy';
+  @override
+  String get noMealsForSection => 'Sin registros en esta comida.';
+  @override
+  String addToMealSection(String mealType) => 'Añadir a $mealType';
+  @override
+  String get mealDetails => 'Detalle de Comida';
+  @override
+  String get newMeal => 'Nueva Comida';
+  @override
+  String get deleteMealTooltip => 'Eliminar comida';
+  @override
+  String get dishNameLabel => 'Nombre del plato *';
+  @override
+  String get dishNameHint => 'Ej. Pechuga a la plancha con arroz';
+  @override
+  String get mealTypeLabel => 'Tipo de Comida';
+  @override
+  String get notesLabel => 'Notas / Observaciones';
+  @override
+  String get notesHint => 'Ej. Se usó poco aceite en sofrito, porción mediana';
+  @override
+  String get inspectMeal => 'Inspeccionar comida';
+  @override
+  String get changePhoto => 'Cambiar foto';
+  @override
+  String get takePhotoAction => 'Tomar foto';
+  @override
+  String get noMealImage => 'Sin imagen del plato';
+  @override
+  String get saving => 'Guardando...';
+  @override
+  String get updateMeal => 'Actualizar Comida';
+  @override
+  String get registerMeal => 'Registrar Comida';
+  @override
+  String get addManualIngredient => 'Añadir ingrediente manual';
+  @override
+  String get editIngredient => 'Editar ingrediente';
+  @override
+  String get deleteIngredient => 'Eliminar ingrediente';
+  @override
+  String get gramsLabel => 'Gramos';
+  @override
+  String get estimationLabel => 'Estimación';
+  @override
+  String get reanalyzeWithAi => 'Re-analizar con correcciones';
+  @override
+  String get reanalyzingAi => 'Re-analizando con IA...';
+  @override
+  String get analysisStageOptimizing => 'Optimizando foto y calibración de vajilla...';
+  @override
+  String get analysisStageConnecting => 'Conectando de forma segura con Gemini Vision...';
+  @override
+  String get analysisStageVolumetric => 'Estimando geometría 3D y cubicaje volumétrico...';
+  @override
+  String get analysisStageDensities => 'Deduciendo densidades y grasas/aceites ocultos...';
+  @override
+  String get analysisStageMacros => 'Desglose nutricional y cruce con macronutrientes...';
+  @override
+  String get analysisStageComplete => '¡Desglose nutricional completado!';
 }

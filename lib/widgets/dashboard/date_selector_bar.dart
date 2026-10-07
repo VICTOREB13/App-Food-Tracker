@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/theme_manager.dart';
 
 class DateSelectorBar extends StatelessWidget {
@@ -26,28 +27,30 @@ class DateSelectorBar extends StatelessWidget {
         selectedDate.day == now.day;
   }
 
-  String _formatDate() {
+  String _formatDate(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final localeName = l10n.localeName;
     try {
       final now = DateTime.now();
       if (selectedDate.year == now.year &&
           selectedDate.month == now.month &&
           selectedDate.day == now.day) {
-        return 'Hoy, ${DateFormat('d MMM', 'es').format(selectedDate)}';
+        return '${l10n.today}, ${DateFormat('d MMM', localeName).format(selectedDate)}';
       }
       final yesterday = DateTime(now.year, now.month, now.day - 1);
       if (selectedDate.year == yesterday.year &&
           selectedDate.month == yesterday.month &&
           selectedDate.day == yesterday.day) {
-        return 'Ayer, ${DateFormat('d MMM', 'es').format(selectedDate)}';
+        return '${l10n.yesterday}, ${DateFormat('d MMM', localeName).format(selectedDate)}';
       }
       final tomorrow = DateTime(now.year, now.month, now.day + 1);
       if (selectedDate.year == tomorrow.year &&
           selectedDate.month == tomorrow.month &&
           selectedDate.day == tomorrow.day) {
-        return 'Mañana, ${DateFormat('d MMM', 'es').format(selectedDate)}';
+        return '${l10n.tomorrow}, ${DateFormat('d MMM', localeName).format(selectedDate)}';
       }
 
-      return DateFormat('EEE, d MMM yyyy', 'es').format(selectedDate);
+      return DateFormat('EEE, d MMM yyyy', localeName).format(selectedDate);
     } catch (_) {
       return '${selectedDate.day.toString().padLeft(2, '0')}/${selectedDate.month.toString().padLeft(2, '0')}/${selectedDate.year}';
     }
@@ -55,6 +58,7 @@ class DateSelectorBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
@@ -69,7 +73,7 @@ class DateSelectorBar extends StatelessWidget {
             icon: const Icon(Icons.chevron_left, size: 22),
             onPressed: onPreviousDay,
             color: AppColors.textPrimary(context),
-            tooltip: 'Día anterior',
+            tooltip: l10n.previousDayTooltip,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
           ),
@@ -103,7 +107,7 @@ class DateSelectorBar extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    _formatDate(),
+                    _formatDate(context),
                     style: GoogleFonts.outfit(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
@@ -122,7 +126,7 @@ class DateSelectorBar extends StatelessWidget {
                   icon: const Icon(Icons.today, size: 20),
                   onPressed: onToday,
                   color: AppColors.primary,
-                  tooltip: 'Ir a hoy',
+                  tooltip: l10n.goToTodayTooltip,
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                 ),
@@ -130,7 +134,7 @@ class DateSelectorBar extends StatelessWidget {
                 icon: const Icon(Icons.chevron_right, size: 22),
                 onPressed: onNextDay,
                 color: AppColors.textPrimary(context),
-                tooltip: 'Día siguiente',
+                tooltip: l10n.nextDayTooltip,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
               ),

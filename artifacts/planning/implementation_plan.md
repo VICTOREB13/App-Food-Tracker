@@ -1,10 +1,10 @@
 ---
 tipo: implementation_plan
 proyecto: App_Food_Tracker
-iteracion: v1.3.0
+iteracion: v1.3.1
 estado: activo
-fecha: 2026-10-05
-tags: [proyecto, planning, v1-3-0, in-app-updater, github-releases, microinteractions, visual-polish, adb-audit]
+fecha: 2026-10-06
+tags: [proyecto, planning, v1-3-1, gemini-vision-precision, timeout-resilience, atomic-image-persistence, i18n-native]
 ---
 
 # 🎯 Plan de Implementación Maestro: Food Tracker (v1.1.0)
@@ -329,6 +329,52 @@ tags: [proyecto, planning, v1-3-0, in-app-updater, github-releases, microinterac
 2. Documentación formal en `artifacts/planning/changelog_v1.md` `[1.3.0] - 2026-10-05`.
 3. Sincronización y actualización de todos los artefactos.
 4. Creación y push del tag anotado `v1.3.0` para compilar y publicar el APK oficial en GitHub Actions.
+
+---
+
+## 🌟 3.5. Plan de Implementación de la Iteración v1.3.1: Alta Precisión Volumétrica, Resiliencia de Timeouts, Persistencia Atómica e i18n Nativo
+
+### Fase A: Backend, Esquema Causal de IA y Timeouts Extendidos (Backend-Architect)
+1. **Inversión Causal del Schema y Prompt de Gemini Vision (`gemini_resilience_helper.dart`):**
+   - Reestructurar el JSON schema para obligar al modelo LLM autorregresivo a calcular:
+     - Detección de referencia métrica (plato de 26 cm o vajilla calibrada).
+     - Dimensiones 3D y volumen en $cm^3$ ($L \times W \times H$).
+     - Densidad ($g/cm^3$) y estado de cocción (pérdida de agua / hidratación).
+     - Detección de brillo y grasas/aceites ocultos.
+     - Gramos calculados $\text{Masa} = \text{Volumen} \times \text{Densidad} \times \text{Factor de cocción}$.
+     - Macronutrientes deducidos estrictamente a partir de los gramos calculados.
+2. **Catálogo de Modelos Modernos y Thinking Budget (`gemini_model_service.dart`):**
+   - Retirar la familia obsoleta `gemini-2.0-flash`.
+   - Establecer `gemini-3.8-flash` como modelo diario predeterminado y `gemini-3.1-pro` como modo clínico de alta precisión.
+   - Soportar `thinking_budget: 1024` para modelos con razonamiento latente.
+3. **Resiliencia de Timeouts a 90s - 120s (`gemini_vision_service.dart`):**
+   - Incrementar el timeout de red de 35s a 90s (y hasta 120s para modos pro/pensamiento profundo), protegiendo contra excepciones prematuras en redes móviles o análisis complejos.
+   - Manejo de contingencia claro ante expiración de tiempo.
+
+### Fase B: Frontend, Pacing Asíncrono, Persistencia Atómica e i18n Limpio (Frontend-UI)
+1. **Persistencia Atómica de Imágenes al Cambiar Tipo de Comida (Bug 1 Fix):**
+   - En `MealDetailScreen`, el dropdown solo modifica la variable en memoria `_mealType = val`.
+   - En `meal_detail_actions.dart`, el renombramiento físico se realiza atómicamente al confirmar "Guardar" / "Actualizar" junto a la transacción SQLite. Si el usuario cancela, la imagen y el registro permanecen intactos.
+2. **Erradicación Total de `isSpanish` y Soporte Multilingüe Nativo (Bug 2 Fix):**
+   - Cero condicionales de idioma en widgets de Flutter.
+   - Poblar `lib/l10n/app_es.arb` y `lib/l10n/app_en.arb` con todas las claves de comidas, formularios, etapas de IA y tooltips.
+   - Compilar con `flutter gen-l10n` y consumir `AppLocalizations.of(context)!` universalmente.
+   - Inicializar formato de fechas para todos los idiomas en `lib/main.dart`.
+3. **Pacing Realista del Anillo de Carga y Feedback de Estado:**
+   - Rediseñar el temporizador en `MealDetailScreen` para un avance suave y progresivo en 5 etapas reales sin saltar abruptamente al 88%.
+
+### Fase C: Auditoría de Calidad y Pruebas (Systems-Auditor)
+1. Ejecución de `flutter analyze` (0 errores, 0 warnings).
+2. Verificación de `flutter test` (100% pruebas pasando).
+3. Verificación de cumplimiento estricto del límite de < 300 LoC por archivo.
+4. Emisión de informe formal con `veredicto: PASS` en `artifacts/audit_reports/audit_report.md`.
+
+### Fase D: DevOps, Tagging y Publicación de Release (DevOps-Engineer)
+1. Incremento de versión a `version: 1.3.1+1` en `pubspec.yaml`.
+2. Actualización de `artifacts/planning/changelog_v1.md` con la versión `[1.3.1] - 2026-10-06`.
+3. Creación y push del tag anotado `v1.3.1` en GitHub para disparar el workflow de compilación y publicación de APK.
+
+---
 
 ---
 

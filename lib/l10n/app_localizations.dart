@@ -112,6 +112,44 @@ abstract class AppLocalizations {
   String get language;
   String get spanish;
   String get english;
+  String remainingCalories(String count);
+  String overCalories(String count);
+  String get today;
+  String get yesterday;
+  String get tomorrow;
+  String get previousDayTooltip;
+  String get nextDayTooltip;
+  String get goToTodayTooltip;
+  String get noMealsForSection;
+  String addToMealSection(String mealType);
+  String get mealDetails;
+  String get newMeal;
+  String get deleteMealTooltip;
+  String get dishNameLabel;
+  String get dishNameHint;
+  String get mealTypeLabel;
+  String get notesLabel;
+  String get notesHint;
+  String get inspectMeal;
+  String get changePhoto;
+  String get takePhotoAction;
+  String get noMealImage;
+  String get saving;
+  String get updateMeal;
+  String get registerMeal;
+  String get addManualIngredient;
+  String get editIngredient;
+  String get deleteIngredient;
+  String get gramsLabel;
+  String get estimationLabel;
+  String get reanalyzeWithAi;
+  String get reanalyzingAi;
+  String get analysisStageOptimizing;
+  String get analysisStageConnecting;
+  String get analysisStageVolumetric;
+  String get analysisStageDensities;
+  String get analysisStageMacros;
+  String get analysisStageComplete;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

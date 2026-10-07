@@ -82,5 +82,64 @@
   "voiceDictation": "Dictado por Voz",
   "language": "Idioma",
   "spanish": "Español",
-  "english": "Inglés"
+  "english": "Inglés",
+  "remainingCalories": "{count} restantes",
+  "@remainingCalories": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "overCalories": "+{count} exceso",
+  "@overCalories": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "today": "Hoy",
+  "yesterday": "Ayer",
+  "tomorrow": "Mañana",
+  "previousDayTooltip": "Día anterior",
+  "nextDayTooltip": "Día siguiente",
+  "goToTodayTooltip": "Ir a hoy",
+  "noMealsForSection": "Sin registros en esta comida.",
+  "addToMealSection": "Añadir a {mealType}",
+  "@addToMealSection": {
+    "placeholders": {
+      "mealType": {
+        "type": "String"
+      }
+    }
+  },
+  "mealDetails": "Detalle de Comida",
+  "newMeal": "Nueva Comida",
+  "deleteMealTooltip": "Eliminar comida",
+  "dishNameLabel": "Nombre del plato *",
+  "dishNameHint": "Ej. Pechuga a la plancha con arroz",
+  "mealTypeLabel": "Tipo de Comida",
+  "notesLabel": "Notas / Observaciones",
+  "notesHint": "Ej. Se usó poco aceite en sofrito, porción mediana",
+  "inspectMeal": "Inspeccionar comida",
+  "changePhoto": "Cambiar foto",
+  "takePhotoAction": "Tomar foto",
+  "noMealImage": "Sin imagen del plato",
+  "saving": "Guardando...",
+  "updateMeal": "Actualizar Comida",
+  "registerMeal": "Registrar Comida",
+  "addManualIngredient": "Añadir ingrediente manual",
+  "editIngredient": "Editar ingrediente",
+  "deleteIngredient": "Eliminar ingrediente",
+  "gramsLabel": "Gramos",
+  "estimationLabel": "Estimación",
+  "reanalyzeWithAi": "Re-analizar con correcciones",
+  "reanalyzingAi": "Re-analizando con IA...",
+  "analysisStageOptimizing": "Optimizando foto y calibración de vajilla...",
+  "analysisStageConnecting": "Conectando de forma segura con Gemini Vision...",
+  "analysisStageVolumetric": "Estimando geometría 3D y cubicaje volumétrico...",
+  "analysisStageDensities": "Deduciendo densidades y grasas/aceites ocultos...",
+  "analysisStageMacros": "Desglose nutricional y cruce con macronutrientes...",
+  "analysisStageComplete": "¡Desglose nutricional completado!"
 }

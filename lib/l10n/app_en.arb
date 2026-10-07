@@ -79,5 +79,64 @@
   "voiceDictation": "Voice Dictation",
   "language": "Language",
   "spanish": "Spanish",
-  "english": "English"
+  "english": "English",
+  "remainingCalories": "{count} remaining",
+  "@remainingCalories": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "overCalories": "+{count} over",
+  "@overCalories": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "today": "Today",
+  "yesterday": "Yesterday",
+  "tomorrow": "Tomorrow",
+  "previousDayTooltip": "Previous day",
+  "nextDayTooltip": "Next day",
+  "goToTodayTooltip": "Go to today",
+  "noMealsForSection": "No meals logged in this section.",
+  "addToMealSection": "Add to {mealType}",
+  "@addToMealSection": {
+    "placeholders": {
+      "mealType": {
+        "type": "String"
+      }
+    }
+  },
+  "mealDetails": "Meal Details",
+  "newMeal": "New Meal",
+  "deleteMealTooltip": "Delete meal",
+  "dishNameLabel": "Dish name *",
+  "dishNameHint": "E.g., Grilled chicken breast with rice",
+  "mealTypeLabel": "Meal Type",
+  "notesLabel": "Notes / Observations",
+  "notesHint": "E.g., Light oil used, medium portion",
+  "inspectMeal": "Inspect meal",
+  "changePhoto": "Change photo",
+  "takePhotoAction": "Take photo",
+  "noMealImage": "No meal image",
+  "saving": "Saving...",
+  "updateMeal": "Update Meal",
+  "registerMeal": "Register Meal",
+  "addManualIngredient": "Add manual ingredient",
+  "editIngredient": "Edit ingredient",
+  "deleteIngredient": "Delete ingredient",
+  "gramsLabel": "Grams",
+  "estimationLabel": "Estimation",
+  "reanalyzeWithAi": "Re-analyze with corrections",
+  "reanalyzingAi": "Re-analyzing with AI...",
+  "analysisStageOptimizing": "Optimizing photo and dish calibration...",
+  "analysisStageConnecting": "Securely connecting to Gemini Vision...",
+  "analysisStageVolumetric": "Estimating 3D geometry and volumetric portion...",
+  "analysisStageDensities": "Deducing food densities and hidden fats/oils...",
+  "analysisStageMacros": "Nutritional breakdown and macro cross-checking...",
+  "analysisStageComplete": "Nutritional breakdown complete!"
 }

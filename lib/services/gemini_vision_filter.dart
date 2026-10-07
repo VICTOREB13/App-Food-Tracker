@@ -6,10 +6,28 @@ class GeminiVisionFilter {
   /// Curated offline fallback models used when device is offline or API fails
   static const List<GeminiModelInfo> fallbackModels = [
     GeminiModelInfo(
+      name: 'gemini-3.8-flash',
+      displayName: 'Gemini 3.8 Flash',
+      description: 'Modelo multimodal por defecto para análisis diario ágil y económico.',
+      isRecommended: true,
+      recommendationLabel: 'Fast',
+      inputTokenLimit: 1048576,
+      outputTokenLimit: 8192,
+    ),
+    GeminiModelInfo(
+      name: 'gemini-3.1-pro',
+      displayName: 'Gemini 3.1 Pro',
+      description: 'Modelo clínico de alta precisión para platos complejos y guisos densos.',
+      isRecommended: true,
+      recommendationLabel: 'Think',
+      inputTokenLimit: 2097152,
+      outputTokenLimit: 8192,
+    ),
+    GeminiModelInfo(
       name: 'gemini-2.5-flash',
       displayName: 'Gemini 2.5 Flash',
-      description: 'Modelo multimodal de última generación, ultrarrápido y de alta precisión visual.',
-      isRecommended: true,
+      description: 'Modelo multimodal de alta velocidad y precisión visual.',
+      isRecommended: false,
       recommendationLabel: 'Fast',
       inputTokenLimit: 1048576,
       outputTokenLimit: 8192,
@@ -19,24 +37,6 @@ class GeminiVisionFilter {
       displayName: 'Gemini 1.5 Flash',
       description: 'Modelo heredado rápido con amplia compatibilidad.',
       isRecommended: false,
-      recommendationLabel: 'Fast',
-      inputTokenLimit: 1048576,
-      outputTokenLimit: 8192,
-    ),
-    GeminiModelInfo(
-      name: 'gemini-1.5-pro',
-      displayName: 'Gemini 1.5 Pro',
-      description: 'Modelo de razonamiento avanzado y amplio contexto multimodal.',
-      isRecommended: false,
-      recommendationLabel: 'Think',
-      inputTokenLimit: 2097152,
-      outputTokenLimit: 8192,
-    ),
-    GeminiModelInfo(
-      name: 'gemini-2.0-flash',
-      displayName: 'Gemini 2.0 Flash',
-      description: 'Modelo multimodal de producción estable y alta velocidad de inferencia.',
-      isRecommended: true,
       recommendationLabel: 'Fast',
       inputTokenLimit: 1048576,
       outputTokenLimit: 8192,
@@ -99,27 +99,31 @@ class GeminiVisionFilter {
   }
 
   /// Assigns priority rank to model ID:
-  /// 1: gemini-2.5-flash / gemini-3.*-flash (Top recommendation)
-  /// 2: gemini-2.0-flash (Estable)
-  /// 3: gemini-2.5-pro / gemini-3.*-pro (Máxima Precisión)
-  /// 4: gemini-2.0-flash-lite
+  /// 1: gemini-3.8-flash / gemini-3.*-flash (Ágil diario recomendado)
+  /// 2: gemini-3.1-pro / gemini-3.*-pro (Clínico alta precisión recomendado)
+  /// 3: gemini-2.5-flash
+  /// 4: gemini-2.5-pro
   /// 5: gemini-1.5-flash
   /// 6: gemini-1.5-pro
+  /// 10: gemini-2.0-flash (Familia retirada / obsoleta)
   /// 99: All other models
   static int calculateTierRank(String modelName) {
     final lower = modelName.toLowerCase();
-    if (lower.startsWith('gemini-2.5-flash') || (lower.startsWith('gemini-3') && lower.contains('flash'))) return 1;
-    if (lower.startsWith('gemini-2.0-flash') && !lower.contains('lite')) return 2;
-    if (lower.startsWith('gemini-2.5-pro') || (lower.startsWith('gemini-3') && lower.contains('pro'))) return 3;
-    if (lower.contains('flash-lite')) return 4;
+    if (lower.startsWith('gemini-3.8-flash') || (lower.startsWith('gemini-3') && lower.contains('flash'))) return 1;
+    if (lower.startsWith('gemini-3.1-pro') || (lower.startsWith('gemini-3') && lower.contains('pro'))) return 2;
+    if (lower.startsWith('gemini-2.5-flash')) return 3;
+    if (lower.startsWith('gemini-2.5-pro')) return 4;
     if (lower.startsWith('gemini-1.5-flash')) return 5;
     if (lower.startsWith('gemini-1.5-pro')) return 6;
+    if (lower.startsWith('gemini-2.0-flash')) return 10;
+    if (lower.contains('flash-lite')) return 11;
     return 99;
   }
 
-  /// Assigns compact semantic badge label displayed in UI ('Fast' or 'Think')
+  /// Assigns compact semantic badge label displayed in UI ('Fast', 'Think', or 'Obsoleto')
   static String? calculateRecommendationLabel(String modelName) {
     final lower = modelName.toLowerCase();
+    if (lower.contains('gemini-2.0')) return 'Obsoleto';
     if (lower.contains('pro')) return 'Think';
     if (lower.contains('flash')) return 'Fast';
     return null;

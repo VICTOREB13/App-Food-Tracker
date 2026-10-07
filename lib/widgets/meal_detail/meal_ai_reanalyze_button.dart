@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_loading_ring.dart';
 
@@ -15,6 +16,8 @@ class MealAiReanalyzeButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return OutlinedButton.icon(
       onPressed: isReanalyzing ? null : onPressed,
       icon: isReanalyzing
@@ -25,7 +28,7 @@ class MealAiReanalyzeButton extends StatelessWidget {
             )
           : const Icon(Icons.auto_awesome, size: 18),
       label: Text(
-        isReanalyzing ? 'Re-analizando con IA...' : 'Re-analizar con correcciones',
+        isReanalyzing ? l10n.reanalyzingAi : l10n.reanalyzeWithAi,
         style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600),
       ),
       style: OutlinedButton.styleFrom(

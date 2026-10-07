@@ -1,15 +1,15 @@
 ---
 tipo: task_list
 proyecto: App_Food_Tracker
-iteracion: v1.3.0
+iteracion: v1.3.1
 estado: activo
-fecha: 2026-10-05
-tags: [proyecto, tasks, checklist, v1-3-0, in-app-updater, github-releases, microinteractions, visual-polish]
+fecha: 2026-10-06
+tags: [proyecto, tasks, checklist, v1-3-1, gemini-vision-precision, timeout-resilience, atomic-image-persistence, i18n-native]
 ---
 
-# 📋 Checklist Maestro de Tareas de Agentes (v1.2.1)
+# 📋 Checklist Maestro de Tareas de Agentes (v1.3.1)
 
-> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.2.1. Cada tarea completada se marca con `[x]`.
+> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.3.1. Cada tarea completada se marca con `[x]`.
 
 ---
 
@@ -303,6 +303,52 @@ tags: [proyecto, tasks, checklist, v1-3-0, in-app-updater, github-releases, micr
 - [x] (DevOps-Engineer) Incrementar versión en `pubspec.yaml` a `1.3.0+1`.
 - [x] (DevOps-Engineer) Documentar la versión en `artifacts/planning/changelog_v1.md` bajo `[1.3.0] - 2026-10-05`.
 - [x] (DevOps-Engineer) Crear y publicar el tag anotado `v1.3.0` en GitHub Actions para compilar el APK oficial.
+
+---
+
+## 🌟 Iteración v1.3.1: Alta Precisión Volumétrica Gemini Vision, Resiliencia de Timeouts, Persistencia Atómica e i18n Nativo
+
+### 🧭 1. Project-Planner (Master Tech Lead & Orquestador)
+- [x] (Project-Planner) Diagnosticar causa raíz de pérdida de imagen en cambio de tipo de comida y falta de soporte i18n en inglés.
+- [x] (Project-Planner) Formular la estrategia de alta precisión para Gemini Vision (inversión de orden causal y razonamiento físico 3D).
+- [x] (Project-Planner) Consolidar requerimientos de timeouts (90s-120s) y UX de progreso en `prompt_draft.md`.
+- [x] (Project-Planner) Erradicar de raíz el anti-patrón de condicionales de idioma (`isSpanish`).
+- [x] (Project-Planner) Orquestar la delegación a subagentes (`Backend-Architect`, `Frontend-UI`, `Systems-Auditor`, `DevOps-Engineer`).
+
+### 🗄️ 2. Backend-Architect (Precisión de IA, Modelos y Timeouts)
+- [x] (Backend-Architect) Reestructurar esquema de respuesta JSON y prompt del sistema en `lib/services/gemini_resilience_helper.dart` para forzar razonamiento causal:
+  - Vajilla/plato de referencia métrica.
+  - Geometría 3D y volumen ($cm^3$).
+  - Densidad física ($g/cm^3$) y estado de cocción.
+  - Brillo de grasa/aceites ocultos.
+  - Masa derivada en gramos y macronutrientes consecuentes.
+- [x] (Backend-Architect) Actualizar catálogo de modelos en `lib/services/gemini_model_service.dart`:
+  - Deprecar/desactivar `gemini-2.0-flash`.
+  - Establecer `gemini-3.8-flash` como modelo predeterminado y `gemini-3.1-pro` como modo de alta precisión.
+  - Configurar soporte de `thinking_budget: 1024`.
+- [x] (Backend-Architect) Aumentar timeout en `lib/services/gemini_vision_service.dart` de 35s a 90s (con tolerancia hasta 120s para modelos con pensamiento profundo).
+- [x] (Backend-Architect) Actualizar pruebas unitarias en `test/services/` para validar el nuevo esquema y modelos.
+
+### 🎨 3. Frontend-UI (Persistencia Atómica, Pacing de Carga e i18n Completo)
+- [x] (Frontend-UI) Corregir persistencia de imagen en cambio de tipo de comida (Bug 1):
+  - `MealDetailScreen.onMealTypeChanged`: solo actualizar estado local `_mealType` sin renombrar prematuramente en disco.
+  - `meal_detail_actions.dart` (`saveMealEntry`): ejecutar el renombrado atómico en disco sincronizado con la transacción SQLite al guardar.
+- [x] (Frontend-UI) Erradicar 100% de condicionales `isSpanish` en todos los widgets y pantallas.
+- [x] (Frontend-UI) Añadir todas las claves y traducciones requeridas a `lib/l10n/app_es.arb` y `lib/l10n/app_en.arb`.
+- [x] (Frontend-UI) Ejecutar `flutter gen-l10n` y consumir `AppLocalizations.of(context)!` en todas las interfaces.
+- [x] (Frontend-UI) Diseñar pacing fluido y realista del anillo de carga en `MealDetailScreen` (fases de 0%-20%, 20%-45%, 45%-70%, 70%-85%, 85%-95%, 100%) sin saltos bruscos ni bloqueos en 88%.
+- [x] (Frontend-UI) Garantizar inicialización de `initializeDateFormatting()` para todos los locales en `lib/main.dart`.
+
+### 🛡️ 4. Systems-Auditor (Auditoría de Calidad, LoC y Suite Completa)
+- [x] (Systems-Auditor) Auditar que el 100% de los archivos creados o modificados tengan estrictamente < 300 LoC.
+- [x] (Systems-Auditor) Ejecutar `flutter analyze` y asegurar 0 errores y 0 warnings.
+- [x] (Systems-Auditor) Ejecutar la suite completa de pruebas unitarias y de widgets (`flutter test`).
+- [x] (Systems-Auditor) Actualizar `artifacts/audit_reports/audit_report.md` con veredicto formal `PASS`.
+
+### 🚀 5. DevOps-Engineer (Versionado v1.3.1, Changelog y Release)
+- [x] (DevOps-Engineer) Incrementar versión en `pubspec.yaml` a `1.3.1+1`.
+- [x] (DevOps-Engineer) Documentar la versión en `artifacts/planning/changelog_v1.md` bajo `[1.3.1] - 2026-10-06`.
+- [x] (DevOps-Engineer) Crear y publicar el tag anotado `v1.3.1` en GitHub Actions para compilar el APK oficial.
 
 ---
 

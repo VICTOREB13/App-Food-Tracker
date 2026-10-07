@@ -1,15 +1,15 @@
 ---
 tipo: abstracciones
 proyecto: App_Food_Tracker
-version: v1.3.0
+version: v1.3.1
 estado: activo
-fecha: 2026-10-05
-tags: [proyecto, arquitectura, abstracciones, backend, in-app-updater, microinteractions, v1-3-0]
+fecha: 2026-10-06
+tags: [proyecto, arquitectura, abstracciones, backend, in-app-updater, microinteractions, v1-3-1, gemini-vision-precision, timeout-resilience, atomic-image-persistence, i18n-native]
 ---
 
-# Abstracciones del Sistema y Arquitectura de Código: Victor Engineer - Food Tracker (v1.3.0)
+# Abstracciones del Sistema y Arquitectura de Código: Victor Engineer - Food Tracker (v1.3.1)
 
-> **Mesa de Control & Backend-Architect:** Este documento centraliza las clases maestras, interfaces de dominio, servicios de negocio, funciones utilitarias nucleares, variables de estado seguro y costuras de flujo de datos (data seams) de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.3.0` (Auto-Actualizador In-App, Canal Nativo de Instalación Android, Microinteracciones Elásticas, Pulido Visual ADB y Descomposición Modular Estricta < 300 LoC). Complementa conceptualmente a [[PRJ_App_Food_Tracker_api_spec|Especificación de API y Modelos]] para posibilitar el entendimiento exhaustivo del software sin necesidad de inspeccionar línea por línea el código fuente.
+> **Mesa de Control & Backend-Architect:** Este documento centraliza las clases maestras, interfaces de dominio, servicios de negocio, funciones utilitarias nucleares, variables de estado seguro y costuras de flujo de datos (data seams) de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.3.1` (Inferencia Causal Volumétrica 3D, Modernización a Gemini 3 con Thinking Budget, Resiliencia de Timeouts a 120s, Pacing Asíncrono de UI, Persistencia Atómica de Archivos e Internacionalización Nativa Pura). Complementa conceptualmente a [[PRJ_App_Food_Tracker_api_spec|Especificación de API y Modelos]] para posibilitar el entendimiento exhaustivo del software sin necesidad de inspeccionar línea por línea el código fuente.
 
 ---
 
@@ -490,6 +490,28 @@ Para garantizar la estricta mantenibilidad del monolito modular sin romper compa
 - **`ActivityGoalSelectorCard` (`lib/widgets/profile/activity_goal_selector_card.dart` - 166 LoC):** Reducido de 406 LoC.
 - **`WeightChartRenderUtils` (`lib/widgets/metrics/weight_chart_render_utils.dart` - 79 LoC):** Renderizado de estado vacío y punto único en gráfico de peso.
 - **`WeightLineChartPainter` (`lib/widgets/metrics/weight_line_chart_painter.dart` - 185 LoC):** Reducido de 342 LoC.
+
+---
+
+## 🧠 10. Abstracciones y Servicios Introducidos en v1.3.1
+
+### 10.1. Pacing Asíncrono de UI (`MealAnalysisPacing`)
+- **Ubicación:** `lib/widgets/meal_detail/meal_analysis_pacing.dart` (47 LoC).
+- **Función:** Genera una progresión asintótica suave durante la llamada a Gemini Vision distribuida en 5 etapas localizadas:
+  - Fase 1 (0% - 20%): Calibración óptica y dimensiones de vajilla (`analysisStageOptimizing`).
+  - Fase 2 (20% - 45%): Enlace de red y cifrado con Gemini Vision (`analysisStageConnecting`).
+  - Fase 3 (45% - 70%): Geometría 3D y cubicaje volumétrico ($cm^3$) (`analysisStageVolumetric`).
+  - Fase 4 (70% - 85%): Densidad física y detección de grasas ocultas (`analysisStageDensities`).
+  - Fase 5 (85% - 95%): Desglose nutricional y macronutrientes (`analysisStageMacros`).
+  - Completado (100%): Inserción atómica en formulario (`analysisStageComplete`).
+
+### 10.2. Extensión de Localización Desacoplada (`MealTypeL10n`)
+- **Ubicación:** `lib/l10n/meal_type_l10n.dart` (18 LoC).
+- **Función:** `String toLocalizedMealType(BuildContext context, String canonicalType)` mapea las claves invariantes persistidas en SQLite ('Desayuno', 'Almuerzo', 'Cena', 'Snack', 'Otro') a las cadenas tipadas de `AppLocalizations.of(context)!` ('Breakfast', 'Lunch', 'Dinner', 'Snack', 'Other') sin alterar nunca la base de datos relacional.
+
+### 10.3. Inversión Causal de Schema y Prompt en `GeminiResilienceHelper`
+- **Ubicación:** `lib/services/gemini_resilience_helper.dart` (279 LoC).
+- **Estructura Causal:** Inversión estricta del flujo autorregresivo del LLM. Obliga al token de inferencia a predecir dimensiones físicas tridimensionales, volumen y densidad antes de generar gramos o macronutrientes, eliminando la adivinación previa de masa.
 
 
 

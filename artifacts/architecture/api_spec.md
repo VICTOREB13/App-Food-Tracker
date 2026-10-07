@@ -1,15 +1,15 @@
 ---
 tipo: api_spec
 proyecto: App_Food_Tracker
-version: v1.3.0
+version: v1.3.1
 estado: activo
-fecha: 2026-10-05
-tags: [proyecto, api, backend, contratos, sqlite-v4, github-releases, methodchannel-installer, v1-3-0]
+fecha: 2026-10-06
+tags: [proyecto, api, backend, contratos, sqlite-v4, github-releases, methodchannel-installer, v1-3-1, gemini-vision-precision, timeout-resilience]
 ---
 
-# 📡 Especificación de Contrato de Datos, Esquema SQLite v4 y Servicios Backend (v1.2.5)
+# 📡 Especificación de Contrato de Datos, Esquema SQLite v4 y Servicios Backend (v1.3.1)
 
-> **Backend-Architect:** Este artefacto define formalmente el esquema relacional de base de datos local SQLite v4, los índices B-Tree de cobertura, los modelos de dominio inmutables (Sentinel), los contratos de servicios internos (DAOs, Service Locator, Result Pattern, BackupNormalizer con auto-reparación) y externos (Dynamic Gemini API, HomeWidget, USDA FoodData Central, Open Food Facts y Calculadora Metabólica).
+> **Backend-Architect:** Este artefacto define formalmente el esquema relacional de base de datos local SQLite v4, los índices B-Tree de cobertura, los modelos de dominio inmutables (Sentinel), los contratos de servicios internos (DAOs, Service Locator, Result Pattern, BackupNormalizer con auto-reparación) y externos (Dynamic Gemini API con Inferencia Causal Volumétrica, HomeWidget, USDA FoodData Central, Open Food Facts y Calculadora Metabólica).
 
 ---
 
@@ -278,4 +278,53 @@ Si el plato visualizado contiene alimentos correspondientes a estos productos, p
   3. `openInstallPermissionSettings()`:
      - Comportamiento: En Android API >= 26, despacha `Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:$packageName"))`.
      - Retorno: `null`.
+
+---
+
+## 🤖 7. Contrato de Inferencia Causal Volumétrica Gemini Vision & Model Ranking (v1.3.1)
+
+### 7.1. Inversión Causal de Schema JSON (`mealAnalysisSchema`)
+Para evitar alucinaciones autorregresivas donde el modelo predice calorías antes de razonar la porción física, el esquema JSON exige la siguiente secuencia causal estricta:
+
+```json
+{
+  "plato_general": "String",
+  "referencia_metrica_utilizada": "String (ej. 'Plato 26cm', 'Vaso 250ml', 'Mano visible')",
+  "justificacion_visual_global": "String",
+  "ingredientes": [
+    {
+      "alimento": "String",
+      "referencia_metrica": "String",
+      "forma_geometrica_3d": "String (ej. 'cilindro', 'disco', 'semiesfera', 'cuboide')",
+      "dimensiones_estimadas_cm": "String (ej. '12x8x2 cm')",
+      "volumen_cm3": 192.0,
+      "densidad_g_cm3": 0.85,
+      "factor_coccion": 0.80,
+      "grasa_visible_o_oculta": "String (ej. 'Brillo de aceite de oliva ~5g')",
+      "gramos_estimados": 130.0,
+      "calorias": 165.0,
+      "proteina": 26.0,
+      "carbohidratos": 0.0,
+      "grasas": 6.8,
+      "fibra": 0.0,
+      "sodio": 75.0,
+      "azucar": 0.0,
+      "justificacion_visual": "String"
+    }
+  ]
+}
+```
+
+### 7.2. Contrato de Filtrado y Ranking de Modelos (`GeminiVisionFilter`)
+- `gemini-3.8-flash`: Rank 1 (Recomendado, badge 'Fast', por defecto para escaneo diario).
+- `gemini-3.1-pro`: Rank 2 (Recomendado, badge 'Think', alta precisión clínica con `thinking_budget: 1024`).
+- `gemini-2.5-flash`: Rank 3 (Compatible).
+- `gemini-1.5-pro`: Rank 4 (Compatible).
+- `gemini-1.5-flash`: Rank 5 (Fallback).
+- `gemini-2.0-flash`: Rank 10 (Obsoleto / Demovido).
+
+### 7.3. Contrato de Timeouts y Resiliencia
+- `defaultTimeout`: 90 segundos para modelos Flash.
+- `clinicalTimeout`: 120 segundos para modelos Pro con `thinking_budget`.
+- Manejo estructurado de `TimeoutException` retornando `AiServiceFailure.timeout(message)`.
 

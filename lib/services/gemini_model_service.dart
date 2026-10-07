@@ -23,6 +23,33 @@ class GeminiModelService {
   static bool isVisionCapableModel(Map<String, dynamic> model) =>
       GeminiVisionFilter.isVisionCapableModel(model);
 
+  /// Default thinking budget token allocation for latent reasoning models
+  static const int defaultThinkingBudget = 1024;
+
+  /// Determines whether a given Gemini model supports latent reasoning / thinking budget
+  static bool supportsThinking(String modelName) {
+    final lower = modelName.toLowerCase();
+    return lower.contains('pro') || lower.contains('thinking') || lower.contains('3.1');
+  }
+
+  /// Resolves the thinking budget for a given model (1024 for pro/thinking models, null otherwise)
+  static int? resolveThinkingBudget(String modelName) =>
+      supportsThinking(modelName) ? defaultThinkingBudget : null;
+
+  /// Builds a call configuration map with model and thinking_budget when supported
+  static Map<String, dynamic> buildCallConfig({
+    required String modelName,
+    int? customThinkingBudget,
+  }) {
+    final config = <String, dynamic>{'model': modelName};
+    final budget = customThinkingBudget ?? resolveThinkingBudget(modelName);
+    if (budget != null) {
+      config['thinking_budget'] = budget;
+      config['thinking_config'] = {'thinking_budget': budget};
+    }
+    return config;
+  }
+
   /// Queries Google Generative Language API and returns sorted, filtered models
   Future<List<GeminiModelInfo>> fetchAvailableModels(
     String apiKey, {
@@ -115,7 +142,7 @@ class GeminiModelService {
 
       final tier = GeminiVisionFilter.calculateTierRank(cleanName);
       final label = GeminiVisionFilter.calculateRecommendationLabel(cleanName);
-      final isRecommended = tier <= 3;
+      final isRecommended = tier <= 2; // Only top tier: 3.8-flash and 3.1-pro
 
       filtered.add(GeminiModelInfo.fromGoogleJson(
         item,

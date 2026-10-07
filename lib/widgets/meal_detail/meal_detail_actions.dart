@@ -59,13 +59,16 @@ Future<bool> saveMealEntry({
   try {
     String? effectiveImagePath = imagePath;
     if (effectiveImagePath != null && effectiveImagePath.trim().isNotEmpty) {
-      try {
-        effectiveImagePath = await ImageProcessingService.instance.renameMealImage(
-          currentPath: effectiveImagePath,
-          newMealType: mealType,
-          date: date,
-        );
-      } catch (_) {}
+      final bool mealTypeChanged = initialMeal == null || initialMeal.mealType != mealType;
+      if (mealTypeChanged) {
+        try {
+          effectiveImagePath = await ImageProcessingService.instance.renameMealImage(
+            currentPath: effectiveImagePath,
+            newMealType: mealType,
+            date: date,
+          );
+        } catch (_) {}
+      }
     }
 
     final baseMeal = (initialMeal ?? Meal(name: name, mealType: mealType, date: date)).copyWith(

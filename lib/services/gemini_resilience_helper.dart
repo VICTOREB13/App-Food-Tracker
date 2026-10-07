@@ -4,7 +4,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
-/// Helper utility managing exponential backoff, jitter, and fallback switching for Gemini Vision.
+/// Helper utility managing exponential backoff, jitter, and causal schemas for Gemini Vision.
 class GeminiResilienceHelper {
   static const String fallbackModel = 'gemini-1.5-flash';
 
@@ -56,7 +56,6 @@ class GeminiResilienceHelper {
           rethrow;
         }
 
-        // On repeated server/quota errors, fallback to secondary model
         if (attempt >= 1 && currentModel != secondaryModel) {
           currentModel = secondaryModel;
           debugPrint('GeminiResilienceHelper: Falling back to $currentModel');
@@ -74,16 +73,22 @@ class GeminiResilienceHelper {
     throw lastError ?? Exception('Operación fallida tras $maxAttempts reintentos');
   }
 
+  /// Strict causal meal analysis schema forcing autoregressive physical deduction
+  /// order before computing grams and macros.
   static Schema get mealAnalysisSchema => Schema.object(
-        description: 'Desglose nutricional, volumétrico y de micronutrientes de comida',
+        description: 'Desglose nutricional y volumétrico causal de comida',
         requiredProperties: ['plato', 'items', 'totales'],
         properties: {
           'plato': Schema.string(description: 'Nombre representativo del plato'),
           'items': Schema.array(
-            description: 'Lista obligatoria con el desglose individual de cada alimento visible',
+            description: 'Lista obligatoria con desglose causal de cada alimento visible',
             items: Schema.object(
               requiredProperties: [
                 'alimento',
+                'forma_geometrica_3d',
+                'dimensiones_estimadas_cm',
+                'volumen_cm3',
+                'densidad_g_cm3',
                 'gramos_estimados',
                 'calorias',
                 'proteinas_g',
@@ -91,16 +96,23 @@ class GeminiResilienceHelper {
                 'grasas_g',
               ],
               properties: {
-                'alimento': Schema.string(description: 'Nombre del alimento individual'),
-                'gramos_estimados': Schema.number(description: 'Peso realista estimado en gramos'),
-                'calorias': Schema.number(description: 'Calorías estimadas'),
-                'proteinas_g': Schema.number(description: 'Proteínas en gramos'),
-                'carbohidratos_g': Schema.number(description: 'Carbohidratos en gramos'),
-                'grasas_g': Schema.number(description: 'Grasas en gramos'),
-                'fibra_g': Schema.number(description: 'Fibra en gramos'),
-                'sodio_mg': Schema.number(description: 'Sodio en miligramos'),
-                'azucar_g': Schema.number(description: 'Azúcar en gramos'),
-                'justificacion_visual': Schema.string(description: 'Explicación volumétrica visual'),
+                'alimento': Schema.string(description: '1. Nombre del alimento individual'),
+                'referencia_metrica': Schema.string(description: '1b. Referencia métrica (plato en cm o proporción)'),
+                'forma_geometrica_3d': Schema.string(description: '2a. Forma geométrica 3D (semiesfera, prisma, cilindro)'),
+                'dimensiones_estimadas_cm': Schema.string(description: '2b. Dimensiones estimadas Largo x Ancho x Alto en cm'),
+                'volumen_cm3': Schema.number(description: '2c. Volumen tridimensional estimado en cm³'),
+                'densidad_g_cm3': Schema.number(description: '3a. Densidad física aproximada en g/cm³'),
+                'factor_coccion': Schema.number(description: '3b. Factor de cocción (hidratación o contracción)'),
+                'grasa_visible_o_oculta': Schema.string(description: '4. Detección de brillo, aceites o sofritos'),
+                'gramos_estimados': Schema.number(description: '5. Gramos derivados: volumen x densidad x factor'),
+                'calorias': Schema.number(description: '6a. Calorías calculadas a partir de gramos_estimados'),
+                'proteinas_g': Schema.number(description: '6b. Proteínas en gramos deducidas de gramos_estimados'),
+                'carbohidratos_g': Schema.number(description: '6c. Carbohidratos en gramos deducidos de gramos_estimados'),
+                'grasas_g': Schema.number(description: '6d. Grasas en gramos deducidas de gramos_estimados y aceites'),
+                'fibra_g': Schema.number(description: '6e. Fibra en gramos'),
+                'sodio_mg': Schema.number(description: '6f. Sodio en miligramos'),
+                'azucar_g': Schema.number(description: '6g. Azúcar en gramos'),
+                'justificacion_visual': Schema.string(description: '7. Justificación explicativa causal y volumétrica'),
               },
             ),
           ),
@@ -120,7 +132,26 @@ class GeminiResilienceHelper {
       );
 
   static const String baseSystemInstruction = '''
-Eres un nutricionista clínico y experto en estimación volumétrica visual de alimentos sin báscula para comidas caseras latinoamericanas y familiares.
+Eres un nutricionista clínico y experto en estimación física y volumétrica 3D de alimentos para comidas caseras y tradicionales.
+
+PIPELINE CAUSAL ESTRICTO DE PENSAMIENTO E INFERENCIA (Física Autorregresiva):
+Para CADA alimento visible en la foto, deduce sus propiedades físicas en riguroso orden causal ANTES de calcular gramos y macronutrientes:
+1. Identificación y Referencia Métrica:
+   - Identifica el alimento individual y toma como referencia la escala métrica disponible (diámetro del plato en cm o vajilla calibrada).
+2. Estimación Geométrica 3D:
+   - Modela la forma tridimensional aproximada (semiesfera, cilindro, disco, prisma irregular) y estima dimensiones en cm (L x W x H).
+   - Calcula el volumen espacial tridimensional en cm³ (volumen_cm3).
+3. Densidad Física y Factor de Cocción:
+   - Determina la densidad física aproximada (densidad_g_cm3, ej. arroz/pastas cocidas ~1.2-1.3, carnes ~1.1-1.3, legumbres con caldo ~1.1-1.2, ensaladas ~0.3-0.5, aceites ~0.9).
+   - Aplica el factor de cocción: expansión por hidratación de agua (arroz x2.5-3, legumbres x2) o contracción/merma por pérdida de jugos en carnes (20-25%).
+4. Detección Visual de Aceites y Grasa Oculta:
+   - Observa brillo especular, fritura, aderezos o grasa oculta en sofritos/guisos caseros (añade siempre entre 5g y 10g adicionales de grasa por ración no evidente).
+5. Gramos Calculados (Masa Derivada):
+   - Deriva los gramos_estimados rigurosamente: volumen_cm3 x densidad_g_cm3 x factor_coccion. PROHIBIDO fijar 200g genéricos.
+6. Macronutrientes y Micronutrientes Deducidos:
+   - Deriva calorías y macronutrientes estrictamente a partir de los gramos calculados en el paso 5.
+7. Justificación Visual Explicativa:
+   - Resume la justificación física y volumétrica observada.
 
 Reglas obligatorias de cubicaje:
 1. Referencias anatómicas de volumen:
@@ -137,22 +168,14 @@ Reglas obligatorias de cubicaje:
 4. Porciones compartidas:
    - Si el usuario indica en el contexto que la foto es de una fuente, olla o plato compartido y especifica su porción (ej. "me comí 1/3"), calcula exclusivamente la porción consumida por el usuario.
 5. Desglose obligatorio de ingredientes en 'items':
-   - Es ESTRICTAMENTE OBLIGATORIO desglosar de forma individual cada alimento, guarnición e ingrediente que compone el plato dentro de la lista 'items'.
-   - NUNCA devuelvas 'items' como un arreglo vacío cuando haya alimentos visibles en la foto. Cada elemento debe ser una porción identificable (ej. "Arroz blanco cocido", "Pechuga de pollo asada", "Aguacate", "Grasa oculta de sofrito/aceite").
-   - PROHIBIDO agrupar o duplicar el nombre del plato como único elemento en 'items' (ej. si el plato es "Arroz blanco con frijoles y carne molida", desglosa individualmente "Arroz blanco cocido", "Frijoles negros", "Carne molida guisada", etc.). Si hay varios alimentos visibles, es OBLIGATORIO desglosarlos por separado (mínimo 2 o más items).
+   - Es ESTRICTAMENTE OBLIGATORIO desglosar de forma individual cada alimento visible en 'items'. NUNCA devuelvas 'items' como un arreglo vacío. Mínimo 2 o más items si hay varios alimentos.
+   - PROHIBIDO agrupar o duplicar el nombre del plato como único elemento en 'items'.
    - Para cada alimento en 'items', estima con precisión sus gramos, calorías, proteínas, carbohidratos y grasas específicos.
    - La suma de las calorías y macronutrientes de los 'items' individuales debe coincidir con 'totales'.
 6. Estimación volumétrica precisa de gramos (PROHIBIDO fijar 200g genéricos):
    - PROHIBIDO asignar 200g de forma genérica o repetitiva a los ingredientes o al plato.
-   - Cada alimento debe tener un peso en gramos estimado según su densidad visual y área en el plato:
-     * Arroz o pasta cocida: típicamente 120g - 220g según volumen.
-     * Carnes, pollo, pescado o carne molida: típicamente 90g - 160g cocido.
-     * Legumbres o frijoles: típicamente 100g - 160g con su caldo.
-     * Aguacate: una porción de tajada o medio aguacate típicamente 40g - 90g.
-     * Ensaladas / vegetales: 30g - 100g.
-     * Aceite o grasa visible/oculta: 5g - 15g.
 7. Formato estricto:
-   - Responde únicamente con el JSON definido en el esquema.
+   - Responde únicamente con el JSON estructurado según el esquema.
 ''';
 
   static String buildSystemPrompt({String? masterPrompt, String? pantryContext}) {
@@ -184,10 +207,11 @@ Reglas obligatorias de cubicaje:
   }) {
     final buffer = StringBuffer();
     buffer.writeln('Analiza minuciosamente esta comida casera y estima su desglose nutricional siguiendo las reglas volumétricas.');
+    buffer.writeln('ORDEN CAUSAL OBLIGATORIO: Identifica referencia métrica -> Geometría 3D y volumen cm³ -> Densidad y cocción -> Brillo/grasa oculta -> Masa en gramos -> Macronutrientes.');
     buffer.writeln('REGLAS FUNDAMENTALES DE DESGLOSE:');
     buffer.writeln('1. DESGLOSE INDIVIDUAL OBLIGATORIO: Identifica y desglosa CADA alimento visible en la lista "items" con sus macros y micronutrientes (fibra_g, sodio_mg, azucar_g). NUNCA devuelvas items vacío.');
     buffer.writeln('2. PROHIBIDO DUPLICAR EL PLATO: NUNCA coloques el plato entero como un único ingrediente.');
-    buffer.writeln('3. GRAMOS REALISTAS: PROHIBIDO fijar 200g genéricos. Estima gramos por densidad visual.');
+    buffer.writeln('3. GRAMOS REALISTAS: PROHIBIDO fijar 200g genéricos. Deriva gramos por densidad visual y volumen 3D.');
     buffer.writeln('4. La suma de calorías, macronutrientes y micronutrientes de los items individuales debe corresponder con los totales.');
 
     if (dishwareDiameterCm != null && dishwareDiameterCm > 0) {

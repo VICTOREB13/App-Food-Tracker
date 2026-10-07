@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_loading_ring.dart';
 import 'food_image_viewer_dialog.dart';
@@ -25,6 +26,7 @@ class MealImageCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final hasImage = imagePath != null && File(imagePath!).existsSync();
 
     return Container(
@@ -80,7 +82,7 @@ class MealImageCard extends StatelessWidget {
                   ),
                   icon: const Icon(Icons.fullscreen_rounded, size: 18),
                   label: Text(
-                    'Inspeccionar comida',
+                    l10n.inspectMeal,
                     style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600),
                   ),
                 ),
@@ -102,7 +104,7 @@ class MealImageCard extends StatelessWidget {
                 ),
                 icon: const Icon(Icons.camera_alt_outlined, size: 16),
                 label: Text(
-                  hasImage ? 'Cambiar foto' : 'Tomar foto',
+                  hasImage ? l10n.changePhoto : l10n.takePhotoAction,
                   style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600),
                 ),
               ),
@@ -156,6 +158,7 @@ class MealImageCard extends StatelessWidget {
   }
 
   Widget _buildPlaceholder(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -167,7 +170,7 @@ class MealImageCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Sin imagen del plato',
+            l10n.noMealImage,
             style: GoogleFonts.outfit(
               fontSize: 14,
               color: AppColors.textSecondary(context),

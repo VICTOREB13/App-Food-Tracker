@@ -1,17 +1,17 @@
 ---
 tipo: arquitectura
 proyecto: App_Food_Tracker
-version: v1.3.0
+version: v1.3.1
 estado: activo
-fecha: 2026-10-05
-stack_principal: [Flutter, SQLite WAL v4, Google Gemini API, USDA FoodData Central, Open Food Facts, FlutterSecureStorage, GetIt, Flutter Localizations, HomeWidget, BackupNormalizer, NutritionalRecommendationService, GitHubReleasesUpdateService, MethodChannelAppInstaller]
+fecha: 2026-10-06
+stack_principal: [Flutter, SQLite WAL v4, Google Gemini API, USDA FoodData Central, Open Food Facts, FlutterSecureStorage, GetIt, Flutter Localizations, HomeWidget, BackupNormalizer, NutritionalRecommendationService, GitHubReleasesUpdateService, MethodChannelAppInstaller, GeminiResilienceHelper]
 diagrama_html: PRJ_App_Food_Tracker_architecture_diagram.html
-tags: [proyecto, arquitectura, tech-stack, archify, local-first, get-it, l10n, result-pattern, android-widgets, sqlite-v4, recommendations, saf-backup, auto-repair, in-app-updater, microinteractions, android-16]
+tags: [proyecto, arquitectura, tech-stack, archify, local-first, get-it, l10n, result-pattern, android-widgets, sqlite-v4, recommendations, saf-backup, auto-repair, in-app-updater, microinteractions, android-16, gemini-vision-precision, timeout-resilience, atomic-image-persistence, i18n-native]
 ---
 
-# 🏗️ Arquitectura del Sistema: Victor Engineer - Food Tracker (v1.2.5)
+# 🏗️ Arquitectura del Sistema: Victor Engineer - Food Tracker (v1.3.1)
 
-> **Mesa de Control & Backend-Architect:** Este documento establece los componentes fundamentales, el Tech Stack tecnológico, las decisiones arquitectónicas estructurales y el flujo de datos integral de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.2.5` (Selector SAF, Auto-Reparación de Respaldos Truncados, Rediseño Ergonómico de Ayuno Bento, SQLite v4 con Gramajes y Blindaje Android 16).
+> **Mesa de Control & Backend-Architect:** Este documento establece los componentes fundamentales, el Tech Stack tecnológico, las decisiones arquitectónicas estructurales y el flujo de datos integral de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.3.1` (Inferencia Causal Volumétrica 3D en Gemini Vision, Modernización a Gemini 3 con Thinking Budget, Resiliencia de Timeouts a 120s, Pacing Asíncrono de UI, Persistencia Atómica de Archivos e Internacionalización Nativa Pura).
 
 ---
 
@@ -129,4 +129,27 @@ El diagrama interactivo de componentes, límites de seguridad, widgets nativos d
   - `VeAnimatedCounter`: Animación numérica continua para métricas de calorías y macronutrientes.
   - Feedback háptico (`HapticFeedback.lightImpact()` y `selectionClick()`) en FAB de comidas, agua y ayuno.
   - Eliminación de flecha `<-` errónea en Dashboard (`automaticallyImplyLeading: false` en `VeAppBar`).
+
+### 3.12. Inferencia Causal Volumétrica 3D, Modernización a Gemini 3, Persistencia Atómica e i18n Nativo (v1.3.1)
+- **Inversión Causal Autorregresiva (`GeminiResilienceHelper`):**
+  - La predicción autoregresiva del LLM se reordena estrictamente para forzar al modelo a calcular primero la geometría y propiedades físicas antes de deducir masa y calorías:
+    1. Delimitación de vajilla o referencia métrica anatómica.
+    2. Estimación geométrica 3D (Largo x Ancho x Alto en cm) y volumen ($cm^3$).
+    3. Densidad física volumétrica ($g/cm^3$) y estado de cocción (merma/hidratación).
+    4. Detección visual de brillo especular, fritura y grasas/aceites ocultos.
+    5. Deducción de masa física en gramos: $Masa = Volumen \times Densidad \times FactorCoccion$.
+    6. Macronutrientes y micronutrientes consecuentes a la masa deducida.
+- **Catálogo de Modelos Modernos & Thinking Budget (`GeminiModelService` & `GeminiVisionFilter`):**
+  - Incorporación prioritaria de `gemini-3.8-flash` (por defecto, ágil y económico) y `gemini-3.1-pro` (alta precisión clínica).
+  - Democión de `gemini-2.0-flash` a categoría obsoleta.
+  - Inyección de `thinking_budget: 1024` para habilitar razonamiento latente en modelos compatibles.
+- **Timeouts Resilientes y Pacing Progresivo de UI:**
+  - Ampliación de timeout en `GeminiVisionService` de 35s a 90s (Flash) y hasta 120s (Pro/Thinking).
+  - Pacing progresivo no lineal en `MealAnalysisPacing` / `MealDetailScreen` estructurado en 5 fases traducidas para eliminar congelamientos al 88%.
+- **Persistencia Atómica en Cambio de Tipo de Comida (Bug 1):**
+  - `MealDetailScreen.onMealTypeChanged` muta únicamente el estado en memoria; el renombramiento físico del archivo en disco se acopla atómicamente a la transacción de guardado en SQLite en `meal_detail_actions.dart`.
+- **Internacionalización Nativa Pura (Bug 2):**
+  - Erradicación del 100% de los condicionales ternarios `isSpanish` en los widgets de UI.
+  - Centralización bilingüe (118 claves) en `lib/l10n/app_es.arb` y `lib/l10n/app_en.arb`.
+  - Extensión `toLocalizedMealType(context)` para traducir etiquetas de comidas sin mutar las claves canónicas invariantes en base de datos.
 

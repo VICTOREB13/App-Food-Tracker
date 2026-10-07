@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
+import '../../l10n/meal_type_l10n.dart';
 import '../../models/meal.dart';
 import '../../services/theme_manager.dart';
 import '../common/macro_indicator_chip.dart';
@@ -37,6 +39,9 @@ class MealSectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final localizedMealType = mealType.toLocalizedMealType(context);
+
     return VeCard(
       padding: const EdgeInsets.all(14),
       child: Column(
@@ -47,7 +52,7 @@ class MealSectionCard extends StatelessWidget {
               Icon(_sectionIcon, size: 18, color: AppColors.primary),
               const SizedBox(width: 8),
               Text(
-                mealType,
+                localizedMealType,
                 style: GoogleFonts.outfit(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
@@ -69,7 +74,7 @@ class MealSectionCard extends StatelessWidget {
                 icon: const Icon(Icons.add_circle_outline, size: 20),
                 color: AppColors.primary,
                 onPressed: onAddMeal,
-                tooltip: 'Añadir a $mealType',
+                tooltip: l10n.addToMealSection(localizedMealType),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
               ),
@@ -79,7 +84,7 @@ class MealSectionCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: Text(
-                'Sin registros en esta comida.',
+                l10n.noMealsForSection,
                 style: GoogleFonts.inter(
                   fontSize: 12,
                   color: AppColors.textMuted(context),

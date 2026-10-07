@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import '../models/food_item.dart';
 import '../models/meal_analysis_result.dart';
+import 'gemini_model_service.dart';
 import 'gemini_resilience_helper.dart';
 import 'image_processing_service.dart';
 
@@ -14,8 +15,12 @@ class GeminiVisionService {
   final String modelName;
   final String? masterPrompt;
 
-  static const String defaultModel = 'gemini-2.5-flash';
+  static const String defaultModel = 'gemini-3.8-flash';
+  static const String clinicalModel = 'gemini-3.1-pro';
   static const String fallbackModel = 'gemini-1.5-flash';
+
+  static const Duration defaultTimeout = Duration(seconds: 90);
+  static const Duration clinicalTimeout = Duration(seconds: 120);
 
   static const String baseSystemInstruction = GeminiResilienceHelper.baseSystemInstruction;
   static const String systemInstruction = baseSystemInstruction;
@@ -32,38 +37,38 @@ class GeminiVisionService {
     this.masterPrompt,
   });
 
+  /// Resolves the network timeout based on model tier and reasoning capacity (90s - 120s)
+  static Duration resolveTimeout(String modelName) =>
+      GeminiModelService.supportsThinking(modelName) ? clinicalTimeout : defaultTimeout;
+
   static String userFriendlyErrorMessage(dynamic error) {
     if (error == null) return 'Ocurrió un error al analizar la comida. Por favor, inténtalo nuevamente.';
     final s = error.toString().toLowerCase();
 
     if (error is String && (s.startsWith('se perdió la conexión') ||
         s.startsWith('tu api key') || s.startsWith('has alcanzado el límite') ||
-        s.startsWith('la ia no logró') || s.startsWith('ocurrió un error'))) {
+        s.startsWith('la ia no logró') || s.startsWith('ocurrió un error') ||
+        s.startsWith('el tiempo de espera'))) {
       return error;
     }
-
-    if (error is SocketException || error is TimeoutException ||
-        s.contains('socketexception') || s.contains('timeoutexception') ||
-        s.contains('clientexception') || s.contains('unreachable') ||
-        s.contains('lookup') || s.contains('refused') || s.contains('timed out')) {
+    if (error is TimeoutException || s.contains('timeoutexception') || s.contains('timed out')) {
+      return 'El tiempo de espera de análisis se agotó (la red tardó demasiado). Se perdió la conexión a internet temporalmente. Por favor, reintenta o usa registro manual.';
+    }
+    if (error is SocketException || s.contains('socketexception') || s.contains('clientexception') ||
+        s.contains('unreachable') || s.contains('lookup') || s.contains('refused')) {
       return 'Se perdió la conexión a internet. Por favor, verifica tu red e inténtalo de nuevo.';
     }
-
-    if (s.contains('api key') || s.contains('permission_denied') ||
-        s.contains('unauthenticated') || s.contains('401') || s.contains('403') ||
-        (s.contains('400') && !s.contains('safety'))) {
+    if (s.contains('api key') || s.contains('permission_denied') || s.contains('unauthenticated') ||
+        s.contains('401') || s.contains('403') || (s.contains('400') && !s.contains('safety'))) {
       return 'Tu API Key de Gemini no es válida o no tiene permisos suficientes. Verifícala en Ajustes.';
     }
-
     if (s.contains('429') || s.contains('resource_exhausted') || s.contains('quota') || s.contains('rate limit')) {
       return 'Has alcanzado el límite de solicitudes de Gemini. Por favor, espera unos segundos e inténtalo de nuevo.';
     }
-
     if (s.contains('safety') || s.contains('recitation') || s.contains('blocked') ||
         s.contains('vacía') || s.contains('empty') || s.contains('no logr') || s.contains('alimentos')) {
       return 'La IA no logró identificar alimentos en la foto. Intenta con una toma más cercana, con mejor iluminación o ángulo superior.';
     }
-
     return 'Ocurrió un error al analizar la comida. Por favor, inténtalo nuevamente.';
   }
 
@@ -247,9 +252,8 @@ class GeminiVisionService {
           ),
         );
 
-        final response = await model
-            .generateContent([content])
-            .timeout(const Duration(seconds: 35));
+        final timeoutDuration = resolveTimeout(currentModel);
+        final response = await model.generateContent([content]).timeout(timeoutDuration);
 
         final text = response.text;
         if (text == null || text.trim().isEmpty) {
@@ -278,8 +282,7 @@ class GeminiVisionService {
           final width = (bytes[offset + 7] << 8) | bytes[offset + 8];
           return (width, height);
         }
-        final length = (bytes[offset + 2] << 8) | bytes[offset + 3];
-        offset += 2 + length;
+        offset += 2 + ((bytes[offset + 2] << 8) | bytes[offset + 3]);
       }
     }
     return null;

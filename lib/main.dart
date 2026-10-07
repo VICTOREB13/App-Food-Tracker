@@ -39,7 +39,9 @@ void main() {
 
 Future<void> _initializeBackgroundServices() async {
   try {
-    await initializeDateFormatting('es', null);
+    for (final locale in AppLocalizations.supportedLocales) {
+      await initializeDateFormatting(locale.languageCode, null);
+    }
   } catch (e) {
     debugPrint('DateFormatting initialization warning: $e');
   }

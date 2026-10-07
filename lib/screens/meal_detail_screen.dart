@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../controllers/meal_controller.dart';
+import '../l10n/app_localizations.dart';
 import '../models/food_item.dart';
 import '../models/meal.dart';
 import '../services/image_processing_service.dart';
@@ -10,6 +11,7 @@ import '../widgets/common/ve_app_bar.dart';
 import '../widgets/meal_detail/food_item_editor_dialog.dart';
 import '../widgets/meal_detail/food_items_list_card.dart';
 import '../widgets/meal_detail/meal_ai_reanalyze_button.dart';
+import '../widgets/meal_detail/meal_analysis_pacing.dart';
 import '../widgets/meal_detail/meal_detail_actions.dart';
 import '../widgets/meal_detail/meal_form_fields.dart';
 import '../widgets/meal_detail/meal_image_card.dart';
@@ -80,18 +82,20 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
 
   void _startAnalysisProgress() {
     _progressTimer?.cancel();
-    _analysisProgress = 0.15;
-    _analysisStage = 'Optimizando foto y cubicaje...';
-    _progressTimer = Timer.periodic(const Duration(milliseconds: 650), (t) {
+    final l10n = AppLocalizations.of(context);
+    _analysisProgress = MealAnalysisPacing.initialProgress;
+    _analysisStage = l10n != null
+        ? MealAnalysisPacing.getStageMessage(_analysisProgress!, l10n)
+        : 'Optimizando foto y calibración de vajilla...';
+    _progressTimer = Timer.periodic(const Duration(milliseconds: 500), (t) {
       if (!mounted || !_isReanalyzing) return t.cancel();
-      final cur = _analysisProgress ?? 0.15;
+      final cur = _analysisProgress ?? MealAnalysisPacing.initialProgress;
+      final next = MealAnalysisPacing.nextProgress(cur);
+      final currentL10n = AppLocalizations.of(context);
       setState(() {
-        if (cur < 0.40) {
-          _analysisProgress = 0.40; _analysisStage = 'Conectando con Gemini Vision...';
-        } else if (cur < 0.68) {
-          _analysisProgress = 0.68; _analysisStage = 'Estimando volumen visual y porciones...';
-        } else if (cur < 0.88) {
-          _analysisProgress = 0.88; _analysisStage = 'Desglosando ingredientes y macros...';
+        _analysisProgress = next;
+        if (currentL10n != null) {
+          _analysisStage = MealAnalysisPacing.getStageMessage(next, currentL10n);
         }
       });
     });
@@ -129,9 +133,10 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
       );
       if (analysis != null && mounted) {
         _progressTimer?.cancel();
+        final l10n = AppLocalizations.of(context);
         setState(() {
           _analysisProgress = 1.0;
-          _analysisStage = '¡Desglose nutricional completado!';
+          _analysisStage = l10n?.analysisStageComplete ?? '¡Desglose nutricional completado!';
         });
         await Future.delayed(const Duration(milliseconds: 350));
         if (!mounted) return;
@@ -165,14 +170,12 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
 
   Future<void> _saveMeal() async {
     if (_isSaving || _isReanalyzing) return;
-    final name = _nameController.text.trim();
-    final rawNotes = _notesController.text.trim();
-
+    final notes = _notesController.text.trim();
     setState(() => _isSaving = true);
     final saved = await saveMealEntry(
       context: context,
       initialMeal: widget.initialMeal,
-      name: name,
+      name: _nameController.text.trim(),
       mealType: _mealType,
       date: _date,
       imagePath: _imagePath,
@@ -180,7 +183,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
       protein: _protein,
       carbs: _carbs,
       fat: _fat,
-      notes: rawNotes.isNotEmpty ? rawNotes : null,
+      notes: notes.isNotEmpty ? notes : null,
       items: _items,
     );
     if (mounted) setState(() => _isSaving = false);
@@ -190,8 +193,9 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
   Future<void> _deleteMeal() async {
     final meal = widget.initialMeal;
     if (meal == null) return;
-    final deleted = await confirmAndDeleteMeal(context, meal);
-    if (deleted && mounted) Navigator.of(context).pop();
+    if (await confirmAndDeleteMeal(context, meal) && mounted) {
+      Navigator.of(context).pop();
+    }
   }
 
   Future<void> _addItem() async {
@@ -218,16 +222,17 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final isEditing = widget.initialMeal != null;
 
     return Scaffold(
       appBar: VeAppBar(
-        title: isEditing ? 'Detalle de Comida' : 'Nueva Comida',
+        title: isEditing ? l10n.mealDetails : l10n.newMeal,
         actions: [
           if (isEditing)
             IconButton(
               icon: const Icon(Icons.delete_outline, color: AppColors.primaryLight),
-              tooltip: 'Eliminar comida',
+              tooltip: l10n.deleteMealTooltip,
               onPressed: _deleteMeal,
             ),
         ],
@@ -261,17 +266,9 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
             nameController: _nameController,
             notesController: _notesController,
             mealType: _mealType,
-            onMealTypeChanged: (val) async {
+            onMealTypeChanged: (val) {
               if (val != null && val != _mealType) {
                 setState(() => _mealType = val);
-                if (_imagePath != null) {
-                  final renamed = await ImageProcessingService.instance.renameMealImage(
-                    currentPath: _imagePath!, newMealType: val, date: _date,
-                  );
-                  if (mounted && renamed != _imagePath) {
-                    setState(() => _imagePath = renamed);
-                  }
-                }
               }
             },
           ),

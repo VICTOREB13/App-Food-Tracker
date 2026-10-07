@@ -1,5 +1,6 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/theme_manager.dart';
 
 class MealSaveButton extends StatelessWidget {
@@ -16,6 +17,8 @@ class MealSaveButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return ElevatedButton.icon(
       onPressed: isSaving ? null : onSave,
       style: ElevatedButton.styleFrom(
@@ -32,7 +35,7 @@ class MealSaveButton extends StatelessWidget {
             )
           : const Icon(Icons.save_outlined),
       label: Text(
-        isSaving ? 'Guardando...' : (isEditing ? 'Actualizar Comida' : 'Registrar Comida'),
+        isSaving ? l10n.saving : (isEditing ? l10n.updateMeal : l10n.registerMeal),
         style: GoogleFonts.outfit(fontWeight: FontWeight.w700, fontSize: 16),
       ),
     );

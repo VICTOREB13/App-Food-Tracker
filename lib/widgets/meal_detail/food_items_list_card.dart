@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/food_item.dart';
 import '../../services/theme_manager.dart';
 import '../common/macro_indicator_chip.dart';
@@ -21,6 +22,8 @@ class FoodItemsListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return VeCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -41,7 +44,7 @@ class FoodItemsListCard extends StatelessWidget {
                 icon: const Icon(Icons.add_circle_outline, size: 20),
                 color: AppColors.primary,
                 onPressed: onAddItem,
-                tooltip: 'Añadir ingrediente manual',
+                tooltip: l10n.addManualIngredient,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
               ),
@@ -79,6 +82,7 @@ class FoodItemsListCard extends StatelessWidget {
   }
 
   Widget _buildItemTile(BuildContext context, FoodItem item) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
@@ -104,6 +108,7 @@ class FoodItemsListCard extends StatelessWidget {
               ),
               IconButton(
                 icon: const Icon(Icons.edit_outlined, size: 16),
+                tooltip: l10n.editIngredient,
                 onPressed: () => onEditItem(item),
                 color: AppColors.textSecondary(context),
                 padding: EdgeInsets.zero,
@@ -111,6 +116,7 @@ class FoodItemsListCard extends StatelessWidget {
               ),
               IconButton(
                 icon: const Icon(Icons.delete_outline, size: 16),
+                tooltip: l10n.deleteIngredient,
                 onPressed: () => onDeleteItem(item),
                 color: AppColors.primaryLight,
                 padding: EdgeInsets.zero,
@@ -125,7 +131,7 @@ class FoodItemsListCard extends StatelessWidget {
             children: [
               if (item.estimatedGrams > 0)
                 MacroIndicatorChip(
-                  label: 'Gramos',
+                  label: l10n.gramsLabel,
                   value: '${item.estimatedGrams.toStringAsFixed(0)}g',
                   accentColor: AppColors.portion,
                   isCompact: true,
@@ -165,7 +171,7 @@ class FoodItemsListCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
-                'Estimación: ${item.visualJustification!}',
+                '${l10n.estimationLabel}: ${item.visualJustification!}',
                 style: GoogleFonts.inter(
                   fontSize: 11,
                   fontStyle: FontStyle.italic,

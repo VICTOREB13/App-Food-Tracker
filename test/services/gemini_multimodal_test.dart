@@ -32,7 +32,7 @@ void main() {
       final service = GeminiVisionService(apiKey: 'dummy_key');
 
       expect(service.apiKey, 'dummy_key');
-      expect(service.modelName, 'gemini-2.5-flash');
+      expect(service.modelName, 'gemini-3.8-flash');
 
       // Verify methods exist and can be referenced
       expect(service.analyzeSpeechMeal, isA<Function>());

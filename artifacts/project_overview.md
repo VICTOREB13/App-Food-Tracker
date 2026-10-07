@@ -1,13 +1,13 @@
 ---
 tipo: overview
 proyecto: App_Food_Tracker
-version: v1.3.0
+version: v1.3.1
 estado: activo
-fecha: 2026-10-05
-tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid, get-it, l10n, result-pattern, android-widgets, sqlite-v4, recommendations, saf-backup, auto-repair, in-app-updater, microinteractions]
+fecha: 2026-10-06
+tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid, get-it, l10n, result-pattern, android-widgets, sqlite-v4, recommendations, saf-backup, auto-repair, in-app-updater, microinteractions, gemini-vision-precision, timeout-resilience, atomic-image-persistence, i18n-native]
 ---
 
-# 🚀 Visión General del Proyecto: Victor Engineer - Food Tracker (v1.3.0)
+# 🚀 Visión General del Proyecto: Victor Engineer - Food Tracker (v1.3.1)
 
 > **Mesa de Control (Project-Planner):** Este documento centraliza la visión del producto, capacidades técnicas, directrices de arquitectura y el índice de navegación interconectado de todos los artefactos del proyecto según la metodología de Prototipado Evolutivo y estándares Obsidian.
 
@@ -102,6 +102,14 @@ tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid, get-it, 
 
 17. **Saneamiento y Descomposición Modular Integral (< 300 LoC):**
     - Descomposición de la totalidad de archivos históricos del proyecto que superaban las 300 líneas (`metabolic_calculator.dart`, `gemini_model_service.dart`, `usda_food_item.dart`, `quick_weight_entry_dialog.dart`, `activity_goal_selector_card.dart`, `weight_line_chart_painter.dart`), alcanzando el 100% de conformidad con la regla de oro arquitectónica.
+
+18. **Inferencia Causal Volumétrica Gemini Vision, Timeouts Resilientes (120s), Persistencia Atómica e i18n Puro (v1.3.1):**
+    - Inversión autorregresiva de causalidad física: deducción de geometría 3D, cubicaje ($cm^3$), densidad física ($g/cm^3$) y grasa oculta antes del cálculo de masa en gramos y macronutrientes.
+    - Catálogo de modelos Gemini 3: `gemini-3.8-flash` (por defecto, insignia 'Fast') y `gemini-3.1-pro` (alta precisión, insignia 'Think') con inyección de `thinking_budget: 1024`.
+    - Pacing fluido y realista del anillo de carga en 5 etapas secuenciales traducidas sin congelamientos al 88%.
+    - Timeouts escalados de 90s a 120s contra cortes prematuros de red o inferencias profundas.
+    - Persistencia atómica de imágenes: sincronización transaccional del renombramiento en disco únicamente al guardar en SQLite, evitando desincronizaciones o pantallas negras.
+    - Erradicación al 100% del anti-patrón de condicionales de idioma (`isSpanish ? ... : ...`) en favor de `AppLocalizations` con paridad 118/118 en ES/EN y desacoplamiento de valores canónicos de SQLite mediante `toLocalizedMealType`.
 
 ---
 

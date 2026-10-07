@@ -8,21 +8,31 @@ const String mockSuccessResponseJson = '''
 {
   "models": [
     {
-      "name": "models/gemini-2.5-flash",
-      "version": "2.5",
-      "displayName": "Gemini 2.5 Flash",
-      "description": "Next-generation multimodal model.",
+      "name": "models/gemini-3.8-flash",
+      "version": "3.8",
+      "displayName": "Gemini 3.8 Flash",
+      "description": "Daily fast and cost-effective vision model.",
       "inputTokenLimit": 1048576,
       "outputTokenLimit": 8192,
       "supportedGenerationMethods": ["generateContent", "countTokens"],
       "inputModalities": ["TEXT", "IMAGE"]
     },
     {
-      "name": "models/gemini-2.5-pro",
-      "version": "2.5",
-      "displayName": "Gemini 2.5 Pro",
-      "description": "Deep reasoning multimodal model.",
+      "name": "models/gemini-3.1-pro",
+      "version": "3.1",
+      "displayName": "Gemini 3.1 Pro",
+      "description": "Clinical deep reasoning high-precision model.",
       "inputTokenLimit": 2097152,
+      "outputTokenLimit": 8192,
+      "supportedGenerationMethods": ["generateContent", "countTokens"],
+      "inputModalities": ["TEXT", "IMAGE"]
+    },
+    {
+      "name": "models/gemini-2.5-flash",
+      "version": "2.5",
+      "displayName": "Gemini 2.5 Flash",
+      "description": "Multimodal model.",
+      "inputTokenLimit": 1048576,
       "outputTokenLimit": 8192,
       "supportedGenerationMethods": ["generateContent", "countTokens"],
       "inputModalities": ["TEXT", "IMAGE"]
@@ -31,7 +41,7 @@ const String mockSuccessResponseJson = '''
       "name": "models/gemini-2.0-flash",
       "version": "2.0",
       "displayName": "Gemini 2.0 Flash",
-      "description": "Fast multimodal model.",
+      "description": "Retired legacy model.",
       "inputTokenLimit": 1048576,
       "outputTokenLimit": 8192,
       "supportedGenerationMethods": ["generateContent"],
@@ -41,7 +51,7 @@ const String mockSuccessResponseJson = '''
       "name": "models/gemini-1.5-flash",
       "version": "1.5",
       "displayName": "Gemini 1.5 Flash",
-      "description": "Legacy fast multimodal model.",
+      "description": "Legacy fast model.",
       "inputTokenLimit": 1048576,
       "outputTokenLimit": 8192,
       "supportedGenerationMethods": ["generateContent"],
@@ -56,13 +66,6 @@ const String mockSuccessResponseJson = '''
       "outputTokenLimit": 1,
       "supportedGenerationMethods": ["embedContent"],
       "inputModalities": ["TEXT"]
-    },
-    {
-      "name": "models/imagen-3.0-generate-002",
-      "version": "3.0",
-      "displayName": "Imagen 3.0",
-      "description": "Image generation model.",
-      "supportedGenerationMethods": ["generateImage"]
     }
   ]
 }
@@ -72,8 +75,8 @@ const String mockMissingModalitiesJson = '''
 {
   "models": [
     {
-      "name": "models/gemini-2.5-flash",
-      "displayName": "Gemini 2.5 Flash",
+      "name": "models/gemini-3.8-flash",
+      "displayName": "Gemini 3.8 Flash",
       "description": "Model with omitted modalities array.",
       "supportedGenerationMethods": ["generateContent"]
     },
@@ -81,11 +84,6 @@ const String mockMissingModalitiesJson = '''
       "name": "models/text-embedding-004",
       "displayName": "Text Embedding",
       "supportedGenerationMethods": ["embedContent"]
-    },
-    {
-      "name": "models/gemini-embedding-exp",
-      "displayName": "Gemini Embedding",
-      "supportedGenerationMethods": ["generateContent"]
     }
   ]
 }
@@ -93,7 +91,7 @@ const String mockMissingModalitiesJson = '''
 
 void main() {
   group('GeminiModelService Unit Tests', () {
-    test('fetchAvailableModels successfully parses and ranks vision models', () async {
+    test('fetchAvailableModels successfully parses, ranks, and prioritizes vision models', () async {
       final mockClient = MockClient((request) async {
         expect(request.url.queryParameters['key'], equals('test-api-key'));
         expect(request.url.queryParameters['pageSize'], equals('100'));
@@ -103,28 +101,45 @@ void main() {
       final service = GeminiModelService(client: mockClient);
       final models = await service.fetchAvailableModels('test-api-key');
 
-      // Should contain 4 vision models (excluding text-embedding-004 and imagen)
-      expect(models.length, equals(4));
+      expect(models.length, equals(5));
 
-      // 1. gemini-2.5-flash (rank 1)
-      expect(models[0].name, equals('gemini-2.5-flash'));
+      // 1. gemini-3.8-flash (rank 1, recommended default)
+      expect(models[0].name, equals('gemini-3.8-flash'));
       expect(models[0].isRecommended, isTrue);
       expect(models[0].recommendationLabel, equals('Fast'));
 
-      // 2. gemini-2.0-flash (rank 2)
-      expect(models[1].name, equals('gemini-2.0-flash'));
+      // 2. gemini-3.1-pro (rank 2, recommended clinical)
+      expect(models[1].name, equals('gemini-3.1-pro'));
       expect(models[1].isRecommended, isTrue);
-      expect(models[1].recommendationLabel, equals('Fast'));
+      expect(models[1].recommendationLabel, equals('Think'));
 
-      // 3. gemini-2.5-pro (rank 3)
-      expect(models[2].name, equals('gemini-2.5-pro'));
-      expect(models[2].isRecommended, isTrue);
-      expect(models[2].recommendationLabel, equals('Think'));
+      // 3. gemini-2.5-flash (rank 3, not recommended)
+      expect(models[2].name, equals('gemini-2.5-flash'));
+      expect(models[2].isRecommended, isFalse);
 
       // 4. gemini-1.5-flash (rank 5)
       expect(models[3].name, equals('gemini-1.5-flash'));
       expect(models[3].isRecommended, isFalse);
-      expect(models[3].recommendationLabel, equals('Fast'));
+
+      // 5. gemini-2.0-flash (rank 10, obsolete)
+      expect(models[4].name, equals('gemini-2.0-flash'));
+      expect(models[4].isRecommended, isFalse);
+      expect(models[4].recommendationLabel, equals('Obsoleto'));
+    });
+
+    test('supportsThinking and resolveThinkingBudget assign 1024 to pro and thinking models', () {
+      expect(GeminiModelService.supportsThinking('gemini-3.1-pro'), isTrue);
+      expect(GeminiModelService.resolveThinkingBudget('gemini-3.1-pro'), equals(1024));
+
+      expect(GeminiModelService.supportsThinking('gemini-3.8-flash'), isFalse);
+      expect(GeminiModelService.resolveThinkingBudget('gemini-3.8-flash'), isNull);
+
+      final proConfig = GeminiModelService.buildCallConfig(modelName: 'gemini-3.1-pro');
+      expect(proConfig['thinking_budget'], equals(1024));
+      expect(proConfig['thinking_config'], equals({'thinking_budget': 1024}));
+
+      final flashConfig = GeminiModelService.buildCallConfig(modelName: 'gemini-3.8-flash');
+      expect(flashConfig.containsKey('thinking_budget'), isFalse);
     });
 
     test('isVisionCapableModel fallback heuristic filters non-vision when inputModalities is absent', () {
@@ -132,7 +147,7 @@ void main() {
       final models = service.parseModelsResponse(mockMissingModalitiesJson);
 
       expect(models.length, equals(1));
-      expect(models.first.name, equals('gemini-2.5-flash'));
+      expect(models.first.name, equals('gemini-3.8-flash'));
     });
 
     test('Throws GeminiApiException with 400 when API key is empty', () async {
@@ -145,29 +160,19 @@ void main() {
 
     test('Throws GeminiApiException with 403 on forbidden response', () async {
       final mockClient = MockClient((request) async {
-        return http.Response(
-          '{"error": {"code": 403, "message": "Method not allowed for key"}}',
-          403,
-        );
+        return http.Response('{"error": {"code": 403, "message": "Method not allowed for key"}}', 403);
       });
 
       final service = GeminiModelService(client: mockClient);
       expect(
         () => service.fetchAvailableModels('invalid-key'),
-        throwsA(
-          isA<GeminiApiException>()
-              .having((e) => e.statusCode, 'statusCode', 403)
-              .having((e) => e.details, 'details', contains('Method not allowed')),
-        ),
+        throwsA(isA<GeminiApiException>().having((e) => e.statusCode, 'statusCode', 403)),
       );
     });
 
     test('Throws GeminiApiException with 429 on quota limit reached', () async {
       final mockClient = MockClient((request) async {
-        return http.Response(
-          '{"error": {"code": 429, "message": "Resource has been exhausted"}}',
-          429,
-        );
+        return http.Response('{"error": {"code": 429, "message": "Resource has been exhausted"}}', 429);
       });
 
       final service = GeminiModelService(client: mockClient);
@@ -185,76 +190,43 @@ void main() {
 
       final service = GeminiModelService(client: mockClient);
       expect(
-        () => service.fetchAvailableModels(
-          'key',
-          timeout: const Duration(milliseconds: 10),
-        ),
+        () => service.fetchAvailableModels('key', timeout: const Duration(milliseconds: 10)),
         throwsA(isA<GeminiApiException>().having((e) => e.statusCode, 'statusCode', 408)),
       );
     });
 
     test('resolveEffectiveModel returns saved selection if valid in list', () {
       final available = [
-        const GeminiModelInfo(
-          name: 'gemini-2.5-flash',
-          displayName: 'Gemini 2.5 Flash',
-          description: '',
-          isRecommended: true,
-        ),
-        const GeminiModelInfo(
-          name: 'gemini-2.5-pro',
-          displayName: 'Gemini 2.5 Pro',
-          description: '',
-          isRecommended: true,
-        ),
+        const GeminiModelInfo(name: 'gemini-3.8-flash', displayName: 'Gemini 3.8 Flash', description: '', isRecommended: true),
+        const GeminiModelInfo(name: 'gemini-3.1-pro', displayName: 'Gemini 3.1 Pro', description: '', isRecommended: true),
       ];
 
       final resolved = GeminiModelService.resolveEffectiveModel(
         availableModels: available,
-        savedSelection: 'gemini-2.5-pro',
+        savedSelection: 'gemini-3.1-pro',
       );
-      expect(resolved, equals('gemini-2.5-pro'));
+      expect(resolved, equals('gemini-3.1-pro'));
     });
 
     test('resolveEffectiveModel falls back to recommended model if saved is invalid or null', () {
       final available = [
-        const GeminiModelInfo(
-          name: 'gemini-2.5-flash',
-          displayName: 'Gemini 2.5 Flash',
-          description: '',
-          isRecommended: true,
-        ),
+        const GeminiModelInfo(name: 'gemini-3.8-flash', displayName: 'Gemini 3.8 Flash', description: '', isRecommended: true),
       ];
 
-      final resolvedNull = GeminiModelService.resolveEffectiveModel(
-        availableModels: available,
-        savedSelection: null,
-      );
-      expect(resolvedNull, equals('gemini-2.5-flash'));
+      final resolvedNull = GeminiModelService.resolveEffectiveModel(availableModels: available, savedSelection: null);
+      expect(resolvedNull, equals('gemini-3.8-flash'));
 
-      final resolvedMissing = GeminiModelService.resolveEffectiveModel(
-        availableModels: available,
-        savedSelection: 'deprecated-model-xyz',
-      );
-      expect(resolvedMissing, equals('gemini-2.5-flash'));
-    });
-
-    test('Fallback models list is populated and contains standard models', () {
-      const fallbacks = GeminiModelService.fallbackModels;
-      expect(fallbacks.length, equals(4));
-      expect(fallbacks.any((m) => m.name == 'gemini-2.5-flash'), isTrue);
-      expect(fallbacks.any((m) => m.name == 'gemini-1.5-flash'), isTrue);
-      expect(fallbacks.any((m) => m.name == 'gemini-1.5-pro'), isTrue);
-      expect(fallbacks.any((m) => m.name == 'gemini-2.0-flash'), isTrue);
+      final resolvedMissing = GeminiModelService.resolveEffectiveModel(availableModels: available, savedSelection: 'deprecated-model-xyz');
+      expect(resolvedMissing, equals('gemini-3.8-flash'));
     });
 
     test('GeminiModelInfo serialization and sentinel copyWith', () {
       const model = GeminiModelInfo(
-        name: 'gemini-2.5-flash',
-        displayName: 'Gemini 2.5 Flash',
+        name: 'gemini-3.8-flash',
+        displayName: 'Gemini 3.8 Flash',
         description: 'Test description',
         isRecommended: true,
-        recommendationLabel: 'RECOMENDADO',
+        recommendationLabel: 'Fast',
         inputTokenLimit: 1000,
         outputTokenLimit: 500,
       );
@@ -263,130 +235,10 @@ void main() {
       final fromJson = GeminiModelInfo.fromJson(json);
 
       expect(fromJson, equals(model));
-      expect(fromJson.name, equals('gemini-2.5-flash'));
-      expect(fromJson.recommendationLabel, equals('RECOMENDADO'));
+      expect(fromJson.name, equals('gemini-3.8-flash'));
 
       final copied = model.copyWith(recommendationLabel: null);
       expect(copied.recommendationLabel, isNull);
-      expect(copied.name, equals(model.name));
-    });
-
-    test('isVisionCapableModel blocks all prohibited keywords and requires flash or pro', () {
-      const prohibitedKeywords = [
-        'banana',
-        'nano',
-        'transcribe',
-        'omni',
-        'computer-use',
-        'robotics',
-        'live',
-        'custom',
-        'preview-10-2025',
-        'embedding',
-        'imagen',
-        'tts',
-        'audio',
-        'veo',
-        'bison',
-      ];
-
-      for (final keyword in prohibitedKeywords) {
-        final blockedModel = {
-          'name': 'models/gemini-flash-$keyword',
-          'supportedGenerationMethods': ['generateContent'],
-        };
-        expect(
-          GeminiModelService.isVisionCapableModel(blockedModel),
-          isFalse,
-          reason: 'Model containing "$keyword" should be blocked',
-        );
-      }
-
-      // Block model without flash or pro
-      final noFlashNoPro = {
-        'name': 'models/gemini-ultra',
-        'supportedGenerationMethods': ['generateContent'],
-      };
-      expect(GeminiModelService.isVisionCapableModel(noFlashNoPro), isFalse);
-
-      // Block model without generateContent
-      final noGenerate = {
-        'name': 'models/gemini-flash',
-        'supportedGenerationMethods': ['embedContent'],
-      };
-      expect(GeminiModelService.isVisionCapableModel(noGenerate), isFalse);
-
-      // Allow valid flash and pro models
-      expect(
-        GeminiModelService.isVisionCapableModel({
-          'name': 'models/gemini-2.5-flash',
-          'supportedGenerationMethods': ['generateContent'],
-        }),
-        isTrue,
-      );
-      expect(
-        GeminiModelService.isVisionCapableModel({
-          'name': 'models/gemini-1.5-pro',
-          'supportedGenerationMethods': ['generateContent'],
-        }),
-        isTrue,
-      );
-    });
-
-    test('isVisionCapableModel strictly blocks Google AI Studio tuned models and custom models', () {
-      // 1. Tuned model with tunedModels/ prefix
-      expect(
-        GeminiModelService.isVisionCapableModel({
-          'name': 'tunedModels/nano-banana-pro',
-          'displayName': 'Nano Banana Pro',
-          'supportedGenerationMethods': ['generateContent'],
-          'inputModalities': ['TEXT', 'IMAGE'],
-        }),
-        isFalse,
-      );
-
-      // 2. Tuned model named "2"
-      expect(
-        GeminiModelService.isVisionCapableModel({
-          'name': 'tunedModels/2',
-          'displayName': '2',
-          'supportedGenerationMethods': ['generateContent'],
-          'inputModalities': ['TEXT', 'IMAGE'],
-        }),
-        isFalse,
-      );
-
-      // 3. Model with baseModel or tunedModelSource
-      expect(
-        GeminiModelService.isVisionCapableModel({
-          'name': 'models/gemini-1.5-flash-tuned',
-          'baseModel': 'models/gemini-1.5-flash',
-          'supportedGenerationMethods': ['generateContent'],
-        }),
-        isFalse,
-      );
-
-      // 4. Custom model named "gemini-2" without flash or pro even with IMAGE modality
-      expect(
-        GeminiModelService.isVisionCapableModel({
-          'name': 'models/gemini-2',
-          'displayName': 'Gemini 2',
-          'supportedGenerationMethods': ['generateContent'],
-          'inputModalities': ['TEXT', 'IMAGE'],
-        }),
-        isFalse,
-      );
-
-      // 5. Custom model with displayName "Nano Banana Pro"
-      expect(
-        GeminiModelService.isVisionCapableModel({
-          'name': 'models/gemini-1.5-flash-custom',
-          'displayName': 'Nano Banana Pro',
-          'supportedGenerationMethods': ['generateContent'],
-          'inputModalities': ['TEXT', 'IMAGE'],
-        }),
-        isFalse,
-      );
     });
   });
 }

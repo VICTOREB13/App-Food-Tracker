@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/daily_goals.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_card.dart';
@@ -24,6 +25,7 @@ class DailyCalorieSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final calorieProgress = goals.calories > 0
         ? (currentCalories / goals.calories).clamp(0.0, 1.0)
         : 0.0;
@@ -37,7 +39,7 @@ class DailyCalorieSummaryCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'RESUMEN DEL DÍA',
+                l10n.dailySummary.toUpperCase(),
                 style: GoogleFonts.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
@@ -103,8 +105,8 @@ class DailyCalorieSummaryCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       remaining >= 0
-                          ? '${remaining.toStringAsFixed(0)} restantes'
-                          : '+${(-remaining).toStringAsFixed(0)} exceso',
+                          ? l10n.remainingCalories(remaining.toStringAsFixed(0))
+                          : l10n.overCalories((-remaining).toStringAsFixed(0)),
                       style: GoogleFonts.inter(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -133,7 +135,7 @@ class DailyCalorieSummaryCard extends StatelessWidget {
             children: [
               Expanded(
                 child: MacroBentoCard(
-                  label: 'Proteína',
+                  label: l10n.protein,
                   iconEmoji: '🍗',
                   current: currentProtein,
                   goal: goals.protein,
@@ -143,7 +145,7 @@ class DailyCalorieSummaryCard extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: MacroBentoCard(
-                  label: 'Carbos',
+                  label: l10n.carbs,
                   iconEmoji: '🌾',
                   current: currentCarbs,
                   goal: goals.carbs,
@@ -153,7 +155,7 @@ class DailyCalorieSummaryCard extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: MacroBentoCard(
-                  label: 'Grasas',
+                  label: l10n.fat,
                   iconEmoji: '🥑',
                   current: currentFat,
                   goal: goals.fat,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
+import '../../l10n/meal_type_l10n.dart';
 import '../../models/meal.dart';
 
 class MealFormFields extends StatelessWidget {
@@ -18,24 +20,29 @@ class MealFormFields extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         TextField(
           controller: nameController,
           style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w600),
-          decoration: const InputDecoration(
-            labelText: 'Nombre del plato *',
-            hintText: 'Ej. Pechuga a la plancha con arroz',
+          decoration: InputDecoration(
+            labelText: l10n.dishNameLabel,
+            hintText: l10n.dishNameHint,
           ),
         ),
         const SizedBox(height: 12),
         DropdownButtonFormField<String>(
           initialValue: mealType,
           menuMaxHeight: 280,
-          decoration: const InputDecoration(labelText: 'Tipo de Comida'),
+          decoration: InputDecoration(labelText: l10n.mealTypeLabel),
           items: Meal.validMealTypes
-              .map((type) => DropdownMenuItem(value: type, child: Text(type)))
+              .map((type) => DropdownMenuItem(
+                    value: type,
+                    child: Text(type.toLocalizedMealType(context)),
+                  ))
               .toList(),
           onChanged: onMealTypeChanged,
         ),
@@ -43,9 +50,9 @@ class MealFormFields extends StatelessWidget {
         TextField(
           controller: notesController,
           maxLines: 2,
-          decoration: const InputDecoration(
-            labelText: 'Notas / Observaciones',
-            hintText: 'Ej. Se usó poco aceite en sofrito, porción mediana',
+          decoration: InputDecoration(
+            labelText: l10n.notesLabel,
+            hintText: l10n.notesHint,
           ),
         ),
       ],

@@ -3,7 +3,7 @@ tipo: changelog
 proyecto: App_Food_Tracker
 version: v1
 estado: activo
-fecha: 2026-10-04
+fecha: 2026-10-06
 tags: [proyecto, changelog, versiones]
 ---
 
@@ -15,6 +15,28 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 ---
 
 ## [Unreleased]
+
+---
+
+## [1.3.1] - 2026-10-06
+
+La versión v1.3.1 optimiza la precisión del motor multimodal de Gemini Vision mediante razonamiento físico causal invertido (geometría 3D y cubicaje volumétrico antes de predecir gramos), moderniza el catálogo de modelos adoptando Gemini 3 (`gemini-3.8-flash` y `gemini-3.1-pro`), extiende la resiliencia de timeouts (hasta 120s) con pacing progresivo y realista del anillo de carga, corrige la persistencia atómica de imágenes al modificar el tipo de comida, y refactoriza la internacionalización a `AppLocalizations` erradicando condicionales `isSpanish`.
+
+### Added
+- **Razonamiento Causal Volumétrico en Gemini Vision (`GeminiResilienceHelper` & `GeminiVisionService`):**
+  - Inversión de orden causal en el schema JSON para obligar al LLM a delimitar referencia métrica, volumen 3D ($cm^3$), densidad y grasas ocultas antes de predecir gramos y macros.
+  - Catálogo de modelos modernos: soporte para `gemini-3.8-flash` (por defecto) y `gemini-3.1-pro` (alta precisión) con `thinking_budget: 1024`.
+  - Timeout de red extendido a 90s-120s para acomodar modelos con razonamiento latente sin interrupciones prematuras.
+- **Pacing Progresivo y Realista de Progreso en Carga:**
+  - Avance fluido en 5 etapas secuenciales durante el análisis de imagen en `MealDetailScreen`.
+
+### Fixed
+- **Persistencia Atómica de Imágenes en Cambio de Tipo de Comida (Bug 1):**
+  - Desacoplamiento del selector de tipo de comida en UI del renombramiento en disco: `onMealTypeChanged` solo actualiza el estado en memoria, y el renombramiento físico se realiza de forma atómica en SQLite al guardar, evitando pantallas negras o íconos fallback desincronizados.
+- **Internacionalización Nativa Completa y Erradicación de `isSpanish` (Bug 2):**
+  - Reemplazo del 100% de los condicionales ternarios `isSpanish` por recursos tipados en `AppLocalizations`.
+  - Claves completas en `app_es.arb` y `app_en.arb` con soporte nativo para ampliación a futuros idiomas.
+  - Inicialización bilingüe de formato de fechas en `lib/main.dart`.
 
 ---
 
