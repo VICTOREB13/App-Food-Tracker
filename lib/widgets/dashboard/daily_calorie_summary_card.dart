@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../l10n/app_localizations.dart';
+import '../../l10n/app_localizations_es.dart';
 import '../../models/daily_goals.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_card.dart';
@@ -25,7 +26,7 @@ class DailyCalorieSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEs();
     final calorieProgress = goals.calories > 0
         ? (currentCalories / goals.calories).clamp(0.0, 1.0)
         : 0.0;

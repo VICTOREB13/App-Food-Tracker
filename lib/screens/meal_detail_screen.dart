@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../controllers/meal_controller.dart';
 import '../l10n/app_localizations.dart';
+import '../l10n/app_localizations_es.dart';
 import '../models/food_item.dart';
 import '../models/meal.dart';
 import '../services/image_processing_service.dart';
@@ -222,7 +223,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEs();
     final isEditing = widget.initialMeal != null;
 
     return Scaffold(

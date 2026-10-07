@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../l10n/app_localizations.dart';
+import '../../l10n/app_localizations_es.dart';
 import '../../l10n/meal_type_l10n.dart';
 import '../../models/meal.dart';
 
@@ -20,7 +21,7 @@ class MealFormFields extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEs();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

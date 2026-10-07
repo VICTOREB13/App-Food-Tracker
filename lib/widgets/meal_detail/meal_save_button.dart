@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../l10n/app_localizations.dart';
+import '../../l10n/app_localizations_es.dart';
 import '../../services/theme_manager.dart';
 
 class MealSaveButton extends StatelessWidget {
@@ -17,7 +18,7 @@ class MealSaveButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEs();
 
     return ElevatedButton.icon(
       onPressed: isSaving ? null : onSave,

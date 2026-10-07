@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../l10n/app_localizations.dart';
+import '../../l10n/app_localizations_es.dart';
 import '../../models/food_item.dart';
 import '../../services/theme_manager.dart';
 import '../common/macro_indicator_chip.dart';
@@ -22,7 +23,7 @@ class FoodItemsListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEs();
 
     return VeCard(
       child: Column(
@@ -82,7 +83,7 @@ class FoodItemsListCard extends StatelessWidget {
   }
 
   Widget _buildItemTile(BuildContext context, FoodItem item) {
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEs();
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
