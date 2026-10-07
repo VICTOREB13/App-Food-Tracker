@@ -242,14 +242,14 @@ void main() {
       expect(storedModel, isNull);
 
       final effectiveModel = storedModel ?? GeminiVisionService.defaultModel;
-      expect(effectiveModel, equals('gemini-2.5-flash'));
+      expect(effectiveModel, equals('gemini-3.8-flash'));
       expect(effectiveModel, equals(GeminiVisionService.defaultModel));
 
       final visionService = GeminiVisionService(
         apiKey: 'dummy-key',
         modelName: effectiveModel,
       );
-      expect(visionService.modelName, equals('gemini-2.5-flash'));
+      expect(visionService.modelName, equals('gemini-3.8-flash'));
     });
 
     test('5. Dynamic Model Invocation: When user selects gemini-2.0-flash, effective model matches exactly', () async {
