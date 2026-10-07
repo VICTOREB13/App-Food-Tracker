@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 import '../../core/di/service_locator.dart';
 import '../../core/interfaces/app_installer_service_interface.dart';
 import '../../core/interfaces/app_update_service_interface.dart';
