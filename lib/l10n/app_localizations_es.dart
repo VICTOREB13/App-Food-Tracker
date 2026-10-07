@@ -67,7 +67,7 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get targetFat => 'Grasa Objetivo';
   @override
-  String get dailySummary => 'Resumen Diario';
+  String get dailySummary => 'Resumen del Día';
   @override
   String get consumed => 'Consumido';
   @override
