@@ -141,5 +141,15 @@
   "analysisStageVolumetric": "Estimando geometría 3D y cubicaje volumétrico...",
   "analysisStageDensities": "Deduciendo densidades y grasas/aceites ocultos...",
   "analysisStageMacros": "Desglose nutricional y cruce con macronutrientes...",
-  "analysisStageComplete": "¡Desglose nutricional completado!"
+  "analysisStageComplete": "¡Desglose nutricional completado!",
+  "updateAvailable": "Nueva versión disponible: {version}",
+  "@updateAvailable": {
+    "description": "Mensaje de versión disponible en banner o snackbar",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "viewUpdateAction": "Ver actualización"
 }

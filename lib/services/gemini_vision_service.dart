@@ -17,7 +17,7 @@ class GeminiVisionService {
 
   static const String defaultModel = 'gemini-3.8-flash';
   static const String clinicalModel = 'gemini-3.1-pro';
-  static const String fallbackModel = 'gemini-1.5-flash';
+  static const String fallbackModel = 'gemini-2.5-flash';
 
   static const Duration defaultTimeout = Duration(seconds: 90);
   static const Duration clinicalTimeout = Duration(seconds: 120);
@@ -26,10 +26,7 @@ class GeminiVisionService {
   static const String systemInstruction = baseSystemInstruction;
 
   static String buildSystemInstruction([String? masterPrompt, String? pantryContext]) =>
-      GeminiResilienceHelper.buildSystemPrompt(
-        masterPrompt: masterPrompt,
-        pantryContext: pantryContext,
-      );
+      GeminiResilienceHelper.buildSystemPrompt(masterPrompt: masterPrompt, pantryContext: pantryContext);
 
   GeminiVisionService({
     required this.apiKey,
@@ -79,15 +76,14 @@ class GeminiVisionService {
     String? overrideMasterPrompt,
     double? dishwareDiameterCm,
     String? pantryContext,
-  }) =>
-      analyzeMealPhoto(
-        rawImageBytes: imageBytes,
-        userContext: userContext,
-        overrideModel: overrideModel,
-        overrideMasterPrompt: overrideMasterPrompt,
-        dishwareDiameterCm: dishwareDiameterCm,
-        pantryContext: pantryContext,
-      );
+  }) => analyzeMealPhoto(
+    rawImageBytes: imageBytes,
+    userContext: userContext,
+    overrideModel: overrideModel,
+    overrideMasterPrompt: overrideMasterPrompt,
+    dishwareDiameterCm: dishwareDiameterCm,
+    pantryContext: pantryContext,
+  );
 
   Future<MealAnalysisResult> analyzeMealPhoto({
     required Uint8List rawImageBytes,
@@ -249,14 +245,22 @@ class GeminiVisionService {
             responseMimeType: 'application/json',
             responseSchema: GeminiResilienceHelper.mealAnalysisSchema,
             temperature: 0.2,
+            maxOutputTokens: 8192,
           ),
         );
 
         final timeoutDuration = resolveTimeout(currentModel);
-        final response = await model.generateContent([content]).timeout(timeoutDuration);
+        final responseStream = model.generateContentStream([content]);
+        final buffer = StringBuffer();
+        await for (final chunk in responseStream.timeout(timeoutDuration)) {
+          final chunkText = chunk.text;
+          if (chunkText != null && chunkText.isNotEmpty) {
+            buffer.write(chunkText);
+          }
+        }
 
-        final text = response.text;
-        if (text == null || text.trim().isEmpty) {
+        final text = buffer.toString().trim();
+        if (text.isEmpty) {
           throw Exception('Gemini devolvió una respuesta vacía');
         }
 

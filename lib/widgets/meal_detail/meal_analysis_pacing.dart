@@ -16,7 +16,7 @@ class MealAnalysisPacing {
       return l10n.analysisStageVolumetric;
     } else if (progress < 0.85) {
       return l10n.analysisStageDensities;
-    } else if (progress < 0.95) {
+    } else if (progress < 1.0) {
       return l10n.analysisStageMacros;
     } else {
       return l10n.analysisStageComplete;

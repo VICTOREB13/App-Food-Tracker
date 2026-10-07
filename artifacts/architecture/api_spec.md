@@ -1,15 +1,15 @@
 ---
 tipo: api_spec
 proyecto: App_Food_Tracker
-version: v1.3.1
+version: v1.3.2
 estado: activo
 fecha: 2026-10-06
-tags: [proyecto, api, backend, contratos, sqlite-v4, github-releases, methodchannel-installer, v1-3-1, gemini-vision-precision, timeout-resilience]
+tags: [proyecto, api, backend, contratos, sqlite-v4, github-releases, methodchannel-installer, gemini-streaming, resumable-downloads, http-206, timeout-resilience]
 ---
 
-# 📡 Especificación de Contrato de Datos, Esquema SQLite v4 y Servicios Backend (v1.3.1)
+# 📡 Especificación de Contrato de Datos, Esquema SQLite v4 y Servicios Backend (v1.3.2)
 
-> **Backend-Architect:** Este artefacto define formalmente el esquema relacional de base de datos local SQLite v4, los índices B-Tree de cobertura, los modelos de dominio inmutables (Sentinel), los contratos de servicios internos (DAOs, Service Locator, Result Pattern, BackupNormalizer con auto-reparación) y externos (Dynamic Gemini API con Inferencia Causal Volumétrica, HomeWidget, USDA FoodData Central, Open Food Facts y Calculadora Metabólica).
+> **Backend-Architect:** Este artefacto define formalmente el esquema relacional de base de datos local SQLite v4, los índices B-Tree de cobertura, los modelos de dominio inmutables (Sentinel), los contratos de servicios internos (DAOs, Service Locator, Result Pattern, BackupNormalizer con auto-reparación) y externos (Dynamic Gemini API con Streaming y Presupuesto de 8192 Tokens, Descargas Resumibles HTTP 206 en GitHub Releases, HomeWidget, USDA FoodData Central, Open Food Facts y Calculadora Metabólica).
 
 ---
 
@@ -279,9 +279,17 @@ Si el plato visualizado contiene alimentos correspondientes a estos productos, p
      - Comportamiento: En Android API >= 26, despacha `Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:$packageName"))`.
      - Retorno: `null`.
 
+### 6.3. Contrato de Descarga Resumible HTTP 206 & Range Header
+- **Cabeceras de Petición:** `Range: bytes={existingBytes}-` (inyectada si `{destination}.part` ya existe en disco y tiene tamaño $> 0$).
+- **Manejo de Respuestas HTTP:**
+  - `HTTP 206 Partial Content`: El servidor acepta la reanudación de bytes. La escritura en disco opera en modo append (`FileMode.append`). El progreso reportado al callback acumula `existingBytes + chunkBytes` relativo a la longitud total esperada.
+  - `HTTP 200 OK`: El servidor no soporta o ignoró la cabecera Range; el archivo `.part` se sobreescribe desde el byte 0 de forma transparente.
+  - Otros códigos (4xx / 5xx): Retorna `FailureResult(NetworkFailure)` con mensaje sanitizado.
+- **Finalización Atómica:** Únicamente al verificar la recepción del 100% de los bytes, el archivo temporal `.part` se renombra de manera atómica al `.apk` final, asegurando que nunca se entregue un binario corrupto o a medio descargar.
+
 ---
 
-## 🤖 7. Contrato de Inferencia Causal Volumétrica Gemini Vision & Model Ranking (v1.3.1)
+## 🤖 7. Contrato de Inferencia Causal Volumétrica Gemini Vision & Model Ranking (v1.3.2)
 
 ### 7.1. Inversión Causal de Schema JSON (`mealAnalysisSchema`)
 Para evitar alucinaciones autorregresivas donde el modelo predice calorías antes de razonar la porción física, el esquema JSON exige la siguiente secuencia causal estricta:
@@ -318,13 +326,26 @@ Para evitar alucinaciones autorregresivas donde el modelo predice calorías ante
 ### 7.2. Contrato de Filtrado y Ranking de Modelos (`GeminiVisionFilter`)
 - `gemini-3.8-flash`: Rank 1 (Recomendado, badge 'Fast', por defecto para escaneo diario).
 - `gemini-3.1-pro`: Rank 2 (Recomendado, badge 'Think', alta precisión clínica con `thinking_budget: 1024`).
-- `gemini-2.5-flash`: Rank 3 (Compatible).
+- `gemini-2.5-flash`: Rank 3 (Compatible y Fallback activo de alta capacidad).
 - `gemini-1.5-pro`: Rank 4 (Compatible).
-- `gemini-1.5-flash`: Rank 5 (Fallback).
+- `gemini-1.5-flash`: Rank 5 (Legado).
 - `gemini-2.0-flash`: Rank 10 (Obsoleto / Demovido).
 
 ### 7.3. Contrato de Timeouts y Resiliencia
 - `defaultTimeout`: 90 segundos para modelos Flash.
-- `clinicalTimeout`: 120 segundos para modelos Pro con `thinking_budget`.
+- `clinicalTimeout`: 120 segundos para modelos Pro o con `supportsThinking`.
 - Manejo estructurado de `TimeoutException` retornando `AiServiceFailure.timeout(message)`.
+
+### 7.4. Contrato de Streaming y Cascada de Fallback (v1.3.2)
+- **Protocolo de Streaming Continuo:** Invocación vía `model.generateContentStream()` acumulando chunks progresivos en `StringBuffer`. La actividad de paquetes mantiene abierto el socket TCP/TLS, mitigando desconexiones de gateways NAT móviles (45–80s) durante fases de razonamiento latente.
+- **Parámetros de `GenerationConfig`:**
+  - `temperature`: 0.2
+  - `responseMimeType`: "application/json"
+  - `maxOutputTokens`: 8192 (previniendo el corte abrupto de tokens de razonamiento por `finishReason: MAX_TOKENS`)
+- **Cascada de Respaldo Automática:**
+  - Modelo Primario: Modelo seleccionado por el usuario o por defecto (`gemini-3.8-flash`).
+  - Modelo de Fallback: `gemini-2.5-flash`.
+  - Backoff Escalonado: Retardos progresivos en secuencia `[2s, 5s, 10s]` con jitter aleatorio adicional (0–500ms).
+  - Clasificación de Reintento (`isRetriableError`): HTTP 500, 502, 504, `HttpException`, `HandshakeException`, `SocketException`, respuestas vacías o terminaciones abruptas de red.
+
 

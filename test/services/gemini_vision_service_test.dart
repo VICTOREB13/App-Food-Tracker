@@ -10,6 +10,7 @@ void main() {
       expect(serviceDefault.modelName, equals('gemini-3.8-flash'));
       expect(GeminiVisionService.defaultModel, equals('gemini-3.8-flash'));
       expect(GeminiVisionService.clinicalModel, equals('gemini-3.1-pro'));
+      expect(GeminiVisionService.fallbackModel, equals('gemini-2.5-flash'));
       expect(serviceDefault.masterPrompt, isNull);
 
       final serviceCustom = GeminiVisionService(
@@ -21,13 +22,13 @@ void main() {
       expect(serviceCustom.masterPrompt, equals('Contexto de usuario'));
     });
 
-    test('resolveTimeout scales network timeout between 90s and 120s based on model tier', () {
-      // 90s default for agile/flash models
-      expect(GeminiVisionService.resolveTimeout('gemini-3.8-flash'), equals(const Duration(seconds: 90)));
+    test('resolveTimeout scales network timeout between 90s and 120s based on model tier and thinking support', () {
+      // 90s default for agile/flash legacy models without thinking
       expect(GeminiVisionService.resolveTimeout('gemini-2.5-flash'), equals(const Duration(seconds: 90)));
       expect(GeminiVisionService.resolveTimeout('gemini-1.5-flash'), equals(const Duration(seconds: 90)));
 
-      // 120s for pro / deep reasoning / clinical models
+      // 120s for pro / deep reasoning / clinical models and gen-3 models with thinking
+      expect(GeminiVisionService.resolveTimeout('gemini-3.8-flash'), equals(const Duration(seconds: 120)));
       expect(GeminiVisionService.resolveTimeout('gemini-3.1-pro'), equals(const Duration(seconds: 120)));
       expect(GeminiVisionService.resolveTimeout('gemini-2.5-pro'), equals(const Duration(seconds: 120)));
       expect(GeminiVisionService.resolveTimeout('gemini-3-pro-preview'), equals(const Duration(seconds: 120)));

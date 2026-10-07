@@ -241,4 +241,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get analysisStageMacros => 'Desglose nutricional y cruce con macronutrientes...';
   @override
   String get analysisStageComplete => '¡Desglose nutricional completado!';
+  @override
+  String updateAvailable(String version) => 'Nueva versión disponible: $version';
+  @override
+  String get viewUpdateAction => 'Ver actualización';
 }

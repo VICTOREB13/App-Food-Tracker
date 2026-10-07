@@ -1,15 +1,15 @@
 ---
 tipo: abstracciones
 proyecto: App_Food_Tracker
-version: v1.3.1
+version: v1.3.2
 estado: activo
 fecha: 2026-10-06
-tags: [proyecto, arquitectura, abstracciones, backend, in-app-updater, microinteractions, v1-3-1, gemini-vision-precision, timeout-resilience, atomic-image-persistence, i18n-native]
+tags: [proyecto, arquitectura, abstracciones, backend, in-app-updater, microinteractions, gemini-streaming, resumable-downloads, http-206, timeout-resilience, gemini-vision-precision]
 ---
 
-# Abstracciones del Sistema y Arquitectura de Código: Victor Engineer - Food Tracker (v1.3.1)
+# Abstracciones del Sistema y Arquitectura de Código: Victor Engineer - Food Tracker (v1.3.2)
 
-> **Mesa de Control & Backend-Architect:** Este documento centraliza las clases maestras, interfaces de dominio, servicios de negocio, funciones utilitarias nucleares, variables de estado seguro y costuras de flujo de datos (data seams) de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.3.1` (Inferencia Causal Volumétrica 3D, Modernización a Gemini 3 con Thinking Budget, Resiliencia de Timeouts a 120s, Pacing Asíncrono de UI, Persistencia Atómica de Archivos e Internacionalización Nativa Pura). Complementa conceptualmente a [[PRJ_App_Food_Tracker_api_spec|Especificación de API y Modelos]] para posibilitar el entendimiento exhaustivo del software sin necesidad de inspeccionar línea por línea el código fuente.
+> **Mesa de Control & Backend-Architect:** Este documento centraliza las clases maestras, interfaces de dominio, servicios de negocio, funciones utilitarias nucleares, variables de estado seguro y costuras de flujo de datos (data seams) de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.3.2` (Streaming Resiliente en Gemini Vision contra Cortes NAT, Presupuesto Ampliado a 8192 Tokens, Cascada de Respaldo a Gemini 2.5 Flash, Descargas Resumibles HTTP 206 en Actualizador In-App, Sanitización de Errores y Pulido de Contraste UI). Complementa conceptualmente a [[PRJ_App_Food_Tracker_api_spec|Especificación de API y Modelos]] para posibilitar el entendimiento exhaustivo del software sin necesidad de inspeccionar línea por línea el código fuente.
 
 ---
 
@@ -510,8 +510,78 @@ Para garantizar la estricta mantenibilidad del monolito modular sin romper compa
 - **Función:** `String toLocalizedMealType(BuildContext context, String canonicalType)` mapea las claves invariantes persistidas en SQLite ('Desayuno', 'Almuerzo', 'Cena', 'Snack', 'Otro') a las cadenas tipadas de `AppLocalizations.of(context)!` ('Breakfast', 'Lunch', 'Dinner', 'Snack', 'Other') sin alterar nunca la base de datos relacional.
 
 ### 10.3. Inversión Causal de Schema y Prompt en `GeminiResilienceHelper`
-- **Ubicación:** `lib/services/gemini_resilience_helper.dart` (279 LoC).
+- **Ubicación:** `lib/services/gemini_resilience_helper.dart` (292 LoC).
 - **Estructura Causal:** Inversión estricta del flujo autorregresivo del LLM. Obliga al token de inferencia a predecir dimensiones físicas tridimensionales, volumen y densidad antes de generar gramos o macronutrientes, eliminando la adivinación previa de masa.
+
+---
+
+## ⚡ 11. Abstracciones y Mejoras de Resiliencia Introducidas en v1.3.2
+
+### 11.1. Streaming Continuo en `GeminiVisionService` contra Desconexiones NAT
+- **Ubicación:** `lib/services/gemini_vision_service.dart` (295 LoC).
+- **Abstracción de Streaming:**
+  ```dart
+  // Reemplazo de model.generateContent por flujo streaming acumulativo:
+  final stream = model.generateContentStream([
+    Content.multi([
+      TextPart(effectivePrompt),
+      DataPart('image/jpeg', imageBytes),
+    ]),
+  ]);
+  final buffer = StringBuffer();
+  await for (final response in stream) {
+    if (response.text != null) {
+      buffer.write(response.text);
+    }
+  }
+  final responseText = buffer.toString();
+  ```
+- **Propósito:** Mantener activo el socket TCP/TLS transmitiendo paquetes continuos, evitando desconexiones por inactividad impuestas por NAT gateways móviles (habituales tras 45–80s sin tráfico) durante inferencias complejas de modelos con pensamiento latente.
+- **Configuración de Generación:**
+  ```dart
+  GenerationConfig(
+    temperature: 0.2,
+    responseMimeType: 'application/json',
+    maxOutputTokens: 8192, // Cupo ampliado para tokens de razonamiento
+  )
+  ```
+
+### 11.2. Cascada Moderna y Resiliencia en `GeminiResilienceHelper`
+- **Ubicación:** `lib/services/gemini_resilience_helper.dart` (292 LoC).
+- **Modelo de Respaldo:** Sustitución del modelo legado por `fallbackModel = 'gemini-2.5-flash'`.
+- **Estrategia de Backoff Escalonado:** Reintentos con retardos `[Duration(seconds: 2), Duration(seconds: 5), Duration(seconds: 10)]` y jitter aleatorio de hasta 500 ms.
+- **Clasificación de Errores Transitorios (`isRetriableError`):**
+  - Detección de códigos HTTP de gateway: 500, 502, 504.
+  - Excepciones de bajo nivel de socket: `HttpException`, `HandshakeException`, `SocketException`.
+  - Detección de payloads vacíos o terminados abruptamente.
+
+### 11.3. Descargas Resumibles (HTTP 206 & Range) en `AppUpdateService`
+- **Ubicación:** `lib/services/app_update_service.dart` (226 LoC).
+- **Mecanismo de Reanudación de Descarga:**
+  ```dart
+  final partFile = File('$destinationPath.part');
+  int existingBytes = 0;
+  if (await partFile.exists()) {
+    existingBytes = await partFile.length();
+  }
+  final request = http.Request('GET', Uri.parse(downloadUrl));
+  if (existingBytes > 0) {
+    request.headers['Range'] = 'bytes=$existingBytes-';
+  }
+  // Detección de statusCode 206 (Partial Content) vs 200 (reinicio completo si servidor ignora Range)
+  ```
+- **Persistencia Atómica:** Descarga directa a `.part` en modo append (`FileMode.append`) y renombrado atómico `await partFile.rename(destinationPath)` únicamente al completar el 100% de los bytes.
+
+### 11.4. Blindaje y Sanitización de Errores en `InAppUpdateDialog`
+- **Ubicación:** `lib/widgets/settings/in_app_update_dialog.dart` (276 LoC).
+- **Sanitización de URLs (`_sanitizeErrorMessage`):** Filtra URLs firmadas extensas con regex para evitar saturar la interfaz de usuario con cadenas inacabables de tokens AWS S3/Azure Blob.
+- **Manejo de Cancelación:** Control de variable `_isCancelled` con cierre del diálogo y descarte de streams de I/O en progreso.
+- **Ergonomía de Renderizado:** Envoltorio `SingleChildScrollView` previniendo overflow vertical en dispositivos con fuentes grandes.
+
+### 11.5. Canónica de Versiones del Sistema (`AppConstants`)
+- **Ubicación:** `lib/core/constants/app_constants.dart` (5 LoC).
+- **Definición:** `static const String appVersion = '1.3.2';`. Centraliza la versión de referencia consumida por `DashboardScreen`, `AppUpdateCard` y tests unitarios.
+
 
 
 

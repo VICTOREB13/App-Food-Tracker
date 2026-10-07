@@ -29,7 +29,9 @@ class GeminiModelService {
   /// Determines whether a given Gemini model supports latent reasoning / thinking budget
   static bool supportsThinking(String modelName) {
     final lower = modelName.toLowerCase();
-    return lower.contains('pro') || lower.contains('thinking') || lower.contains('3.1');
+    return lower.startsWith('gemini-3') ||
+        lower.contains('pro') ||
+        lower.contains('thinking');
   }
 
   /// Resolves the thinking budget for a given model (1024 for pro/thinking models, null otherwise)

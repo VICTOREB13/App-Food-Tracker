@@ -151,6 +151,8 @@ abstract class AppLocalizations {
   String get analysisStageDensities;
   String get analysisStageMacros;
   String get analysisStageComplete;
+  String updateAvailable(String version);
+  String get viewUpdateAction;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

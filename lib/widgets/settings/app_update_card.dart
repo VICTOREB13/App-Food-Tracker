@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/constants/app_constants.dart';
 import '../../core/di/service_locator.dart';
 import '../../core/interfaces/app_installer_service_interface.dart';
 import '../../core/interfaces/app_update_service_interface.dart';
@@ -16,7 +17,7 @@ class AppUpdateCard extends StatefulWidget {
 
   const AppUpdateCard({
     super.key,
-    this.currentVersion = '1.3.0',
+    this.currentVersion = AppConstants.appVersion,
     this.updateService,
     this.installerService,
   });

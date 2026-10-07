@@ -27,7 +27,7 @@ class NutritionLabelScannerService implements INutritionLabelScannerService {
         _secureStorage = secureStorageService ?? SecureStorageService.instance;
 
   static const String defaultModel = 'gemini-3.8-flash';
-  static const String fallbackModel = 'gemini-1.5-flash';
+  static const String fallbackModel = 'gemini-2.5-flash';
 
   static Schema get _labelSchema => Schema.object(
         description: 'Extracción estructurada de etiqueta de información nutricional comercial',

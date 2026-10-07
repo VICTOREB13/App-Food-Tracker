@@ -1,17 +1,17 @@
 ---
 tipo: arquitectura
 proyecto: App_Food_Tracker
-version: v1.3.1
+version: v1.3.2
 estado: activo
 fecha: 2026-10-06
 stack_principal: [Flutter, SQLite WAL v4, Google Gemini API, USDA FoodData Central, Open Food Facts, FlutterSecureStorage, GetIt, Flutter Localizations, HomeWidget, BackupNormalizer, NutritionalRecommendationService, GitHubReleasesUpdateService, MethodChannelAppInstaller, GeminiResilienceHelper]
 diagrama_html: PRJ_App_Food_Tracker_architecture_diagram.html
-tags: [proyecto, arquitectura, tech-stack, archify, local-first, get-it, l10n, result-pattern, android-widgets, sqlite-v4, recommendations, saf-backup, auto-repair, in-app-updater, microinteractions, android-16, gemini-vision-precision, timeout-resilience, atomic-image-persistence, i18n-native]
+tags: [proyecto, arquitectura, tech-stack, archify, local-first, get-it, l10n, result-pattern, android-widgets, sqlite-v4, recommendations, saf-backup, auto-repair, in-app-updater, microinteractions, android-16, gemini-vision-precision, timeout-resilience, atomic-image-persistence, i18n-native, gemini-streaming, resumable-downloads, http-206]
 ---
 
-# 🏗️ Arquitectura del Sistema: Victor Engineer - Food Tracker (v1.3.1)
+# 🏗️ Arquitectura del Sistema: Victor Engineer - Food Tracker (v1.3.2)
 
-> **Mesa de Control & Backend-Architect:** Este documento establece los componentes fundamentales, el Tech Stack tecnológico, las decisiones arquitectónicas estructurales y el flujo de datos integral de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.3.1` (Inferencia Causal Volumétrica 3D en Gemini Vision, Modernización a Gemini 3 con Thinking Budget, Resiliencia de Timeouts a 120s, Pacing Asíncrono de UI, Persistencia Atómica de Archivos e Internacionalización Nativa Pura).
+> **Mesa de Control & Backend-Architect:** Este documento establece los componentes fundamentales, el Tech Stack tecnológico, las decisiones arquitectónicas estructurales y el flujo de datos integral de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.3.2` (Streaming Resiliente en Gemini Vision contra Desconexiones NAT, Capacidad Ampliada a 8192 Tokens, Cascada de Respaldo a Gemini 2.5 Flash, Descargas Resumibles HTTP 206 Range en Actualizador In-App, Sanitización de Errores y Pulido de Contraste UI).
 
 ---
 
@@ -38,10 +38,12 @@ tags: [proyecto, arquitectura, tech-stack, archify, local-first, get-it, l10n, r
   - **Widget Extendido (4x2):** Anillo de calorías a la izquierda, desglose tri-columna de macronutrientes (Proteína, Carbohidratos, Grasas), y botones táctiles interactivos de 1 toque con deep links directos (`foodtracker://scan_food` para cámara IA y `foodtracker://scan_barcode` para escáner USDA).
   - **Doble Tema Nativo:** `res/values/colors.xml` (Modo Claro) y `res/values-night/colors.xml` (Modo Oscuro Zinc/Carmesí con esquinas redondeadas de 24dp).
 - **Inferencia IA & Visión Multimodal:** Google Generative AI SDK (`google_generative_ai: ^0.4.6`):
-  - Inyección de Escala Métrica de Vajilla: Inyección del diámetro en cm de la vajilla calibrada en el prompt del sistema para cálculo volumétrico de alta precisión.
+  - Streaming Continuo Resiliente (`model.generateContentStream`): Flujo de tokens acumulados en `StringBuffer` que mantiene activo el socket TCP/TLS, mitigando cierres por inactividad de gateways NAT móviles durante fases de inferencia profunda.
+  - Presupuesto Ampliado (`maxOutputTokens: 8192`): Evita el agotamiento de salida por cadenas de razonamiento latente y descarta truncamientos por `MAX_TOKENS`.
+  - Inyección de Escala Métrica de Vajilla: Inyección del diámetro en cm de la vajilla calibrada en el prompt del sistema para cálculo volumétrico causal.
   - Inyección de Contexto de Despensa: Reconocimiento inteligente de marcas del usuario (`PantryItem`).
-  - Resiliencia Defensiva: `GeminiResilienceHelper` con reintentos exponenciales, jitter y conmutación automática de modelo (`gemini-2.5-flash` $\rightarrow$ `gemini-1.5-flash`).
-  - Esquema JSON estructurado (`responseSchema`), temperatura 0.2, timeout defensivo de 35s y rescate de JSON truncado (`JsonRepairHelper`).
+  - Resiliencia Defensiva: `GeminiResilienceHelper` con reintentos escalonados `[2s, 5s, 10s]`, jitter y conmutación automática de modelo a `gemini-2.5-flash`.
+  - Esquema JSON estructurado (`responseSchema`), temperatura 0.2, timeout defensivo adaptativo (90s / 120s) y rescate de JSON truncado (`JsonRepairHelper`).
 - **Estimación Local Zero-Tokens:** `OfflineFoodEstimatorService` con catálogo normalizado de 50+ alimentos base por 100g para autocompletado y cálculo instantáneo sin coste de red ni consumo de tokens.
 - **Procesamiento Asíncrono en Background (Zero-Freeze):** Cola de tareas SQLite `AnalysisQueueService` con encolamiento en milisegundo 0 antes de la compresión en isolate (`compressAndResizeAsync`), preservación garantizada de fotos en disco ante errores y anillo interactivo `VeLoadingRing`.
 - **Bases de Datos Nutricionales (Cascada Híbrida):**
@@ -152,4 +154,27 @@ El diagrama interactivo de componentes, límites de seguridad, widgets nativos d
   - Erradicación del 100% de los condicionales ternarios `isSpanish` en los widgets de UI.
   - Centralización bilingüe (118 claves) en `lib/l10n/app_es.arb` y `lib/l10n/app_en.arb`.
   - Extensión `toLocalizedMealType(context)` para traducir etiquetas de comidas sin mutar las claves canónicas invariantes en base de datos.
+
+### 3.13. Streaming Resiliente en Gemini Vision, HTTP 206 Resumable Updates y Consistencia de UI (v1.3.2)
+- **Streaming Continuo contra Desconexiones NAT (`GeminiVisionService`):**
+  - Migración de `model.generateContent()` a `model.generateContentStream()` acumulando chunks en `StringBuffer`.
+  - Los paquetes de red intermedios mantienen viva la conexión TCP/TLS, mitigando el cierre de sockets por inactividad impuesto por NAT gateways de redes móviles durante fases prolongadas de razonamiento (45–80s).
+- **Presupuesto Ampliado (`maxOutputTokens: 8192`):**
+  - Configuración explícita en `GenerationConfig` para evitar que las cadenas de pensamiento agoten el presupuesto de salida (`finishReason: MAX_TOKENS`) y trunquen la estructura JSON.
+- **Cascada de Alta Capacidad y Backoff Escalonado (`GeminiResilienceHelper`):**
+  - Conmutación de fallback a `gemini-2.5-flash` con demoras `[2s, 5s, 10s]` y jitter aleatorio.
+  - Clasificación ampliada en `isRetriableError` reconociendo códigos HTTP 500, 502, 504, `HttpException`, `HandshakeException` y payloads de respuesta vacíos.
+  - Reconocimiento de modelos Gemini 3 (`gemini-3.8-flash` y `gemini-3.1-pro`) en `supportsThinking` para asignar timeout de 120s y presupuesto de pensamiento latente (1024).
+- **Descargas Resumibles de Actualizaciones GitHub (HTTP 206 & Range) (`AppUpdateService`):**
+  - Reanudación de transferencias interrumpidas (~74 MB) mediante cabeceras `Range: bytes=$existingBytes-` y detección de `HTTP 206 Partial Content`.
+  - Escritura incremental en archivo temporal `.apk.part` y renombrado atómico a `.apk` al completar la descarga total.
+- **Sanitización y Ergonomía del Diálogo de Actualización (`InAppUpdateDialog`):**
+  - `_sanitizeErrorMessage` erradica URLs de firma digital extensas de AWS/Azure/GitHub en mensajes de error visibles.
+  - Contenedor con `SingleChildScrollView` evitando desbordamientos de renderizado vertical en pantallas con tipografía ampliada.
+  - Soporte de cancelación interactiva del proceso de descarga con liberación inmediata de recursos.
+- **Corrección de Frontera en Pacing y Contraste de Notificaciones:**
+  - `MealAnalysisPacing.getStageMessage`: ratio 0.95 mantiene el mensaje de análisis de macros (`analysisStageMacros`), activando `analysisStageComplete` estrictamente en $\ge 1.0$.
+  - Contraste accesible en `DashboardScreen` mediante `AppColors.primaryLight` en botones de acción `SnackBarAction` y tema global unificado `snackBarTheme` en `AppTheme`.
+  - Centralización de versiones en `AppConstants.appVersion = '1.3.2'`.
+
 

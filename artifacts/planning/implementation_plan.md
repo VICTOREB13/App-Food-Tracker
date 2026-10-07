@@ -1,10 +1,10 @@
 ---
 tipo: implementation_plan
 proyecto: App_Food_Tracker
-iteracion: v1.3.1
+iteracion: v1.3.2
 estado: activo
 fecha: 2026-10-06
-tags: [proyecto, planning, v1-3-1, gemini-vision-precision, timeout-resilience, atomic-image-persistence, i18n-native]
+tags: [proyecto, planning, v1-3-2, gemini-streaming, resumable-downloads, http-206, timeout-resilience, ui-contrast]
 ---
 
 # 🎯 Plan de Implementación Maestro: Food Tracker (v1.1.0)
@@ -376,7 +376,47 @@ tags: [proyecto, planning, v1-3-1, gemini-vision-precision, timeout-resilience, 
 
 ---
 
+## ⚡ 3.3. Iteración v1.3.2: Resiliencia de Inferencia Gemini Streaming, Descargas Resumibles GitHub HTTP 206 y Pulido de Contraste UI
+
+### Fase A: Resiliencia de Inferencia y Streaming en Red Móvil (Backend-Architect)
+1. **Streaming Continuo (`gemini_vision_service.dart`):**
+   - Migración de `model.generateContent` a `model.generateContentStream` acumulando chunks en `StringBuffer`.
+   - Transmisión continua de fragmentos que evita desconexiones por inactividad impuestas por NAT gateways móviles (45–80s) durante razonamiento latente.
+   - Fijación de `maxOutputTokens: 8192` en `GenerationConfig` para evitar truncamientos con `finishReason: MAX_TOKENS`.
+2. **Modernización de Modelos y Thinking Support (`gemini_model_service.dart`):**
+   - Habilitar `supportsThinking` para toda la familia `gemini-3` (`gemini-3.8-flash` y `gemini-3.1-pro`), activando timeout de 120s y presupuesto de pensamiento latente de 1024.
+3. **Cascada de Alta Capacidad y Backoff Escalonado (`gemini_resilience_helper.dart`):**
+   - Establecer `fallbackModel = 'gemini-2.5-flash'` sustituyendo el modelo legado.
+   - Escalar backoff a retardos progresivos `[2s, 5s, 10s]` con jitter aleatorio.
+   - Ampliar `isRetriableError` para capturar errores de gateway 500, 502, 504, `HttpException`, `HandshakeException` y respuestas vacías.
+
+### Fase B: Descargas Resumibles y Blindaje de Diálogo (Backend-Architect & Frontend-UI)
+1. **Reanudación HTTP 206 en Descargas (`app_update_service.dart`):**
+   - Inyección de cabecera `Range: bytes=$existingBytes-` si existe archivo temporal `.apk.part`.
+   - Soporte de `HTTP 206 Partial Content` escribiendo en `FileMode.append` y calculando progreso sobre el tamaño total.
+   - Renombrado atómico a `.apk` al completar la descarga total.
+2. **Sanitización y Cancelación en Diálogo (`in_app_update_dialog.dart`):**
+   - Filtrar URLs de firma digital extensas de AWS/Azure mediante `_sanitizeErrorMessage`.
+   - Integración de `SingleChildScrollView` para prevenir errores de desbordamiento vertical.
+   - Implementar cancelación de descarga interactiva liberando recursos de streaming.
+3. **Consolidación de Versión Canónica (`app_constants.dart`):**
+   - Erradicar versiones hardcodeadas `'1.3.0'` reemplazándolas por `AppConstants.appVersion = '1.3.2'`.
+
+### Fase C: Pacing, Ergonomía y Contraste Visual (Frontend-UI)
+1. **Frontera de Pacing Precisa (`meal_analysis_pacing.dart`):**
+   - Corregir condición de frontera para que ratio 0.95 mantenga `analysisStageMacros` y solo $\ge 1.0$ reporte `analysisStageComplete`.
+2. **Accesibilidad y Contraste de SnackBar (`dashboard_screen.dart`, `theme_manager.dart`):**
+   - Uso de `AppColors.primaryLight` en botones de acción `SnackBarAction`.
+   - Configuración de `snackBarTheme` en `AppTheme` con fondo `#18181B` y borde suave.
+   - Localización en `AppLocalizations` de textos de notificación de actualización.
+
+### Fase D: Verificación de Calidad y Registro (Systems-Auditor)
+1. Verificación de cumplimiento estricto del límite de < 300 LoC en el 100% de archivos creados y modificados.
+2. Suites de pruebas unitarias y de widgets cubriendo casos borde (HTTP 206, sanitización de URLs, streaming, pacing de macros, constantes de versión).
+3. Registro formal de auditoría en `artifacts/audit_reports/audit_report.md`.
+
 ---
+
 
 ## 🔒 4. Matriz de Cumplimiento de Restricciones Técnicas
 

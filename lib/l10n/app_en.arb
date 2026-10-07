@@ -138,5 +138,15 @@
   "analysisStageVolumetric": "Estimating 3D geometry and volumetric portion...",
   "analysisStageDensities": "Deducing food densities and hidden fats/oils...",
   "analysisStageMacros": "Nutritional breakdown and macro cross-checking...",
-  "analysisStageComplete": "Nutritional breakdown complete!"
+  "analysisStageComplete": "Nutritional breakdown complete!",
+  "updateAvailable": "New version available: {version}",
+  "@updateAvailable": {
+    "description": "Message indicating a new version is available",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "viewUpdateAction": "View update"
 }

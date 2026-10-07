@@ -150,6 +150,16 @@ class AppTheme {
           borderSide: const BorderSide(color: Color(0xFFDC2626), width: 1.5),
         ),
       ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: const Color(0xFF18181B),
+        contentTextStyle: GoogleFonts.inter(color: const Color(0xFFFAFAFA), fontSize: 13),
+        actionTextColor: const Color(0xFFEF4444),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: Color(0xFF27272A), width: 1),
+        ),
+        behavior: SnackBarBehavior.floating,
+      ),
       textTheme: TextTheme(
         displayLarge: GoogleFonts.outfit(color: const Color(0xFFFAFAFA), fontWeight: FontWeight.bold),
         displayMedium: GoogleFonts.outfit(color: const Color(0xFFFAFAFA), fontWeight: FontWeight.bold),
@@ -211,6 +221,16 @@ class AppTheme {
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: Color(0xFFDC2626), width: 1.5),
         ),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: const Color(0xFF18181B),
+        contentTextStyle: GoogleFonts.inter(color: const Color(0xFFFAFAFA), fontSize: 13),
+        actionTextColor: const Color(0xFFEF4444),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: Color(0xFFE4E4E7), width: 1),
+        ),
+        behavior: SnackBarBehavior.floating,
       ),
       textTheme: TextTheme(
         displayLarge: GoogleFonts.outfit(color: const Color(0xFF09090B), fontWeight: FontWeight.bold),

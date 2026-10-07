@@ -127,18 +127,21 @@ void main() {
       expect(models[4].recommendationLabel, equals('Obsoleto'));
     });
 
-    test('supportsThinking and resolveThinkingBudget assign 1024 to pro and thinking models', () {
+    test('supportsThinking and resolveThinkingBudget assign 1024 to gen-3, pro and thinking models', () {
       expect(GeminiModelService.supportsThinking('gemini-3.1-pro'), isTrue);
       expect(GeminiModelService.resolveThinkingBudget('gemini-3.1-pro'), equals(1024));
 
-      expect(GeminiModelService.supportsThinking('gemini-3.8-flash'), isFalse);
-      expect(GeminiModelService.resolveThinkingBudget('gemini-3.8-flash'), isNull);
+      expect(GeminiModelService.supportsThinking('gemini-3.8-flash'), isTrue);
+      expect(GeminiModelService.resolveThinkingBudget('gemini-3.8-flash'), equals(1024));
 
-      final proConfig = GeminiModelService.buildCallConfig(modelName: 'gemini-3.1-pro');
-      expect(proConfig['thinking_budget'], equals(1024));
-      expect(proConfig['thinking_config'], equals({'thinking_budget': 1024}));
+      expect(GeminiModelService.supportsThinking('gemini-2.5-flash'), isFalse);
+      expect(GeminiModelService.resolveThinkingBudget('gemini-2.5-flash'), isNull);
 
-      final flashConfig = GeminiModelService.buildCallConfig(modelName: 'gemini-3.8-flash');
+      final gen3Config = GeminiModelService.buildCallConfig(modelName: 'gemini-3.8-flash');
+      expect(gen3Config['thinking_budget'], equals(1024));
+      expect(gen3Config['thinking_config'], equals({'thinking_budget': 1024}));
+
+      final flashConfig = GeminiModelService.buildCallConfig(modelName: 'gemini-2.5-flash');
       expect(flashConfig.containsKey('thinking_budget'), isFalse);
     });
 

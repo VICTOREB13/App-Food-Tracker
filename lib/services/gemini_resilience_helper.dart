@@ -6,26 +6,38 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 
 /// Helper utility managing exponential backoff, jitter, and causal schemas for Gemini Vision.
 class GeminiResilienceHelper {
-  static const String fallbackModel = 'gemini-1.5-flash';
+  static const String fallbackModel = 'gemini-2.5-flash';
 
   static bool isRetriableError(dynamic error) {
     if (error == null) return false;
+    if (error is SocketException ||
+        error is TimeoutException ||
+        error is HttpException ||
+        error is HandshakeException) {
+      return true;
+    }
     final s = error.toString().toLowerCase();
     return s.contains('429') ||
         s.contains('resource_exhausted') ||
         s.contains('quota') ||
         s.contains('rate limit') ||
-        s.contains('503') ||
         s.contains('500') ||
+        s.contains('502') ||
+        s.contains('503') ||
+        s.contains('504') ||
+        s.contains('bad gateway') ||
+        s.contains('gateway timeout') ||
         s.contains('unavailable') ||
         s.contains('overloaded') ||
         s.contains('socketexception') ||
         s.contains('timeoutexception') ||
         s.contains('clientexception') ||
+        s.contains('handshakeexception') ||
+        s.contains('httpexception') ||
         s.contains('network') ||
         s.contains('timed out') ||
-        error is SocketException ||
-        error is TimeoutException;
+        s.contains('respuesta vacía') ||
+        s.contains('empty response');
   }
 
   static Future<T> executeWithRetry<T>({
@@ -38,9 +50,9 @@ class GeminiResilienceHelper {
   }) async {
     final delays = customDelays ??
         const [
-          Duration(seconds: 1),
           Duration(seconds: 2),
-          Duration(seconds: 4),
+          Duration(seconds: 5),
+          Duration(seconds: 10),
         ];
 
     dynamic lastError;
@@ -62,7 +74,7 @@ class GeminiResilienceHelper {
         }
 
         final baseDelay = attempt < delays.length ? delays[attempt] : delays.last;
-        final jitterMs = addJitter ? random.nextInt(400) : 0;
+        final jitterMs = addJitter ? random.nextInt(500) : 0;
         final waitDuration = baseDelay + Duration(milliseconds: jitterMs);
 
         debugPrint('GeminiResilienceHelper: Retrying in ${waitDuration.inMilliseconds}ms (Attempt ${attempt + 1}/$maxAttempts) due to: $e');

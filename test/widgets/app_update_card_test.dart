@@ -85,5 +85,22 @@ void main() {
       expect(find.byType(InAppUpdateDialog), findsOneWidget);
       expect(find.text('v1.4.0'), findsOneWidget);
     });
+
+    testWidgets('defaults to canonical AppConstants.appVersion when omitted', (tester) async {
+      final fakeService = _FakeUpdateService(updateAvailable: false);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: AppUpdateCard(
+              updateService: fakeService,
+              installerService: _FakeInstallerService(),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.textContaining('v1.3.2'), findsOneWidget);
+    });
   });
 }

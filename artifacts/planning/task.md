@@ -1,15 +1,15 @@
 ---
 tipo: task_list
 proyecto: App_Food_Tracker
-iteracion: v1.3.1
+iteracion: v1.3.2
 estado: activo
 fecha: 2026-10-06
-tags: [proyecto, tasks, checklist, v1-3-1, gemini-vision-precision, timeout-resilience, atomic-image-persistence, i18n-native]
+tags: [proyecto, tasks, checklist, v1-3-2, gemini-streaming, resumable-downloads, http-206, timeout-resilience, ui-contrast]
 ---
 
-# 📋 Checklist Maestro de Tareas de Agentes (v1.3.1)
+# 📋 Checklist Maestro de Tareas de Agentes (v1.3.2)
 
-> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.3.1. Cada tarea completada se marca con `[x]`.
+> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.3.2. Cada tarea completada se marca con `[x]`.
 
 ---
 
@@ -349,6 +349,39 @@ tags: [proyecto, tasks, checklist, v1-3-1, gemini-vision-precision, timeout-resi
 - [x] (DevOps-Engineer) Incrementar versión en `pubspec.yaml` a `1.3.1+1`.
 - [x] (DevOps-Engineer) Documentar la versión en `artifacts/planning/changelog_v1.md` bajo `[1.3.1] - 2026-10-06`.
 - [x] (DevOps-Engineer) Crear y publicar el tag anotado `v1.3.1` en GitHub Actions para compilar el APK oficial.
+
+---
+
+## 🌟 Iteración v1.3.2: Resiliencia de Inferencia Gemini Streaming, Descargas Resumibles GitHub HTTP 206 y Pulido de Contraste UI
+
+### 🧭 1. Project-Planner (Master Tech Lead & Orquestador)
+- [x] (Project-Planner) Diagnosticar fallos esporádicos en llamadas extensas a Gemini (cierres NAT de operadoras móviles por inactividad durante razonamiento profundo).
+- [x] (Project-Planner) Diseñar solución de streaming continuo (`model.generateContentStream`) con acumulación progresiva en buffer y cupo ampliado de salida (`maxOutputTokens: 8192`).
+- [x] (Project-Planner) Diseñar soporte para descargas resumibles con `Range: bytes=` y `HTTP 206 Partial Content` para el instalador de actualizaciones GitHub.
+- [x] (Project-Planner) Coordinar sincronización de todos los artefactos de arquitectura, especificación de API, tareas y auditoría.
+
+### 🗄️ 2. Backend-Architect (Streaming, Cascada de Respaldo y Descargas Resumibles)
+- [x] (Backend-Architect) Migrar `GeminiVisionService` a `model.generateContentStream` acumulando chunks en `StringBuffer` y fijar `maxOutputTokens: 8192`.
+- [x] (Backend-Architect) Habilitar `supportsThinking` para modelos `gemini-3` (`gemini-3.8-flash` y `gemini-3.1-pro`) en `GeminiModelService`.
+- [x] (Backend-Architect) Actualizar `GeminiResilienceHelper`: fallback a `gemini-2.5-flash`, retardo escalonado `[2s, 5s, 10s]` con jitter y detección ampliada de errores retriables (500, 502, 504, `HttpException`, `HandshakeException`, respuestas vacías).
+- [x] (Backend-Architect) Implementar `Range: bytes=$existingBytes-` y manejo de `HTTP 206 Partial Content` en `AppUpdateService.downloadApk` con archivos `.part` y renombrado atómico.
+- [x] (Backend-Architect) Crear `lib/core/constants/app_constants.dart` y centralizar `appVersion = '1.3.2'`.
+
+### 🎨 3. Frontend-UI (Pacing, Diálogo de Actualizaciones y Contraste de UI)
+- [x] (Frontend-UI) Corregir frontera en `MealAnalysisPacing.getStageMessage` (0.95 mantiene `analysisStageMacros`, $\ge 1.0$ muestra `analysisStageComplete`).
+- [x] (Frontend-UI) Sanitizar mensajes de error en `InAppUpdateDialog` eliminando URLs firmadas de AWS/Azure, añadir `SingleChildScrollView` y cancelación de descargas.
+- [x] (Frontend-UI) Corregir contraste de `SnackBarAction` en `DashboardScreen` con `AppColors.primaryLight` y configurar `snackBarTheme` en `AppTheme`.
+- [x] (Frontend-UI) Añadir claves bilingües `updateAvailable` y `viewUpdateAction` en `AppLocalizations`.
+- [x] (Frontend-UI) Desacoplar versiones hardcodeadas `'1.3.0'` en `DashboardScreen` y `AppUpdateCard` usando `AppConstants.appVersion`.
+
+### 🛡️ 4. Systems-Auditor (Pruebas Unitarias, Calidad y Verificación de LoC)
+- [x] (Systems-Auditor) Crear y actualizar pruebas unitarias en `gemini_model_service_test.dart`, `gemini_vision_service_test.dart`, `gemini_resilience_helper_test.dart`, `app_update_service_test.dart`, `meal_analysis_pacing_test.dart`, `in_app_update_dialog_test.dart` y `app_update_card_test.dart`.
+- [x] (Systems-Auditor) Auditar que el 100% de los archivos creados o modificados tengan estrictamente < 300 LoC.
+- [x] (Systems-Auditor) Emitir veredicto formal `PASS` en `artifacts/audit_reports/audit_report.md`.
+
+### 🚀 5. DevOps-Engineer (Versionado v1.3.2 y Changelog)
+- [x] (DevOps-Engineer) Incrementar versión en `pubspec.yaml` a `1.3.2+1`.
+- [x] (DevOps-Engineer) Documentar la versión en `artifacts/planning/changelog_v1.md` bajo `[1.3.2] - 2026-10-06`.
 
 ---
 

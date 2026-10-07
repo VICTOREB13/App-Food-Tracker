@@ -22,8 +22,10 @@ import '../widgets/dashboard/quick_meal_dialog.dart';
 import '../widgets/dashboard/streak_badge.dart';
 import '../widgets/dashboard/voice_meal_recording_dialog.dart';
 import '../widgets/dashboard/week_calendar_strip.dart';
+import '../core/constants/app_constants.dart';
 import '../core/di/service_locator.dart';
 import '../core/interfaces/app_update_service_interface.dart';
+import '../l10n/app_localizations.dart';
 import '../widgets/recommendations/what_to_eat_sheet.dart';
 import '../widgets/settings/in_app_update_dialog.dart';
 import 'meal_detail_screen.dart';
@@ -58,11 +60,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
       final updateService = getIt<IAppUpdateService>();
       final release = await updateService.checkLatestRelease();
       if (!mounted || release == null) return;
-      if (updateService.isUpdateAvailable('1.3.0', release.tagName)) {
+      if (updateService.isUpdateAvailable(AppConstants.appVersion, release.tagName)) {
+        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Nueva versión disponible: ${release.tagName}'),
+          content: Text(l10n != null ? l10n.updateAvailable(release.tagName) : 'Nueva versión: ${release.tagName}'),
           duration: const Duration(seconds: 8),
-          action: SnackBarAction(label: 'Ver actualización', textColor: Colors.white, onPressed: () => showInAppUpdateDialog(context, release: release)),
+          action: SnackBarAction(
+            label: l10n?.viewUpdateAction ?? 'Ver actualización',
+            textColor: AppColors.primaryLight,
+            onPressed: () => showInAppUpdateDialog(context, release: release),
+          ),
         ));
       }
     } catch (_) {}
@@ -72,15 +79,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (!mounted) return;
     final action = uri.host.isNotEmpty ? uri.host : uri.path.replaceAll('/', '');
     switch (action) {
-      case 'scan_food':
-        _handleAiPhotoScan(ImageSource.camera);
-        break;
-      case 'scan_barcode':
-        _handleBarcodeScan();
-        break;
-      case 'new_meal':
-        _openManualEntry();
-        break;
+      case 'scan_food': _handleAiPhotoScan(ImageSource.camera); break;
+      case 'scan_barcode': _handleBarcodeScan(); break;
+      case 'new_meal': _openManualEntry(); break;
     }
   }
 

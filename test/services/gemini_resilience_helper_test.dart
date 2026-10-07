@@ -1,13 +1,21 @@
+import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/models/meal_analysis_result.dart';
 import 'package:food_tracker/services/gemini_resilience_helper.dart';
 
 void main() {
   group('GeminiResilienceHelper Tests', () {
-    test('isRetriableError identifies 429, 503, timeouts and socket errors', () {
+    test('isRetriableError identifies 429, 500, 502, 503, 504, timeouts, handshake and socket errors', () {
       expect(GeminiResilienceHelper.isRetriableError('Exception: 429 ResourceExhausted'), isTrue);
+      expect(GeminiResilienceHelper.isRetriableError('Exception: 500 Internal Server Error'), isTrue);
+      expect(GeminiResilienceHelper.isRetriableError('Exception: 502 Bad Gateway'), isTrue);
       expect(GeminiResilienceHelper.isRetriableError('Exception: 503 Service Unavailable'), isTrue);
+      expect(GeminiResilienceHelper.isRetriableError('Exception: 504 Gateway Timeout'), isTrue);
       expect(GeminiResilienceHelper.isRetriableError('SocketException: Connection timed out'), isTrue);
+      expect(GeminiResilienceHelper.isRetriableError(const SocketException('Failed host lookup')), isTrue);
+      expect(GeminiResilienceHelper.isRetriableError(const HttpException('Connection reset')), isTrue);
+      expect(GeminiResilienceHelper.isRetriableError(const HandshakeException('Handshake error in client')), isTrue);
+      expect(GeminiResilienceHelper.isRetriableError('Exception: Gemini devolvió una respuesta vacía'), isTrue);
       expect(GeminiResilienceHelper.isRetriableError('Exception: 400 Bad Request'), isFalse);
       expect(GeminiResilienceHelper.isRetriableError('Exception: 401 Unauthorized'), isFalse);
     });
@@ -45,11 +53,10 @@ void main() {
       expect(attempts, equals(2));
     });
 
-    test('executeWithRetry falls back to secondary model on repeated failures', () async {
+    test('executeWithRetry falls back to default secondary model (gemini-2.5-flash) on repeated failures', () async {
       final modelsUsed = <String>[];
       final result = await GeminiResilienceHelper.executeWithRetry<String>(
         primaryModel: 'gemini-3.8-flash',
-        secondaryModel: 'gemini-1.5-flash',
         customDelays: [const Duration(milliseconds: 10), const Duration(milliseconds: 20)],
         addJitter: false,
         action: (attempt, currentModel) async {
@@ -61,8 +68,8 @@ void main() {
         },
       );
 
-      expect(result, equals('ok_from_gemini-1.5-flash'));
-      expect(modelsUsed, contains('gemini-1.5-flash'));
+      expect(result, equals('ok_from_gemini-2.5-flash'));
+      expect(modelsUsed, contains('gemini-2.5-flash'));
     });
 
     test('buildUserPrompt appends dishware diameter metric scale when provided', () {

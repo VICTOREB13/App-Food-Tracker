@@ -18,6 +18,42 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [1.3.2] - 2026-10-06
+
+La versión v1.3.2 neutraliza los fallos esporádicos en llamadas de análisis de comida con Gemini migrando a un flujo de streaming continuo (`generateContentStream`) que mantiene activo el socket TCP/TLS contra desconexiones por inactividad de gateways NAT móviles durante fases de razonamiento latente (45–80s), amplía el cupo de salida a 8192 tokens en `GenerationConfig`, añade soporte para la familia Gemini 3 en `supportsThinking`, moderniza el fallback a `gemini-2.5-flash` con backoff escalonado (`[2s, 5s, 10s]`), introduce descargas resumibles de actualizaciones con cabeceras `Range: bytes=` y `HTTP 206 Partial Content`, sanitiza los mensajes de error de descarga erradicando URLs firmadas extensas, y resuelve inconsistencias de contraste y condiciones de frontera en la interfaz.
+
+### Added
+- **Streaming Continuo en Gemini Vision (`GeminiVisionService`):**
+  - Migración a `model.generateContentStream` acumulando chunks en `StringBuffer`, asegurando tráfico de paquetes continuo que mantiene vivo el socket TCP/TLS contra desconexiones de gateways móviles.
+  - Asignación de `maxOutputTokens: 8192` en `GenerationConfig` para evitar el truncamiento de respuestas JSON por saturación de tokens de pensamiento (`MAX_TOKENS`).
+- **Soporte Ampliado para Gemini 3 y Fallback Contemporáneo (`GeminiModelService` & `GeminiResilienceHelper`):**
+  - Reconocimiento de toda la familia `gemini-3` (`gemini-3.8-flash` y `gemini-3.1-pro`) en `supportsThinking`, activando timeout extendido de 120s y presupuesto de pensamiento latente (1024).
+  - Modernización del modelo de contingencia a `gemini-2.5-flash` con demoras de reintento `[2s, 5s, 10s]` y jitter aleatorio.
+  - Detección expandida de errores retriables en `isRetriableError` (500, 502, 504, `HttpException`, `HandshakeException`, y payloads vacíos).
+- **Descargas Resumibles en Actualizaciones In-App (`AppUpdateService`):**
+  - Implementación de cabecera `Range: bytes=$existingBytes-` y detección de `HTTP 206 Partial Content` para reanudar descargas de APK interrumpidas (~74 MB) sin reiniciar desde cero.
+  - Escritura progresiva en archivo temporal `.apk.part` y renombrado atómico a `.apk` al completar la transferencia.
+- **Canónica de Versiones (`AppConstants`):**
+  - Centralización de `AppConstants.appVersion = '1.3.2'` en `lib/core/constants/app_constants.dart`.
+
+### Changed
+- **Pacing Preciso de Análisis de Comidas (`MealAnalysisPacing`):**
+  - Ajuste de frontera para que ratio 0.95 mantenga el mensaje de desglose de macros (`analysisStageMacros`) y solo $\ge 1.0$ active `analysisStageComplete`.
+- **Tema y Contraste Visual de SnackBar (`DashboardScreen` & `ThemeManager`):**
+  - Reemplazo de texto atenuado en `SnackBarAction` por `AppColors.primaryLight` para contraste accesible de grado de producción.
+  - Configuración de `snackBarTheme` en `AppTheme` (`#18181B`, bordes suaves y comportamiento flotante).
+  - Integración de claves localizadas `updateAvailable` y `viewUpdateAction` en `AppLocalizations`.
+
+### Fixed
+- **Sanitización y Cancelación en Diálogo de Actualización (`InAppUpdateDialog`):**
+  - Erradicación de URLs firmadas de AWS S3/Azure Blob extensas en errores visibles al usuario mediante `_sanitizeErrorMessage`.
+  - Envoltorio de contenido con `SingleChildScrollView` previniendo desbordamientos verticales (`RenderFlex overflow`) en pantallas compactas o fuentes grandes.
+  - Soporte de cancelación interactiva de descarga liberando streams y cerrando el diálogo ordenadamente.
+- **Eliminación de Versiones Hardcodeadas:**
+  - Sustitución de `'1.3.0'` por `AppConstants.appVersion` en `DashboardScreen` y `AppUpdateCard`.
+
+---
+
 ## [1.3.1] - 2026-10-06
 
 La versión v1.3.1 optimiza la precisión del motor multimodal de Gemini Vision mediante razonamiento físico causal invertido (geometría 3D y cubicaje volumétrico antes de predecir gramos), moderniza el catálogo de modelos adoptando Gemini 3 (`gemini-3.8-flash` y `gemini-3.1-pro`), extiende la resiliencia de timeouts (hasta 120s) con pacing progresivo y realista del anillo de carga, corrige la persistencia atómica de imágenes al modificar el tipo de comida, y refactoriza la internacionalización a `AppLocalizations` erradicando condicionales `isSpanish`.

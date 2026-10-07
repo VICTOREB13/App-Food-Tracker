@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
+import 'package:path/path.dart' as path;
 import 'package:food_tracker/models/github_release_model.dart';
 import 'package:food_tracker/services/app_update_service.dart';
 import 'package:food_tracker/services/app_installer_service.dart';
@@ -20,25 +21,15 @@ void main() {
   group('GitHubReleaseModel Tests', () {
     test('parses official GitHub release JSON with APK asset', () {
       final jsonPayload = {
-        'tag_name': 'v1.3.0',
-        'name': 'v1.3.0 - Auto-Actualizador In-App',
+        'tag_name': 'v1.3.0', 'name': 'v1.3.0 - Auto-Actualizador In-App',
         'body': '## Novedades\n- Sistema de actualización automática.',
         'html_url': 'https://github.com/VICTOREB13/App-Food-Tracker/releases/tag/v1.3.0',
         'published_at': '2026-10-06T12:00:00Z',
         'assets': [
-          {
-            'name': 'source_code.zip',
-            'browser_download_url': 'https://example.com/source.zip',
-            'size': 1024,
-          },
-          {
-            'name': 'app-release.apk',
-            'browser_download_url': 'https://github.com/releases/download/v1.3.0/app-release.apk',
-            'size': 25600000,
-          }
-        ]
+          {'name': 'source.zip', 'browser_download_url': 'https://example.com/source.zip', 'size': 1024},
+          {'name': 'app-release.apk', 'browser_download_url': 'https://github.com/releases/download/v1.3.0/app-release.apk', 'size': 25600000},
+        ],
       };
-
       final release = GitHubReleaseModel.fromJson(jsonPayload);
 
       expect(release.tagName, equals('v1.3.0'));
@@ -53,16 +44,11 @@ void main() {
 
     test('parses release without APK assets gracefully', () {
       final jsonPayload = {
-        'tag_name': 'v1.2.0',
-        'name': '',
-        'body': 'Sin APK adjunto',
+        'tag_name': 'v1.2.0', 'name': '', 'body': 'Sin APK adjunto',
         'html_url': 'https://github.com/releases/v1.2.0',
-        'published_at': '2026-09-01T00:00:00Z',
-        'assets': <Map<String, dynamic>>[]
+        'published_at': '2026-09-01T00:00:00Z', 'assets': <Map<String, dynamic>>[],
       };
-
       final release = GitHubReleaseModel.fromJson(jsonPayload);
-
       expect(release.tagName, equals('v1.2.0'));
       expect(release.title, equals('v1.2.0'));
       expect(release.hasApk, isFalse);
@@ -72,15 +58,10 @@ void main() {
 
     test('serializes to JSON cleanly', () {
       final model = GitHubReleaseModel(
-        tagName: 'v1.3.0',
-        title: 'Release 1.3.0',
-        releaseNotes: 'Notas',
-        apkDownloadUrl: 'https://apk.url',
-        apkSizeBytes: 5000,
-        publishedAt: DateTime(2026, 10, 6),
-        htmlUrl: 'https://release.url',
+        tagName: 'v1.3.0', title: 'Release 1.3.0', releaseNotes: 'Notas',
+        apkDownloadUrl: 'https://apk.url', apkSizeBytes: 5000,
+        publishedAt: DateTime(2026, 10, 6), htmlUrl: 'https://release.url',
       );
-
       final map = model.toJson();
       expect(map['tag_name'], equals('v1.3.0'));
       expect(map['apk_download_url'], equals('https://apk.url'));
@@ -90,45 +71,27 @@ void main() {
 
   group('AppUpdateService SemVer Comparison Tests', () {
     late AppUpdateService service;
+    setUp(() => service = AppUpdateService());
 
-    setUp(() {
-      service = AppUpdateService();
-    });
-
-    test('detects newer minor version', () {
+    test('detects newer minor/major/patch version', () {
       expect(service.isUpdateAvailable('1.2.5', 'v1.3.0'), isTrue);
-    });
-
-    test('detects newer major version', () {
       expect(service.isUpdateAvailable('1.9.9', 'v2.0.0'), isTrue);
-    });
-
-    test('detects newer patch version', () {
       expect(service.isUpdateAvailable('1.2.5', '1.2.6'), isTrue);
     });
 
-    test('returns false when latest tag matches current version', () {
+    test('returns false when latest tag matches or is older than current version', () {
       expect(service.isUpdateAvailable('1.2.5', '1.2.5'), isFalse);
       expect(service.isUpdateAvailable('1.2.5', 'v1.2.5'), isFalse);
       expect(service.isUpdateAvailable('v1.2.5', '1.2.5'), isFalse);
-    });
-
-    test('returns false when latest tag is older than current version', () {
       expect(service.isUpdateAvailable('1.2.5', 'v1.2.4'), isFalse);
       expect(service.isUpdateAvailable('2.0.0', 'v1.9.9'), isFalse);
     });
 
-    test('ignores build number suffixes (+build, +1) correctly', () {
+    test('handles build suffixes, revisions, and empty strings', () {
       expect(service.isUpdateAvailable('1.2.5+1', 'v1.3.0+2'), isTrue);
       expect(service.isUpdateAvailable('1.2.5+2', 'v1.2.5+1'), isFalse);
-    });
-
-    test('handles 4-part versions and revisions', () {
       expect(service.isUpdateAvailable('1.2.5', '1.2.5.1'), isTrue);
       expect(service.isUpdateAvailable('1.2.5.2', '1.2.5.1'), isFalse);
-    });
-
-    test('defensively handles empty strings', () {
       expect(service.isUpdateAvailable('', 'v1.0.0'), isTrue);
       expect(service.isUpdateAvailable('1.0.0', ''), isFalse);
     });
@@ -142,23 +105,13 @@ void main() {
         expect(request.headers['User-Agent'], equals('VictorEngineer-FoodTracker'));
 
         final body = json.encode({
-          'tag_name': 'v1.3.0',
-          'name': 'v1.3.0 - Update',
-          'body': 'Changelog',
-          'html_url': 'https://github.com/release/1.3.0',
-          'published_at': '2026-10-06T10:00:00Z',
-          'assets': [
-            {
-              'name': 'food-tracker.apk',
-              'browser_download_url': 'https://download.apk',
-              'size': 12345678,
-            }
-          ]
+          'tag_name': 'v1.3.0', 'name': 'v1.3.0 - Update', 'body': 'Changelog',
+          'html_url': 'https://github.com/release/1.3.0', 'published_at': '2026-10-06T10:00:00Z',
+          'assets': [{'name': 'food-tracker.apk', 'browser_download_url': 'https://download.apk', 'size': 12345678}],
         });
 
         return http.StreamedResponse(
-          Stream.value(utf8.encode(body)),
-          200,
+          Stream.value(utf8.encode(body)), 200,
           headers: {'content-type': 'application/json'},
         );
       });
@@ -209,31 +162,18 @@ void main() {
     test('streams binary APK chunks and reports progression via onProgress', () async {
       final testData = List.generate(1000, (i) => i % 256);
       final totalSize = testData.length;
-
       final mockClient = MockHttpClient((request) async {
         expect(request.url.toString(), equals('https://github.com/download/app.apk'));
-        // Simulate streaming in 4 chunks
-        final chunk1 = testData.sublist(0, 250);
-        final chunk2 = testData.sublist(250, 500);
-        final chunk3 = testData.sublist(500, 750);
-        final chunk4 = testData.sublist(750, 1000);
-
-        final stream = Stream.fromIterable([chunk1, chunk2, chunk3, chunk4]);
-        return http.StreamedResponse(
-          stream,
-          200,
-          contentLength: totalSize,
-        );
+        final stream = Stream.fromIterable([
+          testData.sublist(0, 250), testData.sublist(250, 500),
+          testData.sublist(500, 750), testData.sublist(750, 1000),
+        ]);
+        return http.StreamedResponse(stream, 200, contentLength: totalSize);
       });
 
       final progressRatios = <double>[];
       final receivedBytesList = <int>[];
-
-      final service = AppUpdateService(
-        client: mockClient,
-        baseDirectoryProvider: () async => tempDir,
-      );
-
+      final service = AppUpdateService(client: mockClient, baseDirectoryProvider: () async => tempDir);
       final file = await service.downloadApk(
         downloadUrl: 'https://github.com/download/app.apk',
         versionTag: 'v1.3.0',
@@ -248,19 +188,14 @@ void main() {
       expect(await file.exists(), isTrue);
       expect(await file.length(), equals(totalSize));
       expect(file.path, endsWith('update_v1.3.0.apk'));
-
       expect(progressRatios, isNotEmpty);
       expect(progressRatios.last, equals(1.0));
       expect(receivedBytesList.last, equals(totalSize));
     });
 
     test('throws HttpException if APK download responds with HTTP error code', () async {
-      final mockClient = MockHttpClient((request) async {
-        return http.StreamedResponse(Stream.value([]), 403);
-      });
-
+      final mockClient = MockHttpClient((request) async => http.StreamedResponse(Stream.value([]), 403));
       final service = AppUpdateService(client: mockClient);
-
       expect(
         () => service.downloadApk(
           downloadUrl: 'https://github.com/download/forbidden.apk',
@@ -269,6 +204,83 @@ void main() {
         ),
         throwsA(isA<HttpException>()),
       );
+    });
+
+    test('resumes interrupted download sending Range header and appending on HTTP 206', () async {
+      final partFile = File(path.join(tempDir.path, 'update_v1.3.0.apk.part'));
+      final initialBytes = List.generate(500, (i) => i % 256);
+      await partFile.writeAsBytes(initialBytes);
+      final remainingBytes = List.generate(500, (i) => (i + 500) % 256);
+      const totalSize = 1000;
+
+      final mockClient = MockHttpClient((request) async {
+        expect(request.headers['Range'], equals('bytes=500-'));
+        return http.StreamedResponse(
+          Stream.value(remainingBytes),
+          206,
+          contentLength: 500,
+          headers: {'content-range': 'bytes 500-999/1000'},
+        );
+      });
+
+      final service = AppUpdateService(client: mockClient, baseDirectoryProvider: () async => tempDir);
+      final file = await service.downloadApk(
+        downloadUrl: 'https://github.com/download/app.apk',
+        versionTag: 'v1.3.0',
+        destinationDirectory: tempDir,
+      );
+
+      expect(await file.exists(), isTrue);
+      expect(await file.length(), equals(totalSize));
+      expect(await partFile.exists(), isFalse);
+    });
+
+    test('recovers from HTTP 416 Range Not Satisfiable by deleting .part and restarting from 0', () async {
+      final partFile = File(path.join(tempDir.path, 'update_v1.3.0.apk.part'));
+      await partFile.writeAsBytes(List.generate(2000, (i) => 1));
+      int requestCount = 0;
+      final fullBytes = List.generate(1000, (i) => i % 256);
+
+      final mockClient = MockHttpClient((request) async {
+        requestCount++;
+        if (requestCount == 1) {
+          expect(request.headers['Range'], equals('bytes=2000-'));
+          return http.StreamedResponse(Stream.value([]), 416);
+        }
+        expect(request.headers.containsKey('Range'), isFalse);
+        return http.StreamedResponse(Stream.value(fullBytes), 200, contentLength: 1000);
+      });
+
+      final service = AppUpdateService(client: mockClient, baseDirectoryProvider: () async => tempDir);
+      final file = await service.downloadApk(
+        downloadUrl: 'https://github.com/download/app.apk',
+        versionTag: 'v1.3.0',
+        destinationDirectory: tempDir,
+      );
+
+      expect(requestCount, equals(2));
+      expect(await file.exists(), isTrue);
+      expect(await file.length(), equals(1000));
+      expect(await partFile.exists(), isFalse);
+    });
+
+    test('overwrites existing .part file from byte 0 when server ignores Range and responds 200', () async {
+      final partFile = File(path.join(tempDir.path, 'update_v1.3.0.apk.part'));
+      await partFile.writeAsBytes(List.generate(300, (i) => 99));
+      final fullBytes = List.generate(1000, (i) => i % 256);
+      final mockClient = MockHttpClient((request) async =>
+          http.StreamedResponse(Stream.value(fullBytes), 200, contentLength: 1000));
+
+      final service = AppUpdateService(client: mockClient, baseDirectoryProvider: () async => tempDir);
+      final file = await service.downloadApk(
+        downloadUrl: 'https://github.com/download/app.apk',
+        versionTag: 'v1.3.0',
+        destinationDirectory: tempDir,
+      );
+
+      expect(await file.exists(), isTrue);
+      expect(await file.length(), equals(1000));
+      expect(await partFile.exists(), isFalse);
     });
   });
 

@@ -1,13 +1,13 @@
 ---
 tipo: overview
 proyecto: App_Food_Tracker
-version: v1.3.1
+version: v1.3.2
 estado: activo
 fecha: 2026-10-06
-tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid, get-it, l10n, result-pattern, android-widgets, sqlite-v4, recommendations, saf-backup, auto-repair, in-app-updater, microinteractions, gemini-vision-precision, timeout-resilience, atomic-image-persistence, i18n-native]
+tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid, get-it, l10n, result-pattern, android-widgets, sqlite-v4, recommendations, saf-backup, auto-repair, in-app-updater, microinteractions, gemini-streaming, resumable-downloads, timeout-resilience, http-206]
 ---
 
-# 🚀 Visión General del Proyecto: Victor Engineer - Food Tracker (v1.3.1)
+# 🚀 Visión General del Proyecto: Victor Engineer - Food Tracker (v1.3.2)
 
 > **Mesa de Control (Project-Planner):** Este documento centraliza la visión del producto, capacidades técnicas, directrices de arquitectura y el índice de navegación interconectado de todos los artefactos del proyecto según la metodología de Prototipado Evolutivo y estándares Obsidian.
 
@@ -19,13 +19,13 @@ tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid, get-it, 
 
 ### Propuesta de Valor Central
 
-1. **Estimación Volumétrica Visual Asistida por IA (Gemini Multimodal Dinámico):**
-   - **Descubrimiento Dinámico de Modelos:** Cero hardcoding. La aplicación consulta en tiempo real `GET https://generativelanguage.googleapis.com/v1beta/models` para descubrir y listar únicamente aquellos modelos que soportan generación de contenido estructurado y procesamiento visual (`gemini-2.5-flash`, `gemini-1.5-pro`, `gemini-2.0-flash`, etc.).
-   - **Cálculo Volumétrico Clínico sin Báscula:** Computa volúmenes basados en referencias anatómicas universales (puño cerrado ~ 1 taza de carbohidratos/legumbres, palma de la mano ~ 100-130g de carne cocida, falange distal ~ 10-15g de grasa/aceite).
-   - **Compensación de Merma y Grasa Oculta:** Ajusta mermas por cocción (20-25% en carnes), factores de hidratación (2.5-3x en arroz/pastas) y adiciona entre 5g y 10g de grasa oculta en sofritos y guisos caseros.
-   - **Desglose Anatómico Individual y Cero 200g:** Erradicación total del comodín genérico de 200g y de la duplicación del nombre del plato en ingredientes. Cada elemento se desglosa con su gramaje y macronutrientes reales.
-   - **Inyección del "Master Prompt":** Enriquecimiento de la inferencia con el perfil biométrico del usuario, hábitos y objetivos metabólicos calculados en el onboarding.
-   - **Resiliencia de Inferencia:** Timeout defensivo de 35s, rescate de JSON truncado (`JsonRepairHelper`) y salvaguarda de hierbas/especias (`isSeasoningOrHerb`) para evitar distorsiones de macros.
+1. **Estimación Volumétrica Visual Asistida por IA (Gemini Multimodal Dinámico & Streaming Resiliente):**
+   - **Streaming Continuo contra Cortes NAT (`generateContentStream`):** Transmisión de tokens en chunks que mantiene el socket TCP/TLS activo continuamente, neutralizando desconexiones por inactividad de gateways NAT móviles durante fases de razonamiento profundo (45-80s).
+   - **Presupuesto y Cupo Ampliado de Salida (`maxOutputTokens: 8192`):** Asignación ampliada en `GenerationConfig` que impide el agotamiento de tokens por cadenas de pensamiento y previene el truncamiento de respuestas JSON con `finishReason: MAX_TOKENS`.
+   - **Soporte Nativo de Modelos Generación 3:** Reconocimiento de `gemini-3.8-flash` (por defecto) y `gemini-3.1-pro` (modo clínico) con timeout extendido de 120s y presupuesto de pensamiento latente (`thinking_budget: 1024`).
+   - **Cascada de Alta Capacidad y Backoff Escalonado:** Conmutación de fallback a `gemini-2.5-flash` con demoras `[2s, 5s, 10s]` y jitter aleatorio, ampliando la detección de reintentos para 500, 502, 504, `HttpException`, `HandshakeException` y respuestas vacías.
+   - **Cálculo Volumétrico Causal 3D:** Deduce referencia métrica de vajilla, forma geométrica tridimensional ($cm^3$), densidad física, mermas de cocción y grasas ocultas antes de calcular gramos y macronutrientes.
+   - **Descargas Resumibles de Actualizaciones GitHub (HTTP 206 & Range):** Reanudación de transferencias de APKs interrumpidas (~74 MB) mediante cabeceras `Range: bytes=` y archivos de descarga temporal `.part`, previniendo descargas redundantes.
 
 2. **Detección Asíncrona en Background con Anillo Animado (`AnalysisQueueService` & `VeLoadingRing`):**
    - La captura fotográfica despacha tareas asíncronas a una cola SQLite sin congelar la UI ni bloquear al usuario con diálogos modales sincrónicos.
@@ -110,6 +110,16 @@ tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid, get-it, 
     - Timeouts escalados de 90s a 120s contra cortes prematuros de red o inferencias profundas.
     - Persistencia atómica de imágenes: sincronización transaccional del renombramiento en disco únicamente al guardar en SQLite, evitando desincronizaciones o pantallas negras.
     - Erradicación al 100% del anti-patrón de condicionales de idioma (`isSpanish ? ... : ...`) en favor de `AppLocalizations` con paridad 118/118 en ES/EN y desacoplamiento de valores canónicos de SQLite mediante `toLocalizedMealType`.
+
+19. **Streaming HTTP en Gemini Vision, Descargas Reanudables (HTTP 206 Range) y Blindaje de Actualizaciones (v1.3.2):**
+    - Inferencia multimodal en streaming continuo (`model.generateContentStream`) con acumulación en `StringBuffer` para evitar cortes por inactividad de sockets TCP en gateways NAT móviles durante análisis profundos (45–80s).
+    - Asignación explícita de `maxOutputTokens: 8192` evitando truncamiento silencioso por agotamiento de cupo de tokens de pensamiento.
+    - Detección exhaustiva de modelos de razonamiento (`lower.startsWith('gemini-3')`) garantizando presupuesto de pensamiento y timeout clínico de 120s para `gemini-3.8-flash`.
+    - Conmutación defensiva de alta capacidad hacia `gemini-2.5-flash` y backoff exponencial escalonado `[2s, 5s, 10s]` con jitter y detección de errores 502/504/HttpException/HandshakeException.
+    - Corrección del bug de condición de frontera en `MealAnalysisPacing`: visualización de "Completado" restringida a la recepción exitosa de la respuesta.
+    - Descarga resiliente de APKs con cabecera `Range: bytes=X-`, gestión de `HTTP 206 Partial Content` y auto-reparación ante `HTTP 416`.
+    - Rediseño ergonómico de `InAppUpdateDialog`: sanitización estricta de URLs firmadas de 500+ caracteres, scroll envolvente `SingleChildScrollView`, y botón explícito para cancelar descargas en curso.
+    - Corrección de contraste WCAG en SnackBar oscuro (`#18181B`) y centralización de versión canónica en `AppConstants.appVersion`.
 
 ---
 

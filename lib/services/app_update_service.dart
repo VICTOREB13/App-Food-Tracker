@@ -88,11 +88,35 @@ class AppUpdateService implements IAppUpdateService {
     Directory? destinationDirectory,
   }) async {
     final activeClient = client ?? _client;
-    final requestUri = Uri.parse(downloadUrl);
-    final request = http.Request('GET', requestUri);
-    request.headers['User-Agent'] = defaultUserAgent;
+    final cacheDir = destinationDirectory ?? await _getUpdatesDirectory();
+    final sanitizedTag = versionTag.trim().replaceFirst(RegExp(r'^[vV]'), '');
+    final fileName = 'update_v$sanitizedTag.apk';
+    final targetFile = File(path.join(cacheDir.path, fileName));
+    final partFile = File(path.join(cacheDir.path, '$fileName.part'));
 
-    final streamedResponse = await activeClient.send(request);
+    int existingBytes = 0;
+    if (await partFile.exists()) {
+      existingBytes = await partFile.length();
+    }
+
+    final requestUri = Uri.parse(downloadUrl);
+    var request = http.Request('GET', requestUri);
+    request.headers['User-Agent'] = defaultUserAgent;
+    if (existingBytes > 0) {
+      request.headers['Range'] = 'bytes=$existingBytes-';
+    }
+
+    var streamedResponse = await activeClient.send(request);
+    if (streamedResponse.statusCode == 416) {
+      if (await partFile.exists()) {
+        await partFile.delete();
+      }
+      existingBytes = 0;
+      request = http.Request('GET', requestUri);
+      request.headers['User-Agent'] = defaultUserAgent;
+      streamedResponse = await activeClient.send(request);
+    }
+
     if (streamedResponse.statusCode < 200 || streamedResponse.statusCode >= 300) {
       throw HttpException(
         'Fallo al descargar el archivo APK (HTTP ${streamedResponse.statusCode})',
@@ -100,19 +124,26 @@ class AppUpdateService implements IAppUpdateService {
       );
     }
 
-    final sanitizedTag = versionTag.trim().replaceFirst(RegExp(r'^[vV]'), '');
-    final fileName = 'update_v$sanitizedTag.apk';
+    final isPartial = streamedResponse.statusCode == 206;
+    int receivedBytes = isPartial ? existingBytes : 0;
+    int totalBytes = 0;
 
-    final cacheDir = destinationDirectory ?? await _getUpdatesDirectory();
-    final targetFile = File(path.join(cacheDir.path, fileName));
-
-    if (await targetFile.exists()) {
-      await targetFile.delete();
+    if (isPartial) {
+      final contentRange = streamedResponse.headers['content-range'];
+      if (contentRange != null) {
+        final slashIndex = contentRange.lastIndexOf('/');
+        if (slashIndex != -1) {
+          totalBytes = int.tryParse(contentRange.substring(slashIndex + 1).trim()) ?? 0;
+        }
+      }
+      if (totalBytes == 0 && streamedResponse.contentLength != null) {
+        totalBytes = existingBytes + streamedResponse.contentLength!;
+      }
+    } else {
+      totalBytes = streamedResponse.contentLength ?? 0;
     }
 
-    final totalBytes = streamedResponse.contentLength ?? 0;
-    int receivedBytes = 0;
-    final sink = targetFile.openWrite();
+    final sink = partFile.openWrite(mode: isPartial ? FileMode.append : FileMode.write);
 
     try {
       await for (final chunk in streamedResponse.stream) {
@@ -129,6 +160,11 @@ class AppUpdateService implements IAppUpdateService {
     } finally {
       await sink.close();
     }
+
+    if (await targetFile.exists()) {
+      await targetFile.delete();
+    }
+    await partFile.rename(targetFile.path);
 
     return targetFile;
   }

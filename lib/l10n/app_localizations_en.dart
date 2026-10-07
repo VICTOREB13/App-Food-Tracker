@@ -241,4 +241,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get analysisStageMacros => 'Nutritional breakdown and macro cross-checking...';
   @override
   String get analysisStageComplete => 'Nutritional breakdown complete!';
+  @override
+  String updateAvailable(String version) => 'New version available: $version';
+  @override
+  String get viewUpdateAction => 'View update';
 }
