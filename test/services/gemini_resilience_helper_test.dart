@@ -5,7 +5,7 @@ import 'package:food_tracker/services/gemini_resilience_helper.dart';
 
 void main() {
   group('GeminiResilienceHelper Tests', () {
-    test('isRetriableError identifies 429, 500, 502, 503, 504, timeouts, handshake and socket errors', () {
+    test('isRetriableError identifies 429, 500, 502, 503, 504, timeouts, handshake, socket and FormatException errors', () {
       expect(GeminiResilienceHelper.isRetriableError('Exception: 429 ResourceExhausted'), isTrue);
       expect(GeminiResilienceHelper.isRetriableError('Exception: 500 Internal Server Error'), isTrue);
       expect(GeminiResilienceHelper.isRetriableError('Exception: 502 Bad Gateway'), isTrue);
@@ -15,6 +15,8 @@ void main() {
       expect(GeminiResilienceHelper.isRetriableError(const SocketException('Failed host lookup')), isTrue);
       expect(GeminiResilienceHelper.isRetriableError(const HttpException('Connection reset')), isTrue);
       expect(GeminiResilienceHelper.isRetriableError(const HandshakeException('Handshake error in client')), isTrue);
+      expect(GeminiResilienceHelper.isRetriableError(const FormatException('Unexpected character in chunk')), isTrue);
+      expect(GeminiResilienceHelper.isRetriableError('FormatException: Unexpected end of input'), isTrue);
       expect(GeminiResilienceHelper.isRetriableError('Exception: Gemini devolvió una respuesta vacía'), isTrue);
       expect(GeminiResilienceHelper.isRetriableError('Exception: 400 Bad Request'), isFalse);
       expect(GeminiResilienceHelper.isRetriableError('Exception: 401 Unauthorized'), isFalse);
@@ -90,20 +92,17 @@ void main() {
       expect(promptWithoutScale.contains('Escala métrica de referencia'), isFalse);
     });
 
-    test('mealAnalysisSchema and baseSystemInstruction enforce strict causal order', () {
+    test('mealAnalysisSchema and baseSystemInstruction enforce decoupled reasoning', () {
       final schema = GeminiResilienceHelper.mealAnalysisSchema;
       expect(schema, isNotNull);
 
-      // System instruction mandates the causal pipeline
+      // System instruction mandates the decoupled pipeline
       final instruction = GeminiResilienceHelper.baseSystemInstruction;
-      expect(instruction, contains('PIPELINE CAUSAL ESTRICTO'));
-      expect(instruction, contains('1. Identificación y Referencia Métrica'));
-      expect(instruction, contains('2. Estimación Geométrica 3D'));
-      expect(instruction, contains('3. Densidad Física y Factor de Cocción'));
-      expect(instruction, contains('4. Detección Visual de Aceites y Grasa Oculta'));
-      expect(instruction, contains('5. Gramos Calculados (Masa Derivada)'));
-      expect(instruction, contains('6. Macronutrientes y Micronutrientes Deducidos'));
-      expect(instruction, contains('7. Justificación Visual Explicativa'));
+      expect(instruction, contains('PIPELINE DE RAZONAMIENTO DESACOPLADO'));
+      expect(instruction, contains('razonamiento_volumetrico'));
+      expect(instruction, contains('plato'));
+      expect(instruction, contains('items'));
+      expect(instruction, contains('totales'));
     });
 
     test('MealAnalysisResult deserializes JSON generated with causal 3D properties', () {

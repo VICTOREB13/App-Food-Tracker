@@ -26,28 +26,32 @@ class GeminiModelService {
   /// Default thinking budget token allocation for latent reasoning models
   static const int defaultThinkingBudget = 1024;
 
-  /// Determines whether a given Gemini model supports latent reasoning / thinking budget
+  /// Determines whether a given Gemini model supports latent reasoning / clinical depth
   static bool supportsThinking(String modelName) {
     final lower = modelName.toLowerCase();
-    return lower.startsWith('gemini-3') ||
-        lower.contains('pro') ||
-        lower.contains('thinking');
+    return lower.contains('pro') || lower.contains('thinking');
   }
 
-  /// Resolves the thinking budget for a given model (1024 for pro/thinking models, null otherwise)
-  static int? resolveThinkingBudget(String modelName) =>
-      supportsThinking(modelName) ? defaultThinkingBudget : null;
+  /// Resolves the thinking budget for a given model (null for Gemini 3 and non-thinking models)
+  static int? resolveThinkingBudget(String modelName) {
+    final lower = modelName.toLowerCase();
+    if (lower.startsWith('gemini-3')) return null;
+    return supportsThinking(modelName) ? defaultThinkingBudget : null;
+  }
 
-  /// Builds a call configuration map with model and thinking_budget when supported
+  /// Builds a call configuration map with model and thinking_budget when supported (excluded on Gemini 3)
   static Map<String, dynamic> buildCallConfig({
     required String modelName,
     int? customThinkingBudget,
   }) {
     final config = <String, dynamic>{'model': modelName};
-    final budget = customThinkingBudget ?? resolveThinkingBudget(modelName);
-    if (budget != null) {
-      config['thinking_budget'] = budget;
-      config['thinking_config'] = {'thinking_budget': budget};
+    final lower = modelName.toLowerCase();
+    if (!lower.startsWith('gemini-3')) {
+      final budget = customThinkingBudget ?? resolveThinkingBudget(modelName);
+      if (budget != null) {
+        config['thinking_budget'] = budget;
+        config['thinking_config'] = {'thinking_budget': budget};
+      }
     }
     return config;
   }

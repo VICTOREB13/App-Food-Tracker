@@ -3,7 +3,7 @@ tipo: changelog
 proyecto: App_Food_Tracker
 version: v1
 estado: activo
-fecha: 2026-10-06
+fecha: 2026-10-07
 tags: [proyecto, changelog, versiones]
 ---
 
@@ -15,6 +15,35 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 ---
 
 ## [Unreleased]
+
+---
+
+## [1.3.3] - 2026-10-07
+
+La versión v1.3.3 consolida la inferencia en streaming de Gemini Vision mediante el patrón de Razonamiento Desacoplado (*Decoupled Chain-of-Thought*) y resuelve el bug de pérdida de tareas en la cola de análisis, permitiendo subir múltiples comidas de forma concurrente y resiliente sin que las tareas previas fallidas o pendientes sean borradas u ocultadas de la interfaz.
+
+### Added
+- **Razonamiento Desacoplado (*Decoupled CoT*) en Gemini Vision (`GeminiResilienceHelper`):**
+  - Incorporación del campo inicial libre `razonamiento_volumetrico` al inicio de `mealAnalysisSchema` para permitir al modelo autorregresivo deducir vajilla, 3D, hidratación, merma y grasas antes de generar `items` y `totales`.
+  - Eliminación de 10 campos euclidianos rígidos que producían deadlocks de constrained grammar en alimentos amorfos y se descartaban en dominio.
+  - Soporte explícito para comidas de un solo elemento (1 ítem) en el esquema y en `baseSystemInstruction`.
+  - Bloque Few-Shot representativo en la instrucción del sistema para calibración volumétrica.
+- **Mosaicos Nativos de 768px y Orden Multimodal Óptimo (`GeminiVisionService`):**
+  - Ajuste de dimensión máxima de compresión a 768px en `_prepareImageBytes` (1 mosaico = 258 tokens vs 1,032 tokens a 1024px).
+  - Envío de `TextPart(prompt)` antes de `DataPart` para condicionar adecuadamente la atención multimodal antes de procesar tokens de imagen.
+- **Cola Resiliente Multi-Comida y Renderizado Concurrente (`AnalysisQueueService` & `AnalysisProgressBanner`):**
+  - Nueva propiedad reactiva `visibleTasks` que preserva y expone simultáneamente todas las tareas activas, fallidas y completadas.
+  - Persistencia inmediata de tareas en SQLite al momento de encolar (`_persistTaskToDb`).
+  - Procesamiento ordenado FIFO de tareas encoladas.
+  - Rediseño de `AnalysisProgressBanner` para renderizar tarjetas independientes por cada tarea visible, preservando foto, estado de error y botones de acción (`[Editar manualmente]`, `[Reintentar]`, `[Abrir plato]`, `[Cerrar]`) ante la subida de nuevas comidas.
+
+### Fixed
+- **Captura de `FormatException` en Reintentos Transparentes (`GeminiResilienceHelper`):**
+  - Inclusión de `FormatException` en `isRetriableError` para activar reintento automático y conmutar a `gemini-2.5-flash` ante fragmentos truncados o corruptos.
+- **Prevención de `HTTP 400 INVALID_ARGUMENT` en Gemini 3 (`GeminiModelService`):**
+  - Eliminación de la inyección de `thinking_budget` en `buildCallConfig` y `resolveThinkingBudget` para la familia de modelos `gemini-3`.
+- **Bug de Ocultamiento de Comidas Previas al Subir Otra Comida:**
+  - Erradicación de la sobreescritura de visualización en el dashboard: las comidas fallidas se mantienen accesibles e interactivas junto a las nuevas comidas encoladas.
 
 ---
 

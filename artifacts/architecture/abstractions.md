@@ -1,15 +1,15 @@
 ---
 tipo: abstracciones
 proyecto: App_Food_Tracker
-version: v1.3.2
+version: v1.3.3
 estado: activo
-fecha: 2026-10-06
-tags: [proyecto, arquitectura, abstracciones, backend, in-app-updater, microinteractions, gemini-streaming, resumable-downloads, http-206, timeout-resilience, gemini-vision-precision]
+fecha: 2026-10-07
+tags: [proyecto, arquitectura, abstracciones, backend, gemini-streaming, decoupled-cot, queue-resilience, multi-task, native-tiling, resilience]
 ---
 
-# Abstracciones del Sistema y Arquitectura de Código: Victor Engineer - Food Tracker (v1.3.2)
+# Abstracciones del Sistema y Arquitectura de Código: Victor Engineer - Food Tracker (v1.3.3)
 
-> **Mesa de Control & Backend-Architect:** Este documento centraliza las clases maestras, interfaces de dominio, servicios de negocio, funciones utilitarias nucleares, variables de estado seguro y costuras de flujo de datos (data seams) de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.3.2` (Streaming Resiliente en Gemini Vision contra Cortes NAT, Presupuesto Ampliado a 8192 Tokens, Cascada de Respaldo a Gemini 2.5 Flash, Descargas Resumibles HTTP 206 en Actualizador In-App, Sanitización de Errores y Pulido de Contraste UI). Complementa conceptualmente a [[PRJ_App_Food_Tracker_api_spec|Especificación de API y Modelos]] para posibilitar el entendimiento exhaustivo del software sin necesidad de inspeccionar línea por línea el código fuente.
+> **Mesa de Control & Backend-Architect:** Este documento centraliza las clases maestras, interfaces de dominio, servicios de negocio, funciones utilitarias nucleares, variables de estado seguro y costuras de flujo de datos (data seams) de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.3.3` (Streaming Continuo en Gemini Vision, Razonamiento Desacoplado CoT, Mosaicos Nativos de 768px, Resiliencia ante FormatException, Exclusión de thinking_budget en Gemini 3, y Cola Multi-Comida Resiliente con Renderizado Concurrente en Dashboard). Complementa conceptualmente a [[PRJ_App_Food_Tracker_api_spec|Especificación de API y Modelos]] para posibilitar el entendimiento exhaustivo del software sin necesidad de inspeccionar línea por línea el código fuente.
 
 ---
 

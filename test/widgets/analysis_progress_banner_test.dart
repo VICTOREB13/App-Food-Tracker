@@ -131,5 +131,50 @@ void main() {
       expect(openedMeal, isNotNull);
       expect(openedMeal?.mealType, equals('Cena'));
     });
+
+    testWidgets('AnalysisProgressBanner renders multiple tasks concurrently without erasing previous failed tasks', (tester) async {
+      final failedTask = AnalysisTask(
+        id: 'failed-concurrent-task',
+        imagePath: '/test/failed_photo.jpg',
+        mealType: 'Almuerzo',
+        date: DateTime.now(),
+        status: AnalysisStatus.failed,
+        error: 'Error de análisis en primera comida',
+      );
+
+      final activeTask = AnalysisTask(
+        id: 'active-concurrent-task',
+        imagePath: '/test/active_photo.jpg',
+        mealType: 'Cena',
+        date: DateTime.now(),
+        status: AnalysisStatus.processing,
+        progress: 0.50,
+        stage: 'Consultando modelo Gemini...',
+      );
+
+      AnalysisQueueService.instance.addTaskForTesting(failedTask);
+      AnalysisQueueService.instance.addTaskForTesting(activeTask);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: AnalysisProgressBanner(
+              onOpenMeal: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      // Verify both tasks are rendered concurrently on screen
+      expect(find.text('No se pudo analizar la foto'), findsOneWidget);
+      expect(find.text('Error de análisis en primera comida'), findsOneWidget);
+      expect(find.text('Reintentar'), findsOneWidget);
+      expect(find.text('Editar manualmente'), findsOneWidget);
+
+      expect(find.text('Analizando en segundo plano'), findsOneWidget);
+      expect(find.text('Consultando modelo Gemini...'), findsOneWidget);
+      expect(find.text('50%'), findsOneWidget);
+      expect(find.byType(VeLoadingRing), findsOneWidget);
+    });
   });
 }

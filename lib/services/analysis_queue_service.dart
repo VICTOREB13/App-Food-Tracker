@@ -23,16 +23,21 @@ class AnalysisQueueService extends ChangeNotifier {
 
   List<AnalysisTask> get tasks => List.unmodifiable(_tasks);
   List<AnalysisTask> get activeTasks => _tasks.where((t) => t.isPending).toList();
+  List<AnalysisTask> get failedTasks => _tasks.where((t) => t.status == AnalysisStatus.failed).toList();
+  List<AnalysisTask> get completedTasks => _tasks.where((t) => t.status == AnalysisStatus.completed).toList();
+  List<AnalysisTask> get visibleTasks => _tasks
+      .where((t) => t.isPending || t.status == AnalysisStatus.failed || t.status == AnalysisStatus.completed)
+      .toList();
 
   AnalysisTask? get currentActiveTask =>
       _tasks.cast<AnalysisTask?>().firstWhere((t) => t != null && t.isPending, orElse: () => null);
 
-  AnalysisTask? get latestCompletedTask => _tasks.cast<AnalysisTask?>().lastWhere(
+  AnalysisTask? get latestCompletedTask => _tasks.cast<AnalysisTask?>().firstWhere(
         (t) => t != null && t.status == AnalysisStatus.completed,
         orElse: () => null,
       );
 
-  AnalysisTask? get latestFailedTask => _tasks.cast<AnalysisTask?>().lastWhere(
+  AnalysisTask? get latestFailedTask => _tasks.cast<AnalysisTask?>().firstWhere(
         (t) => t != null && t.status == AnalysisStatus.failed,
         orElse: () => null,
       );
@@ -48,13 +53,11 @@ class AnalysisQueueService extends ChangeNotifier {
         )
       ''');
 
-      final rows = await db.query('analysis_queue', orderBy: 'created_at DESC', limit: 8);
+      final rows = await db.query('analysis_queue', orderBy: 'created_at DESC', limit: 20);
       _tasks.clear();
       for (final r in rows) {
-        Meal? meal;
         final mealId = r['result_meal_id'] as String?;
-        if (mealId != null) meal = await DatabaseService.instance.getMealById(mealId);
-
+        final meal = mealId != null ? await DatabaseService.instance.getMealById(mealId) : null;
         final task = AnalysisTask.fromDbMap(r, resultMeal: meal);
 
         if (task.isPending) {
@@ -67,9 +70,8 @@ class AnalysisQueueService extends ChangeNotifier {
             task.progress = 1.0;
             task.stage = '¡Comida analizada y registrada!';
           } else {
-            task.status = (task.imagePath.isNotEmpty && File(task.imagePath).existsSync())
-                ? AnalysisStatus.queued
-                : AnalysisStatus.failed;
+            final fileExists = task.imagePath.isNotEmpty && File(task.imagePath).existsSync();
+            task.status = fileExists ? AnalysisStatus.queued : AnalysisStatus.failed;
           }
         }
         _tasks.add(task);
@@ -102,6 +104,7 @@ class AnalysisQueueService extends ChangeNotifier {
     );
 
     _tasks.insert(0, task);
+    await _persistTaskToDb(task);
     notifyListeners();
     _triggerWorker();
     return task;
@@ -116,7 +119,7 @@ class AnalysisQueueService extends ChangeNotifier {
     _isWorkerRunning = true;
     try {
       while (true) {
-        final pending = _tasks.cast<AnalysisTask?>().firstWhere(
+        final pending = _tasks.cast<AnalysisTask?>().lastWhere(
               (t) => t != null && t.status == AnalysisStatus.queued,
               orElse: () => null,
             );
@@ -166,9 +169,7 @@ class AnalysisQueueService extends ChangeNotifier {
       await _updateProgress(task, 0.45, 'Consultando $effectiveModel...');
 
       final file = File(task.imagePath);
-      if (!await file.exists()) {
-        throw Exception('No se encontró el archivo de imagen guardado.');
-      }
+      if (!await file.exists()) throw Exception('No se encontró el archivo de imagen guardado.');
       final bytes = await file.readAsBytes();
 
       final gemini = GeminiVisionService(

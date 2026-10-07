@@ -1,13 +1,13 @@
 ---
 tipo: overview
 proyecto: App_Food_Tracker
-version: v1.3.2
+version: v1.3.3
 estado: activo
-fecha: 2026-10-06
-tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid, get-it, l10n, result-pattern, android-widgets, sqlite-v4, recommendations, saf-backup, auto-repair, in-app-updater, microinteractions, gemini-streaming, resumable-downloads, timeout-resilience, http-206]
+fecha: 2026-10-07
+tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid, get-it, l10n, result-pattern, android-widgets, sqlite-v4, recommendations, saf-backup, auto-repair, in-app-updater, microinteractions, gemini-streaming, decoupled-cot, queue-resilience, multi-task, native-tiling]
 ---
 
-# 🚀 Visión General del Proyecto: Victor Engineer - Food Tracker (v1.3.2)
+# 🚀 Visión General del Proyecto: Victor Engineer - Food Tracker (v1.3.3)
 
 > **Mesa de Control (Project-Planner):** Este documento centraliza la visión del producto, capacidades técnicas, directrices de arquitectura y el índice de navegación interconectado de todos los artefactos del proyecto según la metodología de Prototipado Evolutivo y estándares Obsidian.
 
@@ -19,18 +19,17 @@ tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid, get-it, 
 
 ### Propuesta de Valor Central
 
-1. **Estimación Volumétrica Visual Asistida por IA (Gemini Multimodal Dinámico & Streaming Resiliente):**
-   - **Streaming Continuo contra Cortes NAT (`generateContentStream`):** Transmisión de tokens en chunks que mantiene el socket TCP/TLS activo continuamente, neutralizando desconexiones por inactividad de gateways NAT móviles durante fases de razonamiento profundo (45-80s).
-   - **Presupuesto y Cupo Ampliado de Salida (`maxOutputTokens: 8192`):** Asignación ampliada en `GenerationConfig` que impide el agotamiento de tokens por cadenas de pensamiento y previene el truncamiento de respuestas JSON con `finishReason: MAX_TOKENS`.
-   - **Soporte Nativo de Modelos Generación 3:** Reconocimiento de `gemini-3.8-flash` (por defecto) y `gemini-3.1-pro` (modo clínico) con timeout extendido de 120s y presupuesto de pensamiento latente (`thinking_budget: 1024`).
-   - **Cascada de Alta Capacidad y Backoff Escalonado:** Conmutación de fallback a `gemini-2.5-flash` con demoras `[2s, 5s, 10s]` y jitter aleatorio, ampliando la detección de reintentos para 500, 502, 504, `HttpException`, `HandshakeException` y respuestas vacías.
-   - **Cálculo Volumétrico Causal 3D:** Deduce referencia métrica de vajilla, forma geométrica tridimensional ($cm^3$), densidad física, mermas de cocción y grasas ocultas antes de calcular gramos y macronutrientes.
-   - **Descargas Resumibles de Actualizaciones GitHub (HTTP 206 & Range):** Reanudación de transferencias de APKs interrumpidas (~74 MB) mediante cabeceras `Range: bytes=` y archivos de descarga temporal `.part`, previniendo descargas redundantes.
+1. **Estimación Volumétrica Visual Asistida por IA (Gemini Streaming & Razonamiento Desacoplado):**
+   - **Streaming Continuo contra Cortes NAT (`generateContentStream`):** Transmisión continua de fragmentos en `StringBuffer` que mantiene el socket TCP/TLS activo continuamente contra desconexiones en redes móviles.
+   - **Razonamiento Desacoplado (*Decoupled CoT*):** Campo inicial libre `razonamiento_volumetrico` al inicio de `mealAnalysisSchema` para deducción física libre sin bloqueos de gramática restringida, eliminando 10 campos geométricos rígidos en desuso.
+   - **Mosaicos Nativos de 768px (1 tile = 258 tokens):** Alineación a 768px en `_prepareImageBytes`, reduciendo en 75% los tokens de visión y acelerando la respuesta a 8–16s.
+   - **Orden Multimodal Óptimo:** Envío de `TextPart(prompt)` antes de `DataPart('image/jpeg', bytes)`.
+   - **Resiliencia ante FormatException y Fallback a 2.5-Flash:** Captura de errores de formato con conmutación automática de contingencia.
+   - **Exclusión de `thinking_budget` en Gemini 3:** Erradicación del error `HTTP 400 INVALID_ARGUMENT` en `gemini-3.8-flash` y `gemini-3.1-pro`.
 
-2. **Detección Asíncrona en Background con Anillo Animado (`AnalysisQueueService` & `VeLoadingRing`):**
-   - La captura fotográfica despacha tareas asíncronas a una cola SQLite sin congelar la UI ni bloquear al usuario con diálogos modales sincrónicos.
-   - Anillo de carga de alta fidelidad `VeLoadingRing` inspirado en bocetos de estudio con `CustomPainter`, terminales redondeadas y rotación continua fluida a 60 FPS.
-   - Banner reactivo en el Dashboard con visualización de progreso por etapas y apertura instantánea del plato analizado.
+2. **Cola Multi-Comida Resiliente y Renderizado Concurrente (`AnalysisQueueService` & `AnalysisProgressBanner`):**
+   - Gestión robusta con `visibleTasks` y persistencia inmediata en SQLite: subir una comida no destruye, pisa ni borra tareas pendientes o fallidas previas.
+   - Tarjetas independientes en el Dashboard que preservan fotos, estados y botones de acción (`[Editar manualmente]`, `[Reintentar]`, `[Abrir plato]`, `[Cerrar]`).
 
 3. **Inyección de Dependencias Formal y Arquitectura Desacoplada (`GetIt`):**
    - Adopción de `get_it` como Service Locator centralizado (`lib/core/di/service_locator.dart`), registrando interfaces abstractas (`IDatabaseService`, `IImageProcessingService`, `IMealDao`, `IWeightLogDao`, `IUserProfileDao`, `IPantryDao`).

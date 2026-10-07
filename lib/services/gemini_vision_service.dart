@@ -107,7 +107,7 @@ class GeminiVisionService {
       );
 
       return await _executeGenerativeContent(
-        parts: [DataPart('image/jpeg', imageBytesToSend), TextPart(userPromptText)],
+        parts: [TextPart(userPromptText), DataPart('image/jpeg', imageBytesToSend)],
         systemInstruction: effectiveInstruction,
         initialModel: initialModel,
       );
@@ -146,7 +146,7 @@ class GeminiVisionService {
       );
 
       return await _executeGenerativeContent(
-        parts: [DataPart('image/jpeg', imageBytesToSend), TextPart(userPromptText)],
+        parts: [TextPart(userPromptText), DataPart('image/jpeg', imageBytesToSend)],
         systemInstruction: effectiveInstruction,
         initialModel: initialModel,
       );
@@ -170,7 +170,7 @@ class GeminiVisionService {
       final effectiveInstruction = buildSystemInstruction(masterPrompt);
 
       return await _executeGenerativeContent(
-        parts: [DataPart(mimeType, audioBytes), TextPart(promptText)],
+        parts: [TextPart(promptText), DataPart(mimeType, audioBytes)],
         systemInstruction: effectiveInstruction,
         initialModel: initialModel,
       );
@@ -198,11 +198,10 @@ class GeminiVisionService {
         dishwareDiameterCm: dishwareDiameterCm,
       );
 
-      final preparedParts = <Part>[];
+      final preparedParts = <Part>[TextPart(promptText)];
       for (final frame in frameBytesList) {
         preparedParts.add(DataPart('image/jpeg', await _prepareImageBytes(frame)));
       }
-      preparedParts.add(TextPart(promptText));
 
       return await _executeGenerativeContent(
         parts: preparedParts,
@@ -216,10 +215,10 @@ class GeminiVisionService {
 
   Future<Uint8List> _prepareImageBytes(Uint8List rawBytes) async {
     final fastDims = _getFastDimensions(rawBytes);
-    if (fastDims == null || fastDims.$1 > 1024 || fastDims.$2 > 1024) {
+    if (fastDims == null || fastDims.$1 > 768 || fastDims.$2 > 768) {
       return await ImageProcessingService.instance.compressAndResizeAsync(
         rawBytes,
-        targetMaxDimension: 1024,
+        targetMaxDimension: 768,
         quality: 85,
       );
     }

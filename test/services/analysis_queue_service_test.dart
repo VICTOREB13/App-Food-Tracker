@@ -143,5 +143,34 @@ void main() {
       expect(draft.mealType, equals('Almuerzo'));
       expect(draft.notes, equals('Sin sal'));
     });
+
+    test('visibleTasks preserves failed task when a new active task is added concurrently', () {
+      final service = AnalysisQueueService.instance;
+      final failedTask = AnalysisTask(
+        id: 'failed-task-prev',
+        imagePath: '/photos/meal_prev.jpg',
+        mealType: 'Almuerzo',
+        date: DateTime.now(),
+        status: AnalysisStatus.failed,
+        error: 'Network failure',
+      );
+      final activeTask = AnalysisTask(
+        id: 'active-task-new',
+        imagePath: '/photos/meal_new.jpg',
+        mealType: 'Cena',
+        date: DateTime.now(),
+        status: AnalysisStatus.processing,
+        progress: 0.35,
+      );
+
+      service.addTaskForTesting(failedTask);
+      service.addTaskForTesting(activeTask);
+
+      expect(service.visibleTasks.length, equals(2));
+      expect(service.failedTasks.length, equals(1));
+      expect(service.activeTasks.length, equals(1));
+      expect(service.tasks.any((t) => t.id == 'failed-task-prev'), isTrue);
+      expect(service.tasks.any((t) => t.id == 'active-task-new'), isTrue);
+    });
   });
 }

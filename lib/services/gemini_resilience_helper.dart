@@ -13,7 +13,8 @@ class GeminiResilienceHelper {
     if (error is SocketException ||
         error is TimeoutException ||
         error is HttpException ||
-        error is HandshakeException) {
+        error is HandshakeException ||
+        error is FormatException) {
       return true;
     }
     final s = error.toString().toLowerCase();
@@ -34,6 +35,9 @@ class GeminiResilienceHelper {
         s.contains('clientexception') ||
         s.contains('handshakeexception') ||
         s.contains('httpexception') ||
+        s.contains('formatexception') ||
+        s.contains('unexpected character') ||
+        s.contains('syntaxerror') ||
         s.contains('network') ||
         s.contains('timed out') ||
         s.contains('respuesta vacía') ||
@@ -85,22 +89,21 @@ class GeminiResilienceHelper {
     throw lastError ?? Exception('Operación fallida tras $maxAttempts reintentos');
   }
 
-  /// Strict causal meal analysis schema forcing autoregressive physical deduction
-  /// order before computing grams and macros.
+  /// Decoupled Chain-of-Thought meal analysis schema with free-form volumetric reasoning
+  /// followed by dish name, food items, and totals.
   static Schema get mealAnalysisSchema => Schema.object(
-        description: 'Desglose nutricional y volumétrico causal de comida',
-        requiredProperties: ['plato', 'items', 'totales'],
+        description: 'Desglose nutricional y volumétrico desacoplado de comida',
+        requiredProperties: ['razonamiento_volumetrico', 'plato', 'items', 'totales'],
         properties: {
+          'razonamiento_volumetrico': Schema.string(
+            description: 'Pensamiento y deducción física libre: escala de vajilla, formas 3D, densidad, cocción, aceites y grasas ocultas',
+          ),
           'plato': Schema.string(description: 'Nombre representativo del plato'),
           'items': Schema.array(
-            description: 'Lista obligatoria con desglose causal de cada alimento visible',
+            description: 'Lista de alimentos desglosados (1 único ítem si es preparación unitaria, o múltiples si contiene ingredientes variados)',
             items: Schema.object(
               requiredProperties: [
                 'alimento',
-                'forma_geometrica_3d',
-                'dimensiones_estimadas_cm',
-                'volumen_cm3',
-                'densidad_g_cm3',
                 'gramos_estimados',
                 'calorias',
                 'proteinas_g',
@@ -108,23 +111,16 @@ class GeminiResilienceHelper {
                 'grasas_g',
               ],
               properties: {
-                'alimento': Schema.string(description: '1. Nombre del alimento individual'),
-                'referencia_metrica': Schema.string(description: '1b. Referencia métrica (plato en cm o proporción)'),
-                'forma_geometrica_3d': Schema.string(description: '2a. Forma geométrica 3D (semiesfera, prisma, cilindro)'),
-                'dimensiones_estimadas_cm': Schema.string(description: '2b. Dimensiones estimadas Largo x Ancho x Alto en cm'),
-                'volumen_cm3': Schema.number(description: '2c. Volumen tridimensional estimado en cm³'),
-                'densidad_g_cm3': Schema.number(description: '3a. Densidad física aproximada en g/cm³'),
-                'factor_coccion': Schema.number(description: '3b. Factor de cocción (hidratación o contracción)'),
-                'grasa_visible_o_oculta': Schema.string(description: '4. Detección de brillo, aceites o sofritos'),
-                'gramos_estimados': Schema.number(description: '5. Gramos derivados: volumen x densidad x factor'),
-                'calorias': Schema.number(description: '6a. Calorías calculadas a partir de gramos_estimados'),
-                'proteinas_g': Schema.number(description: '6b. Proteínas en gramos deducidas de gramos_estimados'),
-                'carbohidratos_g': Schema.number(description: '6c. Carbohidratos en gramos deducidos de gramos_estimados'),
-                'grasas_g': Schema.number(description: '6d. Grasas en gramos deducidas de gramos_estimados y aceites'),
-                'fibra_g': Schema.number(description: '6e. Fibra en gramos'),
-                'sodio_mg': Schema.number(description: '6f. Sodio en miligramos'),
-                'azucar_g': Schema.number(description: '6g. Azúcar en gramos'),
-                'justificacion_visual': Schema.string(description: '7. Justificación explicativa causal y volumétrica'),
+                'alimento': Schema.string(description: 'Nombre del alimento individual'),
+                'gramos_estimados': Schema.number(description: 'Masa derivada neta en gramos'),
+                'calorias': Schema.number(description: 'Calorías calculadas a partir de gramos_estimados'),
+                'proteinas_g': Schema.number(description: 'Proteínas en gramos'),
+                'carbohidratos_g': Schema.number(description: 'Carbohidratos en gramos'),
+                'grasas_g': Schema.number(description: 'Grasas en gramos'),
+                'fibra_g': Schema.number(description: 'Fibra en gramos'),
+                'sodio_mg': Schema.number(description: 'Sodio en miligramos'),
+                'azucar_g': Schema.number(description: 'Azúcar en gramos'),
+                'justificacion_visual': Schema.string(description: 'Justificación explicativa y física observada'),
               },
             ),
           ),
@@ -146,48 +142,38 @@ class GeminiResilienceHelper {
   static const String baseSystemInstruction = '''
 Eres un nutricionista clínico y experto en estimación física y volumétrica 3D de alimentos para comidas caseras y tradicionales.
 
-PIPELINE CAUSAL ESTRICTO DE PENSAMIENTO E INFERENCIA (Física Autorregresiva):
-Para CADA alimento visible en la foto, deduce sus propiedades físicas en riguroso orden causal ANTES de calcular gramos y macronutrientes:
-1. Identificación y Referencia Métrica:
-   - Identifica el alimento individual y toma como referencia la escala métrica disponible (diámetro del plato en cm o vajilla calibrada).
-2. Estimación Geométrica 3D:
-   - Modela la forma tridimensional aproximada (semiesfera, cilindro, disco, prisma irregular) y estima dimensiones en cm (L x W x H).
-   - Calcula el volumen espacial tridimensional en cm³ (volumen_cm3).
-3. Densidad Física y Factor de Cocción:
-   - Determina la densidad física aproximada (densidad_g_cm3, ej. arroz/pastas cocidas ~1.2-1.3, carnes ~1.1-1.3, legumbres con caldo ~1.1-1.2, ensaladas ~0.3-0.5, aceites ~0.9).
-   - Aplica el factor de cocción: expansión por hidratación de agua (arroz x2.5-3, legumbres x2) o contracción/merma por pérdida de jugos en carnes (20-25%).
-4. Detección Visual de Aceites y Grasa Oculta:
-   - Observa brillo especular, fritura, aderezos o grasa oculta en sofritos/guisos caseros (añade siempre entre 5g y 10g adicionales de grasa por ración no evidente).
-5. Gramos Calculados (Masa Derivada):
-   - Deriva los gramos_estimados rigurosamente: volumen_cm3 x densidad_g_cm3 x factor_coccion. PROHIBIDO fijar 200g genéricos.
-6. Macronutrientes y Micronutrientes Deducidos:
-   - Deriva calorías y macronutrientes estrictamente a partir de los gramos calculados en el paso 5.
-7. Justificación Visual Explicativa:
-   - Resume la justificación física y volumétrica observada.
+PIPELINE DE RAZONAMIENTO DESACOPLADO (Decoupled Chain-of-Thought):
+1. 'razonamiento_volumetrico': Redacta primero un análisis de texto libre en lenguaje natural donde deduzcas:
+   - Escala métrica y vajilla de referencia (diámetro del plato en cm o vajilla visible).
+   - Formas tridimensionales de cada alimento y volumen espacial en cm³.
+   - Densidad física (g/cm³) y factor de cocción (hidratación en arroz/pastas x2.5-3, merma de 20-25% en carnes).
+   - Detección visual de aceites, brillo superficial y grasa oculta en sofritos/guisos (+5g a 10g de grasa).
+   - Masa neta derivada en gramos para cada componente.
+2. 'plato': Asigna el nombre gastronómico representativo de la comida.
+3. 'items': Desglosa cada alimento identificado de forma individual con sus gramos estimados y macronutrientes.
+   - Si la comida consta de un solo alimento o preparación unitaria (ej. una manzana, un café, o una porción individual de lasaña), desglósalo como un único ítem en 'items'.
+   - Si la comida contiene múltiples alimentos combinados, desglosa individualmente cada ingrediente o elemento reconocible.
+4. 'totales': Suma coherente de las calorías y macronutrientes de los items.
+
+Ejemplo Few-Shot de salida:
+{
+  "razonamiento_volumetrico": "Plato hondo de 24 cm de diámetro con guiso de lentejas y arroz blanco. El arroz ocupa un volumen semiesférico de aprox. 150 cm³ con densidad 1.3 g/cm³, totalizando ~195g cocidos. Las lentejas ocupan aprox. 180 cm³ con caldo espeso (~200g). Se aprecia brillo de aceite de oliva en sofrito (+8g de grasa).",
+  "plato": "Lentejas estofadas con arroz blanco",
+  "items": [
+    {"alimento": "Arroz blanco cocido", "gramos_estimados": 195, "calorias": 250, "proteinas_g": 5, "carbohidratos_g": 54, "grasas_g": 1},
+    {"alimento": "Lentejas guisadas con sofrito", "gramos_estimados": 200, "calorias": 230, "proteinas_g": 16, "carbohidratos_g": 32, "grasas_g": 9}
+  ],
+  "totales": {"calorias": 480, "proteina_g": 21, "carbohidratos_g": 86, "grasas_g": 10}
+}
 
 Reglas obligatorias de cubicaje:
-1. Referencias anatómicas de volumen:
-   - Puño cerrado ~ 1 taza de volumen (~140-180g de arroz cocido, ~130-160g de legumbres cocidas, ~120-150g de pastas cocidas).
-   - Palma de la mano (grosor del meñique) ~ 100-130g de carne, pollo o pescado cocido.
-   - Pulgar / Falange distal ~ 1 cucharada o ~10-15g de aceite, mantequilla o grasa.
-   - Dos manos ahuecadas ~ 50-80g de ensalada de hojas crudas.
-2. Conversión cocido vs crudo:
-   - Arroz y pasta: absorben agua, multiplicando por 2.5 a 3 su peso (100g crudo = ~250-300g cocido). Estima el peso cocido visible.
-   - Carnes y aves: merma por cocción de 20% a 25% por pérdida de jugos.
-   - Legumbres (frijoles, lentejas): absorben agua duplicando o triplicando su peso.
-3. Regla de Grasa Oculta en Comida Casera:
-   - En platos caseros tradicionales (guisos, sofritos, arroz con aderezo, estofados), añade siempre entre 5g y 10g adicionales de grasa (aceite/sofrito) por ración que no se ven a simple vista pero están integrados en la salsa o preparación.
-4. Porciones compartidas:
-   - Si el usuario indica en el contexto que la foto es de una fuente, olla o plato compartido y especifica su porción (ej. "me comí 1/3"), calcula exclusivamente la porción consumida por el usuario.
-5. Desglose obligatorio de ingredientes en 'items':
-   - Es ESTRICTAMENTE OBLIGATORIO desglosar de forma individual cada alimento visible en 'items'. NUNCA devuelvas 'items' como un arreglo vacío. Mínimo 2 o más items si hay varios alimentos.
-   - PROHIBIDO agrupar o duplicar el nombre del plato como único elemento en 'items'.
-   - Para cada alimento en 'items', estima con precisión sus gramos, calorías, proteínas, carbohidratos y grasas específicos.
-   - La suma de las calorías y macronutrientes de los 'items' individuales debe coincidir con 'totales'.
-6. Estimación volumétrica precisa de gramos (PROHIBIDO fijar 200g genéricos):
-   - PROHIBIDO asignar 200g de forma genérica o repetitiva a los ingredientes o al plato.
-7. Formato estricto:
-   - Responde únicamente con el JSON estructurado según el esquema.
+- Puño cerrado ~ 1 taza de volumen (~140-180g de arroz cocido, ~130-160g de legumbres cocidas).
+- Palma de la mano (grosor del meñique) ~ 100-130g de carne, pollo o pescado cocido.
+- Pulgar / Falange distal ~ 1 cucharada o ~10-15g de aceite o grasa.
+- Dos manos ahuecadas ~ 50-80g de ensalada de hojas crudas.
+- Arroz y pasta multiplican su peso x2.5 a 3 por absorción de agua. Carnes merma 20% a 25%.
+- Si el contexto indica porción compartida (ej. "me comí la mitad"), calcula exclusivamente la porción consumida.
+- Responde únicamente con el JSON estructurado según el esquema.
 ''';
 
   static String buildSystemPrompt({String? masterPrompt, String? pantryContext}) {
@@ -219,10 +205,10 @@ Reglas obligatorias de cubicaje:
   }) {
     final buffer = StringBuffer();
     buffer.writeln('Analiza minuciosamente esta comida casera y estima su desglose nutricional siguiendo las reglas volumétricas.');
-    buffer.writeln('ORDEN CAUSAL OBLIGATORIO: Identifica referencia métrica -> Geometría 3D y volumen cm³ -> Densidad y cocción -> Brillo/grasa oculta -> Masa en gramos -> Macronutrientes.');
+    buffer.writeln('ORDEN CAUSAL OBLIGATORIO: razonamiento_volumetrico (deducción libre 3D, vajilla, densidad, grasa) -> plato -> items -> totales.');
     buffer.writeln('REGLAS FUNDAMENTALES DE DESGLOSE:');
-    buffer.writeln('1. DESGLOSE INDIVIDUAL OBLIGATORIO: Identifica y desglosa CADA alimento visible en la lista "items" con sus macros y micronutrientes (fibra_g, sodio_mg, azucar_g). NUNCA devuelvas items vacío.');
-    buffer.writeln('2. PROHIBIDO DUPLICAR EL PLATO: NUNCA coloques el plato entero como un único ingrediente.');
+    buffer.writeln('1. DESGLOSE INDIVIDUAL OBLIGATORIO: Identifica y desglosa CADA alimento en "items" con sus macros y micronutrientes (fibra_g, sodio_mg, azucar_g). NUNCA devuelvas items vacío.');
+    buffer.writeln('2. COMIDAS UNITARIAS: Si el plato contiene un solo elemento (ej. manzana, sándwich, café), devuélvelo como 1 ítem en "items".');
     buffer.writeln('3. GRAMOS REALISTAS: PROHIBIDO fijar 200g genéricos. Deriva gramos por densidad visual y volumen 3D.');
     buffer.writeln('4. La suma de calorías, macronutrientes y micronutrientes de los items individuales debe corresponder con los totales.');
 
@@ -265,7 +251,7 @@ Reglas obligatorias de cubicaje:
     buffer.writeln('El comensal describe por voz natural los alimentos que consumió.');
     buffer.writeln('Escucha minuciosamente el audio, transcribe e identifica cada alimento y porción indicada.');
     buffer.writeln('Calcula sus gramos estimados, calorías, proteínas, carbohidratos, grasas y micronutrientes (fibra_g, sodio_mg, azucar_g).');
-    buffer.writeln('Genera el desglose estructurado obligatorio de cada alimento individual en "items" y los "totales".');
+    buffer.writeln('Genera el razonamiento volumétrico libre, el desglose estructurado en "items" y los "totales".');
     if (userNotes != null && userNotes.trim().isNotEmpty) {
       buffer.writeln('\nNotas adicionales del comensal: ${userNotes.trim()}');
     }

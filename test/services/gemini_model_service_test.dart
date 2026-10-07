@@ -127,19 +127,29 @@ void main() {
       expect(models[4].recommendationLabel, equals('Obsoleto'));
     });
 
-    test('supportsThinking and resolveThinkingBudget assign 1024 to gen-3, pro and thinking models', () {
+    test('supportsThinking and resolveThinkingBudget exclude thinking_budget on gemini-3 to prevent HTTP 400', () {
       expect(GeminiModelService.supportsThinking('gemini-3.1-pro'), isTrue);
-      expect(GeminiModelService.resolveThinkingBudget('gemini-3.1-pro'), equals(1024));
+      expect(GeminiModelService.resolveThinkingBudget('gemini-3.1-pro'), isNull);
 
-      expect(GeminiModelService.supportsThinking('gemini-3.8-flash'), isTrue);
-      expect(GeminiModelService.resolveThinkingBudget('gemini-3.8-flash'), equals(1024));
+      expect(GeminiModelService.supportsThinking('gemini-3.8-flash'), isFalse);
+      expect(GeminiModelService.resolveThinkingBudget('gemini-3.8-flash'), isNull);
+
+      expect(GeminiModelService.supportsThinking('gemini-2.0-flash-thinking'), isTrue);
+      expect(GeminiModelService.resolveThinkingBudget('gemini-2.0-flash-thinking'), equals(1024));
 
       expect(GeminiModelService.supportsThinking('gemini-2.5-flash'), isFalse);
       expect(GeminiModelService.resolveThinkingBudget('gemini-2.5-flash'), isNull);
 
       final gen3Config = GeminiModelService.buildCallConfig(modelName: 'gemini-3.8-flash');
-      expect(gen3Config['thinking_budget'], equals(1024));
-      expect(gen3Config['thinking_config'], equals({'thinking_budget': 1024}));
+      expect(gen3Config.containsKey('thinking_budget'), isFalse);
+      expect(gen3Config.containsKey('thinking_config'), isFalse);
+
+      final gen3ProConfig = GeminiModelService.buildCallConfig(modelName: 'gemini-3.1-pro');
+      expect(gen3ProConfig.containsKey('thinking_budget'), isFalse);
+      expect(gen3ProConfig.containsKey('thinking_config'), isFalse);
+
+      final thinkingConfig = GeminiModelService.buildCallConfig(modelName: 'gemini-2.0-flash-thinking');
+      expect(thinkingConfig['thinking_budget'], equals(1024));
 
       final flashConfig = GeminiModelService.buildCallConfig(modelName: 'gemini-2.5-flash');
       expect(flashConfig.containsKey('thinking_budget'), isFalse);

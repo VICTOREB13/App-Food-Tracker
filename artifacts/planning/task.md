@@ -1,15 +1,15 @@
 ---
 tipo: task_list
 proyecto: App_Food_Tracker
-iteracion: v1.3.2
+iteracion: v1.3.3
 estado: activo
-fecha: 2026-10-06
-tags: [proyecto, tasks, checklist, v1-3-2, gemini-streaming, resumable-downloads, http-206, timeout-resilience, ui-contrast]
+fecha: 2026-10-07
+tags: [proyecto, tasks, checklist, v1-3-3, gemini-vision, unary-call, schema-optimization, resilience, 768px-tiling]
 ---
 
-# 📋 Checklist Maestro de Tareas de Agentes (v1.3.2)
+# 📋 Checklist Maestro de Tareas de Agentes (v1.3.3)
 
-> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.3.2. Cada tarea completada se marca con `[x]`.
+> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.3.3. Cada tarea completada se marca con `[x]`.
 
 ---
 
@@ -382,6 +382,47 @@ tags: [proyecto, tasks, checklist, v1-3-2, gemini-streaming, resumable-downloads
 ### 🚀 5. DevOps-Engineer (Versionado v1.3.2 y Changelog)
 - [x] (DevOps-Engineer) Incrementar versión en `pubspec.yaml` a `1.3.2+1`.
 - [x] (DevOps-Engineer) Documentar la versión en `artifacts/planning/changelog_v1.md` bajo `[1.3.2] - 2026-10-06`.
+
+---
+
+## 🌟 Iteración v1.3.3: Inferencia en Streaming con Razonamiento Desacoplado y Cola Resiliente Multi-Comida
+
+### 🧭 1. Project-Planner (Master Tech Lead & Orquestador)
+- [x] (Project-Planner) Diagnosticar la causa raíz del 50%–70% de fallos en producción (deadlock de constrained grammar por 10 campos geométricos y descarte 100% en capa de dominio).
+- [x] (Project-Planner) Diseñar la arquitectura de Razonamiento Desacoplado (*Decoupled Chain-of-Thought*) con campo `razonamiento_volumetrico` inicial en texto libre.
+- [x] (Project-Planner) Confirmar preservación de Streaming continuo (`model.generateContentStream` acumulando en `StringBuffer`) para neutralizar caídas por timeout de sockets NAT en móviles.
+- [x] (Project-Planner) Especificar escala de imagen nativa de 768px (1 tile = 258 tokens vs 1,032 tokens a 1024px) y orden multimodal `TextPart` antes de `DataPart`.
+- [x] (Project-Planner) Diseñar la solución a la cola resiliente multi-comida: preservación de tareas fallidas/activas (`visibleTasks`) y tarjetas concurrentes independientes en UI.
+- [x] (Project-Planner) Redactar y publicar el plan en `artifacts/planning/implementation_plan.md` y desglosar tareas atómicas en `artifacts/planning/task.md`.
+
+### 🗄️ 2. Backend-Architect (Servicios de Visión, Resiliencia, Modelos y Cola)
+- [x] (Backend-Architect) Podar `mealAnalysisSchema` en `GeminiResilienceHelper`: desacoplar deducción causal en `razonamiento_volumetrico` y erradicar 10 campos geométricos en desuso.
+- [x] (Backend-Architect) Reformular `baseSystemInstruction` con instrucciones positivas, soporte oficial para comidas unitarias (1 ítem) y bloque Few-Shot representativo.
+- [x] (Backend-Architect) Añadir captura de `FormatException` en `GeminiResilienceHelper.isRetriableError` para activar reintento transparente con fallback a `gemini-2.5-flash`.
+- [x] (Backend-Architect) Mantener `GeminiVisionService` con streaming continuo acumulando en `StringBuffer`.
+- [x] (Backend-Architect) Enviar `TextPart(prompt)` antes de `DataPart('image/jpeg', bytes)` en `GeminiVisionService`.
+- [x] (Backend-Architect) Configurar `targetMaxDimension: 768` en `GeminiVisionService._prepareImageBytes` para alineación nativa de tiles (258 tokens).
+- [x] (Backend-Architect) Eliminar inyección de `thinking_budget` en `GeminiModelService.buildCallConfig` y `resolveThinkingBudget` para prevenir error `HTTP 400 INVALID_ARGUMENT` en Gemini 3.
+- [x] (Backend-Architect) Actualizar `AnalysisQueueService` con `visibleTasks`, persistencia inmediata en SQLite y procesamiento ordenado FIFO.
+- [x] (Backend-Architect) Asegurar que el 100% de los archivos modificados cumplan estrictamente `< 300 LoC`.
+
+### 🎨 3. Frontend-UI (Banner de Progreso y Tarjetas Multi-Tarea)
+- [x] (Frontend-UI) Actualizar `AnalysisProgressBanner` para renderizar concurrentemente todas las tareas de `visibleTasks` en tarjetas independientes.
+- [x] (Frontend-UI) Preservar visibilidad y botones de acción (`[Editar manualmente]`, `[Reintentar]`, `[Abrir plato]`, `[Cerrar]`) ante subida concurrente de múltiples comidas.
+- [x] (Frontend-UI) Asegurar que `analysis_progress_banner.dart` cumpla estrictamente `< 300 LoC`.
+
+### 🚀 4. DevOps-Engineer (Versionado y Sincronización de Artefactos)
+- [x] (DevOps-Engineer) Actualizar `AppConstants.appVersion = '1.3.3'` en `lib/core/constants/app_constants.dart`.
+- [x] (DevOps-Engineer) Incrementar versión en `pubspec.yaml` a `version: 1.3.3+1`.
+- [x] (DevOps-Engineer) Actualizar `artifacts/planning/changelog_v1.md` documentando la versión `## [1.3.3] - 2026-10-07`.
+- [x] (DevOps-Engineer) Actualizar `artifacts/project_overview.md`, `artifacts/architecture/architecture.md`, `artifacts/architecture/abstractions.md` y `artifacts/architecture/api_spec.md`.
+- [x] (DevOps-Engineer) Ejecutar git commit, push a origin main y creación y push del tag `v1.3.3`.
+
+### 🛡️ 5. Systems-Auditor (Pruebas Automatizadas y Quality Gate)
+- [x] (Systems-Auditor) Actualizar pruebas en `test/services/gemini_resilience_helper_test.dart` y `test/services/gemini_model_service_test.dart`.
+- [x] (Systems-Auditor) Agregar pruebas en `test/services/analysis_queue_service_test.dart` y `test/widgets/analysis_progress_banner_test.dart` para concurrencia multi-tarea.
+- [x] (Systems-Auditor) Auditar que el 100% de archivos modificados en `lib/` tengan estrictamente < 300 LoC (0 archivos >= 300).
+- [x] (Systems-Auditor) Emitir veredicto formal `PASS` en `artifacts/audit_reports/audit_report.md`.
 
 ---
 
