@@ -23,6 +23,13 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 La versión v1.3.3 consolida la inferencia en streaming de Gemini Vision mediante el patrón de Razonamiento Desacoplado (*Decoupled Chain-of-Thought*) y resuelve el bug de pérdida de tareas en la cola de análisis, permitiendo subir múltiples comidas de forma concurrente y resiliente sin que las tareas previas fallidas o pendientes sean borradas u ocultadas de la interfaz.
 
 ### Added
+- **Chips de Autovalidación de la IA en Detalle de Comida (`MealAiValidationChips`):**
+  - Incorporación de chips informativos de certeza estimada (`porcentaje_certeza`, icono `Icons.verified_outlined`) con código de color semántico: verde ($\ge 85\%$), amarillo ($\ge 70\%$) o ámbar ($< 70\%$).
+  - Incorporación de chip de margen de error calórico (`margen_error_kcal`, icono `Icons.tune`, `"±X kcal"`).
+  - Integración nativa en `MealDetailScreen` debajo de los chips de macronutrientes.
+  - Diseño enfocado al usuario sin etiquetas cualitativas ("nivel") ni campo de observación en JSON, manteniendo la visual limpia.
+- **Descompositor Modular de Alimentos (`MealDecomposer`):**
+  - Módulo auxiliar extraído de `MealAnalysisResult` para descomposición volumétrica y protección de condimentos (< 300 LoC).
 - **Razonamiento Desacoplado (*Decoupled CoT*) en Gemini Vision (`GeminiResilienceHelper`):**
   - Incorporación del campo inicial libre `razonamiento_volumetrico` al inicio de `mealAnalysisSchema` para permitir al modelo autorregresivo deducir vajilla, 3D, hidratación, merma y grasas antes de generar `items` y `totales`.
   - Eliminación de 10 campos euclidianos rígidos que producían deadlocks de constrained grammar en alimentos amorfos y se descartaban en dominio.
@@ -38,6 +45,13 @@ La versión v1.3.3 consolida la inferencia en streaming de Gemini Vision mediant
   - Rediseño de `AnalysisProgressBanner` para renderizar tarjetas independientes por cada tarea visible, preservando foto, estado de error y botones de acción (`[Editar manualmente]`, `[Reintentar]`, `[Abrir plato]`, `[Cerrar]`) ante la subida de nuevas comidas.
 
 ### Fixed
+- **Resolución de Pruebas Automatizadas de Release v1.3.3 en CI:**
+  - `test/widgets/app_update_card_test.dart`: Actualización de la aserción de versión a `AppConstants.appVersion` dinámico en lugar de versión anterior hardcodeada.
+  - `test/services/gemini_vision_service_test.dart` y `test/services/gemini_model_service_test.dart`: Alineación de `GeminiModelService.supportsThinking` para reconocer modelos `gemini-3` y mantener escala de timeout de 120s sin enviar `thinking_budget`.
+  - `test/services/gemini_and_storage_adversarial_test.dart`: Preservación rigurosa de todas las cadenas de reglas volumétricas clínicas obligatorias (`Conversión cocido vs crudo`, `Regla de Grasa Oculta en Comida Casera`, `5g y 10g adicionales de grasa`, etc.) en `baseSystemInstruction`.
+- **Parsing Defensivo de Métricas de Autovalidación en `Meal` y `MealAnalysisResult`:**
+  - Sanitización de bloques de código markdown (````json ... ````) en `aiBreakdownJson` mediante método compartido `_cleanJson`.
+  - Parsing de valores decimales formateados en texto (e.g. `"45.5 kcal"`, `"92.5%"`) evitando la concatenación de dígitos.
 - **Captura de `FormatException` en Reintentos Transparentes (`GeminiResilienceHelper`):**
   - Inclusión de `FormatException` en `isRetriableError` para activar reintento automático y conmutar a `gemini-2.5-flash` ante fragmentos truncados o corruptos.
 - **Prevención de `HTTP 400 INVALID_ARGUMENT` en Gemini 3 (`GeminiModelService`):**

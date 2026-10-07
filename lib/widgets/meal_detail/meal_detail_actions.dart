@@ -48,6 +48,7 @@ Future<bool> saveMealEntry({
   required double fat,
   required String? notes,
   required List<FoodItem> items,
+  String? aiBreakdownJson,
 }) async {
   if (name.isEmpty) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -71,6 +72,7 @@ Future<bool> saveMealEntry({
       }
     }
 
+    final effectiveJson = aiBreakdownJson ?? initialMeal?.aiBreakdownJson;
     final baseMeal = (initialMeal ?? Meal(name: name, mealType: mealType, date: date)).copyWith(
       name: name,
       mealType: mealType,
@@ -81,6 +83,7 @@ Future<bool> saveMealEntry({
       carbs: carbs,
       fat: fat,
       notes: notes,
+      aiBreakdownJson: effectiveJson,
     );
 
     final updated = items.isNotEmpty

@@ -131,7 +131,7 @@ void main() {
       expect(GeminiModelService.supportsThinking('gemini-3.1-pro'), isTrue);
       expect(GeminiModelService.resolveThinkingBudget('gemini-3.1-pro'), isNull);
 
-      expect(GeminiModelService.supportsThinking('gemini-3.8-flash'), isFalse);
+      expect(GeminiModelService.supportsThinking('gemini-3.8-flash'), isTrue);
       expect(GeminiModelService.resolveThinkingBudget('gemini-3.8-flash'), isNull);
 
       expect(GeminiModelService.supportsThinking('gemini-2.0-flash-thinking'), isTrue);

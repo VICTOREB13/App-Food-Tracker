@@ -424,6 +424,17 @@ tags: [proyecto, tasks, checklist, v1-3-3, gemini-vision, unary-call, schema-opt
 - [x] (Systems-Auditor) Auditar que el 100% de archivos modificados en `lib/` tengan estrictamente < 300 LoC (0 archivos >= 300).
 - [x] (Systems-Auditor) Emitir veredicto formal `PASS` en `artifacts/audit_reports/audit_report.md`.
 
+### 🔬 6. Autovalidación de la IA y Diagnóstico de Fallo en CI Release v1.3.3
+- [x] (Backend-Architect) Añadir `porcentaje_certeza` y `margen_error_kcal` al `mealAnalysisSchema` en `GeminiResilienceHelper`, omitiendo "nivel" y "observación".
+- [x] (Backend-Architect) Restaurar frases clínicas volumétricas obligatorias en `baseSystemInstruction` para satisfacer suites adversariales.
+- [x] (Backend-Architect) Extraer `MealDecomposer` (< 300 LoC) y extender `MealAnalysisResult` con deserialización tolerante a fallos y strings decimales.
+- [x] (Backend-Architect) Extender `Meal` con getters `confidencePercentage` y `calorieErrorMargin`, sanitización de markdown fences con `_cleanJson`, e inmutabilidad en `recalculateFromItems`.
+- [x] (Frontend-UI) Crear `MealAiValidationChips` con chips semánticos reactivos de certeza (`Icons.verified_outlined`) y margen (`Icons.tune`), integrándolo en `MealDetailScreen`.
+- [x] (Systems-Auditor) Corregir aserción de versión dinámica en `test/widgets/app_update_card_test.dart` (`AppConstants.appVersion`).
+- [x] (Systems-Auditor) Corregir timeout y thinking para Gemini 3 en `GeminiModelService.supportsThinking` y alinear `test/services/gemini_model_service_test.dart`.
+- [x] (Systems-Auditor) Crear suites dedicadas: `meal_ai_validation_chips_test.dart`, `gemini_self_validation_parsing_test.dart`, `meal_self_validation_test.dart`.
+- [x] (Systems-Auditor) Verificar que el 100% de los archivos modificados cumplan estrictamente `< 300 LoC`.
+
 ---
 
 ## 📜 Historial de Iteraciones Previas (Completadas)

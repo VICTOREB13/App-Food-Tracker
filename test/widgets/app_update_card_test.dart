@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:food_tracker/core/constants/app_constants.dart';
 import 'package:food_tracker/core/interfaces/app_installer_service_interface.dart';
 import 'package:food_tracker/core/interfaces/app_update_service_interface.dart';
 import 'package:food_tracker/models/github_release_model.dart';
@@ -100,7 +101,7 @@ void main() {
         ),
       );
 
-      expect(find.textContaining('v1.3.2'), findsOneWidget);
+      expect(find.textContaining('v${AppConstants.appVersion}'), findsOneWidget);
     });
   });
 }

@@ -125,6 +125,8 @@ void main() {
       expect(instruction, contains('plato'));
       expect(instruction, contains('items'));
       expect(instruction, contains('totales'));
+      expect(schema.properties?.containsKey('porcentaje_certeza'), isTrue);
+      expect(schema.properties?.containsKey('margen_error_kcal'), isTrue);
     });
 
     test('MealAnalysisResult deserializes JSON generated with causal 3D properties', () {

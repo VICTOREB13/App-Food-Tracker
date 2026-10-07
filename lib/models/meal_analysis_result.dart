@@ -2,9 +2,11 @@ import 'dart:convert';
 import 'dart:math' as math;
 import 'food_item.dart';
 import 'json_repair_helper.dart';
+import 'meal_decomposer.dart';
 import 'model_sanitizer.dart';
 
 export 'json_repair_helper.dart';
+export 'meal_decomposer.dart';
 
 class MealAnalysisResult {
   final String dishName;
@@ -14,120 +16,38 @@ class MealAnalysisResult {
   final double totalCarbs;
   final double totalFat;
   final String rawJson;
+  final int? confidencePercentage;
+  final int? calorieErrorMargin;
 
   const MealAnalysisResult({
-    required this.dishName, required this.items,
-    required this.totalCalories, required this.totalProtein,
-    required this.totalCarbs, required this.totalFat,
+    required this.dishName,
+    required this.items,
+    required this.totalCalories,
+    required this.totalProtein,
+    required this.totalCarbs,
+    required this.totalFat,
     required this.rawJson,
+    this.confidencePercentage,
+    this.calorieErrorMargin,
   });
 
-  /// Extracts individual food component names from a composite text (e.g. "Arroz, frijoles y carne")
-  static List<String> extractComponents(String text) {
-    if (text.trim().isEmpty) return const [];
-    final normalized = text
-        .replaceAll(RegExp(r'\s+(?:y|e|con|and|with)\s+', caseSensitive: false), ', ')
-        .replaceAll(RegExp(r'[;&/+\n]'), ', ');
-
-    final parts = normalized
-        .split(',')
-        .map((p) => p.trim())
-        .map((p) => p.replaceAll(RegExp(r'^[-*•"\s]+|[-*•"\s]+$'), ''))
-        .where((p) => p.length >= 2)
-        .toSet()
-        .toList();
-
-    return parts;
-  }
+  /// Extracts individual food component names from a composite text
+  static List<String> extractComponents(String text) =>
+      MealDecomposer.extractComponents(text);
 
   /// Identifies seasonings, spices, and herbs to protect macro allocation
-  static bool isSeasoningOrHerb(String name) {
-    final s = name.toLowerCase();
-    const exclusions = ['salmon', 'salmón', 'salchicha', 'salsa', 'ensalada', 'saltead'];
-    if (exclusions.any((e) => s.contains(e))) {
-      return false;
-    }
-    const keys = ['romero', 'perejil', 'orégano', 'oregano', 'cilantro', 'pimienta',
-      'laurel', 'albahaca', 'comino', 'tomillo', 'especi', 'condimento', 'hierba', 'eneldo', 'curry', 'canela'];
-    if (keys.any((k) => s.contains(k))) {
-      return true;
-    }
-    final words = s.split(RegExp(r'[\s,.;:()/\-]+'));
-    return words.contains('sal') || words.contains('ajo');
-  }
+  static bool isSeasoningOrHerb(String name) =>
+      MealDecomposer.isSeasoningOrHerb(name);
 
-  /// Decomposes composite foods or dishes into distinct ingredients with realistic volumetric grams
+  /// Decomposes composite foods or dishes into distinct ingredients
   static List<FoodItem> decomposeCompositeFood(
     List<String> componentNames,
     double cal,
     double prot,
     double carbs,
     double fat,
-  ) {
-    if (componentNames.isEmpty) return const [];
-    final n = componentNames.length;
-
-    // Weight coefficients per category: [calWeight, protWeight, carbWeight, fatWeight, baseGrams, density]
-    List<double> weightsFor(String name) {
-      final s = name.toLowerCase();
-      if (isSeasoningOrHerb(s)) {
-        return [0.01, 0.01, 0.01, 0.01, 5.0, 0.5];
-      } else if (s.contains('arroz') || s.contains('pasta') || s.contains('fideo') || s.contains('papa') ||
-          s.contains('platano') || s.contains('plátano') || s.contains('yuca') || s.contains('arepa')) {
-        return [0.35, 0.10, 0.65, 0.05, 160.0, 1.3];
-      } else if (s.contains('frijol') || s.contains('caraota') || s.contains('lenteja') || s.contains('garbanzo')) {
-        return [0.25, 0.25, 0.30, 0.10, 135.0, 1.2];
-      } else if (s.contains('carne') || s.contains('pollo') || s.contains('pescado') || s.contains('bistec') ||
-                 s.contains('pechuga') || s.contains('molida') || s.contains('mechada') || s.contains('huevo')) {
-        return [0.35, 0.60, 0.02, 0.40, 125.0, 1.9];
-      } else if (s.contains('aguacate') || s.contains('palta') || s.contains('aceite') || s.contains('grasa')) {
-        return [0.18, 0.03, 0.05, 0.45, 65.0, 1.7];
-      } else if (s.contains('ensalada') || s.contains('lechuga') || s.contains('tomate') || s.contains('vegetal')) {
-        return [0.08, 0.05, 0.10, 0.02, 85.0, 0.4];
-      }
-      return [1.0 / n, 1.0 / n, 1.0 / n, 1.0 / n, 110.0, 1.4];
-    }
-
-    final profiles = componentNames.map(weightsFor).toList();
-    double sumCalW = profiles.fold(0.0, (acc, p) => acc + p[0]);
-    double sumProtW = profiles.fold(0.0, (acc, p) => acc + p[1]);
-    double sumCarbW = profiles.fold(0.0, (acc, p) => acc + p[2]);
-    double sumFatW = profiles.fold(0.0, (acc, p) => acc + p[3]);
-
-    if (sumCalW == 0) sumCalW = 1.0;
-    if (sumProtW == 0) sumProtW = 1.0;
-    if (sumCarbW == 0) sumCarbW = 1.0;
-    if (sumFatW == 0) sumFatW = 1.0;
-
-    final items = <FoodItem>[];
-    for (int i = 0; i < n; i++) {
-      final name = componentNames[i];
-      final prof = profiles[i];
-      final itemCal = cal > 0 ? (cal * (prof[0] / sumCalW)) : 0.0;
-      final itemProt = prot > 0 ? (prot * (prof[1] / sumProtW)) : 0.0;
-      final itemCarb = carbs > 0 ? (carbs * (prof[2] / sumCarbW)) : 0.0;
-      final itemFat = fat > 0 ? (fat * (prof[3] / sumFatW)) : 0.0;
-
-      double grams = prof[4];
-      if (itemCal > 0) {
-        final minG = isSeasoningOrHerb(name) ? 2.0 : 35.0;
-        final maxG = isSeasoningOrHerb(name) ? 15.0 : 320.0;
-        grams = (itemCal / prof[5]).clamp(minG, maxG);
-      }
-      if (grams == 200.0) grams = 185.0; // Enforce anti-200g generic
-
-      items.add(FoodItem(
-        name: name,
-        estimatedGrams: grams.roundToDouble(),
-        calories: ModelSanitizer.clampDouble(itemCal),
-        protein: ModelSanitizer.clampDouble(itemProt),
-        carbs: ModelSanitizer.clampDouble(itemCarb),
-        fat: ModelSanitizer.clampDouble(itemFat),
-        visualJustification: 'Desglose volumétrico de porción de $name',
-      ));
-    }
-    return items;
-  }
+  ) =>
+      MealDecomposer.decomposeCompositeFood(componentNames, cal, prot, carbs, fat);
 
   /// Repairs truncated JSON by closing dangling strings and matching unclosed braces/brackets.
   static String repairTruncatedJson(String raw) => JsonRepairHelper.repair(raw);
@@ -153,8 +73,11 @@ class MealAnalysisResult {
       try {
         data = json.decode(repairTruncatedJson(cleaned));
       } catch (_) {
-        data = {'plato': 'Comida Analizada', 'items': [],
-          'totales': {'calorias': 0.0, 'proteina_g': 0.0, 'carbohidratos_g': 0.0, 'grasas_g': 0.0}};
+        data = {
+          'plato': 'Comida Analizada',
+          'items': [],
+          'totales': {'calorias': 0.0, 'proteina_g': 0.0, 'carbohidratos_g': 0.0, 'grasas_g': 0.0}
+        };
       }
     }
     final String dish = (data['plato'] ?? data['nombre'] ?? data['dish'] ?? data['name'] ?? 'Comida Analizada').toString();
@@ -218,6 +141,33 @@ class MealAnalysisResult {
       }
     }
 
+    // Parse self-validation metrics (porcentaje_certeza and margen_error_kcal)
+    int? confidence;
+    final dynamic rawConf = data['porcentaje_certeza'] ??
+        data['confidence_percentage'] ??
+        data['certeza'] ??
+        data['confidence'];
+    if (rawConf is num) {
+      confidence = rawConf.toInt().clamp(0, 100);
+    } else if (rawConf is String) {
+      final cleanStr = rawConf.replaceAll(RegExp(r'[^0-9.-]'), '');
+      final d = double.tryParse(cleanStr);
+      if (d != null) confidence = d.round().clamp(0, 100);
+    }
+
+    int? errorMargin;
+    final dynamic rawMargin = data['margen_error_kcal'] ??
+        data['calorie_error_margin'] ??
+        data['margen_error'] ??
+        data['error_margin_kcal'];
+    if (rawMargin is num) {
+      errorMargin = rawMargin.toInt().clamp(0, 2000);
+    } else if (rawMargin is String) {
+      final cleanStr = rawMargin.replaceAll(RegExp(r'[^0-9.-]'), '');
+      final d = double.tryParse(cleanStr);
+      if (d != null) errorMargin = d.round().clamp(0, 2000);
+    }
+
     // Decompose single lumped items or empty item lists
     if (parsedItems.length == 1) {
       final singleItem = parsedItems.first;
@@ -257,7 +207,7 @@ class MealAnalysisResult {
       }
     }
 
-    // If items have 0 calories but total calories exist, distribute macros
+    // Distribute macros if items have 0 calories but total calories exist
     final itemsCalSum = parsedItems.fold(0.0, (acc, e) => acc + e.calories);
     if (itemsCalSum == 0.0 && parsedItems.isNotEmpty && cal > 0) {
       final substantialItems = parsedItems.where((it) => !isSeasoningOrHerb(it.name)).toList();
@@ -271,9 +221,7 @@ class MealAnalysisResult {
           parsedItems[i] = item.copyWith(
             estimatedGrams: 5.0,
             calories: math.min(5.0, cal * 0.01),
-            protein: 0.1,
-            carbs: 0.5,
-            fat: 0.1,
+            protein: 0.1, carbs: 0.5, fat: 0.1,
             visualJustification: 'Nota de saborización / condimento marginal',
           );
         } else {
@@ -291,7 +239,49 @@ class MealAnalysisResult {
       dishName: dish, items: parsedItems,
       totalCalories: ModelSanitizer.clampDouble(cal), totalProtein: ModelSanitizer.clampDouble(prot),
       totalCarbs: ModelSanitizer.clampDouble(carbs), totalFat: ModelSanitizer.clampDouble(fat),
-      rawJson: jsonStr,
+      rawJson: cleaned,
+      confidencePercentage: confidence,
+      calorieErrorMargin: errorMargin,
+    );
+  }
+
+  Map<String, dynamic> toMap() => {
+        'plato': dishName,
+        'items': items.map((e) => e.toJson()).toList(),
+        'totales': {
+          'calorias': totalCalories,
+          'proteina_g': totalProtein,
+          'carbohidratos_g': totalCarbs,
+          'grasas_g': totalFat,
+        },
+        if (confidencePercentage != null) 'porcentaje_certeza': confidencePercentage,
+        if (calorieErrorMargin != null) 'margen_error_kcal': calorieErrorMargin,
+        'rawJson': rawJson,
+      };
+
+  Map<String, dynamic> toJson() => toMap();
+
+  MealAnalysisResult copyWith({
+    String? dishName,
+    List<FoodItem>? items,
+    double? totalCalories,
+    double? totalProtein,
+    double? totalCarbs,
+    double? totalFat,
+    String? rawJson,
+    int? confidencePercentage,
+    int? calorieErrorMargin,
+  }) {
+    return MealAnalysisResult(
+      dishName: dishName ?? this.dishName,
+      items: items ?? this.items,
+      totalCalories: totalCalories ?? this.totalCalories,
+      totalProtein: totalProtein ?? this.totalProtein,
+      totalCarbs: totalCarbs ?? this.totalCarbs,
+      totalFat: totalFat ?? this.totalFat,
+      rawJson: rawJson ?? this.rawJson,
+      confidencePercentage: confidencePercentage ?? this.confidencePercentage,
+      calorieErrorMargin: calorieErrorMargin ?? this.calorieErrorMargin,
     );
   }
 }

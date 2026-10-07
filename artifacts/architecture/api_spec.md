@@ -289,37 +289,40 @@ Si el plato visualizado contiene alimentos correspondientes a estos productos, p
 
 ---
 
-## 🤖 7. Contrato de Inferencia Causal Volumétrica Gemini Vision & Model Ranking (v1.3.2)
+## 🤖 7. Contrato de Inferencia Causal Volumétrica Gemini Vision & Autovalidación (v1.3.3)
 
-### 7.1. Inversión Causal de Schema JSON (`mealAnalysisSchema`)
-Para evitar alucinaciones autorregresivas donde el modelo predice calorías antes de razonar la porción física, el esquema JSON exige la siguiente secuencia causal estricta:
+### 7.1. Schema JSON Desacoplado y Autovalidación (`mealAnalysisSchema`)
+Para evitar alucinaciones autorregresivas y cuellos de botella de constrained grammar, el esquema JSON exige la siguiente secuencia causal estricta:
 
 ```json
 {
-  "plato_general": "String",
-  "referencia_metrica_utilizada": "String (ej. 'Plato 26cm', 'Vaso 250ml', 'Mano visible')",
-  "justificacion_visual_global": "String",
-  "ingredientes": [
+  "razonamiento_volumetrico": "String (Pensamiento y deducción física libre: escala de vajilla, formas 3D, densidad, cocción, aceites y grasas ocultas)",
+  "plato": "String (Nombre representativo del plato)",
+  "porcentaje_certeza": "Integer (0-100: Certeza estimada de la IA basada en visibilidad, oclusión y nitidez)",
+  "margen_error_kcal": "Integer (Margen de error calórico estimado en kilocalorías +/- kcal)",
+  "items": [
     {
       "alimento": "String",
-      "referencia_metrica": "String",
-      "forma_geometrica_3d": "String (ej. 'cilindro', 'disco', 'semiesfera', 'cuboide')",
-      "dimensiones_estimadas_cm": "String (ej. '12x8x2 cm')",
-      "volumen_cm3": 192.0,
-      "densidad_g_cm3": 0.85,
-      "factor_coccion": 0.80,
-      "grasa_visible_o_oculta": "String (ej. 'Brillo de aceite de oliva ~5g')",
       "gramos_estimados": 130.0,
       "calorias": 165.0,
-      "proteina": 26.0,
-      "carbohidratos": 0.0,
-      "grasas": 6.8,
-      "fibra": 0.0,
-      "sodio": 75.0,
-      "azucar": 0.0,
+      "proteinas_g": 26.0,
+      "carbohidratos_g": 0.0,
+      "grasas_g": 6.8,
+      "fibra_g": 0.0,
+      "sodio_mg": 75.0,
+      "azucar_g": 0.0,
       "justificacion_visual": "String"
     }
-  ]
+  ],
+  "totales": {
+    "calorias": 165.0,
+    "proteina_g": 26.0,
+    "carbohidratos_g": 0.0,
+    "grasas_g": 6.8,
+    "fibra_g": 0.0,
+    "sodio_mg": 75.0,
+    "azucar_g": 0.0
+  }
 }
 ```
 

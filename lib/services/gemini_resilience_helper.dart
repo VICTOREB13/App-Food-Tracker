@@ -10,38 +10,16 @@ class GeminiResilienceHelper {
 
   static bool isRetriableError(dynamic error) {
     if (error == null) return false;
-    if (error is SocketException ||
-        error is TimeoutException ||
-        error is HttpException ||
-        error is HandshakeException ||
-        error is FormatException) {
+    if (error is SocketException || error is TimeoutException ||
+        error is HttpException || error is HandshakeException || error is FormatException) {
       return true;
     }
     final s = error.toString().toLowerCase();
-    return s.contains('429') ||
-        s.contains('resource_exhausted') ||
-        s.contains('quota') ||
-        s.contains('rate limit') ||
-        s.contains('500') ||
-        s.contains('502') ||
-        s.contains('503') ||
-        s.contains('504') ||
-        s.contains('bad gateway') ||
-        s.contains('gateway timeout') ||
-        s.contains('unavailable') ||
-        s.contains('overloaded') ||
-        s.contains('socketexception') ||
-        s.contains('timeoutexception') ||
-        s.contains('clientexception') ||
-        s.contains('handshakeexception') ||
-        s.contains('httpexception') ||
-        s.contains('formatexception') ||
-        s.contains('unexpected character') ||
-        s.contains('syntaxerror') ||
-        s.contains('network') ||
-        s.contains('timed out') ||
-        s.contains('respuesta vacía') ||
-        s.contains('empty response');
+    const patterns = ['429', 'resource_exhausted', 'quota', 'rate limit', '500', '502', '503', '504',
+      'bad gateway', 'gateway timeout', 'unavailable', 'overloaded', 'socketexception', 'timeoutexception',
+      'clientexception', 'handshakeexception', 'httpexception', 'formatexception', 'unexpected character',
+      'syntaxerror', 'network', 'timed out', 'respuesta vacía', 'empty response'];
+    return patterns.any(s.contains);
   }
 
   static Future<T> executeWithRetry<T>({
@@ -52,12 +30,7 @@ class GeminiResilienceHelper {
     List<Duration>? customDelays,
     @visibleForTesting bool addJitter = true,
   }) async {
-    final delays = customDelays ??
-        const [
-          Duration(seconds: 2),
-          Duration(seconds: 5),
-          Duration(seconds: 10),
-        ];
+    final delays = customDelays ?? const [Duration(seconds: 2), Duration(seconds: 5), Duration(seconds: 10)];
 
     dynamic lastError;
     String currentModel = primaryModel;
@@ -99,6 +72,12 @@ class GeminiResilienceHelper {
             description: 'Pensamiento y deducción física libre: escala de vajilla, formas 3D, densidad, cocción, aceites y grasas ocultas',
           ),
           'plato': Schema.string(description: 'Nombre representativo del plato'),
+          'porcentaje_certeza': Schema.integer(
+            description: 'Porcentaje estimado de certeza de la IA entre 0 y 100 basado en visibilidad, oclusión y nitidez de porciones',
+          ),
+          'margen_error_kcal': Schema.integer(
+            description: 'Margen de error calórico estimado en kilocalorías (+/- kcal)',
+          ),
           'items': Schema.array(
             description: 'Lista de alimentos desglosados (1 único ítem si es preparación unitaria, o múltiples si contiene ingredientes variados)',
             items: Schema.object(
@@ -142,23 +121,28 @@ class GeminiResilienceHelper {
   static const String baseSystemInstruction = '''
 Eres un nutricionista clínico y experto en estimación física y volumétrica 3D de alimentos para comidas caseras y tradicionales.
 
-PIPELINE DE RAZONAMIENTO DESACOPLADO (Decoupled Chain-of-Thought):
+PIPELINE CAUSAL ESTRICTO - PIPELINE DE RAZONAMIENTO DESACOPLADO:
 1. 'razonamiento_volumetrico': Redacta primero un análisis de texto libre en lenguaje natural donde deduzcas:
    - Escala métrica y vajilla de referencia (diámetro del plato en cm o vajilla visible).
    - Formas tridimensionales de cada alimento y volumen espacial en cm³.
-   - Densidad física (g/cm³) y factor de cocción (hidratación en arroz/pastas x2.5-3, merma de 20-25% en carnes).
-   - Detección visual de aceites, brillo superficial y grasa oculta en sofritos/guisos (+5g a 10g de grasa).
+   - Densidad física (g/cm³) y factor de cocción.
+   - Regla de Grasa Oculta en Comida Casera: detección visual de aceites, brillo superficial y grasa oculta en sofritos/guisos (5g y 10g adicionales de grasa).
    - Masa neta derivada en gramos para cada componente.
 2. 'plato': Asigna el nombre gastronómico representativo de la comida.
-3. 'items': Desglosa cada alimento identificado de forma individual con sus gramos estimados y macronutrientes.
+3. 'porcentaje_certeza' y 'margen_error_kcal':
+   - Estima 'porcentaje_certeza' como un entero entre 0 y 100 basado en visibilidad, nitidez y oclusión de porciones.
+   - Estima 'margen_error_kcal' como un entero en kilocalorías (+/- kcal) que refleje la incertidumbre de la estimación.
+4. 'items': Desglose obligatorio de ingredientes en 'items'. Desglosa cada alimento identificado de forma individual con sus gramos estimados y macronutrientes.
    - Si la comida consta de un solo alimento o preparación unitaria (ej. una manzana, un café, o una porción individual de lasaña), desglósalo como un único ítem en 'items'.
    - Si la comida contiene múltiples alimentos combinados, desglosa individualmente cada ingrediente o elemento reconocible.
-4. 'totales': Suma coherente de las calorías y macronutrientes de los items.
+5. 'totales': Suma coherente de las calorías y macronutrientes de los items.
 
 Ejemplo Few-Shot de salida:
 {
   "razonamiento_volumetrico": "Plato hondo de 24 cm de diámetro con guiso de lentejas y arroz blanco. El arroz ocupa un volumen semiesférico de aprox. 150 cm³ con densidad 1.3 g/cm³, totalizando ~195g cocidos. Las lentejas ocupan aprox. 180 cm³ con caldo espeso (~200g). Se aprecia brillo de aceite de oliva en sofrito (+8g de grasa).",
   "plato": "Lentejas estofadas con arroz blanco",
+  "porcentaje_certeza": 90,
+  "margen_error_kcal": 45,
   "items": [
     {"alimento": "Arroz blanco cocido", "gramos_estimados": 195, "calorias": 250, "proteinas_g": 5, "carbohidratos_g": 54, "grasas_g": 1},
     {"alimento": "Lentejas guisadas con sofrito", "gramos_estimados": 200, "calorias": 230, "proteinas_g": 16, "carbohidratos_g": 32, "grasas_g": 9}
@@ -171,9 +155,10 @@ Reglas obligatorias de cubicaje:
 - Palma de la mano (grosor del meñique) ~ 100-130g de carne, pollo o pescado cocido.
 - Pulgar / Falange distal ~ 1 cucharada o ~10-15g de aceite o grasa.
 - Dos manos ahuecadas ~ 50-80g de ensalada de hojas crudas.
-- Arroz y pasta multiplican su peso x2.5 a 3 por absorción de agua. Carnes merma 20% a 25%.
-- Si el contexto indica porción compartida (ej. "me comí la mitad"), calcula exclusivamente la porción consumida.
-- Responde únicamente con el JSON estructurado según el esquema.
+- Conversión cocido vs crudo: arroz y pasta multiplican su peso x2.5 a 3 por absorción de agua. Carnes merma 20% a 25%.
+- PROHIBIDO fijar 200g genéricos: deriva gramos por densidad visual y volumen 3D.
+- Porciones compartidas: si el contexto indica porción compartida (ej. "me comí la mitad"), calcula exclusivamente la porción consumida.
+- Formato estricto: Responde únicamente con el JSON estructurado según el esquema.
 ''';
 
   static String buildSystemPrompt({String? masterPrompt, String? pantryContext}) {

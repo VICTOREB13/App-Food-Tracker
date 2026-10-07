@@ -29,7 +29,7 @@ class GeminiModelService {
   /// Determines whether a given Gemini model supports latent reasoning / clinical depth
   static bool supportsThinking(String modelName) {
     final lower = modelName.toLowerCase();
-    return lower.contains('pro') || lower.contains('thinking');
+    return lower.startsWith('gemini-3') || lower.contains('pro') || lower.contains('thinking');
   }
 
   /// Resolves the thinking budget for a given model (null for Gemini 3 and non-thinking models)

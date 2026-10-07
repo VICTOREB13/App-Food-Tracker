@@ -580,7 +580,34 @@ Para garantizar la estricta mantenibilidad del monolito modular sin romper compa
 
 ### 11.5. Canónica de Versiones del Sistema (`AppConstants`)
 - **Ubicación:** `lib/core/constants/app_constants.dart` (5 LoC).
-- **Definición:** `static const String appVersion = '1.3.2';`. Centraliza la versión de referencia consumida por `DashboardScreen`, `AppUpdateCard` y tests unitarios.
+- **Definición:** `static const String appVersion = '1.3.3';`. Centraliza la versión de referencia consumida por `DashboardScreen`, `AppUpdateCard` y tests unitarios.
+
+---
+
+## 🔬 12. Abstracciones de Autovalidación de la IA (v1.3.3)
+
+### 12.1. Métricas de Autovalidación en Dominio (`MealAnalysisResult` & `Meal`)
+- **Ubicación:** `lib/models/meal_analysis_result.dart` (287 LoC) y `lib/models/meal.dart` (295 LoC).
+- **Campos Numéricos:**
+  - `confidencePercentage`: `int?` (0–100) derivado de `porcentaje_certeza` / `confidence_percentage` en JSON.
+  - `calorieErrorMargin`: `int?` (0–2000) derivado de `margen_error_kcal` / `calorie_error_margin` en JSON (+/- kcal).
+- **Resiliencia de Parsing:** Soporte tolerante a fallos para strings decimales (e.g. `"45.5 kcal"`, `"92.4%"`) mediante `double.tryParse` y `.round()`, acotamiento clamped y sanitización de markdown code fences en `aiBreakdownJson`.
+- **Inmutabilidad en Edición:** `Meal.recalculateFromItems` preserva fielmente `confidencePercentage` y `calorieErrorMargin` cuando el usuario añade, edita o elimina ingredientes.
+
+### 12.2. Descompositor Modular de Alimentos (`MealDecomposer`)
+- **Ubicación:** `lib/models/meal_decomposer.dart` (114 LoC).
+- **Responsabilidad:** Extraído de `MealAnalysisResult` para satisfacer estrictamente el estándar arquitectónico `< 300 LoC`.
+- **Métodos Nucleares:**
+  - `extractComponents(String text)`: Segmentación textual inteligente separando conjunciones (`y`, `con`, `,`).
+  - `isSeasoningOrHerb(String name)`: Detección defensiva de hierbas/especias para proteger asignación macro.
+  - `decomposeCompositeFood(...)`: Desglose volumétrico proporcional de platos compuestos asignando densidades físicas reales.
+
+### 12.3. Componente Visual de Autovalidación (`MealAiValidationChips`)
+- **Ubicación:** `lib/widgets/meal_detail/meal_ai_validation_chips.dart` (97 LoC).
+- **Chips Visuales Desplegados:**
+  - **Chip de Certeza:** Muestra `"$confidencePercentage% Certeza"` con icono `Icons.verified_outlined`. Color semántico reactivo: `AppColors.success` (verde) si $\ge 85\%$, `AppColors.carbs` (amarillo/ámbar) si $\ge 70\%$, o `AppColors.caloriesFlame` (naranja) si $< 70\%$.
+  - **Chip de Margen de Error:** Muestra `"±$calorieErrorMargin kcal"` con icono `Icons.tune` y color `AppColors.portion`.
+- **Alineación con el Usuario:** Ausencia total de etiquetas cualitativas subjetivas (sin "nivel") y sin caja de observaciones, manteniendo la interfaz despejada y concisa.
 
 
 

@@ -12,6 +12,7 @@ import '../widgets/common/ve_app_bar.dart';
 import '../widgets/meal_detail/food_item_editor_dialog.dart';
 import '../widgets/meal_detail/food_items_list_card.dart';
 import '../widgets/meal_detail/meal_ai_reanalyze_button.dart';
+import '../widgets/meal_detail/meal_ai_validation_chips.dart';
 import '../widgets/meal_detail/meal_analysis_pacing.dart';
 import '../widgets/meal_detail/meal_detail_actions.dart';
 import '../widgets/meal_detail/meal_form_fields.dart';
@@ -35,7 +36,8 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
   late final TextEditingController _nameController, _notesController;
   late String _mealType;
   late DateTime _date;
-  String? _imagePath;
+  String? _imagePath, _aiBreakdownJson;
+  int? _confidencePercentage, _calorieErrorMargin;
   List<FoodItem> _items = [];
   double _calories = 0.0, _protein = 0.0, _carbs = 0.0, _fat = 0.0;
   double _fiber = 0.0, _sodium = 0.0, _sugar = 0.0;
@@ -58,6 +60,9 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
       _items = List.from(meal.items);
       _calories = meal.calories; _protein = meal.protein; _carbs = meal.carbs; _fat = meal.fat;
       _fiber = meal.fiber; _sodium = meal.sodium; _sugar = meal.sugar;
+      _confidencePercentage = meal.confidencePercentage;
+      _calorieErrorMargin = meal.calorieErrorMargin;
+      _aiBreakdownJson = meal.aiBreakdownJson;
     }
   }
 
@@ -150,10 +155,11 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
             _notesController.text = 'Ingredientes: $summary';
           }
           _items = List.from(analysis.items);
-          _calories = analysis.totalCalories;
-          _protein = analysis.totalProtein;
-          _carbs = analysis.totalCarbs;
-          _fat = analysis.totalFat;
+          _calories = analysis.totalCalories; _protein = analysis.totalProtein;
+          _carbs = analysis.totalCarbs; _fat = analysis.totalFat;
+          _confidencePercentage = analysis.confidencePercentage;
+          _calorieErrorMargin = analysis.calorieErrorMargin;
+          _aiBreakdownJson = analysis.rawJson;
         });
         if (_items.isNotEmpty) _recalculateTotals();
       }
@@ -186,6 +192,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
       fat: _fat,
       notes: notes.isNotEmpty ? notes : null,
       items: _items,
+      aiBreakdownJson: _aiBreakdownJson,
     );
     if (mounted) setState(() => _isSaving = false);
     if (saved && mounted) Navigator.of(context).pop();
@@ -193,26 +200,21 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
 
   Future<void> _deleteMeal() async {
     final meal = widget.initialMeal;
-    if (meal == null) return;
-    if (await confirmAndDeleteMeal(context, meal) && mounted) {
+    if (meal != null && await confirmAndDeleteMeal(context, meal) && mounted) {
       Navigator.of(context).pop();
     }
   }
 
   Future<void> _addItem() async {
     final newItem = await showFoodItemEditorDialog(context);
-    if (newItem != null) {
-      setState(() => _items.add(newItem));
-      _recalculateTotals();
-    }
+    if (newItem != null) { setState(() => _items.add(newItem)); _recalculateTotals(); }
   }
 
   Future<void> _editItem(FoodItem item) async {
     final edited = await showFoodItemEditorDialog(context, initialItem: item);
     if (edited != null) {
       final idx = _items.indexWhere((e) => e.id == item.id);
-      if (idx != -1) setState(() => _items[idx] = edited);
-      _recalculateTotals();
+      if (idx != -1) { setState(() => _items[idx] = edited); _recalculateTotals(); }
     }
   }
 
@@ -242,50 +244,40 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         children: [
           MealImageCard(
-            imagePath: _imagePath,
-            dishName: _nameController.text,
-            onPickImage: _pickImage,
-            isAnalyzing: _isReanalyzing,
-            analysisStage: _analysisStage,
-            analysisProgress: _analysisProgress,
+            imagePath: _imagePath, dishName: _nameController.text, onPickImage: _pickImage,
+            isAnalyzing: _isReanalyzing, analysisStage: _analysisStage, analysisProgress: _analysisProgress,
           ),
           if (_imagePath != null) ...[
             const SizedBox(height: 10),
-            MealAiReanalyzeButton(
-              isReanalyzing: _isReanalyzing,
-              onPressed: _reanalyzeWithAi,
-            ),
+            MealAiReanalyzeButton(isReanalyzing: _isReanalyzing, onPressed: _reanalyzeWithAi),
           ],
           const SizedBox(height: 16),
           MealMacroChipsRow(calories: _calories, protein: _protein, carbs: _carbs, fat: _fat),
+          if (_confidencePercentage != null || _calorieErrorMargin != null) ...[
+            const SizedBox(height: 8),
+            MealAiValidationChips(
+              confidencePercentage: _confidencePercentage,
+              calorieErrorMargin: _calorieErrorMargin,
+            ),
+          ],
           if (_fiber > 0 || _sodium > 0 || _sugar > 0) ...[
             const SizedBox(height: 8),
             MealMicronutrientChipsRow(fiber: _fiber, sodium: _sodium, sugar: _sugar),
           ],
           const SizedBox(height: 16),
           MealFormFields(
-            nameController: _nameController,
-            notesController: _notesController,
+            nameController: _nameController, notesController: _notesController,
             mealType: _mealType,
             onMealTypeChanged: (val) {
-              if (val != null && val != _mealType) {
-                setState(() => _mealType = val);
-              }
+              if (val != null && val != _mealType) setState(() => _mealType = val);
             },
           ),
           const SizedBox(height: 16),
           FoodItemsListCard(
-            items: _items,
-            onAddItem: _addItem,
-            onEditItem: _editItem,
-            onDeleteItem: _deleteItem,
+            items: _items, onAddItem: _addItem, onEditItem: _editItem, onDeleteItem: _deleteItem,
           ),
           const SizedBox(height: 24),
-          MealSaveButton(
-            isSaving: _isSaving,
-            isEditing: isEditing,
-            onSave: _saveMeal,
-          ),
+          MealSaveButton(isSaving: _isSaving, isEditing: isEditing, onSave: _saveMeal),
           const SizedBox(height: 24),
         ],
       ),
