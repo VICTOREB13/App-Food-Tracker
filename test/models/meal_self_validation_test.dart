@@ -54,8 +54,8 @@ void main() {
       expect(initialMeal.calorieErrorMargin, equals(30));
 
       final updatedItems = [
-        const FoodItem(name: 'Avena cocida', estimatedGrams: 150, calories: 150, protein: 5, carbs: 28, fat: 2),
-        const FoodItem(name: 'Plátano', estimatedGrams: 80, calories: 72, protein: 1, carbs: 18, fat: 0),
+        FoodItem(name: 'Avena cocida', estimatedGrams: 150, calories: 150, protein: 5, carbs: 28, fat: 2),
+        FoodItem(name: 'Plátano', estimatedGrams: 80, calories: 72, protein: 1, carbs: 18, fat: 0),
       ];
 
       final recalculated = initialMeal.recalculateFromItems(updatedItems);
@@ -106,7 +106,7 @@ void main() {
       expect(meal.calorieErrorMargin, equals(38));
 
       final updated = meal.recalculateFromItems([
-        const FoodItem(name: 'Pechuga', estimatedGrams: 200, calories: 320, protein: 50, carbs: 0, fat: 6),
+        FoodItem(name: 'Pechuga', estimatedGrams: 200, calories: 320, protein: 50, carbs: 0, fat: 6),
       ]);
       expect(updated.confidencePercentage, equals(89));
       expect(updated.calorieErrorMargin, equals(38));
