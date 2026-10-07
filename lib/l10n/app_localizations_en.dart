@@ -19,9 +19,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get protein => 'Protein';
   @override
-  String get carbs => 'Carbs';
+  String get carbs => 'Carbohydrates';
   @override
-  String get fat => 'Fats';
+  String get fat => 'Fat';
   @override
   String get breakfast => 'Breakfast';
   @override

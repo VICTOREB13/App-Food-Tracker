@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/models/daily_goals.dart';
 import 'package:food_tracker/services/theme_manager.dart';
@@ -33,7 +33,7 @@ void main() {
     expect(find.text('/ 2000 kcal'), findsOneWidget);
     expect(find.text('550 restantes'), findsOneWidget);
     expect(find.text('Proteína'), findsOneWidget);
-    expect(find.text('Carbos'), findsOneWidget);
-    expect(find.text('Grasas'), findsOneWidget);
+    expect(find.text('Carbohidratos'), findsOneWidget);
+    expect(find.text('Grasa'), findsOneWidget);
   });
 }
