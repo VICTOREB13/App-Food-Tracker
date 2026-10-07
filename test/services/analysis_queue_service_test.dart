@@ -172,5 +172,48 @@ void main() {
       expect(service.tasks.any((t) => t.id == 'failed-task-prev'), isTrue);
       expect(service.tasks.any((t) => t.id == 'active-task-new'), isTrue);
     });
+
+    test('visibleTasks preserves multiple failed tasks independently when uploading subsequent meals', () async {
+      final service = AnalysisQueueService.instance;
+      final failedTask1 = AnalysisTask(
+        id: 'failed-1',
+        imagePath: '/photos/meal1.jpg',
+        mealType: 'Desayuno',
+        date: DateTime.now(),
+        status: AnalysisStatus.failed,
+        error: 'Timeout en primera comida',
+      );
+      final failedTask2 = AnalysisTask(
+        id: 'failed-2',
+        imagePath: '/photos/meal2.jpg',
+        mealType: 'Almuerzo',
+        date: DateTime.now(),
+        status: AnalysisStatus.failed,
+        error: 'API rate limit en segunda comida',
+      );
+      final queuedTask3 = AnalysisTask(
+        id: 'queued-3',
+        imagePath: '/photos/meal3.jpg',
+        mealType: 'Cena',
+        date: DateTime.now(),
+        status: AnalysisStatus.queued,
+        progress: 0.05,
+      );
+
+      service.addTaskForTesting(failedTask1);
+      service.addTaskForTesting(failedTask2);
+      service.addTaskForTesting(queuedTask3);
+
+      expect(service.visibleTasks.length, equals(3));
+      expect(service.failedTasks.length, equals(2));
+      expect(service.activeTasks.length, equals(1));
+
+      // Dismissing failedTask1 keeps failedTask2 and queuedTask3 intact
+      await service.dismissTask('failed-1');
+      expect(service.visibleTasks.length, equals(2));
+      expect(service.tasks.any((t) => t.id == 'failed-1'), isFalse);
+      expect(service.tasks.any((t) => t.id == 'failed-2'), isTrue);
+      expect(service.tasks.any((t) => t.id == 'queued-3'), isTrue);
+    });
   });
 }

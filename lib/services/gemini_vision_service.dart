@@ -263,7 +263,11 @@ class GeminiVisionService {
           throw Exception('Gemini devolvió una respuesta vacía');
         }
 
-        return MealAnalysisResult.fromJsonString(text);
+        final result = MealAnalysisResult.fromJsonString(text);
+        if (result.items.isEmpty && result.totalCalories == 0) {
+          throw FormatException('No se pudieron extraer alimentos del análisis estructurado: $text');
+        }
+        return result;
       },
     );
   }

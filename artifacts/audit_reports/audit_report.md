@@ -44,11 +44,11 @@ tags: [proyecto, audit, quality-gate, v1-3-3, gemini-vision, streaming, decouple
 - **Inspección de Análisis Estático:** Verificación de balance de delimitadores, contratos de tipado, importaciones limpias y ausencia de referencias rotas en los archivos modificados.
 - **Auditoría Modular de Líneas de Código:**
   - `lib/services/gemini_resilience_helper.dart`: 277 LoC (`< 300` ✓)
-  - `lib/services/gemini_vision_service.dart`: 293 LoC (`< 300` ✓)
+  - `lib/services/gemini_vision_service.dart`: 297 LoC (`< 300` ✓)
   - `lib/services/gemini_model_service.dart`: 189 LoC (`< 300` ✓)
-  - `lib/services/analysis_queue_service.dart`: 293 LoC (`< 300` ✓)
-  - `lib/widgets/dashboard/analysis_progress_banner.dart`: 265 LoC (`< 300` ✓)
-  - `lib/core/constants/app_constants.dart`: 6 LoC (`< 300` ✓)
+  - `lib/services/analysis_queue_service.dart`: 294 LoC (`< 300` ✓)
+  - `lib/widgets/dashboard/analysis_progress_banner.dart`: 270 LoC (`< 300` ✓)
+  - `lib/core/constants/app_constants.dart`: 5 LoC (`< 300` ✓)
   - **Resultado Global:** 100% de los archivos en `lib/` cumplen estrictamente con el estándar modular `< 300 LoC`.
 
 ---

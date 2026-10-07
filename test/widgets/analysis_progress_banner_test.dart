@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/models/meal.dart';
@@ -57,6 +58,44 @@ void main() {
       expect(find.byType(VeLoadingRing), findsOneWidget);
       expect(find.text('Consultando modelo Gemini...'), findsOneWidget);
       expect(find.text('45%'), findsOneWidget);
+    });
+
+    testWidgets('AnalysisProgressBanner renders task with rawImageBytes before file is saved', (tester) async {
+      final task = AnalysisTask(
+        id: 'queued-memory-task',
+        imagePath: '',
+        rawImageBytes: Uint8List.fromList([
+          0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D,
+          0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+          0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4, 0x89, 0x00, 0x00, 0x00,
+          0x0A, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9C, 0x63, 0x00, 0x01, 0x00, 0x00,
+          0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00, 0x00, 0x00, 0x00, 0x49,
+          0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82,
+        ]),
+        mealType: 'Desayuno',
+        date: DateTime.now(),
+        status: AnalysisStatus.processing,
+        progress: 0.15,
+        stage: 'Comprimiendo imagen...',
+      );
+
+      AnalysisQueueService.instance.addTaskForTesting(task);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: AnalysisProgressBanner(
+              onOpenMeal: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(AnalysisProgressBanner), findsOneWidget);
+      expect(find.byType(Image), findsOneWidget);
+      expect(find.byType(VeLoadingRing), findsOneWidget);
+      expect(find.text('Comprimiendo imagen...'), findsOneWidget);
+      expect(find.byKey(const ValueKey('queued-memory-task')), findsOneWidget);
     });
 
     testWidgets('AnalysisProgressBanner renders completed task with action button', (tester) async {

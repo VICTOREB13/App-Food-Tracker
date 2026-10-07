@@ -53,6 +53,7 @@ class AnalysisQueueService extends ChangeNotifier {
         )
       ''');
 
+      await db.delete('analysis_queue', where: 'status = ?', whereArgs: ['completed']);
       final rows = await db.query('analysis_queue', orderBy: 'created_at DESC', limit: 20);
       _tasks.clear();
       for (final r in rows) {

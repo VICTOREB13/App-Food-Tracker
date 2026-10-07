@@ -74,6 +74,28 @@ void main() {
       expect(modelsUsed, contains('gemini-2.5-flash'));
     });
 
+    test('executeWithRetry retries on FormatException and recovers with fallback model', () async {
+      final modelsUsed = <String>[];
+      final result = await GeminiResilienceHelper.executeWithRetry<String>(
+        primaryModel: 'gemini-3.8-flash',
+        customDelays: [const Duration(milliseconds: 5), const Duration(milliseconds: 10)],
+        addJitter: false,
+        action: (attempt, currentModel) async {
+          modelsUsed.add(currentModel);
+          if (attempt == 0) {
+            throw const FormatException('Unexpected character in chunk stream');
+          } else if (attempt == 1) {
+            throw const FormatException('Unfinished JSON token in streaming buffer');
+          }
+          return 'recovered_from_$currentModel';
+        },
+      );
+
+      expect(result, equals('recovered_from_gemini-2.5-flash'));
+      expect(modelsUsed.length, equals(3));
+      expect(modelsUsed.last, equals('gemini-2.5-flash'));
+    });
+
     test('buildUserPrompt appends dishware diameter metric scale when provided', () {
       final promptWithScale = GeminiResilienceHelper.buildUserPrompt(
         dishwareDiameterCm: 26.5,

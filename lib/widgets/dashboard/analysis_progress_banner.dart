@@ -52,9 +52,11 @@ class AnalysisProgressBanner extends StatelessWidget {
     final isPending = task.isPending;
     final isCompleted = task.status == AnalysisStatus.completed;
     final isFailed = task.status == AnalysisStatus.failed;
-    final hasImage = task.imagePath.isNotEmpty && File(task.imagePath).existsSync();
+    final hasImage = (task.imagePath.isNotEmpty && File(task.imagePath).existsSync()) ||
+        (task.rawImageBytes != null && task.rawImageBytes!.isNotEmpty);
 
     return Container(
+      key: ValueKey(task.id),
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
@@ -178,7 +180,10 @@ class AnalysisProgressBanner extends StatelessWidget {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            Image.file(File(task.imagePath), width: 44, height: 44, fit: BoxFit.cover),
+            if (task.imagePath.isNotEmpty && File(task.imagePath).existsSync())
+              Image.file(File(task.imagePath), width: 44, height: 44, fit: BoxFit.cover)
+            else if (task.rawImageBytes != null && task.rawImageBytes!.isNotEmpty)
+              Image.memory(task.rawImageBytes!, width: 44, height: 44, fit: BoxFit.cover),
             if (isPending)
               Container(
                 width: 44,
