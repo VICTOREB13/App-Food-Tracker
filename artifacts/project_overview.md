@@ -1,13 +1,13 @@
 ---
 tipo: overview
 proyecto: App_Food_Tracker
-version: v1.3.3
+version: v1.3.4
 estado: activo
-fecha: 2026-10-07
-tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid, get-it, l10n, result-pattern, android-widgets, sqlite-v4, recommendations, saf-backup, auto-repair, in-app-updater, microinteractions, gemini-streaming, decoupled-cot, queue-resilience, multi-task, native-tiling]
+fecha: 2026-10-08
+tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid, get-it, l10n, result-pattern, android-widgets, sqlite-v4, recommendations, saf-backup, auto-repair, in-app-updater, microinteractions, gemini-streaming, decoupled-cot, queue-resilience, multi-task, native-tiling, 16k-tokens, thinking-level-medium, dynamic-pacing]
 ---
 
-# 🚀 Visión General del Proyecto: Victor Engineer - Food Tracker (v1.3.3)
+# 🚀 Visión General del Proyecto: Victor Engineer - Food Tracker (v1.3.4)
 
 > **Mesa de Control (Project-Planner):** Este documento centraliza la visión del producto, capacidades técnicas, directrices de arquitectura y el índice de navegación interconectado de todos los artefactos del proyecto según la metodología de Prototipado Evolutivo y estándares Obsidian.
 
@@ -22,14 +22,17 @@ tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid, get-it, 
 1. **Estimación Volumétrica Visual Asistida por IA (Gemini Streaming & Razonamiento Desacoplado):**
    - **Streaming Continuo contra Cortes NAT (`generateContentStream`):** Transmisión continua de fragmentos en `StringBuffer` que mantiene el socket TCP/TLS activo continuamente contra desconexiones en redes móviles.
    - **Razonamiento Desacoplado (*Decoupled CoT*):** Campo inicial libre `razonamiento_volumetrico` al inicio de `mealAnalysisSchema` para deducción física libre sin bloqueos de gramática restringida, eliminando 10 campos geométricos rígidos en desuso.
+   - **Ventana Expandida a 16k Tokens (`maxOutputTokens: 16384`):** Eliminación total del riesgo de truncamiento (`finishReason: MAX_TOKENS`) por cadenas de razonamiento latente y respuestas JSON enriquecidas.
+   - **Nivel de Pensamiento `MEDIUM` en Gemini 3.8 Flash y Pro:** Inyección calibrada de `thinking_level: "MEDIUM"` y `thinking_config: {'thinking_level': 'MEDIUM'}` para deducción clínica profunda, con exclusión estricta en modelos Lite (`gemini-3.5-flash-lite`) para erradicar errores `HTTP 400 INVALID_ARGUMENT`.
+   - **Armonización de Micronutrientes (`fibra_g`, `sodio_mg`, `azucar_g`):** Coherencia total entre la instrucción del sistema, el ejemplo Few-Shot y el esquema de salida, preservando al 100% las 12 reglas de cubicaje clínico y grasas ocultas.
    - **Mosaicos Nativos de 768px (1 tile = 258 tokens):** Alineación a 768px en `_prepareImageBytes`, reduciendo en 75% los tokens de visión y acelerando la respuesta a 8–16s.
    - **Orden Multimodal Óptimo:** Envío de `TextPart(prompt)` antes de `DataPart('image/jpeg', bytes)`.
    - **Resiliencia ante FormatException y Fallback a 2.5-Flash:** Captura de errores de formato con conmutación automática de contingencia.
-   - **Exclusión de `thinking_budget` en Gemini 3:** Erradicación del error `HTTP 400 INVALID_ARGUMENT` en `gemini-3.8-flash` y `gemini-3.1-pro`.
 
-2. **Cola Multi-Comida Resiliente y Renderizado Concurrente (`AnalysisQueueService` & `AnalysisProgressBanner`):**
-   - Gestión robusta con `visibleTasks` y persistencia inmediata en SQLite: subir una comida no destruye, pisa ni borra tareas pendientes o fallidas previas.
-   - Tarjetas independientes en el Dashboard que preservan fotos, estados y botones de acción (`[Editar manualmente]`, `[Reintentar]`, `[Abrir plato]`, `[Cerrar]`).
+2. **Cola Multi-Comida Resiliente y Pacing Fluido en Dashboard (`AnalysisQueueService` & `AnalysisProgressBanner`):**
+   - Temporizador periódico en memoria a 60 FPS durante la inferencia IA (0.45 a 0.90) con `MealAnalysisPacing.nextProgress` y notificación continua a la UI sin escrituras a disco SQLite en cada tick.
+   - Resolución dinámica y localizada de etapas mediante `MealAnalysisPacing.getStageMessage(task.progress, AppLocalizations.of(context)!)` cuando la tarea está en progreso.
+   - Gestión robusta con `visibleTasks` y persistencia atómica en SQLite: tarjetas independientes en el Dashboard con miniaturas en memoria y botones de acción (`[Editar manualmente]`, `[Reintentar]`, `[Abrir plato]`, `[Cerrar]`).
 
 3. **Inyección de Dependencias Formal y Arquitectura Desacoplada (`GetIt`):**
    - Adopción de `get_it` como Service Locator centralizado (`lib/core/di/service_locator.dart`), registrando interfaces abstractas (`IDatabaseService`, `IImageProcessingService`, `IMealDao`, `IWeightLogDao`, `IUserProfileDao`, `IPantryDao`).
@@ -119,6 +122,14 @@ tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid, get-it, 
     - Descarga resiliente de APKs con cabecera `Range: bytes=X-`, gestión de `HTTP 206 Partial Content` y auto-reparación ante `HTTP 416`.
     - Rediseño ergonómico de `InAppUpdateDialog`: sanitización estricta de URLs firmadas de 500+ caracteres, scroll envolvente `SingleChildScrollView`, y botón explícito para cancelar descargas en curso.
     - Corrección de contraste WCAG en SnackBar oscuro (`#18181B`) y centralización de versión canónica en `AppConstants.appVersion`.
+
+20. **Ventana de Salida 16k, Thinking Level MEDIUM, Armonización de Micronutrientes y Pacing Fluido en Memoria (v1.3.4):**
+    - Ampliación de la ventana de generación a `maxOutputTokens: 16384` en `GeminiVisionService` y en el catálogo fallback de `GeminiVisionFilter`, evitando cortes por `finishReason: MAX_TOKENS` ante cadenas extensas de pensamiento y respuestas JSON detalladas.
+    - Estandarización de `thinkingLevel: "MEDIUM"` y `buildCallConfig` para modelos Gemini 3 (`gemini-3.8-flash`) y Pro, habilitando mayor profundidad en deducción de densidades, vajilla y grasas ocultas.
+    - Omisión estricta de configuración de pensamiento en modelos Lite (`gemini-3.5-flash-lite`) para prevenir el error `HTTP 400 INVALID_ARGUMENT`.
+    - Armonización de los micronutrientes `fibra_g`, `sodio_mg` y `azucar_g` en la instrucción del sistema, el ejemplo Few-Shot y el esquema de salida, preservando al 100% las 12 reglas clínicas de cubicaje.
+    - Temporizador periódico no bloqueante en memoria durante la inferencia IA en `AnalysisQueueService._processTask` (0.45 a 0.90) que actualiza el progreso a 60 FPS con `MealAnalysisPacing.nextProgress` sin saturar el almacenamiento SQLite con escrituras en cada tick.
+    - Resolución dinámica localizada de etapas de análisis en `AnalysisProgressBanner` con `MealAnalysisPacing.getStageMessage` cuando la tarea está en progreso, preservando las descripciones fijas cuando está en cola o completada.
 
 ---
 

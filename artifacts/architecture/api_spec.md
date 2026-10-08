@@ -1,15 +1,15 @@
 ---
 tipo: api_spec
 proyecto: App_Food_Tracker
-version: v1.3.3
+version: v1.3.4
 estado: activo
-fecha: 2026-10-07
-tags: [proyecto, api, backend, contratos, sqlite-v4, github-releases, methodchannel-installer, gemini-streaming, decoupled-cot, queue-resilience, multi-task, native-tiling]
+fecha: 2026-10-08
+tags: [proyecto, api, backend, contratos, sqlite-v4, github-releases, methodchannel-installer, gemini-streaming, 16k-tokens, thinking-level-medium, dynamic-pacing]
 ---
 
-# 📡 Especificación de Contrato de Datos, Esquema SQLite v4 y Servicios Backend (v1.3.3)
+# 📡 Especificación de Contrato de Datos, Esquema SQLite v4 y Servicios Backend (v1.3.4)
 
-> **Backend-Architect:** Este artefacto define formalmente el esquema relacional de base de datos local SQLite v4, los índices B-Tree de cobertura, los modelos de dominio inmutables (Sentinel), los contratos de servicios internos (DAOs, Service Locator, Result Pattern, BackupNormalizer con auto-reparación) y externos (Dynamic Gemini API con Streaming y Razonamiento Desacoplado, Descargas Resumibles HTTP 206 en GitHub Releases, HomeWidget, USDA FoodData Central, Open Food Facts y Calculadora Metabólica).
+> **Backend-Architect:** Este artefacto define formalmente el esquema relacional de base de datos local SQLite v4, los índices B-Tree de cobertura, los modelos de dominio inmutables (Sentinel), los contratos de servicios internos (DAOs, Service Locator, Result Pattern, BackupNormalizer con auto-reparación) y externos (Dynamic Gemini API con Streaming y Razonamiento Desacoplado, 16k Tokens, Thinking Level MEDIUM, Descargas Resumibles HTTP 206 en GitHub Releases, HomeWidget, USDA FoodData Central, Open Food Facts y Calculadora Metabólica).
 
 ---
 
@@ -339,16 +339,18 @@ Para evitar alucinaciones autorregresivas y cuellos de botella de constrained gr
 - `clinicalTimeout`: 120 segundos para modelos Pro o con `supportsThinking`.
 - Manejo estructurado de `TimeoutException` retornando `AiServiceFailure.timeout(message)`.
 
-### 7.4. Contrato de Streaming y Cascada de Fallback (v1.3.2)
+### 7.4. Contrato de Streaming, Capacidad 16k y Thinking Level MEDIUM (v1.3.4)
 - **Protocolo de Streaming Continuo:** Invocación vía `model.generateContentStream()` acumulando chunks progresivos en `StringBuffer`. La actividad de paquetes mantiene abierto el socket TCP/TLS, mitigando desconexiones de gateways NAT móviles (45–80s) durante fases de razonamiento latente.
 - **Parámetros de `GenerationConfig`:**
   - `temperature`: 0.2
   - `responseMimeType`: "application/json"
-  - `maxOutputTokens`: 8192 (previniendo el corte abrupto de tokens de razonamiento por `finishReason: MAX_TOKENS`)
+  - `responseSchema`: `GeminiResilienceHelper.mealAnalysisSchema`
+  - `maxOutputTokens`: 16384 (eliminando truncamiento de tokens de razonamiento o JSON por `finishReason: MAX_TOKENS`)
+- **Nivel de Inteligencia (`thinkingLevel`):** `MEDIUM` para `gemini-3.8-flash` y variantes Pro, omitido estrictamente en modelos Lite (`gemini-3.5-flash-lite`) para prevenir el error `HTTP 400 INVALID_ARGUMENT`.
 - **Cascada de Respaldo Automática:**
   - Modelo Primario: Modelo seleccionado por el usuario o por defecto (`gemini-3.8-flash`).
   - Modelo de Fallback: `gemini-2.5-flash`.
   - Backoff Escalonado: Retardos progresivos en secuencia `[2s, 5s, 10s]` con jitter aleatorio adicional (0–500ms).
-  - Clasificación de Reintento (`isRetriableError`): HTTP 500, 502, 504, `HttpException`, `HandshakeException`, `SocketException`, respuestas vacías o terminaciones abruptas de red.
+  - Clasificación de Reintento (`isRetriableError`): HTTP 500, 502, 504, `HttpException`, `HandshakeException`, `SocketException`, `FormatException`, respuestas vacías o terminaciones abruptas de red.
 
 

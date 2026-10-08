@@ -137,5 +137,21 @@ void main() {
       expect(prompt, contains('Desglose obligatorio de ingredientes en \'items\''));
       expect(prompt, contains('PROHIBIDO fijar 200g genéricos'));
     });
+
+    test('GeminiVisionService exposes defaultThinkingLevel and resolves thinking levels correctly', () {
+      expect(GeminiVisionService.defaultThinkingLevel, equals('MEDIUM'));
+      expect(GeminiVisionService.resolveThinkingLevel('gemini-3.8-flash'), equals('MEDIUM'));
+      expect(GeminiVisionService.resolveThinkingLevel('gemini-3.1-pro'), equals('MEDIUM'));
+      expect(GeminiVisionService.resolveThinkingLevel('gemini-3.5-flash-lite'), isNull);
+      expect(GeminiVisionService.resolveThinkingLevel('gemini-2.5-flash'), isNull);
+
+      final config = GeminiVisionService.buildCallConfig(modelName: 'gemini-3.8-flash');
+      expect(config['thinking_level'], equals('MEDIUM'));
+      expect(config['thinking_config'], equals({'thinking_level': 'MEDIUM'}));
+
+      final liteConfig = GeminiVisionService.buildCallConfig(modelName: 'gemini-3.5-flash-lite');
+      expect(liteConfig.containsKey('thinking_level'), isFalse);
+      expect(liteConfig.containsKey('thinking_config'), isFalse);
+    });
   });
 }

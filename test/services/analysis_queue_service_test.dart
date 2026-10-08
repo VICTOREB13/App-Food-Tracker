@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/models/meal.dart';
 import 'package:food_tracker/services/analysis_queue_service.dart';
+import 'package:food_tracker/widgets/meal_detail/meal_analysis_pacing.dart';
 
 void main() {
   group('AnalysisTask & AnalysisQueueService Tests', () {
@@ -214,6 +215,19 @@ void main() {
       expect(service.tasks.any((t) => t.id == 'failed-1'), isFalse);
       expect(service.tasks.any((t) => t.id == 'failed-2'), isTrue);
       expect(service.tasks.any((t) => t.id == 'queued-3'), isTrue);
+    });
+
+    test('MealAnalysisPacing advances progress smoothly between 0.45 and 0.90 without jumping', () {
+      double progress = 0.45;
+      int iterations = 0;
+      while (progress < 0.90 && iterations < 200) {
+        final next = MealAnalysisPacing.nextProgress(progress);
+        expect(next, greaterThan(progress));
+        expect(next - progress, lessThan(0.01)); // Smooth increments < 1%
+        progress = next;
+        iterations++;
+      }
+      expect(progress, greaterThanOrEqualTo(0.90));
     });
   });
 }

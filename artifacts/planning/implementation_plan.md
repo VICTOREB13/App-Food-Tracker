@@ -1,103 +1,75 @@
 ---
 tipo: implementation_plan
 proyecto: App_Food_Tracker
-iteracion: v1.3.3
+iteracion: v1.3.4
 estado: activo
-fecha: 2026-10-07
-tags: [proyecto, planning, v1-3-3, gemini-vision, streaming, decoupled-cot, queue-resilience, multi-task, native-tiling, resilience]
+fecha: 2026-10-08
+tags: [proyecto, planning, v1-3-4, gemini-vision, 16k-tokens, thinking-level-medium, micronutrients-harmonization, dynamic-pacing, sqlite-zero-freeze]
 ---
 
-# 🎯 Plan de Implementación v1.3.3: Inferencia en Streaming con Razonamiento Desacoplado y Cola Resiliente Multi-Comida
+# 🎯 Plan de Implementación v1.3.4: Ventana de 16k Tokens, Thinking Level MEDIUM en Gemini 3.8 Flash, Armonización de Micronutrientes y Pacing Fluido en Dashboard
 
-> **Mesa de Control (Project-Planner):** Este plan formaliza la optimización y estabilización del subsistema de inferencia de IA en streaming (`GeminiVisionService`, `GeminiResilienceHelper`, `GeminiModelService`), y la reingeniería de la cola de análisis en segundo plano (`AnalysisQueueService`, `AnalysisProgressBanner`) para la versión **v1.3.3**. Se preserva la inferencia en streaming continuo con `StringBuffer` para evitar caídas NAT, se desacopla el razonamiento volumétrico (*Decoupled CoT*), y se dota a la cola de resiliencia concurrente para evitar que una nueva comida borre o tape platos pendientes o fallidos.
+> **Mesa de Control (Project-Planner):** Este plan formaliza la evolución técnica de la iteración **v1.3.4** del proyecto **Victor Engineer - Food Tracker**. Se expande la ventana de salida a 16,384 tokens para dar holgura total al razonamiento latente y salida estructurada, se calibra el nivel de inteligencia a `MEDIUM` para `gemini-3.8-flash` y modelos Pro (omitiendo estrictamente `thinkingConfig` en variantes Lite para evitar `HTTP 400 INVALID_ARGUMENT`), se armonizan los micronutrientes (`fibra_g`, `sodio_mg`, `azucar_g`) en el prompt maestro y bloque Few-Shot preservando escrupulosamente las reglas clínicas de cubicaje, y se implementa el pacing continuo y fluido en memoria para la cola en el dashboard a 60 FPS sin saturar SQLite.
 
 ---
 
 ## 🔍 1. Diagnóstico Forense y Requerimientos
 
-1. **Streaming vs Inferencia Unaria en Gemini Vision:**
-   - La inferencia mediante **Streaming** (`model.generateContentStream` acumulando en `StringBuffer`) es la estrategia óptima para mitigar caídas por inactividad de sockets TCP en gateways NAT móviles durante análisis de 45–80s.
-   - El 70% de los fallos diagnosticados previamente no se debía al streaming en sí, sino a:
-     - **Deadlock de Gramática Restringida (CFG):** Se exigían 10 campos euclidianos fijos (`forma_geometrica_3d`, `dimensiones_estimadas_cm`, `volumen_cm3`, etc.) que colapsaban en alimentos amorfos (sopas, guisos, arroz) y que además se descartaban al 100% en `lib/models/food_item.dart`.
-     - **Tiling ineficiente:** Imágenes de 1024px generaban 4 tiles (1,032 tokens) aumentando latencia y riesgo de timeout.
-     - **Incompatibilidad de `thinking_budget`:** En Gemini 3 causaba errores `HTTP 400 INVALID_ARGUMENT`.
-     - **Falta de captura de `FormatException`:** Errores de parseo JSON no activaban el fallback a `gemini-2.5-flash`.
+1. **Ampliación de Ventana de Contexto y Tokens de Salida (16k Tokens):**
+   - Con modelos avanzados que despliegan razonamiento clínico profundo y cadenas de deducción volumétrica (Chain-of-Thought), un límite de 8192 tokens genera riesgo de agotamiento de presupuesto (`finishReason: MAX_TOKENS`), truncando la respuesta JSON estructurada.
+   - Al elevar `maxOutputTokens` a **16,384** en `GenerationConfig` y los fallbacks de `GeminiVisionFilter`, se garantiza un margen amplio tanto para el pensamiento latente interno del transformer como para el payload JSON enriquecido con micronutrientes y justificaciones visuales.
 
-2. **Bug de Cola y Pérdida de Comidas en Segundo Plano:**
-   - Cuando una comida fallaba o quedaba en segundo plano sin reintentar y el usuario enviaba otra comida, la anterior desaparecía visualmente ("se borraba completamente").
-   - Causa raíz:
-     - `AnalysisProgressBanner` evaluaba únicamente `currentActiveTask ?? latestFailedTask ?? latestCompletedTask`, seleccionando exclusivamente un único objeto `AnalysisTask`. Al encolar la comida B, la comida A quedaba instantáneamente oculta de la pantalla.
-     - `enqueueMealAnalysis` no realizaba persistencia inmediata en SQLite, arriesgando pérdida de estado.
-     - La cola requería soporte nativo para múltiples tareas visibles (`visibleTasks`), preservación física de fotos y procesamiento ordenado FIFO.
+2. **Nivel de Inteligencia / Thinking Level `MEDIUM` en Gemini 3.8 Flash:**
+   - La deducción física 3D de comidas tradicionales y caseras requiere inferir vajilla, merma, hidratación y aceites/grasas ocultas con profundidad clínica sin penalizar excesivamente la latencia del usuario diario.
+   - En `gemini_model_service.dart` y `gemini_vision_service.dart`: se estandariza `thinkingLevel: "MEDIUM"` para `gemini-3.8-flash` y variantes Pro.
+   - **Regla Crítica de Exclusión para Variantes Lite:** Modelos livianos como `gemini-3.5-flash-lite` no admiten configuración de pensamiento; inyectarles `thinkingConfig` provoca inmediatamente el error `HTTP 400 INVALID_ARGUMENT`. Se excluye terminantemente cualquier bloque de thinking para modelos Lite.
+
+3. **Preservación y Armonización del Prompt Master:**
+   - En versiones previas, los micronutrientes (`fibra_g`, `sodio_mg`, `azucar_g`) figuraban en el esquema formal (`mealAnalysisSchema`) y en el prompt de usuario, pero el paso 4 y el ejemplo Few-Shot del sistema solo mostraban macronutrientes, creando potencial ambigüedad en modelos compactos.
+   - Se armonizan los 3 micronutrientes en los pasos 4 y 5 de `baseSystemInstruction` y en el bloque Few-Shot representativo (tanto en `items` como en `totales`), preservando al 100% todas las reglas obligatorias de cubicaje clínico (`Puño cerrado`, `Palma de la mano`, `Pulgar`, `Dos manos ahuecadas`, `Conversión cocido vs crudo`, `Regla de Grasa Oculta en Comida Casera`, `5g y 10g adicionales de grasa`, `Porciones compartidas`).
+
+4. **Pacing Dinámico y Fluido en el Dashboard (`AnalysisQueueService`):**
+   - Durante la llamada de inferencia multimodal a Gemini (que toma de 15s a 90s), la interfaz del dashboard no debe quedarse estática en 45% ni realizar saltos bruscos.
+   - En `AnalysisQueueService._processTask`, se activa un temporizador en memoria (`Timer.periodic` a 500ms) que avanza suavemente `task.progress` de 0.45 a 0.90 con `MealAnalysisPacing.nextProgress(task.progress)`, invocando `notifyListeners()` para alimentar la animación a 60 FPS sin realizar escrituras intermedias a SQLite (`_persistTaskToDb` solo al inicio, fin o fallo), previniendo saturación de disco.
+   - En `AnalysisProgressBanner`, se resuelve dinámicamente el mensaje de la etapa mediante `MealAnalysisPacing.getStageMessage(task.progress, AppLocalizations.of(context)!)` de forma reactiva.
 
 ---
 
 ## 🏗️ 2. Solución de Arquitectura Técnica
 
-### A. Streaming Continuo con Razonamiento Desacoplado (*Decoupled CoT*)
-- Se mantiene `model.generateContentStream([content])` acumulando fragmentos de texto en `StringBuffer`.
-- Se implementa el campo libre inicial `razonamiento_volumetrico` (String) al inicio de `mealAnalysisSchema`:
-  - Permite al transformer autorregresivo deducir vajilla, 3D, hidratación, merma y grasas ocultas sin restricciones sintácticas rígidas.
-  - Luego genera ordenadamente `plato`, `items` (con `alimento`, `gramos_estimados`, macros y micronutrientes) y `totales`.
-- Soporte oficial y positivo para comidas unitarias (1 ítem) en `baseSystemInstruction` y Few-Shot representativo.
+### A. Subsistema de Inferencia y Modelos
+- `GeminiVisionService`:
+  - `maxOutputTokens: 16384` en `GenerationConfig`.
+  - Exposición de `defaultThinkingLevel = 'MEDIUM'` y `resolveThinkingLevel`.
+- `GeminiModelService`:
+  - Constante `defaultThinkingLevel = 'MEDIUM'`.
+  - Método `resolveThinkingLevel(modelName)` que retorna `'MEDIUM'` para `gemini-3` y Pro, y `null` para Lite o modelos no pensantes.
+  - Método `supportsThinking(modelName)` que rechaza explícitamente modelos con `lite`.
+  - `buildCallConfig`: inyecta `thinking_level` y `thinking_config: {'thinking_level': level}` para `gemini-3` y Pro; omite estrictamente para Lite.
+- `GeminiVisionFilter`:
+  - Actualización de `outputTokenLimit: 16384` para `gemini-3.8-flash` y `gemini-3.1-pro`.
 
-### B. Mosaicos Nativos de 768px y Orden Multimodal Óptimo
-- Se fija `targetMaxDimension: 768` en `_prepareImageBytes` de `GeminiVisionService` (1 tile = 258 tokens vs 1,032 tokens a 1024px).
-- Se envía `TextPart(prompt)` antes de `DataPart('image/jpeg', bytes)` para condicionar la atención multimodal antes de decodificar imágenes.
+### B. Prompt Master y Resiliencia
+- `GeminiResilienceHelper`:
+  - Armonización de `fibra_g`, `sodio_mg` y `azucar_g` en la instrucción del sistema y el bloque Few-Shot representativo.
+  - Mantenimiento intacto de las 12 directivas clínicas de cubicaje volumétrico.
 
-### C. Captura de `FormatException` y Exclusión de `thinking_budget` en Gemini 3
-- `GeminiResilienceHelper.isRetriableError` captura `FormatException` y errores sintácticos de chunk para activar fallback inmediato a `gemini-2.5-flash`.
-- `GeminiModelService.buildCallConfig` y `resolveThinkingBudget` excluyen la inyección de `thinking_budget` en modelos que inicien con `gemini-3`, evitando el error `HTTP 400 INVALID_ARGUMENT`.
-
-### D. Cola y Banner Multi-Tarea Resilientes
+### C. Cola de Análisis y Banner de Progreso
 - `AnalysisQueueService`:
-  - Expone `visibleTasks` conteniendo todas las tareas activas, fallidas y completadas pendientes de revisión.
-  - Encola tareas de forma no destructiva con persistencia inmediata en SQLite (`_persistTaskToDb`).
-  - Procesa en orden FIFO (`lastWhere` con inserción al inicio).
+  - Integración de temporizador de pacing en memoria durante `gemini.analyzeMealPhoto`.
+  - Cancelación garantizada del temporizador en bloque `finally`.
+  - Cero escrituras a SQLite en ticks periódicos.
 - `AnalysisProgressBanner`:
-  - Renderiza una lista reactiva (`Column`) de tarjetas independientes (`_buildTaskCard`) para cada tarea en `visibleTasks`.
-  - Si una comida falló y el usuario sube otra, ambas se muestran simultáneamente con sus estados, fotos, porcentajes y botones de acción independientes (`[Editar manualmente]`, `[Reintentar]`, `[Abrir plato]`, `[Cerrar]`).
+  - Resolución dinámica de etapas con `MealAnalysisPacing.getStageMessage` sensible al contexto de idioma (`AppLocalizations`).
 
 ---
 
-## 🛠️ 3. Fases de Ejecución
+## 📅 3. Plan de Fases y Responsabilidades
 
-### Fase 1: Servicios de Inferencia e IA (`Backend-Architect`)
-1. `lib/services/gemini_resilience_helper.dart`: Esquema `razonamiento_volumetrico` desacoplado, Few-Shot representativo y captura de `FormatException`.
-2. `lib/services/gemini_vision_service.dart`: Streaming continuo, compresión a 768px y `TextPart` antes de `DataPart`.
-3. `lib/services/gemini_model_service.dart`: Exclusión de `thinking_budget` en Gemini 3.
-
-### Fase 2: Cola y UI Multi-Comida (`Backend-Architect` & `Frontend-UI`)
-1. `lib/services/analysis_queue_service.dart`: `visibleTasks`, persistencia SQLite inmediata en encolado, orden FIFO.
-2. `lib/widgets/dashboard/analysis_progress_banner.dart`: Renderizado concurrente de tarjetas por cada tarea visible.
-
-### Fase 3: Versionado y Calidad (`DevOps-Engineer` & `Systems-Auditor`)
-1. Actualización a versión `1.3.3` en `lib/core/constants/app_constants.dart` y `1.3.3+1` en `pubspec.yaml`.
-2. Suites de pruebas en `test/` actualizadas para streaming, CoT desacoplado y concurrencia en cola.
-3. Verificación estricta de `< 300 LoC` en todos los archivos de `lib/`.
-4. Quality Gate aprobado en `artifacts/audit_reports/audit_report.md`.
-5. Git commit, push a origin main y creación y push del tag `v1.3.3`.
-
----
-
-## 🔒 4. Matriz de Cumplimiento de Restricciones Técnicas
-
-| Restricción | Estrategia de Cumplimiento |
-| :--- | :--- |
-| **Límite de < 300 LoC por archivo** | Verificación estricta en el 100% de archivos en `lib/` (ninguno supera 299 líneas). |
-| **Streaming Activo** | `model.generateContentStream` acumulando en `StringBuffer` contra desconexiones NAT. |
-| **Multi-Comida Resiliente** | `visibleTasks` y renderizado individual por tarjeta en `AnalysisProgressBanner`. |
-| **Compatibilidad hacia atrás** | Modelos `FoodItem` y `MealAnalysisResult` inmutables; sin alteraciones de esquema SQLite. |
-| **Despliegue y Release** | Push y tag `v1.3.3` autorizados explícitamente por el usuario para esta iteración. |
-
----
-
-## 📋 5. Enlaces a Artefactos Vinculados
-
-- **Visión General del Proyecto:** [[PRJ_App_Food_Tracker_overview|Visión General del Proyecto]]
-- **Arquitectura del Sistema:** [[PRJ_App_Food_Tracker_architecture|Arquitectura del Sistema]]
-- **Abstracciones y Contratos:** [[PRJ_App_Food_Tracker_abstractions|Abstracciones]]
-- **Especificación de API y Modelos:** [[PRJ_App_Food_Tracker_api_spec|Especificación de API]]
-- **Checklist de Tareas:** [[PRJ_App_Food_Tracker_task|Checklist de Tareas]]
-- **Historial de Cambios:** [[PRJ_App_Food_Tracker_changelog_v1|Changelog]]
-- **Reporte de Auditoría:** [[PRJ_App_Food_Tracker_audit_report|Reporte de Auditoría]]
+| Fase | Rol | Tareas Principales | Estado |
+|---|---|---|---|
+| **Fase 1** | Project-Planner | Especificación técnica, diseño de pacing y actualización de artefactos. | Completado |
+| **Fase 2** | Backend-Architect | Expansión a 16k tokens, Thinking Level MEDIUM, exclusión Lite y armonización prompt. | Completado |
+| **Fase 3** | Frontend-UI | Pacing en memoria en cola y resolución dinámica de etapas en banner. | Completado |
+| **Fase 4** | Systems-Auditor | Pruebas unitarias de thinking, pacing, tokens y auditoría modular < 300 LoC. | Completado |
+| **Fase 5** | DevOps-Engineer | Bump de versión a 1.3.4+1, changelog v1.3.4 y certificación final. | Completado |

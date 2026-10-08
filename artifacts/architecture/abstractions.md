@@ -1,15 +1,15 @@
 ---
 tipo: abstracciones
 proyecto: App_Food_Tracker
-version: v1.3.3
+version: v1.3.4
 estado: activo
-fecha: 2026-10-07
-tags: [proyecto, arquitectura, abstracciones, backend, gemini-streaming, decoupled-cot, queue-resilience, multi-task, native-tiling, resilience]
+fecha: 2026-10-08
+tags: [proyecto, arquitectura, abstracciones, backend, gemini-streaming, 16k-tokens, thinking-level-medium, micronutrients-harmonization, dynamic-pacing]
 ---
 
-# Abstracciones del Sistema y Arquitectura de Código: Victor Engineer - Food Tracker (v1.3.3)
+# Abstracciones del Sistema y Arquitectura de Código: Victor Engineer - Food Tracker (v1.3.4)
 
-> **Mesa de Control & Backend-Architect:** Este documento centraliza las clases maestras, interfaces de dominio, servicios de negocio, funciones utilitarias nucleares, variables de estado seguro y costuras de flujo de datos (data seams) de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.3.3` (Streaming Continuo en Gemini Vision, Razonamiento Desacoplado CoT, Mosaicos Nativos de 768px, Resiliencia ante FormatException, Exclusión de thinking_budget en Gemini 3, y Cola Multi-Comida Resiliente con Renderizado Concurrente en Dashboard). Complementa conceptualmente a [[PRJ_App_Food_Tracker_api_spec|Especificación de API y Modelos]] para posibilitar el entendimiento exhaustivo del software sin necesidad de inspeccionar línea por línea el código fuente.
+> **Mesa de Control & Backend-Architect:** Este documento centraliza las clases maestras, interfaces de dominio, servicios de negocio, funciones utilitarias nucleares, variables de estado seguro y costuras de flujo de datos (data seams) de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.3.4` (Ventana de 16k Tokens, Thinking Level MEDIUM en Gemini 3.8 Flash, Exclusión de Thinking en Variantes Lite, Armonización de Micronutrientes y Pacing Dinámico a 60 FPS sin Saturación SQLite). Complementa conceptualmente a [[PRJ_App_Food_Tracker_api_spec|Especificación de API y Modelos]] para posibilitar el entendimiento exhaustivo del software sin necesidad de inspeccionar línea por línea el código fuente.
 
 ---
 
@@ -542,9 +542,11 @@ Para garantizar la estricta mantenibilidad del monolito modular sin romper compa
   GenerationConfig(
     temperature: 0.2,
     responseMimeType: 'application/json',
-    maxOutputTokens: 8192, // Cupo ampliado para tokens de razonamiento
+    responseSchema: GeminiResilienceHelper.mealAnalysisSchema,
+    maxOutputTokens: 16384, // Cupo ampliado para pensamiento latente y JSON completo
   )
   ```
+- **Nivel de Pensamiento (Thinking Level):** Configuración estandarizada a `MEDIUM` para `gemini-3.8-flash` y modelos Pro, omitida estrictamente en modelos Lite (`gemini-3.5-flash-lite`) para evitar `HTTP 400 INVALID_ARGUMENT`.
 
 ### 11.2. Cascada Moderna y Resiliencia en `GeminiResilienceHelper`
 - **Ubicación:** `lib/services/gemini_resilience_helper.dart` (292 LoC).
@@ -580,7 +582,7 @@ Para garantizar la estricta mantenibilidad del monolito modular sin romper compa
 
 ### 11.5. Canónica de Versiones del Sistema (`AppConstants`)
 - **Ubicación:** `lib/core/constants/app_constants.dart` (5 LoC).
-- **Definición:** `static const String appVersion = '1.3.3';`. Centraliza la versión de referencia consumida por `DashboardScreen`, `AppUpdateCard` y tests unitarios.
+- **Definición:** `static const String appVersion = '1.3.4';`. Centraliza la versión de referencia consumida por `DashboardScreen`, `AppUpdateCard` y tests unitarios.
 
 ---
 
@@ -608,6 +610,26 @@ Para garantizar la estricta mantenibilidad del monolito modular sin romper compa
   - **Chip de Certeza:** Muestra `"$confidencePercentage% Certeza"` con icono `Icons.verified_outlined`. Color semántico reactivo: `AppColors.success` (verde) si $\ge 85\%$, `AppColors.carbs` (amarillo/ámbar) si $\ge 70\%$, o `AppColors.caloriesFlame` (naranja) si $< 70\%$.
   - **Chip de Margen de Error:** Muestra `"±$calorieErrorMargin kcal"` con icono `Icons.tune` y color `AppColors.portion`.
 - **Alineación con el Usuario:** Ausencia total de etiquetas cualitativas subjetivas (sin "nivel") y sin caja de observaciones, manteniendo la interfaz despejada y concisa.
+
+---
+
+## ⚡ 13. Abstracciones de Inferencia 16k, Thinking Level MEDIUM y Pacing Fluido (v1.3.4)
+
+### 13.1. Calibración de Inteligencia en Modelos (`GeminiModelService` & `GeminiVisionService`)
+- **Ubicación:** `lib/services/gemini_model_service.dart` (185 LoC) y `lib/services/gemini_vision_service.dart` (270 LoC).
+- **Constantes y Resolutores:**
+  - `defaultThinkingLevel = 'MEDIUM'`.
+  - `resolveThinkingLevel(modelName)`: Retorna `'MEDIUM'` para Gemini 3 y variantes Pro; `null` para Lite o modelos no reasoning.
+  - `buildCallConfig`: Facade canónico que inyecta `thinking_level` y `thinking_config: {'thinking_level': level}` para modelos con soporte, y omite terminantemente cualquier bloque de pensamiento en variantes Lite (`gemini-3.5-flash-lite`) erradicando el error `HTTP 400 INVALID_ARGUMENT`.
+- **Ventana de Generación:** `maxOutputTokens: 16384` en `GenerationConfig`, garantizando holgura completa para pensamiento latente y estructuración JSON sin riesgo de `finishReason: MAX_TOKENS`.
+
+### 13.2. Pacing Continuo en Memoria a 60 FPS (`AnalysisQueueService` & `AnalysisProgressBanner`)
+- **Ubicación:** `lib/services/analysis_queue_service.dart` (251 LoC) y `lib/widgets/dashboard/analysis_progress_banner.dart` (271 LoC).
+- **Patrón Cero Contención SQLite:**
+  - Durante `analyzeMealPhoto`, un `Timer.periodic(const Duration(milliseconds: 500))` en memoria incrementa suavemente el progreso de 0.45 a 0.90 con `MealAnalysisPacing.nextProgress(task.progress)`.
+  - Notifica a la interfaz gráfica vía `notifyListeners()` asegurando 60 FPS continuos sin escrituras a disco SQLite en cada tick.
+  - Cancelación determinista y segura en cláusula `finally { pacingTimer?.cancel(); }`.
+- **Resolución Reactiva de Etapa:** `AnalysisProgressBanner._resolveStageMessage` delega en `MealAnalysisPacing.getStageMessage(task.progress, l10n)` únicamente cuando la tarea se encuentra activamente en estado `AnalysisStatus.processing`, respetando fielmente los textos de estado predeterminados (`En cola`, `En cola para reintento...`) para tareas en espera.
 
 
 

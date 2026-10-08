@@ -1,10 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/meal.dart';
 import '../../services/analysis_queue_service.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_loading_ring.dart';
+import '../meal_detail/meal_analysis_pacing.dart';
 
 class AnalysisProgressBanner extends StatelessWidget {
   final void Function(Meal meal) onOpenMeal;
@@ -46,6 +48,16 @@ class AnalysisProgressBanner extends StatelessWidget {
         );
       },
     );
+  }
+
+  String _resolveStageMessage(BuildContext context, AnalysisTask task) {
+    if (task.status == AnalysisStatus.processing) {
+      final l10n = AppLocalizations.of(context);
+      if (l10n != null) {
+        return MealAnalysisPacing.getStageMessage(task.progress, l10n);
+      }
+    }
+    return task.stage;
   }
 
   Widget _buildTaskCard(BuildContext context, AnalysisTask task) {
@@ -135,7 +147,7 @@ class AnalysisProgressBanner extends StatelessWidget {
                           ? '${task.resultMeal?.calories.toInt() ?? 0} kcal · ${task.resultMeal?.items.length ?? 0} ingredientes'
                           : isFailed
                               ? (task.error ?? 'Error de conexión o análisis con IA.')
-                              : task.stage,
+                              : _resolveStageMessage(context, task),
                       style: GoogleFonts.inter(
                         fontSize: 11,
                         color: AppColors.textSecondary(context),

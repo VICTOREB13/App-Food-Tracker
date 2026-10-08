@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:food_tracker/l10n/app_localizations.dart';
 import 'package:food_tracker/models/meal.dart';
 import 'package:food_tracker/services/analysis_queue_service.dart';
 import 'package:food_tracker/widgets/common/ve_loading_ring.dart';
@@ -214,6 +215,67 @@ void main() {
       expect(find.text('Consultando modelo Gemini...'), findsOneWidget);
       expect(find.text('50%'), findsOneWidget);
       expect(find.byType(VeLoadingRing), findsOneWidget);
+    });
+
+    testWidgets('AnalysisProgressBanner resolves dynamic stage message via AppLocalizations and MealAnalysisPacing', (tester) async {
+      final task = AnalysisTask(
+        id: 'pacing-stage-task',
+        imagePath: '/test/pacing.jpg',
+        mealType: 'Almuerzo',
+        date: DateTime.now(),
+        status: AnalysisStatus.processing,
+        progress: 0.55,
+        stage: 'Fallback static stage',
+      );
+
+      AnalysisQueueService.instance.addTaskForTesting(task);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('es'),
+          home: Scaffold(
+            body: AnalysisProgressBanner(
+              onOpenMeal: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(AnalysisProgressBanner), findsOneWidget);
+      expect(find.text('55%'), findsOneWidget);
+      expect(find.text('Estimando geometría 3D y cubicaje volumétrico...'), findsOneWidget);
+    });
+
+    testWidgets('AnalysisProgressBanner preserves queued stage when task is waiting in queue', (tester) async {
+      final task = AnalysisTask(
+        id: 'queued-waiting-task',
+        imagePath: '/test/queued.jpg',
+        mealType: 'Cena',
+        date: DateTime.now(),
+        status: AnalysisStatus.queued,
+        progress: 0.05,
+        stage: 'En cola para reintento...',
+      );
+
+      AnalysisQueueService.instance.addTaskForTesting(task);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('es'),
+          home: Scaffold(
+            body: AnalysisProgressBanner(
+              onOpenMeal: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(AnalysisProgressBanner), findsOneWidget);
+      expect(find.text('En cola para reintento...'), findsOneWidget);
     });
   });
 }

@@ -22,6 +22,17 @@ class GeminiVisionService {
   static const Duration defaultTimeout = Duration(seconds: 90);
   static const Duration clinicalTimeout = Duration(seconds: 120);
 
+  static const String defaultThinkingLevel = GeminiModelService.defaultThinkingLevel;
+  static String? resolveThinkingLevel(String modelName) =>
+      GeminiModelService.resolveThinkingLevel(modelName);
+
+  /// Builds a call configuration map with model and thinking level/budget
+  static Map<String, dynamic> buildCallConfig({
+    required String modelName, int? customThinkingBudget, String? customThinkingLevel,
+  }) => GeminiModelService.buildCallConfig(
+    modelName: modelName, customThinkingBudget: customThinkingBudget, customThinkingLevel: customThinkingLevel,
+  );
+
   static const String baseSystemInstruction = GeminiResilienceHelper.baseSystemInstruction;
   static const String systemInstruction = baseSystemInstruction;
 
@@ -77,21 +88,14 @@ class GeminiVisionService {
     double? dishwareDiameterCm,
     String? pantryContext,
   }) => analyzeMealPhoto(
-    rawImageBytes: imageBytes,
-    userContext: userContext,
-    overrideModel: overrideModel,
-    overrideMasterPrompt: overrideMasterPrompt,
-    dishwareDiameterCm: dishwareDiameterCm,
-    pantryContext: pantryContext,
+    rawImageBytes: imageBytes, userContext: userContext, overrideModel: overrideModel,
+    overrideMasterPrompt: overrideMasterPrompt, dishwareDiameterCm: dishwareDiameterCm, pantryContext: pantryContext,
   );
 
   Future<MealAnalysisResult> analyzeMealPhoto({
     required Uint8List rawImageBytes,
-    String? userContext,
-    String? overrideModel,
-    String? overrideMasterPrompt,
-    double? dishwareDiameterCm,
-    String? pantryContext,
+    String? userContext, String? overrideModel, String? overrideMasterPrompt,
+    double? dishwareDiameterCm, String? pantryContext,
   }) async {
     try {
       final imageBytesToSend = await _prepareImageBytes(rawImageBytes);
@@ -117,14 +121,9 @@ class GeminiVisionService {
   }
 
   Future<MealAnalysisResult> reanalyzeWithIngredientSubstitution({
-    required Uint8List rawImageBytes,
-    required List<FoodItem> currentItems,
-    required String oldIngredient,
-    required String newIngredient,
-    String? userNotes,
-    double? dishwareDiameterCm,
-    String? pantryContext,
-    String? overrideModel,
+    required Uint8List rawImageBytes, required List<FoodItem> currentItems,
+    required String oldIngredient, required String newIngredient,
+    String? userNotes, double? dishwareDiameterCm, String? pantryContext, String? overrideModel,
   }) async {
     try {
       final imageBytesToSend = await _prepareImageBytes(rawImageBytes);
@@ -156,10 +155,8 @@ class GeminiVisionService {
   }
 
   Future<MealAnalysisResult> analyzeSpeechMeal({
-    required Uint8List audioBytes,
-    String mimeType = 'audio/mp3',
-    String? userNotes,
-    String? overrideModel,
+    required Uint8List audioBytes, String mimeType = 'audio/mp3',
+    String? userNotes, String? overrideModel,
   }) async {
     try {
       final initialModel = (overrideModel != null && overrideModel.trim().isNotEmpty)
@@ -180,11 +177,8 @@ class GeminiVisionService {
   }
 
   Future<MealAnalysisResult> analyzeVideoFramesMeal({
-    required List<Uint8List> frameBytesList,
-    String? userNotes,
-    double? dishwareDiameterCm,
-    String? pantryContext,
-    String? overrideModel,
+    required List<Uint8List> frameBytesList, String? userNotes,
+    double? dishwareDiameterCm, String? pantryContext, String? overrideModel,
   }) async {
     try {
       final initialModel = (overrideModel != null && overrideModel.trim().isNotEmpty)
@@ -217,18 +211,14 @@ class GeminiVisionService {
     final fastDims = _getFastDimensions(rawBytes);
     if (fastDims == null || fastDims.$1 > 768 || fastDims.$2 > 768) {
       return await ImageProcessingService.instance.compressAndResizeAsync(
-        rawBytes,
-        targetMaxDimension: 768,
-        quality: 85,
+        rawBytes, targetMaxDimension: 768, quality: 85,
       );
     }
     return rawBytes;
   }
 
   Future<MealAnalysisResult> _executeGenerativeContent({
-    required List<Part> parts,
-    required String systemInstruction,
-    required String initialModel,
+    required List<Part> parts, required String systemInstruction, required String initialModel,
   }) async {
     final content = Content.multi(parts);
 
@@ -244,7 +234,7 @@ class GeminiVisionService {
             responseMimeType: 'application/json',
             responseSchema: GeminiResilienceHelper.mealAnalysisSchema,
             temperature: 0.2,
-            maxOutputTokens: 8192,
+            maxOutputTokens: 16384,
           ),
         );
 

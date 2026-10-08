@@ -132,10 +132,10 @@ PIPELINE CAUSAL ESTRICTO - PIPELINE DE RAZONAMIENTO DESACOPLADO:
 3. 'porcentaje_certeza' y 'margen_error_kcal':
    - Estima 'porcentaje_certeza' como un entero entre 0 y 100 basado en visibilidad, nitidez y oclusión de porciones.
    - Estima 'margen_error_kcal' como un entero en kilocalorías (+/- kcal) que refleje la incertidumbre de la estimación.
-4. 'items': Desglose obligatorio de ingredientes en 'items'. Desglosa cada alimento identificado de forma individual con sus gramos estimados y macronutrientes.
+4. 'items': Desglose obligatorio de ingredientes en 'items'. Desglosa cada alimento identificado de forma individual con sus gramos estimados, macronutrientes y micronutrientes (fibra_g, sodio_mg, azucar_g).
    - Si la comida consta de un solo alimento o preparación unitaria (ej. una manzana, un café, o una porción individual de lasaña), desglósalo como un único ítem en 'items'.
    - Si la comida contiene múltiples alimentos combinados, desglosa individualmente cada ingrediente o elemento reconocible.
-5. 'totales': Suma coherente de las calorías y macronutrientes de los items.
+5. 'totales': Suma coherente de las calorías, macronutrientes y micronutrientes de los items.
 
 Ejemplo Few-Shot de salida:
 {
@@ -144,10 +144,10 @@ Ejemplo Few-Shot de salida:
   "porcentaje_certeza": 90,
   "margen_error_kcal": 45,
   "items": [
-    {"alimento": "Arroz blanco cocido", "gramos_estimados": 195, "calorias": 250, "proteinas_g": 5, "carbohidratos_g": 54, "grasas_g": 1},
-    {"alimento": "Lentejas guisadas con sofrito", "gramos_estimados": 200, "calorias": 230, "proteinas_g": 16, "carbohidratos_g": 32, "grasas_g": 9}
+    {"alimento": "Arroz blanco cocido", "gramos_estimados": 195, "calorias": 250, "proteinas_g": 5, "carbohidratos_g": 54, "grasas_g": 1, "fibra_g": 1.2, "sodio_mg": 2.0, "azucar_g": 0.1},
+    {"alimento": "Lentejas guisadas con sofrito", "gramos_estimados": 200, "calorias": 230, "proteinas_g": 16, "carbohidratos_g": 32, "grasas_g": 9, "fibra_g": 8.0, "sodio_mg": 380.0, "azucar_g": 2.5}
   ],
-  "totales": {"calorias": 480, "proteina_g": 21, "carbohidratos_g": 86, "grasas_g": 10}
+  "totales": {"calorias": 480, "proteina_g": 21, "carbohidratos_g": 86, "grasas_g": 10, "fibra_g": 9.2, "sodio_mg": 382.0, "azucar_g": 2.6}
 }
 
 Reglas obligatorias de cubicaje:

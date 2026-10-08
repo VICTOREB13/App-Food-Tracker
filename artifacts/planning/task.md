@@ -1,15 +1,53 @@
 ---
 tipo: task_list
 proyecto: App_Food_Tracker
-iteracion: v1.3.3
+iteracion: v1.3.4
 estado: activo
-fecha: 2026-10-07
-tags: [proyecto, tasks, checklist, v1-3-3, gemini-vision, unary-call, schema-optimization, resilience, 768px-tiling]
+fecha: 2026-10-08
+tags: [proyecto, tasks, checklist, v1-3-4, 16k-tokens, thinking-level-medium, micronutrients-harmonization, dynamic-pacing, sqlite-zero-freeze]
 ---
 
-# 📋 Checklist Maestro de Tareas de Agentes (v1.3.3)
+# 📋 Checklist Maestro de Tareas de Agentes (v1.3.4)
 
-> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.3.3. Cada tarea completada se marca con `[x]`.
+> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.3.4. Cada tarea completada se marca con `[x]`.
+
+---
+
+## 🌟 Iteración v1.3.4: Ventana de 16k Tokens, Thinking Level MEDIUM, Armonización de Micronutrientes y Pacing Fluido en Dashboard
+
+### 🧭 1. Project-Planner (Master Tech Lead & Orquestador)
+- [x] (Project-Planner) Estructurar la arquitectura de la ventana de contexto a 16k tokens (`maxOutputTokens: 16384`) para eliminar truncamiento de pensamiento y JSON.
+- [x] (Project-Planner) Diseñar la política de Thinking Level `MEDIUM` en Gemini 3.8 Flash y Pro, con exclusión terminante en variantes Lite para prevenir `HTTP 400 INVALID_ARGUMENT`.
+- [x] (Project-Planner) Armonizar el pipeline de micronutrientes (`fibra_g`, `sodio_mg`, `azucar_g`) preservando todas las reglas clínicas y de cubicaje volumétrico.
+- [x] (Project-Planner) Diseñar el pacing dinámico y fluido en memoria en `AnalysisQueueService` a 60 FPS sin saturación ni escrituras repetitivas a SQLite.
+- [x] (Project-Planner) Actualizar artefactos de planeación y arquitectura (`implementation_plan.md`, `task.md`, `architecture.md`, `abstractions.md`, `api_spec.md`, `changelog_v1.md`, `audit_report.md`).
+
+### 🗄️ 2. Backend-Architect (Servicios de Visión, Resiliencia y Modelos)
+- [x] (Backend-Architect) Configurar `maxOutputTokens: 16384` en `GeminiVisionService` y en los modelos fallback de `GeminiVisionFilter`.
+- [x] (Backend-Architect) Configurar `defaultThinkingLevel: 'MEDIUM'` y `resolveThinkingLevel` en `GeminiModelService` y `GeminiVisionService`.
+- [x] (Backend-Architect) Implementar `buildCallConfig` con inyección de `thinking_level` y `thinking_config: {'thinking_level': level}` en Gemini 3 / Pro, y omisión estricta en modelos Lite.
+- [x] (Backend-Architect) Armonizar `fibra_g`, `sodio_mg` y `azucar_g` en los pasos 4 y 5 de `baseSystemInstruction` y en el Few-Shot de `GeminiResilienceHelper`.
+- [x] (Backend-Architect) Preservar al 100% todas las reglas obligatorias de cubicaje clínico y de grasa oculta (`Puño cerrado`, `Palma de la mano`, `Pulgar`, `Dos manos ahuecadas`, `Conversión cocido vs crudo`, `Regla de Grasa Oculta en Comida Casera`, `5g y 10g adicionales de grasa`, etc.).
+- [x] (Backend-Architect) Integrar temporizador de pacing fluido en memoria en `AnalysisQueueService._processTask` (0.45 a 0.90 con `MealAnalysisPacing.nextProgress(task.progress)` sin escrituras SQLite en ticks).
+- [x] (Backend-Architect) Garantizar estricto cumplimiento modular `< 300 LoC` en todos los archivos modificados.
+
+### 🎨 3. Frontend-UI (Dashboard y Pacing Reactivo)
+- [x] (Frontend-UI) Conectar `AnalysisProgressBanner` con `MealAnalysisPacing.getStageMessage(task.progress, AppLocalizations.of(context)!)` para resolución reactiva de mensajes de etapa.
+- [x] (Frontend-UI) Asegurar fallback elegante a `task.stage` cuando el árbol de widgets no disponga de `AppLocalizations`.
+- [x] (Frontend-UI) Garantizar estricto cumplimiento modular `< 300 LoC` en `AnalysisProgressBanner` (271 LoC).
+
+### 🚀 4. DevOps-Engineer (Versionado y Control de Calidad)
+- [x] (DevOps-Engineer) Incrementar versión a `1.3.4+1` en `pubspec.yaml` y `AppConstants.appVersion = '1.3.4'`.
+- [x] (DevOps-Engineer) Documentar la versión `[1.3.4] - 2026-10-08` en `changelog_v1.md`.
+- [x] (DevOps-Engineer) Respetar la regla de no ejecutar git push prematuro antes de la verificación del Quality Gate.
+
+### 🛡️ 5. Systems-Auditor (Pruebas Automatizadas y Quality Gate)
+- [x] (Systems-Auditor) Crear y actualizar pruebas unitarias en `gemini_model_service_test.dart` para thinking level MEDIUM y exclusión en Lite.
+- [x] (Systems-Auditor) Crear pruebas en `gemini_vision_service_test.dart` para `defaultThinkingLevel` y resolución de niveles.
+- [x] (Systems-Auditor) Crear pruebas en `analysis_queue_service_test.dart` para avance suave de pacing de 0.45 a 0.90 sin saltos.
+- [x] (Systems-Auditor) Crear pruebas en `analysis_progress_banner_test.dart` para resolución dinámica de etapas con `AppLocalizations`.
+- [x] (Systems-Auditor) Auditar que el 100% de archivos en `lib/` tengan estrictamente < 300 LoC.
+- [x] (Systems-Auditor) Emitir veredicto formal `PASS` en `artifacts/audit_reports/audit_report.md`.
 
 ---
 

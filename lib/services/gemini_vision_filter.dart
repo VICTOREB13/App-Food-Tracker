@@ -12,7 +12,7 @@ class GeminiVisionFilter {
       isRecommended: true,
       recommendationLabel: 'Fast',
       inputTokenLimit: 1048576,
-      outputTokenLimit: 8192,
+      outputTokenLimit: 16384,
     ),
     GeminiModelInfo(
       name: 'gemini-3.1-pro',
@@ -21,7 +21,7 @@ class GeminiVisionFilter {
       isRecommended: true,
       recommendationLabel: 'Think',
       inputTokenLimit: 2097152,
-      outputTokenLimit: 8192,
+      outputTokenLimit: 16384,
     ),
     GeminiModelInfo(
       name: 'gemini-2.5-flash',

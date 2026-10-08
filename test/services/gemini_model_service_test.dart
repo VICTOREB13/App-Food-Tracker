@@ -127,32 +127,63 @@ void main() {
       expect(models[4].recommendationLabel, equals('Obsoleto'));
     });
 
-    test('supportsThinking and resolveThinkingBudget exclude thinking_budget on gemini-3 to prevent HTTP 400', () {
+    test('supportsThinking and resolveThinkingBudget configure thinkingLevel MEDIUM for gemini-3 and exclude for lite', () {
       expect(GeminiModelService.supportsThinking('gemini-3.1-pro'), isTrue);
       expect(GeminiModelService.resolveThinkingBudget('gemini-3.1-pro'), isNull);
+      expect(GeminiModelService.resolveThinkingLevel('gemini-3.1-pro'), equals('MEDIUM'));
 
       expect(GeminiModelService.supportsThinking('gemini-3.8-flash'), isTrue);
       expect(GeminiModelService.resolveThinkingBudget('gemini-3.8-flash'), isNull);
+      expect(GeminiModelService.resolveThinkingLevel('gemini-3.8-flash'), equals('MEDIUM'));
+
+      expect(GeminiModelService.supportsThinking('gemini-3.5-flash-lite'), isFalse);
+      expect(GeminiModelService.resolveThinkingBudget('gemini-3.5-flash-lite'), isNull);
+      expect(GeminiModelService.resolveThinkingLevel('gemini-3.5-flash-lite'), isNull);
 
       expect(GeminiModelService.supportsThinking('gemini-2.0-flash-thinking'), isTrue);
       expect(GeminiModelService.resolveThinkingBudget('gemini-2.0-flash-thinking'), equals(1024));
+      expect(GeminiModelService.resolveThinkingLevel('gemini-2.0-flash-thinking'), isNull);
 
       expect(GeminiModelService.supportsThinking('gemini-2.5-flash'), isFalse);
       expect(GeminiModelService.resolveThinkingBudget('gemini-2.5-flash'), isNull);
+      expect(GeminiModelService.resolveThinkingLevel('gemini-2.5-flash'), isNull);
 
       final gen3Config = GeminiModelService.buildCallConfig(modelName: 'gemini-3.8-flash');
       expect(gen3Config.containsKey('thinking_budget'), isFalse);
-      expect(gen3Config.containsKey('thinking_config'), isFalse);
+      expect(gen3Config['thinking_level'], equals('MEDIUM'));
+      expect(gen3Config['thinking_config'], equals({'thinking_level': 'MEDIUM'}));
 
       final gen3ProConfig = GeminiModelService.buildCallConfig(modelName: 'gemini-3.1-pro');
       expect(gen3ProConfig.containsKey('thinking_budget'), isFalse);
-      expect(gen3ProConfig.containsKey('thinking_config'), isFalse);
+      expect(gen3ProConfig['thinking_level'], equals('MEDIUM'));
+      expect(gen3ProConfig['thinking_config'], equals({'thinking_level': 'MEDIUM'}));
+
+      final liteConfig = GeminiModelService.buildCallConfig(modelName: 'gemini-3.5-flash-lite');
+      expect(liteConfig.containsKey('thinking_budget'), isFalse);
+      expect(liteConfig.containsKey('thinking_level'), isFalse);
+      expect(liteConfig.containsKey('thinking_config'), isFalse);
 
       final thinkingConfig = GeminiModelService.buildCallConfig(modelName: 'gemini-2.0-flash-thinking');
       expect(thinkingConfig['thinking_budget'], equals(1024));
 
       final flashConfig = GeminiModelService.buildCallConfig(modelName: 'gemini-2.5-flash');
       expect(flashConfig.containsKey('thinking_budget'), isFalse);
+      expect(flashConfig.containsKey('thinking_level'), isFalse);
+      expect(flashConfig.containsKey('thinking_config'), isFalse);
+
+      final customConfig = GeminiModelService.buildCallConfig(
+        modelName: 'gemini-3.8-flash',
+        customThinkingLevel: 'HIGH',
+      );
+      expect(customConfig['thinking_level'], equals('HIGH'));
+      expect(customConfig['thinking_config'], equals({'thinking_level': 'HIGH'}));
+
+      final customLiteConfig = GeminiModelService.buildCallConfig(
+        modelName: 'gemini-3.5-flash-lite',
+        customThinkingLevel: 'HIGH',
+      );
+      expect(customLiteConfig.containsKey('thinking_level'), isFalse);
+      expect(customLiteConfig.containsKey('thinking_config'), isFalse);
     });
 
     test('isVisionCapableModel fallback heuristic filters non-vision when inputModalities is absent', () {

@@ -23,35 +23,60 @@ class GeminiModelService {
   static bool isVisionCapableModel(Map<String, dynamic> model) =>
       GeminiVisionFilter.isVisionCapableModel(model);
 
-  /// Default thinking budget token allocation for latent reasoning models
+  /// Default thinking budget token allocation for legacy reasoning models
   static const int defaultThinkingBudget = 1024;
+
+  /// Default thinking level for Gemini 3.8 Flash and Pro clinical models
+  static const String defaultThinkingLevel = 'MEDIUM';
 
   /// Determines whether a given Gemini model supports latent reasoning / clinical depth
   static bool supportsThinking(String modelName) {
     final lower = modelName.toLowerCase();
+    if (lower.contains('lite')) return false;
     return lower.startsWith('gemini-3') || lower.contains('pro') || lower.contains('thinking');
   }
 
-  /// Resolves the thinking budget for a given model (null for Gemini 3 and non-thinking models)
+  /// Resolves the thinking budget for a given model (null for Gemini 3, Lite, and non-thinking models)
   static int? resolveThinkingBudget(String modelName) {
     final lower = modelName.toLowerCase();
-    if (lower.startsWith('gemini-3')) return null;
+    if (lower.startsWith('gemini-3') || lower.contains('lite')) return null;
     return supportsThinking(modelName) ? defaultThinkingBudget : null;
   }
 
-  /// Builds a call configuration map with model and thinking_budget when supported (excluded on Gemini 3)
+  /// Resolves the thinking level for a given model ('MEDIUM' for Gemini 3.8 Flash / Pro, null for Lite or non-thinking)
+  static String? resolveThinkingLevel(String modelName) {
+    final lower = modelName.toLowerCase();
+    if (lower.contains('lite')) return null;
+    if (lower.startsWith('gemini-3') || lower.contains('pro')) {
+      return defaultThinkingLevel;
+    }
+    return null;
+  }
+
+  /// Builds a call configuration map with model and thinking level/budget when supported.
+  /// Omits thinking_config and thinking levels strictly on Lite models to avoid HTTP 400 INVALID_ARGUMENT.
   static Map<String, dynamic> buildCallConfig({
     required String modelName,
     int? customThinkingBudget,
+    String? customThinkingLevel,
   }) {
     final config = <String, dynamic>{'model': modelName};
     final lower = modelName.toLowerCase();
-    if (!lower.startsWith('gemini-3')) {
-      final budget = customThinkingBudget ?? resolveThinkingBudget(modelName);
-      if (budget != null) {
-        config['thinking_budget'] = budget;
-        config['thinking_config'] = {'thinking_budget': budget};
+    if (lower.contains('lite')) {
+      return config;
+    }
+    if (lower.startsWith('gemini-3') || lower.contains('pro')) {
+      final level = customThinkingLevel ?? resolveThinkingLevel(modelName);
+      if (level != null) {
+        config['thinking_level'] = level;
+        config['thinking_config'] = {'thinking_level': level};
       }
+      return config;
+    }
+    final budget = customThinkingBudget ?? resolveThinkingBudget(modelName);
+    if (budget != null) {
+      config['thinking_budget'] = budget;
+      config['thinking_config'] = {'thinking_budget': budget};
     }
     return config;
   }

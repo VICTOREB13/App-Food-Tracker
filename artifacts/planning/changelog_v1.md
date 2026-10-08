@@ -18,6 +18,33 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [1.3.4] - 2026-10-08
+
+La versión v1.3.4 amplía la ventana de salida a 16k tokens (`maxOutputTokens: 16384`) para eliminar truncamientos por pensamiento latente (`finishReason: MAX_TOKENS`), estandariza `thinkingLevel: "MEDIUM"` para modelos Gemini 3 y Pro omitiendo estrictamente la configuración de pensamiento en modelos Lite (`gemini-3.5-flash-lite`) para erradicar errores `HTTP 400 INVALID_ARGUMENT`, armoniza los micronutrientes (`fibra_g`, `sodio_mg`, `azucar_g`) en la instrucción de sistema, Few-Shot y esquema preservando intactas las reglas volumétricas clínicas, e implementa pacing fluido en memoria a 60 FPS en el dashboard durante el análisis sin contención de escritura en SQLite.
+
+### Added
+- **Ventana de Generación de 16k Tokens (`GeminiVisionService` & `GeminiVisionFilter`):**
+  - Ampliación de `maxOutputTokens: 16384` en `GenerationConfig` para evitar truncamiento de respuestas JSON cuando el modelo genera razonamiento latente extenso.
+  - Actualización de `outputTokenLimit: 16384` en el catálogo de modelos de visión fallback (`gemini-3.8-flash`, `gemini-3.1-pro`).
+- **Configuración de Nivel de Pensamiento `thinkingLevel: "MEDIUM"` (`GeminiModelService` & `GeminiVisionService`):**
+  - Introducción de `defaultThinkingLevel = 'MEDIUM'` y método resolutor `resolveThinkingLevel(model)`.
+  - Inyección de `thinking_level: 'MEDIUM'` en `buildCallConfig` para modelos con soporte de pensamiento (`gemini-3`, `gemini-1.5-pro`, `gemini-2.0-flash-thinking-exp`).
+  - Omisión estricta de configuración de pensamiento para modelos Lite (`gemini-3.5-flash-lite`) en `supportsThinking` y `buildCallConfig` para prevenir fallos `HTTP 400 INVALID_ARGUMENT`.
+- **Pacing Fluido en Memoria a 60 FPS (`AnalysisQueueService` & `AnalysisProgressBanner`):**
+  - Temporizador periódico en memoria (500 ms) en `AnalysisQueueService._processTask` que avanza suavemente el progreso de 0.45 a 0.90 mediante `MealAnalysisPacing.nextProgress` notificando a la UI vía `notifyListeners()` sin emitir transacciones SQLite intermedias.
+  - Resolución dinámica y localizada de etapas del banner (`_resolveStageMessage`) en `AnalysisProgressBanner` consumiendo `MealAnalysisPacing.getStageMessage(task.progress, l10n)` con fallback seguro a `task.stage`.
+  - Cancelación determinista del temporizador de pacing en bloque `finally` al concluir el análisis (éxito o fallo).
+
+### Changed
+- **Armonización de Esquema de Micronutrientes (`GeminiResilienceHelper`):**
+  - Inclusión explícita y coherente de `fibra_g`, `sodio_mg` y `azucar_g` en los pasos 4 y 5 de `baseSystemInstruction`, en el ejemplo Few-Shot y en `mealAnalysisSchema`.
+  - Preservación rigurosa de las 12 reglas volumétricas clínicas y heurísticas de cubicaje (`Conversión cocido vs crudo`, `Regla de Grasa Oculta en Comida Casera`, `5g y 10g adicionales de grasa`, etc.).
+- **Incremento de Versión de la Aplicación:**
+  - Actualización a `1.3.4` en `AppConstants.appVersion` (`lib/core/constants/app_constants.dart`).
+  - Actualización a `1.3.4+1` en `pubspec.yaml`.
+
+---
+
 ## [1.3.3] - 2026-10-07
 
 La versión v1.3.3 consolida la inferencia en streaming de Gemini Vision mediante el patrón de Razonamiento Desacoplado (*Decoupled Chain-of-Thought*) y resuelve el bug de pérdida de tareas en la cola de análisis, permitiendo subir múltiples comidas de forma concurrente y resiliente sin que las tareas previas fallidas o pendientes sean borradas u ocultadas de la interfaz.

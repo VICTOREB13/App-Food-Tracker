@@ -10,6 +10,7 @@ import 'database_service.dart';
 import 'gemini_vision_service.dart';
 import 'image_processing_service.dart';
 import 'secure_storage_service.dart';
+import '../widgets/meal_detail/meal_analysis_pacing.dart';
 
 export '../models/analysis_task.dart';
 
@@ -31,16 +32,10 @@ class AnalysisQueueService extends ChangeNotifier {
 
   AnalysisTask? get currentActiveTask =>
       _tasks.cast<AnalysisTask?>().firstWhere((t) => t != null && t.isPending, orElse: () => null);
-
-  AnalysisTask? get latestCompletedTask => _tasks.cast<AnalysisTask?>().firstWhere(
-        (t) => t != null && t.status == AnalysisStatus.completed,
-        orElse: () => null,
-      );
-
-  AnalysisTask? get latestFailedTask => _tasks.cast<AnalysisTask?>().firstWhere(
-        (t) => t != null && t.status == AnalysisStatus.failed,
-        orElse: () => null,
-      );
+  AnalysisTask? get latestCompletedTask =>
+      _tasks.cast<AnalysisTask?>().firstWhere((t) => t != null && t.status == AnalysisStatus.completed, orElse: () => null);
+  AnalysisTask? get latestFailedTask =>
+      _tasks.cast<AnalysisTask?>().firstWhere((t) => t != null && t.status == AnalysisStatus.failed, orElse: () => null);
 
   Future<void> init() async {
     try {
@@ -179,8 +174,6 @@ class AnalysisQueueService extends ChangeNotifier {
         masterPrompt: masterPrompt,
       );
 
-      await _updateProgress(task, 0.70, 'Estimando volumen y desglosando componentes...');
-
       double? diameter = task.dishwareDiameterCm;
       String? pantryCtx;
       try {
@@ -188,12 +181,25 @@ class AnalysisQueueService extends ChangeNotifier {
         pantryCtx = await DatabaseService.instance.pantryDao.getPantryPromptContext();
       } catch (_) {}
 
-      final analysis = await gemini.analyzeMealPhoto(
-        rawImageBytes: bytes,
-        userContext: task.userContext,
-        dishwareDiameterCm: diameter,
-        pantryContext: (pantryCtx != null && pantryCtx.isNotEmpty) ? pantryCtx : null,
-      );
+      Timer? pacingTimer;
+      MealAnalysisResult analysis;
+      try {
+        pacingTimer = Timer.periodic(const Duration(milliseconds: 500), (_) {
+          if (task.status == AnalysisStatus.processing && task.progress < 0.90) {
+            task.progress = MealAnalysisPacing.nextProgress(task.progress).clamp(0.45, 0.90);
+            notifyListeners();
+          }
+        });
+
+        analysis = await gemini.analyzeMealPhoto(
+          rawImageBytes: bytes,
+          userContext: task.userContext,
+          dishwareDiameterCm: diameter,
+          pantryContext: (pantryCtx != null && pantryCtx.isNotEmpty) ? pantryCtx : null,
+        );
+      } finally {
+        pacingTimer?.cancel();
+      }
 
       await _updateProgress(task, 0.90, 'Calculando macronutrientes y guardando en SQLite...');
 
@@ -204,17 +210,10 @@ class AnalysisQueueService extends ChangeNotifier {
       final existingMeal = await DatabaseService.instance.getMealByImagePath(task.imagePath);
       final meal = Meal(
         id: task.resultMeal?.id ?? existingMeal?.id ?? task.id,
-        name: analysis.dishName,
-        mealType: task.mealType,
-        date: task.date,
-        imagePath: task.imagePath,
-        calories: analysis.totalCalories,
-        protein: analysis.totalProtein,
-        carbs: analysis.totalCarbs,
-        fat: analysis.totalFat,
-        notes: ingredientsSummary,
-        items: analysis.items,
-        aiBreakdownJson: analysis.rawJson,
+        name: analysis.dishName, mealType: task.mealType, date: task.date,
+        imagePath: task.imagePath, calories: analysis.totalCalories,
+        protein: analysis.totalProtein, carbs: analysis.totalCarbs, fat: analysis.totalFat,
+        notes: ingredientsSummary, items: analysis.items, aiBreakdownJson: analysis.rawJson,
       ).recalculateFromItems(analysis.items);
 
       await DatabaseService.instance.upsertMeal(meal);
@@ -234,12 +233,8 @@ class AnalysisQueueService extends ChangeNotifier {
     final task = _tasks.cast<AnalysisTask?>().firstWhere((t) => t != null && t.id == taskId, orElse: () => null);
     if (task == null || task.imagePath.isEmpty) return null;
     return Meal(
-      id: task.id,
-      name: 'Comida sin clasificar',
-      mealType: task.mealType,
-      date: task.date,
-      imagePath: task.imagePath,
-      notes: task.userContext,
+      id: task.id, name: 'Comida sin clasificar', mealType: task.mealType,
+      date: task.date, imagePath: task.imagePath, notes: task.userContext,
     );
   }
 
