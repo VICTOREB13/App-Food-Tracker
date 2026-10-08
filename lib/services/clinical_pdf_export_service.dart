@@ -76,7 +76,7 @@ class ClinicalPdfExportService implements IClinicalPdfExportService {
             pw.SizedBox(height: 16),
             pw.Text(
               'Desglose Cronológico de Comidas (${meals.length})',
-              style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold, color: PdfColors.blueGrey900),
+              style: const pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold, color: PdfColors.blueGrey900),
             ),
             pw.SizedBox(height: 8),
             _buildMealsTable(meals, dateFormat, timeFormat),
@@ -100,9 +100,9 @@ class ClinicalPdfExportService implements IClinicalPdfExportService {
           pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              pw.Text('VICTOR ENGINEER - FOOD TRACKER', style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold, color: PdfColors.teal700)),
+              pw.Text('VICTOR ENGINEER - FOOD TRACKER', style: const pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold, color: PdfColors.teal700)),
               pw.SizedBox(height: 2),
-              pw.Text('Reporte Clínico Nutricional', style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold, color: PdfColors.blueGrey900)),
+              pw.Text('Reporte Clínico Nutricional', style: const pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold, color: PdfColors.blueGrey900)),
             ],
           ),
           pw.Text('Fecha: ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now())}', style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
@@ -146,11 +146,11 @@ class ClinicalPdfExportService implements IClinicalPdfExportService {
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          pw.Text('Resumen Acumulado y Promedios Diarios', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: PdfColors.teal800)),
+          pw.Text('Resumen Acumulado y Promedios Diarios', style: const pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: PdfColors.teal800)),
           pw.SizedBox(height: 6),
           pw.TableHelper.fromTextArray(
             headers: ['Métrica', 'Calorías (kcal)', 'Proteína (g)', 'Carbos (g)', 'Grasa (g)', 'Fibra (g)', 'Sodio (mg)', 'Azúcar (g)'],
-            headerStyle: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold, color: PdfColors.white),
+            headerStyle: const pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold, color: PdfColors.white),
             headerDecoration: const pw.BoxDecoration(color: PdfColors.teal700),
             cellStyle: const pw.TextStyle(fontSize: 8),
             cellAlignment: pw.Alignment.center,
@@ -202,7 +202,7 @@ class ClinicalPdfExportService implements IClinicalPdfExportService {
 
     return pw.TableHelper.fromTextArray(
       headers: ['Fecha', 'Hora', 'Tipo', 'Plato', 'Kcal', 'P (g)', 'C (g)', 'G (g)'],
-      headerStyle: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold, color: PdfColors.white),
+      headerStyle: const pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold, color: PdfColors.white),
       headerDecoration: const pw.BoxDecoration(color: PdfColors.blueGrey800),
       cellStyle: const pw.TextStyle(fontSize: 8),
       cellAlignment: pw.Alignment.centerLeft,

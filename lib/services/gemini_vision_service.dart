@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import '../models/food_item.dart';
 import '../models/meal_analysis_result.dart';
@@ -40,11 +41,7 @@ class GeminiVisionService implements IVisionModelProvider {
   static String buildSystemInstruction([String? masterPrompt, String? pantryContext]) =>
       GeminiResilienceHelper.buildSystemPrompt(masterPrompt: masterPrompt, pantryContext: pantryContext);
 
-  GeminiVisionService({
-    required this.apiKey,
-    this.modelName = defaultModel,
-    this.masterPrompt,
-  });
+  GeminiVisionService({required this.apiKey, this.modelName = defaultModel, this.masterPrompt});
 
   /// Resolves the network timeout based on model tier and reasoning capacity (90s - 120s)
   static Duration resolveTimeout(String modelName) =>
@@ -93,6 +90,7 @@ class GeminiVisionService implements IVisionModelProvider {
     overrideMasterPrompt: overrideMasterPrompt, dishwareDiameterCm: dishwareDiameterCm, pantryContext: pantryContext,
   );
 
+  @override
   Future<MealAnalysisResult> analyzeMealPhoto({
     required Uint8List rawImageBytes,
     String? userContext, String? overrideModel, String? overrideMasterPrompt,
@@ -121,6 +119,7 @@ class GeminiVisionService implements IVisionModelProvider {
     }
   }
 
+  @override
   Future<MealAnalysisResult> reanalyzeWithIngredientSubstitution({
     required Uint8List rawImageBytes, required List<FoodItem> currentItems,
     required String oldIngredient, required String newIngredient,
@@ -155,6 +154,7 @@ class GeminiVisionService implements IVisionModelProvider {
     }
   }
 
+  @override
   Future<MealAnalysisResult> analyzeSpeechMeal({
     required Uint8List audioBytes, String mimeType = 'audio/mp3',
     String? userNotes, String? overrideModel,
@@ -177,6 +177,7 @@ class GeminiVisionService implements IVisionModelProvider {
     }
   }
 
+  @override
   Future<MealAnalysisResult> analyzeVideoFramesMeal({
     required List<Uint8List> frameBytesList, String? userNotes,
     double? dishwareDiameterCm, String? pantryContext, String? overrideModel,

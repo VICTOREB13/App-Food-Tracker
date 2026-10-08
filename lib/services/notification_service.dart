@@ -105,7 +105,7 @@ class NotificationService implements INotificationService {
     String? body,
   }) async {
     try {
-      final androidDetails = AndroidNotificationDetails(
+      const androidDetails = AndroidNotificationDetails(
         mealChannelId,
         mealChannelName,
         channelDescription: mealChannelDescription,
@@ -114,7 +114,7 @@ class NotificationService implements INotificationService {
         icon: '@mipmap/ic_launcher',
       );
       const darwinDetails = DarwinNotificationDetails();
-      final details = NotificationDetails(
+      const details = NotificationDetails(
         android: androidDetails,
         iOS: darwinDetails,
         macOS: darwinDetails,
@@ -142,7 +142,7 @@ class NotificationService implements INotificationService {
     String? body,
   }) async {
     try {
-      final androidDetails = AndroidNotificationDetails(
+      const androidDetails = AndroidNotificationDetails(
         mealChannelId,
         mealChannelName,
         channelDescription: mealChannelDescription,
@@ -151,7 +151,7 @@ class NotificationService implements INotificationService {
         icon: '@mipmap/ic_launcher',
       );
       const darwinDetails = DarwinNotificationDetails();
-      final details = NotificationDetails(
+      const details = NotificationDetails(
         android: androidDetails,
         iOS: darwinDetails,
         macOS: darwinDetails,
@@ -181,7 +181,7 @@ class NotificationService implements INotificationService {
     try {
       if (scheduledTime.isBefore(DateTime.now())) return;
 
-      final androidDetails = AndroidNotificationDetails(
+      const androidDetails = AndroidNotificationDetails(
         fastingChannelId,
         fastingChannelName,
         channelDescription: fastingChannelDescription,
@@ -190,7 +190,7 @@ class NotificationService implements INotificationService {
         icon: '@mipmap/ic_launcher',
       );
       const darwinDetails = DarwinNotificationDetails();
-      final details = NotificationDetails(
+      const details = NotificationDetails(
         android: androidDetails,
         iOS: darwinDetails,
         macOS: darwinDetails,
