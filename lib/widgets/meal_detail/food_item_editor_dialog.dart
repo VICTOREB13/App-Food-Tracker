@@ -25,7 +25,7 @@ class _FoodItemEditorDialog extends StatefulWidget {
 
 class _FoodItemEditorDialogState extends State<_FoodItemEditorDialog> {
   late final TextEditingController _nameController, _gramsController, _caloriesController;
-  late final TextEditingController _proteinController, _carbsController, _fatController, _justificationController;
+  late final TextEditingController _proteinController, _carbsController, _fatController;
   double? _estimatedFiber, _estimatedSodium, _estimatedSugar;
   bool _hasAutoEstimated = false;
   Timer? _debounceTimer;
@@ -42,7 +42,6 @@ class _FoodItemEditorDialogState extends State<_FoodItemEditorDialog> {
     _proteinController = TextEditingController(text: item != null ? item.protein.toStringAsFixed(1) : '5.0');
     _carbsController = TextEditingController(text: item != null ? item.carbs.toStringAsFixed(1) : '20.0');
     _fatController = TextEditingController(text: item != null ? item.fat.toStringAsFixed(1) : '3.0');
-    _justificationController = TextEditingController(text: item?.visualJustification ?? '');
 
     _nameController.addListener(_onNameInputChanged);
     _gramsController.addListener(_onGramsChanged);
@@ -61,7 +60,6 @@ class _FoodItemEditorDialogState extends State<_FoodItemEditorDialog> {
     _proteinController.dispose();
     _carbsController.dispose();
     _fatController.dispose();
-    _justificationController.dispose();
     super.dispose();
   }
 
@@ -77,7 +75,6 @@ class _FoodItemEditorDialogState extends State<_FoodItemEditorDialog> {
         _estimatedFiber = _activeSuggestion!.fiberPer100g * ratio;
         _estimatedSodium = _activeSuggestion!.sodiumPer100g * ratio;
         _estimatedSugar = _activeSuggestion!.sugarPer100g * ratio;
-        _justificationController.text = 'Datos de [${_activeSuggestion!.sourceBadgeLabel}] escala a ${grams.toInt()}g';
         if (mounted) setState(() {});
         return;
       }
@@ -111,7 +108,6 @@ class _FoodItemEditorDialogState extends State<_FoodItemEditorDialog> {
     _estimatedFiber = s.fiberPer100g * ratio;
     _estimatedSodium = s.sodiumPer100g * ratio;
     _estimatedSugar = s.sugarPer100g * ratio;
-    _justificationController.text = 'Datos de [${s.sourceBadgeLabel}] escala a ${grams.toInt()}g';
     setState(() {
       _suggestions = [];
       _hasAutoEstimated = true;
@@ -139,9 +135,6 @@ class _FoodItemEditorDialogState extends State<_FoodItemEditorDialog> {
         _estimatedFiber = estimated.fiber;
         _estimatedSodium = estimated.sodium;
         _estimatedSugar = estimated.sugar;
-        if (_justificationController.text.isEmpty && estimated.visualJustification != null) {
-          _justificationController.text = estimated.visualJustification!;
-        }
         if (mounted) setState(() {});
       }
     }
@@ -156,7 +149,6 @@ class _FoodItemEditorDialogState extends State<_FoodItemEditorDialog> {
     final prot = double.tryParse(_proteinController.text.trim()) ?? 0.0;
     final carbs = double.tryParse(_carbsController.text.trim()) ?? 0.0;
     final fat = double.tryParse(_fatController.text.trim()) ?? 0.0;
-    final just = _justificationController.text.trim();
 
     final result = FoodItem(
       id: widget.initialItem?.id,
@@ -169,7 +161,7 @@ class _FoodItemEditorDialogState extends State<_FoodItemEditorDialog> {
       fiber: _estimatedFiber ?? widget.initialItem?.fiber ?? 0.0,
       sodium: _estimatedSodium ?? widget.initialItem?.sodium ?? 0.0,
       sugar: _estimatedSugar ?? widget.initialItem?.sugar ?? 0.0,
-      visualJustification: just.isNotEmpty ? just : null,
+      visualJustification: widget.initialItem?.visualJustification,
     );
     Navigator.of(context).pop(result);
   }
@@ -237,19 +229,6 @@ class _FoodItemEditorDialogState extends State<_FoodItemEditorDialog> {
               ),
               const SizedBox(height: 12),
               _buildMacroField('Carbohidratos', _carbsController, AppColors.carbs),
-              const SizedBox(height: 14),
-              TextField(
-                controller: _justificationController,
-                maxLines: 2,
-                style: GoogleFonts.inter(fontSize: 14, color: AppColors.textPrimary(context)),
-                decoration: InputDecoration(
-                  labelText: 'Justificación volumétrica / Notas',
-                  labelStyle: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary(context)),
-                  hintText: 'Ej. 1 taza cocida',
-                  hintStyle: GoogleFonts.inter(fontSize: 12, color: AppColors.textMuted(context)),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                ),
-              ),
             ],
           ),
         ),

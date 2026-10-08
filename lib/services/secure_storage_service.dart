@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/daily_goals.dart';
+import '../models/storage_mode.dart';
 
 class SecureStorageService {
   static SecureStorageService _instance = SecureStorageService._();
@@ -45,6 +46,7 @@ class SecureStorageService {
   static const String _hasCompletedOnboardingKey = 'has_completed_onboarding';
   static const String _masterPromptKey = 'user_master_prompt';
   static const String _dailyGoalsKey = 'daily_goals_json';
+  static const String _storageModeKey = 'storage_mode';
 
   Future<String?> _safeRead(String key) async {
     try {
@@ -139,4 +141,13 @@ class SecureStorageService {
     final raw = json.encode(goals.toJson());
     await _safeWrite(_dailyGoalsKey, raw);
   }
+
+  // --- Storage Mode (Public vs Private) ---
+  Future<StorageMode> getStorageMode() async {
+    final raw = await _safeRead(_storageModeKey);
+    return StorageMode.fromString(raw);
+  }
+
+  Future<void> setStorageMode(StorageMode mode) =>
+      _safeWrite(_storageModeKey, mode.name);
 }

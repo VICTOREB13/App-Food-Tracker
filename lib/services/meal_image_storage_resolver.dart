@@ -1,17 +1,21 @@
 import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import '../models/storage_mode.dart';
 import 'meal_image_file_namer.dart';
 
 /// Resolves directories and executes atomic filesystem operations for meal photos.
 class MealImageStorageResolver {
   static const String androidPublicPicturesPath = '/storage/emulated/0/Pictures/FoodTracker/images';
 
-  static Future<List<Directory>> getCandidateDirectories({Directory? customDirectory}) async {
+  static Future<List<Directory>> getCandidateDirectories({
+    Directory? customDirectory,
+    StorageMode storageMode = StorageMode.public,
+  }) async {
     final candidateDirs = <Directory>[];
     if (customDirectory != null) candidateDirs.add(customDirectory);
 
-    if (Platform.isAndroid) {
+    if (storageMode == StorageMode.public && Platform.isAndroid) {
       candidateDirs.add(Directory(androidPublicPicturesPath));
       try {
         final extDir = await getExternalStorageDirectory();
@@ -45,12 +49,16 @@ class MealImageStorageResolver {
     required String typeCode,
     int? explicitIndex,
     Directory? customDirectory,
+    StorageMode storageMode = StorageMode.public,
   }) async {
     final year = date.year.toString().padLeft(4, '0');
     final month = date.month.toString().padLeft(2, '0');
     final day = date.day.toString().padLeft(2, '0');
 
-    final candidateDirs = await getCandidateDirectories(customDirectory: customDirectory);
+    final candidateDirs = await getCandidateDirectories(
+      customDirectory: customDirectory,
+      storageMode: storageMode,
+    );
     Object? lastError;
 
     for (final dir in candidateDirs) {

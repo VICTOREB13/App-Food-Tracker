@@ -1,17 +1,17 @@
 ---
 tipo: arquitectura
 proyecto: App_Food_Tracker
-version: v1.3.4
+version: v1.4.0
 estado: activo
 fecha: 2026-10-08
-stack_principal: [Flutter, SQLite WAL v4, Google Gemini API, USDA FoodData Central, Open Food Facts, FlutterSecureStorage, GetIt, Flutter Localizations, HomeWidget, BackupNormalizer, NutritionalRecommendationService, GitHubReleasesUpdateService, MethodChannelAppInstaller, GeminiResilienceHelper]
+stack_principal: [Flutter, SQLite WAL v4, Google Gemini API, USDA FoodData Central, Open Food Facts, FlutterSecureStorage, GetIt, Flutter Localizations, HomeWidget, BackupNormalizer, NutritionalRecommendationService, GitHubReleasesUpdateService, MethodChannelAppInstaller, GeminiResilienceHelper, NotificationService, ClinicalPdfExportService]
 diagrama_html: PRJ_App_Food_Tracker_architecture_diagram.html
-tags: [proyecto, arquitectura, tech-stack, archify, local-first, get-it, l10n, result-pattern, android-widgets, sqlite-v4, recommendations, saf-backup, auto-repair, in-app-updater, microinteractions, android-16, gemini-vision-precision, timeout-resilience, atomic-image-persistence, i18n-native, gemini-streaming, resumable-downloads, http-206, 16k-tokens, thinking-level-medium, dynamic-pacing]
+tags: [proyecto, arquitectura, tech-stack, archify, local-first, get-it, l10n, result-pattern, android-widgets, sqlite-v4, recommendations, saf-backup, auto-repair, in-app-updater, microinteractions, android-16, gemini-vision-precision, timeout-resilience, atomic-image-persistence, i18n-native, gemini-streaming, resumable-downloads, http-206, 16k-tokens, thinking-level-medium, dynamic-pacing, local-notifications, socket-resilience, privacy-storage, clinical-pdf, purge-justification]
 ---
 
-# 🏗️ Arquitectura del Sistema: Victor Engineer - Food Tracker (v1.3.4)
+# 🏗️ Arquitectura del Sistema: Victor Engineer - Food Tracker (v1.4.0)
 
-> **Mesa de Control & Backend-Architect:** Este documento establece los componentes fundamentales, el Tech Stack tecnológico, las decisiones arquitectónicas estructurales y el flujo de datos integral de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.3.4` (Ventana de 16k Tokens, Thinking Level MEDIUM en Gemini 3.8 Flash, Exclusión de Thinking en Variantes Lite, Armonización de Micronutrientes y Pacing Dinámico a 60 FPS sin Saturación SQLite).
+> **Mesa de Control & Backend-Architect:** Este documento establece los componentes fundamentales, el Tech Stack tecnológico, las decisiones arquitectónicas estructurales y el flujo de datos integral de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.4.0` (Notificaciones Locales Asíncronas, Resiliencia de Socket Gemini con Fallback Unario, Privacidad de Almacenamiento de Fotos, Reportes Clínicos en PDF y Purga de Justificación Volumétrica).
 
 ---
 
@@ -195,5 +195,28 @@ El diagrama interactivo de componentes, límites de seguridad, widgets nativos d
   - Cancelación determinista en bloque `finally { pacingTimer?.cancel(); }`.
   - `AnalysisProgressBanner`: resolución dinámica y localizada del mensaje de etapa vía `MealAnalysisPacing.getStageMessage(task.progress, l10n)` cuando la tarea está activamente en progreso (`task.status == AnalysisStatus.processing`).
 - **Versión Canónica:** `AppConstants.appVersion = '1.3.4'` y `pubspec.yaml version: 1.3.4+1`.
+
+### 3.15. Notificaciones Asíncronas en Segundo Plano, Resiliencia de Socket Gemini con Fallback Unario, Privacidad de Almacenamiento y Reportes Clínicos en PDF (v1.4.0)
+- **Sistema de Notificaciones Locales y Programadas (`NotificationService` & `INotificationService`):**
+  - Implementación de servicio de notificaciones (< 300 LoC) con canales de alta prioridad (`food_tracker_meal_analysis`) y canales de alarma exacta (`food_tracker_fasting`) basados en `flutter_local_notifications` y soporte de zona horaria `tz.TZDateTime`.
+  - Configuración nativa en `AndroidManifest.xml` con permisos `POST_NOTIFICATIONS`, `SCHEDULE_EXACT_ALARM`, `USE_EXACT_ALARM` y `RECEIVE_BOOT_COMPLETED`.
+  - Notificaciones en segundo plano al terminar de procesar una comida en `AnalysisQueueService` (`¡Ya se terminó de analizar tu comida!` con nombre de plato y calorías aproximadas, o aviso de fallo si la imagen es irreconocible).
+  - Alarma programada exacta en `FastingController` al iniciar un ayuno (`scheduleFastingCompleted`) con cancelación automática al interrumpir o finalizar el ayuno antes de tiempo (`cancelFastingReminder`).
+- **Resiliencia ante Socket Cuts y Fallback Unario en Visión (`GeminiVisionService` & `GeminiResilienceHelper`):**
+  - Detección exhaustiva de caídas abruptas de socket en `isRetriableError` (`os error: 104`, `os error: 10054`, `connection reset by peer`, `software caused connection abort`, `connection closed`).
+  - En caso de interrupción del flujo en streaming (`generateContentStream`), `GeminiVisionService` ejecuta de inmediato un fallback unario (`generateContent`) transparente sin fallar la tarea de la cola de análisis.
+  - Creación del contrato `IVisionModelProvider` en `lib/core/interfaces/vision_model_provider_interface.dart` para desacoplar el motor de visión de futuros proveedores como OpenRouter.
+- **Purga de Justificación Volumétrica Técnica:**
+  - Supresión de `justificacion_visual` del esquema estructurado `mealAnalysisSchema` en `GeminiResilienceHelper`.
+  - Eliminación del contenedor de justificación en `FoodItemsListCard` y del controlador/campo en `FoodItemEditorDialog` para centrar la experiencia de usuario exclusivamente en los alimentos y valores nutricionales.
+- **Selector de Privacidad de Almacenamiento de Fotos:**
+  - Modelo `StorageMode` (`public`, `private`) persistido en `SecureStorageService`.
+  - Tarjeta Bento `StorageModeCard` en `SettingsScreen` permitiendo alternar entre almacenamiento público (visible en la galería del dispositivo `/Pictures/FoodTracker`) y privado aislado (sandbox de la aplicación).
+  - Adaptación en `MealImageStorageResolver` e `ImageProcessingService` para asegurar que en modo privado ninguna captura se propague a la galería del sistema.
+- **Exportación Clínica Dual (CSV RFC 4180 y PDF Profesional):**
+  - Nuevo servicio `ClinicalPdfExportService` e interfaz `IClinicalPdfExportService` (< 300 LoC) usando `package:pdf` para estructurar tablas de macronutrientes, micronutrientes (fibra, sodio, azúcar), promedios diarios y cronograma detallado de comidas.
+  - Almacenamiento directo en el directorio accesible `/Documents/FoodTracker` vía `AccessibleStorageResolver`.
+  - Diálogo `ClinicalExportDialog` con selector segmented button (CSV / PDF) y confirmación amigable (`Se guardó en /Documents/FoodTracker: {archivo}`).
+- **Versión Canónica:** `AppConstants.appVersion = '1.4.0'` y `pubspec.yaml version: 1.4.0+1`.
 
 

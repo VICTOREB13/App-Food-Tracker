@@ -153,6 +153,31 @@ abstract class AppLocalizations {
   String get analysisStageComplete;
   String updateAvailable(String version);
   String get viewUpdateAction;
+  String get mealAnalysisSuccessTitle;
+  String mealAnalysisSuccessBody(String dishName, String calories);
+  String get mealAnalysisErrorTitle;
+  String get fastingCompletedTitle;
+  String fastingCompletedBody(String hours);
+  String get storageModeTitle;
+  String get storageModePublic;
+  String get storageModePrivate;
+  String exportSavedInFolder(String folder);
+  String get exportFormatLabel;
+  String get exportFormatCsv;
+  String get exportFormatPdf;
+  String get clinicalReportTitle;
+  String get clinicalExportDesc;
+  String get timeRangeLabel;
+  String get exportSuccessTitle;
+  String get exportCsvButton;
+  String get exportPdfButton;
+  String get closeButton;
+  String get storageModeSubtitle;
+  String get storageModePublicDesc;
+  String get storageModePrivateDesc;
+  String get storageModePublicSnackBar;
+  String get storageModePrivateSnackBar;
+  String get mealAnalysisErrorFallback;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

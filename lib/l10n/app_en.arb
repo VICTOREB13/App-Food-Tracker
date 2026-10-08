@@ -148,5 +148,49 @@
       }
     }
   },
-  "viewUpdateAction": "View update"
+  "viewUpdateAction": "View update",
+  "mealAnalysisSuccessTitle": "Meal analysis completed!",
+  "mealAnalysisSuccessBody": "Dish: {dishName} (~{calories} kcal). Tap to view breakdown!",
+  "@mealAnalysisSuccessBody": {
+    "description": "Notification body when meal analysis completes",
+    "placeholders": {
+      "dishName": { "type": "String" },
+      "calories": { "type": "String" }
+    }
+  },
+  "mealAnalysisErrorTitle": "Meal analysis failed",
+  "fastingCompletedTitle": "Intermittent fast completed!",
+  "fastingCompletedBody": "You reached your target of {hours} hours of fasting. You can eat now!",
+  "@fastingCompletedBody": {
+    "description": "Notification body when intermittent fasting completes",
+    "placeholders": {
+      "hours": { "type": "String" }
+    }
+  },
+  "storageModeTitle": "Photo Storage",
+  "storageModePublic": "Public (Gallery)",
+  "storageModePrivate": "Private (Isolated)",
+  "exportSavedInFolder": "Saved in {folder}",
+  "@exportSavedInFolder": {
+    "description": "Confirmation message with destination folder",
+    "placeholders": {
+      "folder": { "type": "String" }
+    }
+  },
+  "exportFormatLabel": "Report format",
+  "exportFormatCsv": "CSV (Excel)",
+  "exportFormatPdf": "Clinical PDF",
+  "clinicalReportTitle": "Clinical Report",
+  "clinicalExportDesc": "Export your tabulated nutrition history with macros, fiber, sodium, and sugar for your clinic or nutritionist.",
+  "timeRangeLabel": "Time range:",
+  "exportSuccessTitle": "Report generated successfully",
+  "exportCsvButton": "Export CSV",
+  "exportPdfButton": "Export PDF",
+  "closeButton": "Close",
+  "storageModeSubtitle": "Set privacy mode for captured photos",
+  "storageModePublicDesc": "Visible in Gallery and system photos (/Pictures)",
+  "storageModePrivateDesc": "Isolated in app internal storage (protected)",
+  "storageModePublicSnackBar": "Public mode enabled: photos visible in Gallery",
+  "storageModePrivateSnackBar": "Private mode enabled: photos isolated in app",
+  "mealAnalysisErrorFallback": "Could not connect to vision service. Tap to retry."
 }

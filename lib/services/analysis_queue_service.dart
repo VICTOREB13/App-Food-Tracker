@@ -10,6 +10,7 @@ import 'database_service.dart';
 import 'gemini_vision_service.dart';
 import 'image_processing_service.dart';
 import 'secure_storage_service.dart';
+import 'notification_service.dart';
 import '../widgets/meal_detail/meal_analysis_pacing.dart';
 
 export '../models/analysis_task.dart';
@@ -26,16 +27,11 @@ class AnalysisQueueService extends ChangeNotifier {
   List<AnalysisTask> get activeTasks => _tasks.where((t) => t.isPending).toList();
   List<AnalysisTask> get failedTasks => _tasks.where((t) => t.status == AnalysisStatus.failed).toList();
   List<AnalysisTask> get completedTasks => _tasks.where((t) => t.status == AnalysisStatus.completed).toList();
-  List<AnalysisTask> get visibleTasks => _tasks
-      .where((t) => t.isPending || t.status == AnalysisStatus.failed || t.status == AnalysisStatus.completed)
-      .toList();
+  List<AnalysisTask> get visibleTasks => _tasks.where((t) => t.isPending || t.status == AnalysisStatus.failed || t.status == AnalysisStatus.completed).toList();
 
-  AnalysisTask? get currentActiveTask =>
-      _tasks.cast<AnalysisTask?>().firstWhere((t) => t != null && t.isPending, orElse: () => null);
-  AnalysisTask? get latestCompletedTask =>
-      _tasks.cast<AnalysisTask?>().firstWhere((t) => t != null && t.status == AnalysisStatus.completed, orElse: () => null);
-  AnalysisTask? get latestFailedTask =>
-      _tasks.cast<AnalysisTask?>().firstWhere((t) => t != null && t.status == AnalysisStatus.failed, orElse: () => null);
+  AnalysisTask? get currentActiveTask => _tasks.cast<AnalysisTask?>().firstWhere((t) => t != null && t.isPending, orElse: () => null);
+  AnalysisTask? get latestCompletedTask => _tasks.cast<AnalysisTask?>().firstWhere((t) => t != null && t.status == AnalysisStatus.completed, orElse: () => null);
+  AnalysisTask? get latestFailedTask => _tasks.cast<AnalysisTask?>().firstWhere((t) => t != null && t.status == AnalysisStatus.failed, orElse: () => null);
 
   Future<void> init() async {
     try {
@@ -222,10 +218,17 @@ class AnalysisQueueService extends ChangeNotifier {
       task.status = AnalysisStatus.completed;
       task.resultMeal = meal;
       await _updateProgress(task, 1.0, '¡Comida analizada y registrada!');
+      await NotificationService.instance.showMealAnalysisCompleted(
+        mealName: meal.name,
+        calories: meal.calories,
+      );
     } catch (e) {
       task.status = AnalysisStatus.failed;
       task.error = GeminiVisionService.userFriendlyErrorMessage(e);
       await _updateProgress(task, task.progress, 'Error al analizar la comida');
+      await NotificationService.instance.showMealAnalysisFailed(
+        error: task.error ?? 'Error desconocido',
+      );
     }
   }
 

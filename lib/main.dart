@@ -12,6 +12,7 @@ import 'services/analysis_queue_service.dart';
 import 'services/database_service.dart';
 import 'services/secure_storage_service.dart';
 import 'services/theme_manager.dart';
+import 'services/notification_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -75,6 +76,15 @@ Future<void> _initializeBackgroundServices() async {
     );
   } catch (e) {
     debugPrint('SettingsController loadLocale warning: $e');
+  }
+
+  try {
+    await NotificationService.instance.init().timeout(
+      const Duration(seconds: 2),
+      onTimeout: () => debugPrint('NotificationService init timeout warning'),
+    );
+  } catch (e) {
+    debugPrint('NotificationService initialization warning: $e');
   }
 }
 

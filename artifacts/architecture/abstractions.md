@@ -1,15 +1,15 @@
 ---
 tipo: abstracciones
 proyecto: App_Food_Tracker
-version: v1.3.4
+version: v1.4.0
 estado: activo
 fecha: 2026-10-08
-tags: [proyecto, arquitectura, abstracciones, backend, gemini-streaming, 16k-tokens, thinking-level-medium, micronutrients-harmonization, dynamic-pacing]
+tags: [proyecto, arquitectura, abstracciones, backend, gemini-streaming, 16k-tokens, thinking-level-medium, micronutrients-harmonization, dynamic-pacing, local-notifications, socket-resilience, privacy-storage, clinical-pdf]
 ---
 
-# Abstracciones del Sistema y Arquitectura de Código: Victor Engineer - Food Tracker (v1.3.4)
+# Abstracciones del Sistema y Arquitectura de Código: Victor Engineer - Food Tracker (v1.4.0)
 
-> **Mesa de Control & Backend-Architect:** Este documento centraliza las clases maestras, interfaces de dominio, servicios de negocio, funciones utilitarias nucleares, variables de estado seguro y costuras de flujo de datos (data seams) de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.3.4` (Ventana de 16k Tokens, Thinking Level MEDIUM en Gemini 3.8 Flash, Exclusión de Thinking en Variantes Lite, Armonización de Micronutrientes y Pacing Dinámico a 60 FPS sin Saturación SQLite). Complementa conceptualmente a [[PRJ_App_Food_Tracker_api_spec|Especificación de API y Modelos]] para posibilitar el entendimiento exhaustivo del software sin necesidad de inspeccionar línea por línea el código fuente.
+> **Mesa de Control & Backend-Architect:** Este documento centraliza las clases maestras, interfaces de dominio, servicios de negocio, funciones utilitarias nucleares, variables de estado seguro y costuras de flujo de datos (data seams) de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.4.0` (Notificaciones Locales Asíncronas, Resiliencia de Socket Gemini con Fallback Unario, Privacidad de Almacenamiento de Fotos, Reportes Clínicos en PDF y Purga de Justificación Volumétrica). Complementa conceptualmente a [[PRJ_App_Food_Tracker_api_spec|Especificación de API y Modelos]] para posibilitar el entendimiento exhaustivo del software sin necesidad de inspeccionar línea por línea el código fuente.
 
 ---
 
@@ -36,7 +36,7 @@ tags: [proyecto, arquitectura, abstracciones, backend, gemini-streaming, 16k-tok
 
 ---
 
-## 🧩 Módulos y Capas del Sistema (v1.1.0)
+## 🧩 Módulos y Capas del Sistema (v1.4.0)
 
 ```text
 lib/
@@ -57,7 +57,10 @@ lib/
 │       ├── fasting_dao_interface.dart
 │       ├── meal_template_dao_interface.dart
 │       ├── database_service_interface.dart
-│       └── image_processing_service_interface.dart
+│       ├── image_processing_service_interface.dart
+│       ├── notification_service_interface.dart
+│       ├── vision_model_provider_interface.dart
+│       └── clinical_pdf_export_service_interface.dart
 ├── l10n/                 # Localización e Internacionalización Multi-idioma
 │   ├── app_en.arb
 │   ├── app_es.arb

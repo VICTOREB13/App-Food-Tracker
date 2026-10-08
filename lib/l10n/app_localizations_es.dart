@@ -245,4 +245,54 @@ class AppLocalizationsEs extends AppLocalizations {
   String updateAvailable(String version) => 'Nueva versión disponible: $version';
   @override
   String get viewUpdateAction => 'Ver actualización';
+  @override
+  String get mealAnalysisSuccessTitle => '¡Ya se terminó de analizar tu comida!';
+  @override
+  String mealAnalysisSuccessBody(String dishName, String calories) => 'Plato: $dishName (~$calories kcal). ¡Toca para ver el desglose!';
+  @override
+  String get mealAnalysisErrorTitle => 'Falló el análisis del alimento';
+  @override
+  String get fastingCompletedTitle => '¡Ya terminó tu ayuno intermitente!';
+  @override
+  String fastingCompletedBody(String hours) => 'Cumpliste tu meta de $hours horas de ayuno. ¡Ya puedes comer!';
+  @override
+  String get storageModeTitle => 'Almacenamiento de Fotos';
+  @override
+  String get storageModePublic => 'Público (Galería)';
+  @override
+  String get storageModePrivate => 'Privado (Aislado)';
+  @override
+  String exportSavedInFolder(String folder) => 'Se guardó en $folder';
+  @override
+  String get exportFormatLabel => 'Formato del reporte';
+  @override
+  String get exportFormatCsv => 'CSV (Excel)';
+  @override
+  String get exportFormatPdf => 'PDF Clínico';
+  @override
+  String get clinicalReportTitle => 'Reporte Clínico';
+  @override
+  String get clinicalExportDesc => 'Exporta tu historial nutricional tabulado con macros, fibra, sodio y azúcar para tu consulta clínica o nutricionista.';
+  @override
+  String get timeRangeLabel => 'Rango temporal:';
+  @override
+  String get exportSuccessTitle => 'Reporte generado con éxito';
+  @override
+  String get exportCsvButton => 'Exportar CSV';
+  @override
+  String get exportPdfButton => 'Exportar PDF';
+  @override
+  String get closeButton => 'Cerrar';
+  @override
+  String get storageModeSubtitle => 'Define la privacidad de las fotos capturadas';
+  @override
+  String get storageModePublicDesc => 'Visible en Galería y fotos del sistema (/Pictures)';
+  @override
+  String get storageModePrivateDesc => 'Almacenamiento interno de la app (protegido)';
+  @override
+  String get storageModePublicSnackBar => 'Modo Público activado: fotos visibles en Galería';
+  @override
+  String get storageModePrivateSnackBar => 'Modo Privado activado: fotos aisladas dentro de la app';
+  @override
+  String get mealAnalysisErrorFallback => 'No se pudo conectar con el servicio de visión. Toca para reintentar.';
 }

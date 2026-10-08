@@ -23,16 +23,21 @@ import '../interfaces/image_processing_service_interface.dart';
 import '../interfaces/offline_food_estimator_service_interface.dart';
 import '../interfaces/nutrition_label_scanner_service_interface.dart';
 import '../interfaces/clinical_excel_export_service_interface.dart';
+import '../interfaces/clinical_pdf_export_service_interface.dart';
+import '../interfaces/vision_model_provider_interface.dart';
 import '../interfaces/nutritional_recommendation_service_interface.dart';
 import '../../services/offline_food_estimator_service.dart';
 import '../../services/nutrition_label_scanner_service.dart';
 import '../../services/clinical_excel_export_service.dart';
+import '../../services/clinical_pdf_export_service.dart';
 import '../../services/nutritional_recommendation_service.dart';
 import '../../services/home_widget_service.dart';
 import '../interfaces/app_update_service_interface.dart';
 import '../interfaces/app_installer_service_interface.dart';
 import '../../services/app_update_service.dart';
 import '../../services/app_installer_service.dart';
+import '../interfaces/notification_service_interface.dart';
+import '../../services/notification_service.dart';
 
 /// Global Service Locator instance backed by GetIt.
 final GetIt getIt = GetIt.instance;
@@ -82,6 +87,12 @@ void setupServiceLocator({bool isTesting = false}) {
       modelName: modelName ?? GeminiVisionService.defaultModel,
     ),
   );
+  getIt.registerFactoryParam<IVisionModelProvider, String, String?>(
+    (apiKey, modelName) => GeminiVisionService(
+      apiKey: apiKey,
+      modelName: modelName ?? GeminiVisionService.defaultModel,
+    ),
+  );
 
   // Background Workers & System Tasks
   getIt.registerLazySingleton<AnalysisQueueService>(() => AnalysisQueueService.instance);
@@ -89,6 +100,8 @@ void setupServiceLocator({bool isTesting = false}) {
   getIt.registerLazySingleton<HomeWidgetService>(() => HomeWidgetService.instance);
   getIt.registerLazySingleton<IClinicalExcelExportService>(() => ClinicalExcelExportService.instance);
   getIt.registerLazySingleton<ClinicalExcelExportService>(() => ClinicalExcelExportService.instance);
+  getIt.registerLazySingleton<IClinicalPdfExportService>(() => ClinicalPdfExportService.instance);
+  getIt.registerLazySingleton<ClinicalPdfExportService>(() => ClinicalPdfExportService.instance);
   getIt.registerLazySingleton<INutritionalRecommendationService>(() => NutritionalRecommendationService.instance);
   getIt.registerLazySingleton<NutritionalRecommendationService>(() => NutritionalRecommendationService.instance);
 
@@ -97,6 +110,8 @@ void setupServiceLocator({bool isTesting = false}) {
   getIt.registerLazySingleton<AppUpdateService>(() => AppUpdateService.instance);
   getIt.registerLazySingleton<IAppInstallerService>(() => AppInstallerService.instance);
   getIt.registerLazySingleton<AppInstallerService>(() => AppInstallerService.instance);
+  getIt.registerLazySingleton<INotificationService>(() => NotificationService.instance);
+  getIt.registerLazySingleton<NotificationService>(() => NotificationService.instance);
 
   // State Management Controllers
   getIt.registerLazySingleton<SettingsController>(() => SettingsController.instance);

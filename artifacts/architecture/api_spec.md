@@ -1,15 +1,15 @@
 ---
 tipo: api_spec
 proyecto: App_Food_Tracker
-version: v1.3.4
+version: v1.4.0
 estado: activo
 fecha: 2026-10-08
-tags: [proyecto, api, backend, contratos, sqlite-v4, github-releases, methodchannel-installer, gemini-streaming, 16k-tokens, thinking-level-medium, dynamic-pacing]
+tags: [proyecto, api, backend, contratos, sqlite-v4, github-releases, methodchannel-installer, gemini-streaming, 16k-tokens, thinking-level-medium, dynamic-pacing, local-notifications, socket-resilience, privacy-storage, clinical-pdf, purge-justification]
 ---
 
-# 📡 Especificación de Contrato de Datos, Esquema SQLite v4 y Servicios Backend (v1.3.4)
+# 📡 Especificación de Contrato de Datos, Esquema SQLite v4 y Servicios Backend (v1.4.0)
 
-> **Backend-Architect:** Este artefacto define formalmente el esquema relacional de base de datos local SQLite v4, los índices B-Tree de cobertura, los modelos de dominio inmutables (Sentinel), los contratos de servicios internos (DAOs, Service Locator, Result Pattern, BackupNormalizer con auto-reparación) y externos (Dynamic Gemini API con Streaming y Razonamiento Desacoplado, 16k Tokens, Thinking Level MEDIUM, Descargas Resumibles HTTP 206 en GitHub Releases, HomeWidget, USDA FoodData Central, Open Food Facts y Calculadora Metabólica).
+> **Backend-Architect:** Este artefacto define formalmente el esquema relacional de base de datos local SQLite v4, los índices B-Tree de cobertura, los modelos de dominio inmutables (Sentinel), los contratos de servicios internos (DAOs, Service Locator, Result Pattern, BackupNormalizer con auto-reparación, NotificationService, ClinicalPdfExportService) y externos (Dynamic Gemini API con Streaming, Fallback Unario, IVisionModelProvider, 16k Tokens, Thinking Level MEDIUM, Descargas Resumibles HTTP 206 en GitHub Releases, HomeWidget, USDA FoodData Central, Open Food Facts y Calculadora Metabólica).
 
 ---
 
@@ -310,8 +310,7 @@ Para evitar alucinaciones autorregresivas y cuellos de botella de constrained gr
       "grasas_g": 6.8,
       "fibra_g": 0.0,
       "sodio_mg": 75.0,
-      "azucar_g": 0.0,
-      "justificacion_visual": "String"
+      "azucar_g": 0.0
     }
   ],
   "totales": {
@@ -339,18 +338,48 @@ Para evitar alucinaciones autorregresivas y cuellos de botella de constrained gr
 - `clinicalTimeout`: 120 segundos para modelos Pro o con `supportsThinking`.
 - Manejo estructurado de `TimeoutException` retornando `AiServiceFailure.timeout(message)`.
 
-### 7.4. Contrato de Streaming, Capacidad 16k y Thinking Level MEDIUM (v1.3.4)
+### 7.4. Contrato de Streaming, Capacidad 16k y Thinking Level MEDIUM
 - **Protocolo de Streaming Continuo:** Invocación vía `model.generateContentStream()` acumulando chunks progresivos en `StringBuffer`. La actividad de paquetes mantiene abierto el socket TCP/TLS, mitigando desconexiones de gateways NAT móviles (45–80s) durante fases de razonamiento latente.
 - **Parámetros de `GenerationConfig`:**
   - `temperature`: 0.2
   - `responseMimeType`: "application/json"
-  - `responseSchema`: `GeminiResilienceHelper.mealAnalysisSchema`
+  - `responseSchema`: `GeminiResilienceHelper.mealAnalysisSchema` (sin campo `justificacion_visual`)
   - `maxOutputTokens`: 16384 (eliminando truncamiento de tokens de razonamiento o JSON por `finishReason: MAX_TOKENS`)
 - **Nivel de Inteligencia (`thinkingLevel`):** `MEDIUM` para `gemini-3.8-flash` y variantes Pro, omitido estrictamente en modelos Lite (`gemini-3.5-flash-lite`) para prevenir el error `HTTP 400 INVALID_ARGUMENT`.
 - **Cascada de Respaldo Automática:**
   - Modelo Primario: Modelo seleccionado por el usuario o por defecto (`gemini-3.8-flash`).
   - Modelo de Fallback: `gemini-2.5-flash`.
   - Backoff Escalonado: Retardos progresivos en secuencia `[2s, 5s, 10s]` con jitter aleatorio adicional (0–500ms).
-  - Clasificación de Reintento (`isRetriableError`): HTTP 500, 502, 504, `HttpException`, `HandshakeException`, `SocketException`, `FormatException`, respuestas vacías o terminaciones abruptas de red.
+  - Clasificación de Reintento (`isRetriableError`): HTTP 500, 502, 504, `HttpException`, `HandshakeException`, `SocketException`, `FormatException`, respuestas vacías, terminaciones abruptas de red, y errores OS 104/10054.
+
+### 7.5. Resiliencia ante Socket Cuts, Fallback Unario y Proveedor Desacoplado (v1.4.0)
+- **Fallback Unario Inmediato:** Ante cualquier fallo durante el streaming en `GeminiVisionService.analyzeMeal` (ej. corte de socket `os error: 104` o `10054`), el servicio ejecuta de forma inmediata una llamada unaria con `model.generateContent([prompt])` antes de propagar un fallo o abortar la tarea.
+- **Contrato `IVisionModelProvider`:** Abstracción unificada (`lib/core/interfaces/vision_model_provider_interface.dart`) para desacoplar el motor de visión de Gemini frente a proveedores futuros (ej. OpenRouter):
+  - `Future<Result<MealAnalysisResult, Failure>> analyzeMeal({required Uint8List imageBytes, ...})`
+  - `bool get supportsStreaming`
+  - `void dispose()`
+
+---
+
+## 🔔 8. Contrato de Notificaciones Locales y Programadas (`INotificationService`) (v1.4.0)
+
+- **Canal Android de Análisis de Comidas (`food_tracker_meal_analysis`):** Prioridad alta con sonido/vibración para alertar al usuario cuando su comida termina de procesarse en segundo plano o si se produce un error.
+  - `Future<void> showMealAnalysisCompleted({required String mealId, required String dishName, required double calories})`
+  - `Future<void> showMealAnalysisFailed({required String taskId, required String reason})`
+- **Canal Android de Ayuno Intermitente (`food_tracker_fasting`):** Notificación de alarma exacta programada para dispararse en el momento en que se cumple la ventana de ayuno seleccionada:
+  - `Future<void> scheduleFastingCompleted({required int notificationId, required DateTime scheduledDate, required double targetHours})`
+  - `Future<void> cancelFastingReminder({required int notificationId})`
+
+---
+
+## 📄 9. Contrato de Reporte Clínico Dual PDF/CSV (v1.4.0)
+
+- **Exportación CSV RFC 4180 (`ClinicalExcelExportService`):**
+  - `Future<Result<String, Failure>> exportToExcelCsv({required List<Meal> meals, required DateTime startDate, required DateTime endDate, ...})`
+  - Guarda en `/storage/emulated/0/Documents/FoodTracker` (o directorio accesible de documentos) con codificación UTF-8 BOM.
+- **Exportación PDF Clínico (`IClinicalPdfExportService` / `ClinicalPdfExportService`):**
+  - `Future<Result<String, Failure>> exportToClinicalPdf({required List<Meal> meals, required DateTime startDate, required DateTime endDate, ...})`
+  - Genera documento binario con cabecera `%PDF-`, estructurado con tablas completas de macronutrientes, micronutrientes (fibra, sodio, azúcar), promedios diarios e historial secuencial de comidas, guardado en el mismo directorio `/Documents/FoodTracker`.
+
 
 

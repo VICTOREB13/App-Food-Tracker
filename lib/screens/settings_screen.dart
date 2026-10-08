@@ -14,6 +14,7 @@ import '../widgets/settings/gemini_model_selector_card.dart';
 import '../widgets/settings/language_selector_card.dart';
 import '../widgets/settings/photo_pruning_card.dart';
 import '../widgets/settings/settings_navigation_card.dart';
+import '../widgets/settings/storage_mode_card.dart';
 import '../widgets/settings/usda_api_key_card.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -212,6 +213,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 16),
           const LanguageSelectorCard(),
+          const SizedBox(height: 16),
+          const StorageModeCard(),
           const SizedBox(height: 16),
           VeCard(
             child: ListTile(

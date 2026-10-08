@@ -1,15 +1,63 @@
 ---
 tipo: task_list
 proyecto: App_Food_Tracker
-iteracion: v1.3.4
+iteracion: v1.4.0
 estado: activo
 fecha: 2026-10-08
-tags: [proyecto, tasks, checklist, v1-3-4, 16k-tokens, thinking-level-medium, micronutrients-harmonization, dynamic-pacing, sqlite-zero-freeze]
+tags: [proyecto, tasks, checklist, v1-4-0, background-notifications, socket-resilience, privacy-storage, clinical-pdf, purge-justification, l10n]
 ---
 
-# 📋 Checklist Maestro de Tareas de Agentes (v1.3.4)
+# 📋 Checklist Maestro de Tareas de Agentes (v1.4.0)
 
-> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.3.4. Cada tarea completada se marca con `[x]`.
+> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.4.0. Cada tarea completada se marca con `[x]`.
+
+---
+
+## 🌟 Iteración v1.4.0: Notificaciones en Segundo Plano, Resiliencia de Socket Gemini, Privacidad de Almacenamiento, Reportes PDF Clínicos y Purga de Justificación Visual
+
+### 🧭 1. Project-Planner (Master Tech Lead & Orquestador)
+- [x] (Project-Planner) Diseñar la arquitectura del sistema de notificaciones locales asíncronas y recordatorio exacto de ayuno con `flutter_local_notifications`.
+- [x] (Project-Planner) Diseñar la resiliencia ante socket cuts y desconexiones abruptas (OS error: 104/10054) con fallback unario (`generateContent`) e interfaz desacoplada `IVisionModelProvider`.
+- [x] (Project-Planner) Diseñar el selector de privacidad de almacenamiento de fotos (Público vs Privado aislado) en Settings.
+- [x] (Project-Planner) Diseñar el generador de reportes clínicos dual (CSV y PDF con el paquete `pdf`) guardado en directorio accesible `/Documents/FoodTracker`.
+- [x] (Project-Planner) Diseñar la purga de justificación volumétrica en el schema de Gemini y widgets UI (`FoodItemsListCard`, `FoodItemEditorDialog`).
+- [x] (Project-Planner) Actualizar los artefactos de planeación, arquitectura, auditoría y changelog.
+
+### 🗄️ 2. Backend-Architect (Servicios, Resiliencia, Notificaciones y Exportación)
+- [x] (Backend-Architect) Implementar `NotificationService` e interfaz `INotificationService` (< 300 LoC) para canales locales, notificaciones de éxito/fallo de análisis y alarma exacta de ayuno.
+- [x] (Backend-Architect) Integrar `NotificationService.instance.showMealAnalysisCompleted` y `showMealAnalysisFailed` en `AnalysisQueueService`.
+- [x] (Backend-Architect) Conectar `scheduleFastingCompleted` y `cancelFastingReminder` en `FastingController`.
+- [x] (Backend-Architect) Crear interfaz `IVisionModelProvider` e implementar en `GeminiVisionService` (< 300 LoC) para desacoplamiento ante futuros proveedores.
+- [x] (Backend-Architect) Extender `GeminiResilienceHelper` para atrapar cortes de socket, connection resets y OS errors 104/10054.
+- [x] (Backend-Architect) Implementar fallback unario inmediato (`generateContent`) en `GeminiVisionService` ante caídas de stream.
+- [x] (Backend-Architect) Purgar `justificacion_visual` del schema estructurado `mealAnalysisSchema` en `GeminiResilienceHelper`.
+- [x] (Backend-Architect) Crear enum `StorageMode` y métodos en `SecureStorageService` para persistir preferencia de privacidad.
+- [x] (Backend-Architect) Adaptar `MealImageStorageResolver` e `ImageProcessingService` para respetar el modo privado sin publicar en galería.
+- [x] (Backend-Architect) Crear `AccessibleStorageResolver` para ubicar `/Documents/FoodTracker` de forma segura.
+- [x] (Backend-Architect) Crear `ClinicalPdfExportService` e interfaz `IClinicalPdfExportService` (< 300 LoC) con tablas de macronutrientes, micronutrientes, promedios y desglose diario.
+- [x] (Backend-Architect) Actualizar `ServiceLocator` registrando `NotificationService` y `ClinicalPdfExportService`.
+
+### 🎨 3. Frontend-UI (UI, Widgets y Dialogs)
+- [x] (Frontend-UI) Purgar el contenedor de texto de justificación visual en `FoodItemsListCard`.
+- [x] (Frontend-UI) Eliminar el campo y controlador de justificación en `FoodItemEditorDialog`.
+- [x] (Frontend-UI) Crear widget Bento `StorageModeCard` (< 300 LoC) e integrarlo en `SettingsScreen`.
+- [x] (Frontend-UI) Actualizar `ClinicalExportDialog` con selector de formato (CSV vs PDF), retroalimentación amigable ("Se guardó en /Documents/FoodTracker") y visualización del archivo.
+- [x] (Frontend-UI) Completar soporte l10n en `app_es.arb`, `app_en.arb`, `app_localizations.dart`, `app_localizations_es.dart` y `app_localizations_en.dart`.
+
+### 🚀 4. DevOps-Engineer (Android Manifest, Dependencias y Control de Versión)
+- [x] (DevOps-Engineer) Actualizar `pubspec.yaml` con `version: 1.4.0+1`, `flutter_local_notifications: ^18.0.1`, `timezone: ^0.9.4`, `pdf: ^3.11.1`.
+- [x] (DevOps-Engineer) Actualizar `AppConstants.appVersion = '1.4.0'`.
+- [x] (DevOps-Engineer) Configurar permisos (`POST_NOTIFICATIONS`, `SCHEDULE_EXACT_ALARM`, `USE_EXACT_ALARM`, `RECEIVE_BOOT_COMPLETED`) y receivers en `AndroidManifest.xml`.
+- [x] (DevOps-Engineer) Documentar la versión `[1.4.0] - 2026-10-08` en `changelog_v1.md`.
+
+### 🛡️ 5. Systems-Auditor (Pruebas Automatizadas y Quality Gate)
+- [x] (Systems-Auditor) Crear pruebas unitarias para `StorageMode` en `storage_mode_test.dart`.
+- [x] (Systems-Auditor) Crear pruebas unitarias para `NotificationService` en `notification_service_test.dart`.
+- [x] (Systems-Auditor) Crear pruebas unitarias para `ClinicalPdfExportService` en `clinical_pdf_export_service_test.dart` verificando formato `%PDF-` y tablas.
+- [x] (Systems-Auditor) Crear pruebas de widgets para `StorageModeCard` en `storage_mode_card_test.dart`.
+- [x] (Systems-Auditor) Actualizar pruebas de widgets para `FoodItemsListCard` y `ClinicalExportDialog`.
+- [x] (Systems-Auditor) Auditar que el 100% de archivos en `lib/` cumplan estrictamente `< 300 LoC`.
+- [x] (Systems-Auditor) Emitir veredicto formal `PASS` en `artifacts/audit_reports/audit_report.md`.
 
 ---
 

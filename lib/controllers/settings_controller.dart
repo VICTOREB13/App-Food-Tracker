@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../core/interfaces/database_service_interface.dart';
 import '../models/daily_goals.dart';
 import '../models/gemini_model_info.dart';
+import '../models/storage_mode.dart';
 import '../services/backup_service.dart';
 import '../services/database_service.dart';
 import '../services/gemini_model_service.dart';
@@ -16,24 +17,16 @@ class SettingsController extends ChangeNotifier {
   static SettingsController get instance => _instance;
 
   @visibleForTesting
-  static void setMockInstance(SettingsController mock) {
-    _instance = mock;
-  }
+  static void setMockInstance(SettingsController mock) => _instance = mock;
 
   @visibleForTesting
-  static void resetInstance() {
-    _instance = SettingsController();
-  }
+  static void resetInstance() => _instance = SettingsController();
 
   @visibleForTesting
   factory SettingsController.forTesting({
     IDatabaseService? databaseService,
     GeminiModelService? geminiModelService,
-  }) =>
-      SettingsController(
-        databaseService: databaseService,
-        geminiModelService: geminiModelService,
-      );
+  }) => SettingsController(databaseService: databaseService, geminiModelService: geminiModelService);
 
   final IDatabaseService _db;
   GeminiModelService _geminiModelService;
@@ -45,9 +38,7 @@ class SettingsController extends ChangeNotifier {
         _geminiModelService = geminiModelService ?? GeminiModelService.instance;
 
   @visibleForTesting
-  void setGeminiModelServiceForTesting(GeminiModelService service) {
-    _geminiModelService = service;
-  }
+  void setGeminiModelServiceForTesting(GeminiModelService service) => _geminiModelService = service;
 
   String? _geminiApiKey;
   String? _selectedGeminiModel;
@@ -59,6 +50,7 @@ class SettingsController extends ChangeNotifier {
   DailyGoals _dailyGoals = const DailyGoals();
   Map<String, dynamic> _dbStats = {};
   bool _isLoading = false;
+  StorageMode _storageMode = StorageMode.public;
 
   String? get geminiApiKey => _geminiApiKey;
   bool get hasApiKey => _geminiApiKey != null && _geminiApiKey!.trim().isNotEmpty;
@@ -73,6 +65,7 @@ class SettingsController extends ChangeNotifier {
   DailyGoals get dailyGoals => _dailyGoals;
   Map<String, dynamic> get dbStats => Map.unmodifiable(_dbStats);
   bool get isLoading => _isLoading;
+  StorageMode get storageMode => _storageMode;
 
   Locale? _currentLocale;
   Locale? get currentLocale => _currentLocale;
@@ -81,9 +74,7 @@ class SettingsController extends ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       final code = prefs.getString('app_locale_code');
-      if (code != null && code.isNotEmpty) {
-        _currentLocale = Locale(code);
-      }
+      if (code != null && code.isNotEmpty) _currentLocale = Locale(code);
     } catch (_) {}
   }
 
@@ -96,11 +87,18 @@ class SettingsController extends ChangeNotifier {
     } catch (_) {}
   }
 
+  Future<void> saveStorageMode(StorageMode mode) async {
+    _storageMode = mode;
+    notifyListeners();
+    await SecureStorageService.instance.setStorageMode(mode);
+  }
+
   Future<void> init() async {
     _isLoading = true;
     notifyListeners();
     try {
       await loadLocale();
+      _storageMode = await SecureStorageService.instance.getStorageMode();
       _geminiApiKey = await SecureStorageService.instance.getGeminiApiKey();
       _selectedGeminiModel = await SecureStorageService.instance.getSelectedGeminiModel();
       _usdaApiKey = await SecureStorageService.instance.getUsdaApiKey();
@@ -265,30 +263,26 @@ class SettingsController extends ChangeNotifier {
       await BackupService.instance.listAvailableBackups(customDirectoryPath: customDirectoryPath);
 
   Future<Map<String, int>> importBackupFromFile(File file) async {
-    _isLoading = true;
-    notifyListeners();
+    _isLoading = true; notifyListeners();
     try {
       final res = await BackupService.instance.importFromFile(file);
       _dbStats = await _db.getDatabaseStats();
       await MealController.instance.loadMeals();
       return res;
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      _isLoading = false; notifyListeners();
     }
   }
 
   Future<Map<String, int>> importBackup(String jsonContent) async {
-    _isLoading = true;
-    notifyListeners();
+    _isLoading = true; notifyListeners();
     try {
       final res = await BackupService.instance.importFromJsonString(jsonContent);
       _dbStats = await _db.getDatabaseStats();
       await MealController.instance.loadMeals();
       return res;
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      _isLoading = false; notifyListeners();
     }
   }
 }

@@ -89,7 +89,7 @@ void main() {
       expect(deletedItem, equals(testItem));
     });
 
-    testWidgets('renders visual justification when present', (tester) async {
+    testWidgets('purges visual justification from items list card', (tester) async {
       final testItem = FoodItem(
         id: 'item-2',
         name: 'Arroz cocido',
@@ -114,7 +114,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Estimación: Aproximadamente 1 taza colmada'), findsOneWidget);
+      expect(find.text('Estimación: Aproximadamente 1 taza colmada'), findsNothing);
     });
   });
 }

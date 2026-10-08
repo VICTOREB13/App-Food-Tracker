@@ -163,24 +163,6 @@ class FoodItemsListCard extends StatelessWidget {
               ),
             ],
           ),
-          if (item.visualJustification != null && item.visualJustification!.isNotEmpty) ...[
-            const SizedBox(height: 6),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppColors.border(context).withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                '${l10n.estimationLabel}: ${item.visualJustification!}',
-                style: GoogleFonts.inter(
-                  fontSize: 11,
-                  fontStyle: FontStyle.italic,
-                  color: AppColors.textMuted(context),
-                ),
-              ),
-            ),
-          ],
         ],
       ),
     );

@@ -1,8 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:path/path.dart' as p;
+import '../../l10n/app_localizations.dart';
+import '../../l10n/app_localizations_es.dart';
+import '../../services/accessible_storage_resolver.dart';
 import '../../services/clinical_excel_export_service.dart';
+import '../../services/clinical_pdf_export_service.dart';
 import '../../services/theme_manager.dart';
 
 Future<void> showClinicalExportDialog(BuildContext context) {
@@ -21,6 +25,7 @@ class _ClinicalExportDialog extends StatefulWidget {
 
 class _ClinicalExportDialogState extends State<_ClinicalExportDialog> {
   int _selectedDays = 30;
+  String _selectedFormat = 'CSV'; // 'CSV' or 'PDF'
   bool _isExporting = false;
   File? _exportedFile;
 
@@ -28,17 +33,20 @@ class _ClinicalExportDialogState extends State<_ClinicalExportDialog> {
     setState(() => _isExporting = true);
     try {
       final now = DateTime.now();
-      final DateTime start;
-      if (_selectedDays == 0) {
-        start = DateTime(2000, 1, 1);
-      } else {
-        start = now.subtract(Duration(days: _selectedDays));
-      }
+      final DateTime start = _selectedDays == 0 ? DateTime(2000, 1, 1) : now.subtract(Duration(days: _selectedDays));
 
-      final file = await ClinicalExcelExportService.instance.exportClinicalCsvFile(
-        startDate: start,
-        endDate: now,
-      );
+      final File file;
+      if (_selectedFormat == 'PDF') {
+        file = await ClinicalPdfExportService.instance.exportClinicalPdfFile(
+          startDate: start,
+          endDate: now,
+        );
+      } else {
+        file = await ClinicalExcelExportService.instance.exportClinicalCsvFile(
+          startDate: start,
+          endDate: now,
+        );
+      }
 
       if (mounted) {
         setState(() {
@@ -61,6 +69,8 @@ class _ClinicalExportDialogState extends State<_ClinicalExportDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEs();
+
     return AlertDialog(
       backgroundColor: AppColors.surface(context),
       shape: RoundedRectangleBorder(
@@ -80,7 +90,7 @@ class _ClinicalExportDialogState extends State<_ClinicalExportDialog> {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              'Reporte Clínico',
+              l10n.clinicalReportTitle,
               style: GoogleFonts.outfit(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
@@ -98,12 +108,25 @@ class _ClinicalExportDialogState extends State<_ClinicalExportDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Exporta tu historial nutricional tabulado con macros, fibra, sodio y azúcar para tu consulta clínica o nutricionista.',
+                l10n.clinicalExportDesc,
                 style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary(context), height: 1.4),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
               Text(
-                'Rango temporal:',
+                l10n.exportFormatLabel,
+                style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary(context)),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  _buildFormatChip('CSV', l10n.exportFormatCsv),
+                  const SizedBox(width: 8),
+                  _buildFormatChip('PDF', l10n.exportFormatPdf),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Text(
+                l10n.timeRangeLabel,
                 style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary(context)),
               ),
               const SizedBox(height: 8),
@@ -119,7 +142,7 @@ class _ClinicalExportDialogState extends State<_ClinicalExportDialog> {
               const SizedBox(height: 16),
               if (_exportedFile != null) ...[
                 Container(
-                  padding: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: AppColors.success.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
@@ -130,30 +153,25 @@ class _ClinicalExportDialogState extends State<_ClinicalExportDialog> {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.check_circle, size: 16, color: AppColors.success),
-                          const SizedBox(width: 6),
-                          Text('Archivo generado con éxito', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.success)),
+                          const Icon(Icons.check_circle, size: 18, color: AppColors.success),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              l10n.exportSuccessTitle,
+                              style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.success),
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        _exportedFile!.path,
-                        style: GoogleFonts.inter(fontSize: 10, color: AppColors.textSecondary(context)),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                        l10n.exportSavedInFolder(AccessibleStorageResolver.friendlyExportFolderPath),
+                        style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textPrimary(context)),
                       ),
-                      const SizedBox(height: 8),
-                      InkWell(
-                        onTap: () {
-                          Clipboard.setData(ClipboardData(text: _exportedFile!.path));
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Ruta copiada al portapapeles')),
-                          );
-                        },
-                        child: Text(
-                          'Copiar ruta del archivo',
-                          style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primary),
-                        ),
+                      const SizedBox(height: 2),
+                      Text(
+                        p.basename(_exportedFile!.path),
+                        style: GoogleFonts.inter(fontSize: 11, color: AppColors.textMuted(context)),
                       ),
                     ],
                   ),
@@ -166,7 +184,7 @@ class _ClinicalExportDialogState extends State<_ClinicalExportDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text('Cerrar', style: GoogleFonts.inter(color: AppColors.textSecondary(context))),
+          child: Text(l10n.closeButton, style: GoogleFonts.inter(color: AppColors.textSecondary(context))),
         ),
         ElevatedButton(
           onPressed: _isExporting ? null : _export,
@@ -177,9 +195,26 @@ class _ClinicalExportDialogState extends State<_ClinicalExportDialog> {
           ),
           child: _isExporting
               ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-              : Text('Exportar CSV', style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
+              : Text(_selectedFormat == 'CSV' ? l10n.exportCsvButton : l10n.exportPdfButton, style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
         ),
       ],
+    );
+  }
+
+  Widget _buildFormatChip(String format, String label) {
+    final isSelected = _selectedFormat == format;
+    return ChoiceChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (selected) {
+        if (selected) setState(() => _selectedFormat = format);
+      },
+      selectedColor: AppColors.primary.withValues(alpha: 0.15),
+      labelStyle: GoogleFonts.inter(
+        fontSize: 12,
+        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+        color: isSelected ? AppColors.primary : AppColors.textSecondary(context),
+      ),
     );
   }
 

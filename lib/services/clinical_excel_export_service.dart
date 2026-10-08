@@ -7,6 +7,7 @@ import '../core/interfaces/clinical_excel_export_service_interface.dart';
 import '../core/interfaces/database_service_interface.dart';
 import '../models/meal.dart';
 import 'database_service.dart';
+import 'accessible_storage_resolver.dart';
 
 /// Service generating RFC 4180 compliant CSV reports formatted for clinical analysis.
 class ClinicalExcelExportService implements IClinicalExcelExportService {
@@ -161,7 +162,7 @@ class ClinicalExcelExportService implements IClinicalExcelExportService {
     if (targetDirectoryPath != null) {
       directory = Directory(targetDirectoryPath);
     } else {
-      directory = await getApplicationDocumentsDirectory();
+      directory = await AccessibleStorageResolver.getAccessibleDocumentsDirectory();
     }
     if (!await directory.exists()) {
       await directory.create(recursive: true);

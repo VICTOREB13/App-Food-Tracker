@@ -18,7 +18,10 @@ class GeminiResilienceHelper {
     const patterns = ['429', 'resource_exhausted', 'quota', 'rate limit', '500', '502', '503', '504',
       'bad gateway', 'gateway timeout', 'unavailable', 'overloaded', 'socketexception', 'timeoutexception',
       'clientexception', 'handshakeexception', 'httpexception', 'formatexception', 'unexpected character',
-      'syntaxerror', 'network', 'timed out', 'respuesta vacía', 'empty response'];
+      'syntaxerror', 'network', 'timed out', 'respuesta vacía', 'empty response',
+      'connection closed', 'connection reset', 'broken pipe', 'os error: 104', 'os error: 10054',
+      'software caused connection abort', 'connection aborted', 'stream was reset', 'stream closed',
+      'remotely closed', 'transport is closing', 'socket cut'];
     return patterns.any(s.contains);
   }
 
@@ -99,7 +102,6 @@ class GeminiResilienceHelper {
                 'fibra_g': Schema.number(description: 'Fibra en gramos'),
                 'sodio_mg': Schema.number(description: 'Sodio en miligramos'),
                 'azucar_g': Schema.number(description: 'Azúcar en gramos'),
-                'justificacion_visual': Schema.string(description: 'Justificación explicativa y física observada'),
               },
             ),
           ),

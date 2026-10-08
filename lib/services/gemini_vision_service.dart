@@ -4,13 +4,14 @@ import 'dart:typed_data';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import '../models/food_item.dart';
 import '../models/meal_analysis_result.dart';
+import '../core/interfaces/vision_model_provider_interface.dart';
 import 'gemini_model_service.dart';
 import 'gemini_resilience_helper.dart';
 import 'image_processing_service.dart';
 
 export '../models/meal_analysis_result.dart';
 
-class GeminiVisionService {
+class GeminiVisionService implements IVisionModelProvider {
   final String apiKey;
   final String modelName;
   final String? masterPrompt;
@@ -239,19 +240,26 @@ class GeminiVisionService {
         );
 
         final timeoutDuration = resolveTimeout(currentModel);
-        final responseStream = model.generateContentStream([content]);
-        final buffer = StringBuffer();
-        await for (final chunk in responseStream.timeout(timeoutDuration)) {
-          final chunkText = chunk.text;
-          if (chunkText != null && chunkText.isNotEmpty) {
-            buffer.write(chunkText);
+        String text = '';
+        try {
+          final responseStream = model.generateContentStream([content]);
+          final buffer = StringBuffer();
+          await for (final chunk in responseStream.timeout(timeoutDuration)) {
+            final chunkText = chunk.text;
+            if (chunkText != null && chunkText.isNotEmpty) buffer.write(chunkText);
           }
+          text = buffer.toString().trim();
+          if (text.isEmpty) {
+            final unaryRes = await model.generateContent([content]).timeout(timeoutDuration);
+            text = unaryRes.text?.trim() ?? '';
+          }
+        } catch (streamErr) {
+          debugPrint('GeminiVisionService: Stream failed ($streamErr), executing unary fallback');
+          final unaryRes = await model.generateContent([content]).timeout(timeoutDuration);
+          text = unaryRes.text?.trim() ?? '';
         }
 
-        final text = buffer.toString().trim();
-        if (text.isEmpty) {
-          throw Exception('Gemini devolvió una respuesta vacía');
-        }
+        if (text.isEmpty) throw Exception('Gemini devolvió una respuesta vacía');
 
         final result = MealAnalysisResult.fromJsonString(text);
         if (result.items.isEmpty && result.totalCalories == 0) {

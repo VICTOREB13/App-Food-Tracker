@@ -18,6 +18,44 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [1.4.0] - 2026-10-08
+
+La versión v1.4.0 introduce un sistema completo de notificaciones locales asíncronas y recordatorios programados exactos de ayuno intermitente (`flutter_local_notifications`), eleva la tolerancia a fallos de Gemini Vision con recuperación unaria inmediata (`generateContent`) ante socket cuts / desconexiones abruptas (`OS error 104/10054`) e interfaz desacoplada `IVisionModelProvider`, incorpora selector de privacidad de fotos (Público vs Privado aislado) en Settings, dualidad de exportación de reportes clínicos (CSV RFC 4180 y PDF profesional mediante paquete `pdf`) en `/Documents/FoodTracker`, y purga total de la justificación volumétrica técnica de la UI y del schema de Gemini para una experiencia clínica limpia y centrada en el usuario.
+
+### Added
+- **Sistema de Notificaciones Locales y Programadas (`NotificationService` & `INotificationService`):**
+  - Implementación de servicio modular de notificaciones (< 300 LoC) con canales Android dedicados: `food_tracker_meal_analysis` (prioridad alta para éxito y fallo de análisis) y `food_tracker_fasting` (alarmas exactas con `scheduleExactNotification` y soporte de zona horaria `tz.TZDateTime`).
+  - Configuración nativa en `AndroidManifest.xml` con permisos `POST_NOTIFICATIONS`, `SCHEDULE_EXACT_ALARM`, `USE_EXACT_ALARM`, `RECEIVE_BOOT_COMPLETED` y receptores de alarma/reinicio.
+  - Integración en `AnalysisQueueService` para notificar al usuario en background cuando su comida termina de procesarse (`¡Ya se terminó de analizar tu comida!`) o si ocurre un fallo irrecuperable.
+  - Integración en `FastingController` para programar alarma exacta al iniciar ayuno (`scheduleFastingCompleted`) y cancelarla al detenerlo (`cancelFastingReminder`).
+- **Contrato de Visión Desacoplada (`IVisionModelProvider`):**
+  - Interfaz de proveedor de visión (`lib/core/interfaces/vision_model_provider_interface.dart`) que define `analyzeMeal`, `supportsStreaming`, y `dispose` para desacoplar `GeminiVisionService` de futuros backends de IA como OpenRouter.
+- **Exportación Dual de Reporte Clínico a PDF (`ClinicalPdfExportService` & `IClinicalPdfExportService`):**
+  - Generador de reportes clínicos PDF (< 300 LoC) usando `package:pdf` con tablas de macronutrientes, micronutrientes (fibra, sodio, azúcar), promedios diarios y cronograma detallado de comidas.
+  - Almacenamiento directo en directorio accesible de documentos (`/Documents/FoodTracker`) mediante `AccessibleStorageResolver`.
+- **Selector de Privacidad de Almacenamiento (`StorageMode` & `StorageModeCard`):**
+  - Nuevo enum `StorageMode` (`public`, `private`) con persistencia en `SecureStorageService`.
+  - Tarjeta Bento interactiva en `SettingsScreen` para alternar entre almacenamiento público (accesible en galería) y privado aislado (restringido al sandbox de la aplicación).
+  - Adaptación de `MealImageStorageResolver` e `ImageProcessingService` para respetar el modo privado sin registrar archivos en galería externa.
+- **Selector de Formato en Diálogo de Exportación (`ClinicalExportDialog`):**
+  - Segmented button en diálogo de exportación para alternar entre CSV (Excel) y PDF Clínico.
+  - Mensaje de confirmación amigable (`Se guardó en /Documents/FoodTracker: {archivo}`) eliminando rutas técnicas crudas.
+
+### Changed
+- **Resiliencia de Socket y Fallback Unario en Gemini Vision (`GeminiVisionService` & `GeminiResilienceHelper`):**
+  - Detección expandida de errores de desconexión abrupta en `isRetriableError` (`os error: 104`, `os error: 10054`, `connection reset by peer`, `software caused connection abort`, `connection closed`).
+  - Captura y recuperación ante fallos de stream en `GeminiVisionService.analyzeMeal` con invocación inmediata de fallback unario (`generateContent`) preservando el análisis sin fallar la tarea en la cola.
+- **Purga de Justificación Volumétrica en UI y Schema (`GeminiResilienceHelper`, `FoodItemsListCard`, `FoodItemEditorDialog`):**
+  - Eliminación de la propiedad `justificacion_visual` del JSON schema estructurado de Gemini Vision.
+  - Retiro del contenedor de texto de justificación visual en la tarjeta de ingredientes (`FoodItemsListCard`) y eliminación del campo/controlador en el diálogo de edición manual (`FoodItemEditorDialog`).
+- **Completitud de Localización (l10n):**
+  - Nuevas claves con placeholders tipados en `app_es.arb`, `app_en.arb`, `app_localizations.dart`, `app_localizations_es.dart` y `app_localizations_en.dart`.
+- **Actualización de Versión de la Aplicación:**
+  - Actualización a `1.4.0` en `AppConstants.appVersion` (`lib/core/constants/app_constants.dart`).
+  - Actualización a `1.4.0+1` en `pubspec.yaml`.
+
+---
+
 ## [1.3.4] - 2026-10-08
 
 La versión v1.3.4 amplía la ventana de salida a 16k tokens (`maxOutputTokens: 16384`) para eliminar truncamientos por pensamiento latente (`finishReason: MAX_TOKENS`), estandariza `thinkingLevel: "MEDIUM"` para modelos Gemini 3 y Pro omitiendo estrictamente la configuración de pensamiento en modelos Lite (`gemini-3.5-flash-lite`) para erradicar errores `HTTP 400 INVALID_ARGUMENT`, armoniza los micronutrientes (`fibra_g`, `sodio_mg`, `azucar_g`) en la instrucción de sistema, Few-Shot y esquema preservando intactas las reglas volumétricas clínicas, e implementa pacing fluido en memoria a 60 FPS en el dashboard durante el análisis sin contención de escritura en SQLite.

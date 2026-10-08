@@ -2,7 +2,7 @@
   "schema_version": 1,
   "diagram_type": "architecture",
   "meta": {
-    "title": "Victor Engineer - Food Tracker Architecture (v1.2.5)",
+    "title": "Victor Engineer - Food Tracker Architecture (v1.4.0)",
     "output": "architecture_diagram.html",
     "quality_profile": "showcase",
     "views": [

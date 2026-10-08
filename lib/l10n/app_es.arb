@@ -151,5 +151,49 @@
       }
     }
   },
-  "viewUpdateAction": "Ver actualización"
+  "viewUpdateAction": "Ver actualización",
+  "mealAnalysisSuccessTitle": "¡Ya se terminó de analizar tu comida!",
+  "mealAnalysisSuccessBody": "Plato: {dishName} (~{calories} kcal). ¡Toca para ver el desglose!",
+  "@mealAnalysisSuccessBody": {
+    "description": "Cuerpo de la notificación de análisis completado",
+    "placeholders": {
+      "dishName": { "type": "String" },
+      "calories": { "type": "String" }
+    }
+  },
+  "mealAnalysisErrorTitle": "Falló el análisis del alimento",
+  "fastingCompletedTitle": "¡Ya terminó tu ayuno intermitente!",
+  "fastingCompletedBody": "Cumpliste tu meta de {hours} horas de ayuno. ¡Ya puedes comer!",
+  "@fastingCompletedBody": {
+    "description": "Cuerpo de la notificación de ayuno completado",
+    "placeholders": {
+      "hours": { "type": "String" }
+    }
+  },
+  "storageModeTitle": "Almacenamiento de Fotos",
+  "storageModePublic": "Público (Galería)",
+  "storageModePrivate": "Privado (Aislado)",
+  "exportSavedInFolder": "Se guardó en {folder}",
+  "@exportSavedInFolder": {
+    "description": "Mensaje de confirmación de carpeta de exportación",
+    "placeholders": {
+      "folder": { "type": "String" }
+    }
+  },
+  "exportFormatLabel": "Formato del reporte",
+  "exportFormatCsv": "CSV (Excel)",
+  "exportFormatPdf": "PDF Clínico",
+  "clinicalReportTitle": "Reporte Clínico",
+  "clinicalExportDesc": "Exporta tu historial nutricional tabulado con macros, fibra, sodio y azúcar para tu consulta clínica o nutricionista.",
+  "timeRangeLabel": "Rango temporal:",
+  "exportSuccessTitle": "Reporte generado con éxito",
+  "exportCsvButton": "Exportar CSV",
+  "exportPdfButton": "Exportar PDF",
+  "closeButton": "Cerrar",
+  "storageModeSubtitle": "Define la privacidad de las fotos capturadas",
+  "storageModePublicDesc": "Visible en Galería y fotos del sistema (/Pictures)",
+  "storageModePrivateDesc": "Almacenamiento interno de la app (protegido)",
+  "storageModePublicSnackBar": "Modo Público activado: fotos visibles en Galería",
+  "storageModePrivateSnackBar": "Modo Privado activado: fotos aisladas dentro de la app",
+  "mealAnalysisErrorFallback": "No se pudo conectar con el servicio de visión. Toca para reintentar."
 }

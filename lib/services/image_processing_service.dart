@@ -10,6 +10,7 @@ import '../core/interfaces/image_processing_service_interface.dart';
 import 'database_service.dart';
 import 'meal_image_file_namer.dart';
 import 'meal_image_storage_resolver.dart';
+import 'secure_storage_service.dart';
 
 export 'meal_image_file_namer.dart';
 export 'meal_image_storage_resolver.dart';
@@ -161,12 +162,14 @@ class ImageProcessingService implements IImageProcessingService {
         mealType ?? mealId ?? MealImageFileNamer.inferMealTypeByTime(effectiveDate);
     final typeCode = MealImageFileNamer.getMealTypeCode(effectiveMealType);
 
+    final storageMode = await SecureStorageService.instance.getStorageMode();
     return await MealImageStorageResolver.writeImageWithAntiCollision(
       imageBytes: imageBytes,
       date: effectiveDate,
       typeCode: typeCode,
       explicitIndex: index,
       customDirectory: customDirectory,
+      storageMode: storageMode,
     );
   }
 

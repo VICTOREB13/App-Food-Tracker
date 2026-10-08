@@ -245,4 +245,54 @@ class AppLocalizationsEn extends AppLocalizations {
   String updateAvailable(String version) => 'New version available: $version';
   @override
   String get viewUpdateAction => 'View update';
+  @override
+  String get mealAnalysisSuccessTitle => 'Meal analysis completed!';
+  @override
+  String mealAnalysisSuccessBody(String dishName, String calories) => 'Dish: $dishName (~$calories kcal). Tap to view breakdown!';
+  @override
+  String get mealAnalysisErrorTitle => 'Meal analysis failed';
+  @override
+  String get fastingCompletedTitle => 'Intermittent fast completed!';
+  @override
+  String fastingCompletedBody(String hours) => 'You reached your target of $hours hours of fasting. You can eat now!';
+  @override
+  String get storageModeTitle => 'Photo Storage';
+  @override
+  String get storageModePublic => 'Public (Gallery)';
+  @override
+  String get storageModePrivate => 'Private (Isolated)';
+  @override
+  String exportSavedInFolder(String folder) => 'Saved in $folder';
+  @override
+  String get exportFormatLabel => 'Report format';
+  @override
+  String get exportFormatCsv => 'CSV (Excel)';
+  @override
+  String get exportFormatPdf => 'Clinical PDF';
+  @override
+  String get clinicalReportTitle => 'Clinical Report';
+  @override
+  String get clinicalExportDesc => 'Export your tabulated nutrition history with macros, fiber, sodium, and sugar for your clinic or nutritionist.';
+  @override
+  String get timeRangeLabel => 'Time range:';
+  @override
+  String get exportSuccessTitle => 'Report generated successfully';
+  @override
+  String get exportCsvButton => 'Export CSV';
+  @override
+  String get exportPdfButton => 'Export PDF';
+  @override
+  String get closeButton => 'Close';
+  @override
+  String get storageModeSubtitle => 'Set privacy mode for captured photos';
+  @override
+  String get storageModePublicDesc => 'Visible in Gallery and system photos (/Pictures)';
+  @override
+  String get storageModePrivateDesc => 'Isolated in app internal storage (protected)';
+  @override
+  String get storageModePublicSnackBar => 'Public mode enabled: photos visible in Gallery';
+  @override
+  String get storageModePrivateSnackBar => 'Private mode enabled: photos isolated in app';
+  @override
+  String get mealAnalysisErrorFallback => 'Could not connect to vision service. Tap to retry.';
 }
