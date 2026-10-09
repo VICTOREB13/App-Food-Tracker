@@ -117,10 +117,11 @@ class _ClinicalExportDialogState extends State<_ClinicalExportDialog> {
                 style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary(context)),
               ),
               const SizedBox(height: 8),
-              Row(
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
                 children: [
                   _buildFormatChip('CSV', l10n.exportFormatCsv),
-                  const SizedBox(width: 8),
                   _buildFormatChip('PDF', l10n.exportFormatPdf),
                 ],
               ),

@@ -14,10 +14,13 @@ class StorageModeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = SettingsController.instance;
-    final currentMode = controller.storageMode;
     final l10n = AppLocalizations.of(context) ?? AppLocalizationsEs();
 
-    return VeCard(
+    return ListenableBuilder(
+      listenable: controller,
+      builder: (context, _) {
+        final currentMode = controller.storageMode;
+        return VeCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -110,6 +113,8 @@ class StorageModeCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+      },
     );
   }
 

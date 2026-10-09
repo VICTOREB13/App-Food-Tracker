@@ -1,19 +1,30 @@
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:food_tracker/core/interfaces/database_service_interface.dart';
 import 'package:food_tracker/models/food_item.dart';
 import 'package:food_tracker/models/meal.dart';
 import 'package:food_tracker/services/clinical_pdf_export_service.dart';
 
+class _FakeDatabaseService implements IDatabaseService {
+  final List<Meal> meals;
+  _FakeDatabaseService([this.meals = const []]);
+
+  @override
+  Future<List<Meal>> getMealsByRange(DateTime start, DateTime end) async => meals;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   group('ClinicalPdfExportService Tests', () {
     late ClinicalPdfExportService service;
+    late Meal meal1;
 
     setUp(() {
-      service = ClinicalPdfExportService();
-    });
-
-    test('generateClinicalPdf produces non-empty valid PDF bytes with %PDF magic header', () async {
-      final meal1 = Meal(
+      meal1 = Meal(
         id: 'm1',
         name: 'Pollo con arroz y ensalada',
         mealType: 'Almuerzo',
@@ -30,7 +41,10 @@ void main() {
           FoodItem(name: 'Arroz blanco', estimatedGrams: 180, calories: 230, protein: 4, carbs: 50, fat: 1),
         ],
       );
+      service = ClinicalPdfExportService(databaseService: _FakeDatabaseService([meal1]));
+    });
 
+    test('generateClinicalPdf produces non-empty valid PDF bytes with %PDF magic header', () async {
       final pdfBytes = await service.generateClinicalPdf(meals: [meal1]);
 
       expect(pdfBytes.isNotEmpty, isTrue);
