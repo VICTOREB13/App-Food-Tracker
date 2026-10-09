@@ -79,9 +79,11 @@ jobs:
           fi
           if [ -f "/tmp/build.gradle.canonical" ]; then
             cp /tmp/build.gradle.canonical android/app/build.gradle
+            rm -f android/app/build.gradle.kts 2>/dev/null || true
           fi
           if [ -f "/tmp/build.gradle.kts.canonical" ]; then
             cp /tmp/build.gradle.kts.canonical android/app/build.gradle.kts
+            rm -f android/app/build.gradle 2>/dev/null || true
           fi
           if [ -f "/tmp/proguard-rules.pro.canonical" ]; then
             cp /tmp/proguard-rules.pro.canonical android/app/proguard-rules.pro
@@ -92,7 +94,7 @@ jobs:
           rm -rf android/app/src/main/kotlin/com/victorengineer/food_tracker 2>/dev/null || true
           cp -rf lib/assets/launcher_icons/android/* android/app/src/main/res/ 2>/dev/null || true
 
-          # Garantizar namespace y applicationId com.victorengineer.foodtracker y useLegacyPackaging en Gradle
+          # Garantizar namespace y applicationId com.victorengineer.foodtracker, useLegacyPackaging y coreLibraryDesugaring en Gradle
           python3 - << 'EOF'
           import os, re
           for fpath in ["android/app/build.gradle", "android/app/build.gradle.kts"]:
@@ -109,9 +111,24 @@ jobs:
               content = re.sub(r'useLegacyPackaging\s*=?\s*true', 'useLegacyPackaging = false', content)
               if 'useLegacyPackaging' not in content:
                   content = re.sub(r'android\s*\{', 'android {\n    packagingOptions {\n        jniLibs {\n            useLegacyPackaging = false\n        }\n    }', content)
+              if 'coreLibraryDesugaringEnabled' not in content and 'isCoreLibraryDesugaringEnabled' not in content:
+                  if fpath.endswith('.kts'):
+                      content = re.sub(r'compileOptions\s*\{', 'compileOptions {\n        isCoreLibraryDesugaringEnabled = true', content)
+                  else:
+                      content = re.sub(r'compileOptions\s*\{', 'compileOptions {\n        coreLibraryDesugaringEnabled true', content)
+              if 'multiDexEnabled' not in content:
+                  if fpath.endswith('.kts'):
+                      content = re.sub(r'defaultConfig\s*\{', 'defaultConfig {\n        multiDexEnabled = true', content)
+                  else:
+                      content = re.sub(r'defaultConfig\s*\{', 'defaultConfig {\n        multiDexEnabled true', content)
+              if 'coreLibraryDesugaring' not in content:
+                  if fpath.endswith('.kts'):
+                      content += '\n\ndependencies {\n    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")\n}\n'
+                  else:
+                      content += "\n\ndependencies {\n    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'\n}\n"
               with open(fpath, "w", encoding="utf-8") as f:
                   f.write(content)
-              print(f"✅ {fpath} verificado con namespace y applicationId com.victorengineer.foodtracker y useLegacyPackaging = false")
+              print(f"✅ {fpath} verificado con namespace, applicationId, useLegacyPackaging y coreLibraryDesugaring")
           EOF
 
       - name: Configurar Compatibilidad de Android SDK (compileSdk 34)
