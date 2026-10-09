@@ -64,7 +64,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Clinical Report'), findsOneWidget);
-    expect(find.text('Report format:'), findsOneWidget);
+    expect(find.text('Report format'), findsOneWidget);
     expect(find.text('CSV (Excel)'), findsOneWidget);
     expect(find.text('Clinical PDF'), findsOneWidget);
     expect(find.text('Time range:'), findsOneWidget);
