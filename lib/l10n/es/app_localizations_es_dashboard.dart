@@ -6,7 +6,7 @@ abstract class AppLocalizationsEsDashboard extends AppLocalizationsEsCore {
   @override String get dashboard => 'Panel Principal';
   @override String get breakfast => 'Desayuno';
   @override String get quickMeal => 'Comida rápida';
-  @override String get quickMealTitle => 'Comida Rápida';
+  @override String get quickMealTitle => 'Registro Rápido de Comida';
   @override String get fasting => 'Ayuno Intermitente';
   @override String get fastingWindow => 'Ventana de Ayuno';
   @override String get startFast => 'Comenzar Ayuno';

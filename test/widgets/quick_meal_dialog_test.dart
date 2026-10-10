@@ -26,7 +26,7 @@ void main() {
       await tester.tap(find.text('Open Quick Dialog'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Comida Rápida'), findsOneWidget);
+      expect(find.text('Registro Rápido de Comida'), findsOneWidget);
       expect(find.text('Añadir'), findsOneWidget);
 
       await tester.tap(find.text('Añadir'));

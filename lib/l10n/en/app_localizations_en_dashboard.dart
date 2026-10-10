@@ -6,7 +6,7 @@ abstract class AppLocalizationsEnDashboard extends AppLocalizationsEnCore {
   @override String get dashboard => 'Dashboard';
   @override String get breakfast => 'Breakfast';
   @override String get quickMeal => 'Quick Meal';
-  @override String get quickMealTitle => 'Quick Meal';
+  @override String get quickMealTitle => 'Quick Meal Entry';
   @override String get fasting => 'Intermittent Fasting';
   @override String get fastingWindow => 'Fasting Window';
   @override String get startFast => 'Start Fast';
