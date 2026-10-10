@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/meal_controller.dart';
+import '../l10n/app_localizations.dart';
 import '../models/user_profile.dart';
 import '../services/database_service.dart';
 import '../services/metabolic_calculator.dart';
@@ -139,11 +140,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   Future<void> _saveProfile() async {
     if (_calculatedProfile == null || _isSaving) return;
+    final l10n = AppLocalizations.of(context);
 
     if (_age < 10 || _age > 120 || _height < 80 || _height > 250 || _weight < 30 || _weight > 300) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor, ingresa datos corporales válidos antes de guardar.'),
+        SnackBar(
+          content: Text(l10n.enterValidBodyMeasurements),
           backgroundColor: AppColors.primary,
         ),
       );
@@ -156,8 +158,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Perfil metabólico y metas sincronizadas con éxito'),
+        SnackBar(
+          content: Text(l10n.profileAndGoalsSyncedSuccess),
           backgroundColor: AppColors.protein,
           behavior: SnackBarBehavior.floating,
         ),
@@ -172,7 +174,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error al guardar el perfil: $e'),
+          content: Text(l10n.profileSaveError('$e')),
           backgroundColor: AppColors.primary,
         ),
       );
@@ -183,11 +185,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: VeAppBar(
-        title: widget.isOnboarding ? 'Configura tu Perfil' : 'Perfil Metabólico',
+        title: widget.isOnboarding ? l10n.configureYourProfile : l10n.metabolicProfile,
         subtitle: widget.isOnboarding
-            ? 'Paso 1: Parámetros Biológicos y Metas TDEE'
+            ? l10n.step1BioParamsAndTdee
             : 'Mifflin-St Jeor & Master Prompt',
         leading: widget.isOnboarding && !Navigator.of(context).canPop()
             ? null
@@ -247,7 +250,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                               const Icon(Icons.sync_rounded, size: 20),
                               const SizedBox(width: 8),
                               Text(
-                                widget.isOnboarding ? 'Completar Onboarding y Guardar Metas' : 'Guardar Perfil y Sincronizar Metas',
+                                widget.isOnboarding ? l10n.completeOnboardingAndSave : l10n.saveProfileAndSyncGoals,
                                 style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w700),
                               ),
                             ],

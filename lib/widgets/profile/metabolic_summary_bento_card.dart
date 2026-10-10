@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/user_profile.dart';
 import '../../services/metabolic_calculator.dart';
 import '../../services/secure_storage_service.dart';
@@ -46,8 +47,9 @@ class _MetabolicSummaryBentoCardState extends State<MetabolicSummaryBentoCard> {
     if (text.isEmpty) return;
     await SecureStorageService.instance.setMasterPrompt(text);
     if (!mounted) return;
+    final l10n = AppLocalizations.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Prompt personalizado guardado con éxito'), backgroundColor: AppColors.protein),
+      SnackBar(content: Text(l10n.customPromptSavedSuccess), backgroundColor: AppColors.protein),
     );
   }
 
@@ -57,24 +59,21 @@ class _MetabolicSummaryBentoCardState extends State<MetabolicSummaryBentoCard> {
     setState(() => _promptController.text = calculated);
     await SecureStorageService.instance.setMasterPrompt(calculated);
     if (!mounted) return;
+    final l10n = AppLocalizations.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Prompt restablecido a valores calculados'), backgroundColor: AppColors.carbs),
+      SnackBar(content: Text(l10n.promptResetSuccess), backgroundColor: AppColors.carbs),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final profile = widget.profile;
     if (profile == null) {
       return VeCard(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 24),
-          child: Center(
-            child: Text(
-              'Ingresa tus datos biométricos para calcular el perfil',
-              style: GoogleFonts.inter(fontSize: 13, color: AppColors.textSecondary(context)),
-            ),
-          ),
+          child: Center(child: Text(l10n.enterBiometricsToCalculate, style: GoogleFonts.inter(fontSize: 13, color: AppColors.textSecondary(context)))),
         ),
       );
     }
@@ -86,7 +85,10 @@ class _MetabolicSummaryBentoCardState extends State<MetabolicSummaryBentoCard> {
     final protRatio = totalMacroCals > 0 ? (protCals / totalMacroCals).clamp(0.0, 1.0) : 0.3;
     final carbRatio = totalMacroCals > 0 ? (carbCals / totalMacroCals).clamp(0.0, 1.0) : 0.4;
     final fatRatio = totalMacroCals > 0 ? (fatCals / totalMacroCals).clamp(0.0, 1.0) : 0.3;
-    final genderText = profile.gender == 'female' ? 'Femenino' : 'Masculino';
+    final genderText = profile.gender == 'female' ? l10n.genderFemale : l10n.genderMale;
+    final hStr = (profile.height % 1 == 0) ? profile.height.toInt().toString() : profile.height.toString();
+    final wStr = (profile.weight % 1 == 0) ? profile.weight.toInt().toString() : profile.weight.toString();
+    final bioSummary = l10n.profileBioSummary(profile.age.toString(), hStr, wStr, genderText);
 
     return VeCard(
       child: Column(
@@ -99,7 +101,7 @@ class _MetabolicSummaryBentoCardState extends State<MetabolicSummaryBentoCard> {
                 children: [
                   const Icon(Icons.bolt_rounded, size: 20, color: AppColors.carbs),
                   const SizedBox(width: 8),
-                  Text('RESUMEN METABÓLICO', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1.0, color: AppColors.textSecondary(context))),
+                  Text(l10n.metabolicSummaryHeader, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1.0, color: AppColors.textSecondary(context))),
                 ],
               ),
               Container(
@@ -119,7 +121,7 @@ class _MetabolicSummaryBentoCardState extends State<MetabolicSummaryBentoCard> {
               children: [
                 const Icon(Icons.fingerprint_rounded, size: 14, color: AppColors.primary),
                 const SizedBox(width: 6),
-                Text('${profile.age} años • ${(profile.height % 1 == 0) ? profile.height.toInt() : profile.height} cm • ${(profile.weight % 1 == 0) ? profile.weight.toInt() : profile.weight} kg • $genderText', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary(context))),
+                Text(bioSummary, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary(context))),
               ],
             ),
           ),
@@ -139,7 +141,7 @@ class _MetabolicSummaryBentoCardState extends State<MetabolicSummaryBentoCard> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('PRESUPUESTO DIARIO OBJETIVO', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.8, color: AppColors.primary)),
+                    Text(l10n.dailyTargetBudget, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.8, color: AppColors.primary)),
                     const SizedBox(height: 4),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -147,7 +149,7 @@ class _MetabolicSummaryBentoCardState extends State<MetabolicSummaryBentoCard> {
                       children: [
                         Text(profile.targetCalories.toStringAsFixed(0), style: GoogleFonts.outfit(fontSize: 32, fontWeight: FontWeight.w800, letterSpacing: -1.0, color: AppColors.textPrimary(context))),
                         const SizedBox(width: 4),
-                        Text('kcal/día', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textSecondary(context))),
+                        Text(l10n.kcalPerDay, style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textSecondary(context))),
                       ],
                     ),
                   ],
@@ -164,14 +166,14 @@ class _MetabolicSummaryBentoCardState extends State<MetabolicSummaryBentoCard> {
           // Two Bento Tiles: BMR & TDEE
           Row(
             children: [
-              Expanded(child: _buildStatTile(context, 'TMB (En reposo)', '${profile.bmr.toStringAsFixed(0)} kcal')),
+              Expanded(child: _buildStatTile(context, l10n.bmrAtRestLabel, '${profile.bmr.toStringAsFixed(0)} kcal')),
               const SizedBox(width: 10),
-              Expanded(child: _buildStatTile(context, 'TDEE (Gasto total)', '${profile.tdee.toStringAsFixed(0)} kcal')),
+              Expanded(child: _buildStatTile(context, l10n.tdeeTotalExpenseLabel, '${profile.tdee.toStringAsFixed(0)} kcal')),
             ],
           ),
           const SizedBox(height: 14),
           // Macro Distribution Ratio Bar
-          Text('Distribución de Macronutrientes', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary(context))),
+          Text(l10n.macroDistributionTitle, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary(context))),
           const SizedBox(height: 8),
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
@@ -192,11 +194,11 @@ class _MetabolicSummaryBentoCardState extends State<MetabolicSummaryBentoCard> {
           // Macro Breakdown 3 Cards
           Row(
             children: [
-              Expanded(child: _buildMacroBadge('Proteínas', profile.targetProtein, protCals, AppColors.protein)),
+              Expanded(child: _buildMacroBadge(l10n.protein, profile.targetProtein, protCals, AppColors.protein)),
               const SizedBox(width: 8),
-              Expanded(child: _buildMacroBadge('Carbohidratos', profile.targetCarbs, carbCals, AppColors.carbs)),
+              Expanded(child: _buildMacroBadge(l10n.carbs, profile.targetCarbs, carbCals, AppColors.carbs)),
               const SizedBox(width: 8),
-              Expanded(child: _buildMacroBadge('Grasas', profile.targetFat, fatCals, AppColors.fat)),
+              Expanded(child: _buildMacroBadge(l10n.fat, profile.targetFat, fatCals, AppColors.fat)),
             ],
           ),
           // Master Prompt Section
@@ -215,7 +217,7 @@ class _MetabolicSummaryBentoCardState extends State<MetabolicSummaryBentoCard> {
                     children: [
                       const Icon(Icons.psychology_outlined, size: 18, color: AppColors.primaryLight),
                       const SizedBox(width: 6),
-                      Text('Master Prompt IA Multimodal (Editable)', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primaryLight)),
+                      Text(l10n.multimodalMasterPrompt, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primaryLight)),
                     ],
                   ),
                   Icon(_showPromptDetails ? Icons.expand_less : Icons.expand_more, size: 20, color: AppColors.textSecondary(context)),
@@ -233,7 +235,7 @@ class _MetabolicSummaryBentoCardState extends State<MetabolicSummaryBentoCard> {
                 filled: true,
                 fillColor: AppColors.surfaceSubtle(context),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppColors.border(context))),
-                hintText: 'Prompt para Gemini Vision...',
+                hintText: l10n.aiVisionPromptHint,
               ),
             ),
             const SizedBox(height: 10),
@@ -244,7 +246,7 @@ class _MetabolicSummaryBentoCardState extends State<MetabolicSummaryBentoCard> {
                     onPressed: _resetPromptToCalculated,
                     style: OutlinedButton.styleFrom(side: BorderSide(color: AppColors.border(context)), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding: const EdgeInsets.symmetric(vertical: 8)),
                     icon: const Icon(Icons.restart_alt, size: 16),
-                    label: Text('Restablecer', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600)),
+                    label: Text(l10n.resetAction, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600)),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -253,7 +255,7 @@ class _MetabolicSummaryBentoCardState extends State<MetabolicSummaryBentoCard> {
                     onPressed: _saveCustomPrompt,
                     style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding: const EdgeInsets.symmetric(vertical: 8)),
                     icon: const Icon(Icons.save_outlined, size: 16),
-                    label: Text('Guardar Prompt', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700)),
+                    label: Text(l10n.savePromptAction, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700)),
                   ),
                 ),
               ],
@@ -264,35 +266,25 @@ class _MetabolicSummaryBentoCardState extends State<MetabolicSummaryBentoCard> {
     );
   }
 
-  Widget _buildStatTile(BuildContext context, String label, String value) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: AppColors.surfaceSubtle(context), borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.border(context))),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+  Widget _buildStatTile(BuildContext context, String label, String value) => Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(color: AppColors.surfaceSubtle(context), borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.border(context))),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(label, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary(context))),
           const SizedBox(height: 4),
           Text(value, style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary(context))),
-        ],
-      ),
-    );
-  }
+        ]),
+      );
 
-  Widget _buildMacroBadge(String label, double grams, double calories, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.10), borderRadius: BorderRadius.circular(8), border: Border.all(color: color.withValues(alpha: 0.30))),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+  Widget _buildMacroBadge(String label, double grams, double calories, Color color) => Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(color: color.withValues(alpha: 0.10), borderRadius: BorderRadius.circular(8), border: Border.all(color: color.withValues(alpha: 0.30))),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w600, color: color)),
           const SizedBox(height: 4),
           Text('${grams.toStringAsFixed(0)}g', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary(context))),
           Text('${calories.toStringAsFixed(0)} kcal', style: GoogleFonts.inter(fontSize: 9.5, color: AppColors.textMuted(context))),
-        ],
-      ),
-    );
-  }
+        ]),
+      );
 }
 

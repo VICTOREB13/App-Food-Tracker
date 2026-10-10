@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/l10n/app_localizations_es.dart';
+import 'package:food_tracker/l10n/app_localizations.dart';
 import 'package:food_tracker/widgets/meal_detail/meal_analysis_pacing.dart';
 
 void main() {

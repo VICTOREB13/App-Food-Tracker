@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/interfaces/nutritional_recommendation_service_interface.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/nutritional_recommendation.dart';
 import '../../services/nutritional_recommendation_service.dart';
 import '../../services/theme_manager.dart';
@@ -13,6 +14,7 @@ Future<void> showRecommendationDiagnosticDialog(
   NutritionalAnalysisReport? initialReport,
   INutritionalRecommendationService? service,
 }) {
+  final l10n = AppLocalizations.of(context);
   return showDialog<void>(
     context: context,
     builder: (dialogCtx) => Dialog(
@@ -32,11 +34,11 @@ Future<void> showRecommendationDiagnosticDialog(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    child: Text('Diagnóstico Nutricional', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary(context))),
+                    child: Text(l10n.nutritionalDiagnosticTitle, style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary(context))),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close, size: 20),
-                    tooltip: 'Cerrar',
+                    tooltip: l10n.closeButton,
                     onPressed: () => Navigator.of(dialogCtx).pop(),
                   ),
                 ],
@@ -101,6 +103,7 @@ class _RecommendationDiagnosticCardState extends State<RecommendationDiagnosticC
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return VeCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -111,7 +114,7 @@ class _RecommendationDiagnosticCardState extends State<RecommendationDiagnosticC
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'MOTOR DE RECOMENDACIÓN NUTRICIONAL',
+                  l10n.nutritionalRecommendationEngine,
                   style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.8, color: AppColors.textSecondary(context)),
                 ),
               ),
@@ -124,14 +127,14 @@ class _RecommendationDiagnosticCardState extends State<RecommendationDiagnosticC
             alignment: WrapAlignment.spaceBetween,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              Text('Analizar histórico:', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
+              Text(l10n.analyzeHistoryLabel, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
               Wrap(
                 spacing: 6,
                 runSpacing: 6,
                 children: [
-                  _buildPeriodChip(7, '7 días'),
-                  _buildPeriodChip(15, '15 días'),
-                  _buildPeriodChip(30, '30 días'),
+                  _buildPeriodChip(7, l10n.sevenDaysLabel),
+                  _buildPeriodChip(15, l10n.fifteenDaysLabel),
+                  _buildPeriodChip(30, l10n.thirtyDaysLabel),
                 ],
               ),
             ],
@@ -140,17 +143,17 @@ class _RecommendationDiagnosticCardState extends State<RecommendationDiagnosticC
           if (_isLoading)
             const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator()))
           else if (_report == null)
-            Text('Sin datos suficientes para este período', style: GoogleFonts.inter(fontSize: 12))
+            Text(l10n.insufficientDataForPeriod, style: GoogleFonts.inter(fontSize: 12))
           else ...[
-            _buildMacroGauges(),
+            _buildMacroGauges(l10n),
             const SizedBox(height: 12),
-            _buildInsightTile(title: 'Control de Grasas', content: _report!.fatDiagnosis, color: AppColors.fat, icon: Icons.opacity),
+            _buildInsightTile(title: l10n.fatControlTitle, content: _report!.fatDiagnosis, color: AppColors.fat, icon: Icons.opacity),
             const SizedBox(height: 8),
-            _buildInsightTile(title: 'Metas de Proteína', content: _report!.proteinDiagnosis, color: AppColors.protein, icon: Icons.fitness_center),
+            _buildInsightTile(title: l10n.proteinGoalsTitle, content: _report!.proteinDiagnosis, color: AppColors.protein, icon: Icons.fitness_center),
             const SizedBox(height: 8),
-            _buildInsightTile(title: 'Energía y Carbohidratos', content: _report!.carbsDiagnosis, color: AppColors.carbs, icon: Icons.bolt),
+            _buildInsightTile(title: l10n.energyAndCarbsTitle, content: _report!.carbsDiagnosis, color: AppColors.carbs, icon: Icons.bolt),
             const SizedBox(height: 10),
-            Text('Sustituciones Inteligentes Sugeridas:', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold)),
+            Text(l10n.suggestedSmartSubstitutions, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold)),
             const SizedBox(height: 6),
             ..._report!.fatReductionSwaps.map(_buildSwapRow),
             const SizedBox(height: 8),
@@ -177,7 +180,7 @@ class _RecommendationDiagnosticCardState extends State<RecommendationDiagnosticC
     );
   }
 
-  Widget _buildMacroGauges() {
+  Widget _buildMacroGauges(AppLocalizations l10n) {
     final r = _report!;
     return Container(
       padding: const EdgeInsets.all(10),
@@ -187,13 +190,13 @@ class _RecommendationDiagnosticCardState extends State<RecommendationDiagnosticC
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildGaugeItem('Calorías', '${r.averageDailyCalories.round()} / ${r.targetCalories.round()} kcal', r.averageDailyCalories / (r.targetCalories > 0 ? r.targetCalories : 1), AppColors.primary),
+            _buildGaugeItem(l10n.calories, '${r.averageDailyCalories.round()} / ${r.targetCalories.round()} kcal', r.averageDailyCalories / (r.targetCalories > 0 ? r.targetCalories : 1), AppColors.primary),
             const SizedBox(width: 14),
-            _buildGaugeItem('Proteína', '${r.averageDailyProtein.round()} / ${r.targetProtein.round()}g', r.averageDailyProtein / (r.targetProtein > 0 ? r.targetProtein : 1), AppColors.protein),
+            _buildGaugeItem(l10n.protein, '${r.averageDailyProtein.round()} / ${r.targetProtein.round()}g', r.averageDailyProtein / (r.targetProtein > 0 ? r.targetProtein : 1), AppColors.protein),
             const SizedBox(width: 14),
-            _buildGaugeItem('Carbos', '${r.averageDailyCarbs.round()} / ${r.targetCarbs.round()}g', r.averageDailyCarbs / (r.targetCarbs > 0 ? r.targetCarbs : 1), AppColors.carbs),
+            _buildGaugeItem(l10n.carbs, '${r.averageDailyCarbs.round()} / ${r.targetCarbs.round()}g', r.averageDailyCarbs / (r.targetCarbs > 0 ? r.targetCarbs : 1), AppColors.carbs),
             const SizedBox(width: 14),
-            _buildGaugeItem('Grasas', '${r.averageDailyFat.round()} / ${r.targetFat.round()}g', r.averageDailyFat / (r.targetFat > 0 ? r.targetFat : 1), AppColors.fat),
+            _buildGaugeItem(l10n.fat, '${r.averageDailyFat.round()} / ${r.targetFat.round()}g', r.averageDailyFat / (r.targetFat > 0 ? r.targetFat : 1), AppColors.fat),
           ],
         ),
       ),

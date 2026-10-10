@@ -61,12 +61,11 @@ lib/
 │       ├── notification_service_interface.dart
 │       ├── vision_model_provider_interface.dart
 │       └── clinical_pdf_export_service_interface.dart
-├── l10n/                 # Localización e Internacionalización Multi-idioma
-│   ├── app_en.arb
-│   ├── app_es.arb
+├── l10n/                 # Localización e Internacionalización Multi-idioma (100% Pure Dart)
 │   ├── app_localizations.dart
-│   ├── app_localizations_en.dart
-│   └── app_localizations_es.dart
+│   ├── domains/          # Interfaces abstractas segregadas por dominio (< 300 LoC)
+│   ├── en/               # Implementaciones concretas en inglés (< 300 LoC)
+│   └── es/               # Implementaciones concretas en español (< 300 LoC)
 ├── models/               # Modelos de Dominio Inmutables & Sanitizadores (< 300 LoC)
 │   ├── analysis_task.dart
 │   ├── calibrated_dishware.dart
@@ -508,9 +507,9 @@ Para garantizar la estricta mantenibilidad del monolito modular sin romper compa
   - Fase 5 (85% - 95%): Desglose nutricional y macronutrientes (`analysisStageMacros`).
   - Completado (100%): Inserción atómica en formulario (`analysisStageComplete`).
 
-### 10.2. Extensión de Localización Desacoplada (`MealTypeL10n`)
-- **Ubicación:** `lib/l10n/meal_type_l10n.dart` (18 LoC).
-- **Función:** `String toLocalizedMealType(BuildContext context, String canonicalType)` mapea las claves invariantes persistidas en SQLite ('Desayuno', 'Almuerzo', 'Cena', 'Snack', 'Otro') a las cadenas tipadas de `AppLocalizations.of(context)!` ('Breakfast', 'Lunch', 'Dinner', 'Snack', 'Other') sin alterar nunca la base de datos relacional.
+### 10.2. Extensión de Localización Desacoplada (`MealTypeLocalization`)
+- **Ubicación:** `lib/l10n/domains/app_localizations_meal.dart` (reubicada y exportada por `lib/l10n/app_localizations.dart`).
+- **Función:** `String toLocalizedMealType(BuildContext context)` mapea las claves invariantes persistidas en SQLite ('Desayuno', 'Almuerzo', 'Cena', 'Snack', 'Otro') a las cadenas tipadas de `AppLocalizations.of(context)` ('Breakfast', 'Lunch', 'Dinner', 'Snack', 'Other') sin alterar nunca la base de datos relacional.
 
 ### 10.3. Inversión Causal de Schema y Prompt en `GeminiResilienceHelper`
 - **Ubicación:** `lib/services/gemini_resilience_helper.dart` (292 LoC).

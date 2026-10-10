@@ -3,6 +3,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:path/path.dart' as p;
+import '../../l10n/app_localizations.dart';
 import '../../services/backup_service.dart';
 import '../../services/theme_manager.dart';
 
@@ -43,11 +44,15 @@ class _JsonFilePickerDialogState extends State<JsonFilePickerDialog> {
         if (await file.exists()) {
           await _selectFile(file);
         } else {
-          setState(() => _errorMessage = 'El archivo seleccionado no existe.');
+          final l10n = AppLocalizations.of(context);
+          setState(() => _errorMessage = l10n.invalidOrCorruptFileError(picked.path!));
         }
       }
     } catch (e) {
-      if (mounted) setState(() => _errorMessage = 'Error al abrir el selector: $e');
+      if (mounted) {
+        final l10n = AppLocalizations.of(context);
+        setState(() => _errorMessage = l10n.filePickerOpenError(e.toString()));
+      }
     } finally {
       if (mounted) setState(() => _isPicking = false);
     }
@@ -64,9 +69,10 @@ class _JsonFilePickerDialogState extends State<JsonFilePickerDialog> {
       if (mounted) setState(() => _previewMetadata = meta);
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
         setState(() {
           _previewMetadata = null;
-          _errorMessage = 'Archivo no válido o corrupto: $e';
+          _errorMessage = l10n.invalidOrCorruptFileError(e.toString());
         });
       }
     }
@@ -81,9 +87,10 @@ class _JsonFilePickerDialogState extends State<JsonFilePickerDialog> {
       if (mounted) Navigator.of(context).pop(result);
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
         setState(() {
           _isRestoring = false;
-          _errorMessage = 'Error durante la restauración: $e';
+          _errorMessage = l10n.restoreProcessError(e.toString());
         });
       }
     }
@@ -91,6 +98,7 @@ class _JsonFilePickerDialogState extends State<JsonFilePickerDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AlertDialog(
       backgroundColor: AppColors.surface(context),
       shape: RoundedRectangleBorder(
@@ -103,7 +111,7 @@ class _JsonFilePickerDialogState extends State<JsonFilePickerDialog> {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'Importar Respaldo JSON',
+              l10n.importBackupJsonTitle,
               style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary(context)),
             ),
           ),
@@ -117,7 +125,7 @@ class _JsonFilePickerDialogState extends State<JsonFilePickerDialog> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Selecciona tu archivo JSON de respaldo con un toque desde Descargas, Drive o almacenamiento interno.',
+                l10n.importBackupJsonInstruction,
                 style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary(context), height: 1.4),
               ),
               const SizedBox(height: 14),
@@ -135,7 +143,7 @@ class _JsonFilePickerDialogState extends State<JsonFilePickerDialog> {
                     ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                     : const Icon(Icons.folder_open_rounded, size: 20),
                 label: Text(
-                  _isPicking ? 'Abriendo explorador...' : 'Seleccionar Archivo JSON',
+                  _isPicking ? '...' : l10n.importJsonAction,
                   style: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 13),
                 ),
               ),
@@ -188,12 +196,12 @@ class _JsonFilePickerDialogState extends State<JsonFilePickerDialog> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Contenido a restaurar:', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.protein)),
+                      Text(l10n.restoreContentLabel, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.protein)),
                       const SizedBox(height: 4),
                       Text(
-                        '• ${_previewMetadata!['meals_count']} comidas\n'
-                        '• ${_previewMetadata!['pantry_count']} alimentos en despensa\n'
-                        '• ${_previewMetadata!['weight_logs_count']} registros de peso',
+                        '• ${_previewMetadata!['meals_count']} ${l10n.mealsStatLabel.toLowerCase()}\n'
+                        '${l10n.previewPantryCount((_previewMetadata!['pantry_count'] ?? 0).toString())}\n'
+                        '${l10n.previewWeightCount((_previewMetadata!['weight_logs_count'] ?? 0).toString())}',
                         style: GoogleFonts.inter(fontSize: 11, color: AppColors.textPrimary(context), height: 1.3),
                       ),
                     ],
@@ -211,7 +219,7 @@ class _JsonFilePickerDialogState extends State<JsonFilePickerDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text('Cancelar', style: GoogleFonts.inter(color: AppColors.textSecondary(context))),
+          child: Text(l10n.cancel, style: GoogleFonts.inter(color: AppColors.textSecondary(context))),
         ),
         ElevatedButton(
           key: const Key('confirm_restore_button'),
@@ -223,7 +231,7 @@ class _JsonFilePickerDialogState extends State<JsonFilePickerDialog> {
           ),
           child: _isRestoring
               ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-              : Text('Restaurar Datos', style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
+              : Text(l10n.restoreDataAction, style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
         ),
       ],
     );

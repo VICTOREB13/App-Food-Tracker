@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/settings_controller.dart';
+import '../l10n/app_localizations.dart';
 import '../services/theme_manager.dart';
 import '../widgets/common/ve_app_bar.dart';
 import '../widgets/common/ve_card.dart';
@@ -52,72 +53,76 @@ class _SettingsScreenState extends State<SettingsScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (sheetContext) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'TEMA VISUAL',
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.0,
-                  color: AppColors.textSecondary(context),
+      builder: (sheetContext) {
+        final l10n = AppLocalizations.of(context);
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.visualThemeHeader,
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.0,
+                    color: AppColors.textSecondary(context),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              ListTile(
-                title: const Text('Oscuro (Obsidian Zinc)'),
-                leading: const Icon(Icons.dark_mode_outlined),
-                trailing: manager.themeMode == ThemeMode.dark ? const Icon(Icons.check, color: AppColors.primary) : null,
-                onTap: () {
-                  manager.setThemeMode(ThemeMode.dark);
-                  Navigator.of(sheetContext).pop();
-                },
-              ),
-              ListTile(
-                title: const Text('Claro (Crisp Zinc)'),
-                leading: const Icon(Icons.light_mode_outlined),
-                trailing: manager.themeMode == ThemeMode.light ? const Icon(Icons.check, color: AppColors.primary) : null,
-                onTap: () {
-                  manager.setThemeMode(ThemeMode.light);
-                  Navigator.of(sheetContext).pop();
-                },
-              ),
-              ListTile(
-                title: const Text('Automático del Sistema'),
-                leading: const Icon(Icons.brightness_auto_outlined),
-                trailing: manager.themeMode == ThemeMode.system ? const Icon(Icons.check, color: AppColors.primary) : null,
-                onTap: () {
-                  manager.setThemeMode(ThemeMode.system);
-                  Navigator.of(sheetContext).pop();
-                },
-              ),
-            ],
+                const SizedBox(height: 12),
+                ListTile(
+                  title: Text(l10n.themeDarkLabel),
+                  leading: const Icon(Icons.dark_mode_outlined),
+                  trailing: manager.themeMode == ThemeMode.dark ? const Icon(Icons.check, color: AppColors.primary) : null,
+                  onTap: () {
+                    manager.setThemeMode(ThemeMode.dark);
+                    Navigator.of(sheetContext).pop();
+                  },
+                ),
+                ListTile(
+                  title: Text(l10n.themeLightLabel),
+                  leading: const Icon(Icons.light_mode_outlined),
+                  trailing: manager.themeMode == ThemeMode.light ? const Icon(Icons.check, color: AppColors.primary) : null,
+                  onTap: () {
+                    manager.setThemeMode(ThemeMode.light);
+                    Navigator.of(sheetContext).pop();
+                  },
+                ),
+                ListTile(
+                  title: Text(l10n.themeSystemLabel),
+                  leading: const Icon(Icons.brightness_auto_outlined),
+                  trailing: manager.themeMode == ThemeMode.system ? const Icon(Icons.check, color: AppColors.primary) : null,
+                  onTap: () {
+                    manager.setThemeMode(ThemeMode.system);
+                    Navigator.of(sheetContext).pop();
+                  },
+                ),
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final themeManager = ThemeManager.instance;
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: VeAppBar(
-        title: 'Ajustes',
-        subtitle: 'Configuración y Respaldo Local',
+        title: l10n.settings,
+        subtitle: l10n.settingsSubtitle,
         actions: [
           IconButton(
             icon: Icon(
               themeManager.isDarkMode ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
               size: 20,
             ),
-            tooltip: 'Cambiar tema',
+            tooltip: l10n.changeThemeTooltip,
             onPressed: () => themeManager.toggleTheme(),
           ),
         ],
@@ -132,7 +137,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(key.isEmpty ? 'API Key eliminada' : 'API Key guardada de forma segura'),
+                  content: Text(key.isEmpty ? l10n.apiKeyRemoved : l10n.apiKeySavedSecurely),
                   backgroundColor: AppColors.protein,
                 ),
               );
@@ -150,7 +155,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Modelo "$model" seleccionado para visión'),
+                  content: Text(l10n.modelSelectedForVision(model)),
                   backgroundColor: AppColors.protein,
                 ),
               );
@@ -165,7 +170,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(key.isEmpty ? 'USDA API Key eliminada' : 'USDA API Key guardada de forma segura'),
+                  content: Text(key.isEmpty ? l10n.usdaApiKeyRemoved : l10n.usdaApiKeySavedSecurely),
                   backgroundColor: AppColors.protein,
                 ),
               );
@@ -180,8 +185,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               await _controller.saveDailyGoals(goals);
               if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Metas nutricionales actualizadas con éxito'),
+                SnackBar(
+                  content: Text(l10n.nutritionalGoalsUpdatedSuccess),
                   backgroundColor: AppColors.protein,
                 ),
               );
@@ -195,8 +200,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               await _controller.optimizeDatabase();
               if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Base de datos SQLite optimizada (VACUUM ejecutado)'),
+                SnackBar(
+                  content: Text(l10n.sqliteDatabaseVacuumSuccess),
                   backgroundColor: AppColors.protein,
                 ),
               );
@@ -221,11 +226,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.palette_outlined, color: AppColors.primary),
               title: Text(
-                'Apariencia y Sistema de Diseño',
+                l10n.appearanceAndDesignSystem,
                 style: GoogleFonts.outfit(fontWeight: FontWeight.w600),
               ),
               subtitle: Text(
-                themeManager.isDarkMode ? 'Modo Obsidian Zinc' : 'Modo Crisp Zinc',
+                themeManager.isDarkMode ? l10n.themeDarkLabel : l10n.themeLightLabel,
                 style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary(context)),
               ),
               trailing: const Icon(Icons.chevron_right, size: 20),
@@ -239,7 +244,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const VeLogo(size: 36, borderRadius: 10),
                 const SizedBox(height: 10),
                 Text(
-                  'Victor Engineer - Food Tracker\nArquitectura 100% Local-First & BYOK',
+                  l10n.appFooterNotice,
                   textAlign: TextAlign.center,
                   style: GoogleFonts.inter(
                     fontSize: 11,

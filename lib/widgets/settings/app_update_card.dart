@@ -4,6 +4,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/di/service_locator.dart';
 import '../../core/interfaces/app_installer_service_interface.dart';
 import '../../core/interfaces/app_update_service_interface.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/theme_manager.dart';
 import '../../services/app_update_service.dart';
 import '../common/ve_card.dart';
@@ -59,10 +60,12 @@ class _AppUpdateCardState extends State<AppUpdateCard> {
           installerService: widget.installerService,
         );
       } else {
-        setState(() => _statusMessage = 'Tu versión está al día');
+        if (!mounted) return;
+        final l10n = AppLocalizations.of(context);
+        setState(() => _statusMessage = l10n.versionUpToDateStatus);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Tu versión (v${widget.currentVersion}) está al día.'),
+            content: Text(l10n.versionUpToDateMessage(widget.currentVersion)),
             backgroundColor: AppColors.success,
             duration: const Duration(seconds: 3),
           ),
@@ -70,13 +73,14 @@ class _AppUpdateCardState extends State<AppUpdateCard> {
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
         setState(() {
           _isChecking = false;
-          _statusMessage = 'Error al verificar';
+          _statusMessage = l10n.errorCheckingUpdates;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('No se pudo comprobar actualizaciones: $e'),
+            content: Text(l10n.updateCheckError(e.toString())),
             backgroundColor: AppColors.primary,
           ),
         );
@@ -86,6 +90,7 @@ class _AppUpdateCardState extends State<AppUpdateCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return VeCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,11 +111,11 @@ class _AppUpdateCardState extends State<AppUpdateCard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Actualizaciones de la Aplicación',
+                      l10n.appUpdatesTitle,
                       style: GoogleFonts.outfit(fontWeight: FontWeight.w700, fontSize: 14),
                     ),
                     Text(
-                      'Versión instalada: v${widget.currentVersion}${_statusMessage != null ? ' • $_statusMessage' : ''}',
+                      '${l10n.installedVersionLabel(widget.currentVersion)}${_statusMessage != null ? ' • $_statusMessage' : ''}',
                       style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary(context)),
                     ),
                   ],
@@ -133,7 +138,7 @@ class _AppUpdateCardState extends State<AppUpdateCard> {
                   ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
                   : const Icon(Icons.refresh_rounded, size: 18),
               label: Text(
-                _isChecking ? 'Comprobando...' : 'Buscar actualizaciones',
+                _isChecking ? l10n.checkingUpdates : l10n.checkUpdatesAction,
                 style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 13),
               ),
             ),

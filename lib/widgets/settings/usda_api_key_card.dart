@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_card.dart';
 
@@ -53,6 +54,7 @@ class _UsdaApiKeyCardState extends State<UsdaApiKeyCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final hasKey = widget.currentApiKey != null && widget.currentApiKey!.trim().isNotEmpty;
 
     return VeCard(
@@ -65,7 +67,7 @@ class _UsdaApiKeyCardState extends State<UsdaApiKeyCard> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'USDA FOODDATA CENTRAL (API KEY)',
+                  l10n.usdaApiKeyHeader,
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -83,7 +85,7 @@ class _UsdaApiKeyCardState extends State<UsdaApiKeyCard> {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  hasKey ? 'CONFIGURADA' : 'OPCIONAL',
+                  hasKey ? l10n.statusConfigured : l10n.statusOptional,
                   style: GoogleFonts.inter(
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
@@ -95,7 +97,7 @@ class _UsdaApiKeyCardState extends State<UsdaApiKeyCard> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Conexión oficial con USDA FoodData Central (https://fdc.nal.usda.gov) para enriquecer la biblioteca de alimentos y códigos de barras. Si se omite la clave o se agota la cuota (1,000 req/hr), el sistema utiliza Open Food Facts automáticamente como respaldo.',
+            l10n.usdaApiKeyNotice,
             textAlign: TextAlign.justify,
             style: GoogleFonts.inter(
               fontSize: 12,
@@ -109,13 +111,13 @@ class _UsdaApiKeyCardState extends State<UsdaApiKeyCard> {
             obscureText: _obscureText,
             style: GoogleFonts.inter(fontSize: 13),
             decoration: InputDecoration(
-              hintText: 'DEMO_KEY o tu clave de fdc.nal.usda.gov',
+              hintText: l10n.usdaApiKeyHint,
               suffixIcon: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
                     icon: const Icon(Icons.content_paste_outlined, size: 18),
-                    tooltip: 'Pegar del portapapeles',
+                    tooltip: l10n.pasteFromClipboardTooltip,
                     color: AppColors.textMuted(context),
                     onPressed: _pasteFromClipboard,
                   ),
@@ -125,7 +127,7 @@ class _UsdaApiKeyCardState extends State<UsdaApiKeyCard> {
                       size: 18,
                       color: AppColors.textMuted(context),
                     ),
-                    tooltip: _obscureText ? 'Mostrar clave' : 'Ocultar clave',
+                    tooltip: _obscureText ? l10n.showKeyTooltip : l10n.hideKeyTooltip,
                     onPressed: () => setState(() => _obscureText = !_obscureText),
                   ),
                 ],
@@ -146,7 +148,7 @@ class _UsdaApiKeyCardState extends State<UsdaApiKeyCard> {
                     side: const BorderSide(color: AppColors.primaryLight),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
-                  child: Text('Eliminar', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                  child: Text(l10n.delete, style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
                 ),
               const Spacer(),
               ElevatedButton.icon(
@@ -158,7 +160,7 @@ class _UsdaApiKeyCardState extends State<UsdaApiKeyCard> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 ),
                 icon: const Icon(Icons.check, size: 16),
-                label: Text('Guardar Key', style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
+                label: Text(l10n.saveKeyAction, style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
               ),
             ],
           ),

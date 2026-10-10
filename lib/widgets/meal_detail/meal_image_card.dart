@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../l10n/app_localizations.dart';
-import '../../l10n/app_localizations_es.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_loading_ring.dart';
 import 'food_image_viewer_dialog.dart';
@@ -27,7 +26,7 @@ class MealImageCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEs();
+    final l10n = AppLocalizations.of(context);
     final hasImage = imagePath != null && File(imagePath!).existsSync();
 
     return Container(
@@ -138,7 +137,7 @@ class MealImageCard extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Text(
-                            analysisStage ?? 'Analizando con IA...',
+                            analysisStage ?? l10n.reanalyzingAi,
                             textAlign: TextAlign.center,
                             style: GoogleFonts.inter(
                               color: Colors.white,

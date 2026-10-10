@@ -17,10 +17,11 @@ class AnalysisProgressBanner extends StatelessWidget {
   });
 
   void _handleManualEdit(BuildContext context, AnalysisTask task) {
+    final l10n = AppLocalizations.of(context);
     final meal = AnalysisQueueService.instance.createManualMealFromFailedTask(task.id) ??
         Meal(
           id: task.id,
-          name: 'Comida sin clasificar',
+          name: l10n.unclassifiedMeal,
           mealType: task.mealType,
           date: task.date,
           imagePath: task.imagePath.isNotEmpty ? task.imagePath : null,
@@ -53,9 +54,7 @@ class AnalysisProgressBanner extends StatelessWidget {
   String _resolveStageMessage(BuildContext context, AnalysisTask task) {
     if (task.status == AnalysisStatus.processing) {
       final l10n = AppLocalizations.of(context);
-      if (l10n != null) {
-        return MealAnalysisPacing.getStageMessage(task.progress, l10n);
-      }
+      return MealAnalysisPacing.getStageMessage(task.progress, l10n);
     }
     return task.stage;
   }
@@ -113,10 +112,10 @@ class AnalysisProgressBanner extends StatelessWidget {
                         Flexible(
                           child: Text(
                             isCompleted
-                                ? (task.resultMeal?.name ?? '¡Comida analizada!')
+                                ? (task.resultMeal?.name ?? l10n.mealAnalyzedSuccess)
                                 : isFailed
-                                    ? 'No se pudo analizar la foto'
-                                    : 'Analizando en segundo plano',
+                                    ? l10n.couldNotAnalyzePhoto
+                                    : l10n.analyzingInBackground,
                             style: GoogleFonts.inter(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
@@ -133,25 +132,18 @@ class AnalysisProgressBanner extends StatelessWidget {
                         if (isPending)
                           Text(
                             '${(task.progress * 100).toInt()}%',
-                            style: GoogleFonts.inter(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primary,
-                            ),
+                            style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primary),
                           ),
                       ],
                     ),
                     const SizedBox(height: 3),
                     Text(
                       isCompleted
-                          ? '${task.resultMeal?.calories.toInt() ?? 0} kcal · ${task.resultMeal?.items.length ?? 0} ingredientes'
+                          ? '${task.resultMeal?.calories.toInt() ?? 0} kcal · ${task.resultMeal?.items.length ?? 0} ${l10n.ingredients}'
                           : isFailed
-                              ? (task.error ?? 'Error de conexión o análisis con IA.')
+                              ? (task.error ?? l10n.mealAnalysisAiError)
                               : _resolveStageMessage(context, task),
-                      style: GoogleFonts.inter(
-                        fontSize: 11,
-                        color: AppColors.textSecondary(context),
-                      ),
+                      style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary(context)),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -170,7 +162,7 @@ class AnalysisProgressBanner extends StatelessWidget {
                   ],
                 ),
               ),
-              _buildRightAction(task, isCompleted),
+              _buildRightAction(context, task, isCompleted),
             ],
           ),
           if (isFailed) _buildFailedActions(context, task),
@@ -226,10 +218,11 @@ class AnalysisProgressBanner extends StatelessWidget {
     );
   }
 
-  Widget _buildRightAction(AnalysisTask task, bool isCompleted) {
+  Widget _buildRightAction(BuildContext context, AnalysisTask task, bool isCompleted) {
+    final l10n = AppLocalizations.of(context);
     if (isCompleted && task.resultMeal != null) {
       return IconButton(
-        tooltip: 'Abrir plato',
+        tooltip: l10n.openDish,
         icon: const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: AppColors.success),
         onPressed: () {
           final meal = task.resultMeal!;
@@ -239,13 +232,14 @@ class AnalysisProgressBanner extends StatelessWidget {
       );
     }
     return IconButton(
-      tooltip: 'Cerrar',
+      tooltip: l10n.closeAction,
       icon: const Icon(Icons.close_rounded, size: 16),
       onPressed: () => AnalysisQueueService.instance.dismissTask(task.id),
     );
   }
 
   Widget _buildFailedActions(BuildContext context, AnalysisTask task) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.only(top: 10),
       child: Row(
@@ -258,7 +252,7 @@ class AnalysisProgressBanner extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             ),
             icon: const Icon(Icons.edit_note_rounded, size: 16),
-            label: Text('Editar manualmente', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
+            label: Text(l10n.editManually, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
             onPressed: () => _handleManualEdit(context, task),
           ),
           const SizedBox(width: 8),
@@ -272,7 +266,7 @@ class AnalysisProgressBanner extends StatelessWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             ),
             icon: const Icon(Icons.refresh_rounded, size: 16),
-            label: Text('Reintentar', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold)),
+            label: Text(l10n.retryAction, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold)),
             onPressed: () => AnalysisQueueService.instance.retryTask(task.id),
           ),
         ],

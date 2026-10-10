@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:uuid/uuid.dart';
 import '../../controllers/meal_controller.dart';
 import '../../core/interfaces/nutritional_recommendation_service_interface.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/food_item.dart';
 import '../../models/meal.dart';
 import '../../models/nutritional_recommendation.dart';
@@ -72,21 +73,24 @@ class _WhatToEatSheetState extends State<WhatToEatSheet> {
       await DatabaseService.instance.insertMeal(meal);
       await MealController.instance.loadMeals();
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('✨ "${dish.name}" registrada con éxito en tu día'), backgroundColor: AppColors.protein),
+          SnackBar(content: Text(l10n.dishRegisteredSuccess(dish.name)), backgroundColor: AppColors.protein),
         );
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
         setState(() => _addingDishId = null);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error al registrar comida: $e'), backgroundColor: AppColors.primary));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.errorRegisteringMeal(e.toString())), backgroundColor: AppColors.primary));
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final maxHeight = MediaQuery.of(context).size.height * 0.85;
 
     return SafeArea(
@@ -123,10 +127,10 @@ class _WhatToEatSheetState extends State<WhatToEatSheet> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('¿Qué debería comer hoy?', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w700)),
+                        Text(l10n.whatToEatTitle, style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w700)),
                         if (_plan != null)
                           Text(
-                            'Sugerencias para tu próxima comida: ${_plan!.nextMealType}',
+                            l10n.nextMealSuggestions(_plan!.nextMealType),
                             style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary(context)),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -137,7 +141,7 @@ class _WhatToEatSheetState extends State<WhatToEatSheet> {
                   IconButton(
                     key: const Key('what_to_eat_close_button'),
                     icon: const Icon(Icons.close),
-                    tooltip: 'Cerrar',
+                    tooltip: l10n.closeButton,
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -147,7 +151,7 @@ class _WhatToEatSheetState extends State<WhatToEatSheet> {
               if (_isLoading)
                 const Expanded(child: Center(child: Padding(padding: EdgeInsets.all(32), child: CircularProgressIndicator())))
               else if (_plan == null)
-                Expanded(child: Center(child: Text('No fue posible calcular recomendaciones', style: GoogleFonts.inter())))
+                Expanded(child: Center(child: Text(l10n.unableToCalculateRecommendations, style: GoogleFonts.inter())))
               else
                 Expanded(
                   child: SingleChildScrollView(
@@ -161,15 +165,15 @@ class _WhatToEatSheetState extends State<WhatToEatSheet> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Margen restante de hoy:', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.textSecondary(context))),
+                              Text(l10n.todayRemainingMargin, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.textSecondary(context))),
                               const SizedBox(height: 6),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  _buildMacroBadge('Calorías', '${_plan!.remainingCalories.round()} kcal', AppColors.primary),
-                                  _buildMacroBadge('Proteína', '${_plan!.remainingProtein.round()}g', AppColors.protein),
-                                  _buildMacroBadge('Carbos', '${_plan!.remainingCarbs.round()}g', AppColors.carbs),
-                                  _buildMacroBadge('Grasas', '${_plan!.remainingFat.round()}g', AppColors.fat),
+                                  _buildMacroBadge(l10n.calories, '${_plan!.remainingCalories.round()} kcal', AppColors.primary),
+                                  _buildMacroBadge(l10n.protein, '${_plan!.remainingProtein.round()}g', AppColors.protein),
+                                  _buildMacroBadge(l10n.carbs, '${_plan!.remainingCarbs.round()}g', AppColors.carbs),
+                                  _buildMacroBadge(l10n.fat, '${_plan!.remainingFat.round()}g', AppColors.fat),
                                 ],
                               ),
                             ],
@@ -178,9 +182,9 @@ class _WhatToEatSheetState extends State<WhatToEatSheet> {
                         const SizedBox(height: 12),
                         Text(_plan!.generalAdvice, style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary(context), fontStyle: FontStyle.italic)),
                         const SizedBox(height: 16),
-                        Text('Platos recomendados a tu medida:', style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w700)),
+                        Text(l10n.tailoredRecommendedDishes, style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w700)),
                         const SizedBox(height: 8),
-                        ..._plan!.recommendedOptions.map(_buildDishCard),
+                        ..._plan!.recommendedOptions.map((dish) => _buildDishCard(dish, l10n)),
                       ],
                     ),
                   ),
@@ -201,7 +205,7 @@ class _WhatToEatSheetState extends State<WhatToEatSheet> {
     );
   }
 
-  Widget _buildDishCard(RecommendedDish dish) {
+  Widget _buildDishCard(RecommendedDish dish, AppLocalizations l10n) {
     final isAdding = _addingDishId == dish.id;
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -216,7 +220,7 @@ class _WhatToEatSheetState extends State<WhatToEatSheet> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(color: AppColors.protein.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(6)),
-                child: Text('${dish.fitScore}% Ajuste', style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.protein)),
+                child: Text(l10n.fitScoreLabel(dish.fitScore.toString()), style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.protein)),
               ),
             ],
           ),
@@ -228,7 +232,7 @@ class _WhatToEatSheetState extends State<WhatToEatSheet> {
             style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primary),
           ),
           const SizedBox(height: 4),
-          Text('Por qué: ${dish.whyRecommended}', style: GoogleFonts.inter(fontSize: 10, color: AppColors.textMuted(context))),
+          Text(l10n.whyRecommendedLabel(dish.whyRecommended), style: GoogleFonts.inter(fontSize: 10, color: AppColors.textMuted(context))),
           const SizedBox(height: 8),
           Align(
             alignment: Alignment.centerRight,
@@ -238,7 +242,7 @@ class _WhatToEatSheetState extends State<WhatToEatSheet> {
               icon: isAdding
                   ? const SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                   : const Icon(Icons.add, size: 14),
-              label: Text('Registrar en hoy', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700)),
+              label: Text(l10n.logInTodayAction, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700)),
             ),
           ),
         ],

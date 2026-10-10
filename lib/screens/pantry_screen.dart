@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import '../l10n/app_localizations.dart';
 import '../models/pantry_item.dart';
 import '../services/database_service.dart';
 import '../services/image_processing_service.dart';
@@ -58,19 +59,21 @@ class _PantryScreenState extends State<PantryScreen> {
 
       if (mounted) {
         setState(() => _isScanning = false);
+        final l10n = AppLocalizations.of(context);
         if (scanned != null) {
           _showEditDialog(scanned);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('No se pudo extraer la etiqueta nutricional.'), backgroundColor: AppColors.primary),
+            SnackBar(content: Text(l10n.failedToExtractNutritionLabel), backgroundColor: AppColors.primary),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isScanning = false);
+        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al escanear: $e'), backgroundColor: AppColors.primary),
+          SnackBar(content: Text(l10n.scanError('$e')), backgroundColor: AppColors.primary),
         );
       }
     }
@@ -85,16 +88,28 @@ class _PantryScreenState extends State<PantryScreen> {
     await showPantryConsumptionDialog(context, item);
   }
 
+  String _getCategoryLabel(String key, AppLocalizations l10n) {
+    switch (key) {
+      case 'Granos': return l10n.pantryCategoriesGrains;
+      case 'Lácteos': return l10n.pantryCategoriesDairy;
+      case 'Proteínas': return l10n.pantryCategoriesProteins;
+      case 'Snacks': return l10n.pantryCategoriesSnacks;
+      case 'Bebidas': return l10n.pantryCategoriesBeverages;
+      default: return l10n.pantryCategoriesAll;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final filtered = _selectedCategory == 'Todos'
         ? _items
         : _items.where((i) => (i.category ?? '').toLowerCase() == _selectedCategory.toLowerCase()).toList();
 
     return Scaffold(
-      appBar: const VeAppBar(
-        title: 'Mi Despensa',
-        subtitle: 'Contexto de Marcas Locales',
+      appBar: VeAppBar(
+        title: l10n.myPantry,
+        subtitle: l10n.pantryDescription,
         showVeBadge: false,
       ),
       floatingActionButton: Column(
@@ -114,7 +129,7 @@ class _PantryScreenState extends State<PantryScreen> {
             onPressed: () => _showEditDialog(),
             backgroundColor: AppColors.primary,
             icon: const Icon(Icons.add, color: Colors.white),
-            label: Text('Producto', style: GoogleFonts.inter(fontWeight: FontWeight.w700, color: Colors.white)),
+            label: Text(l10n.addProductAction, style: GoogleFonts.inter(fontWeight: FontWeight.w700, color: Colors.white)),
           ),
         ],
       ),
@@ -134,7 +149,7 @@ class _PantryScreenState extends State<PantryScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'Tus productos se inyectan en Gemini Vision para reconocer automáticamente tus marcas habituales.',
+                          l10n.pantryDescription,
                           style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary(context), height: 1.3),
                         ),
                       ),
@@ -153,7 +168,7 @@ class _PantryScreenState extends State<PantryScreen> {
                       final c = _categories[index];
                       final sel = _selectedCategory == c;
                       return ChoiceChip(
-                        label: Text(c),
+                        label: Text(_getCategoryLabel(c, l10n)),
                         labelStyle: GoogleFonts.inter(
                           fontSize: 12,
                           fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
@@ -180,7 +195,7 @@ class _PantryScreenState extends State<PantryScreen> {
                     child: Padding(
                       padding: const EdgeInsets.all(32),
                       child: Text(
-                        'No hay productos en esta categoría.\nUsa el escáner o pulsa "+ Producto".',
+                        l10n.noProductsInCategory,
                         textAlign: TextAlign.center,
                         style: GoogleFonts.inter(fontSize: 13, color: AppColors.textMuted(context)),
                       ),
@@ -195,6 +210,7 @@ class _PantryScreenState extends State<PantryScreen> {
   }
 
   Widget _buildItemTile(PantryItem item) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       child: VeCard(
@@ -220,7 +236,7 @@ class _PantryScreenState extends State<PantryScreen> {
               ),
               const SizedBox(height: 2),
               Text(
-                'Porción: ${item.servingSize.toInt()}g${item.packageWeight != null ? ' • Empaque: ${item.packageWeight!.toInt()}g' : ''}',
+                '${l10n.servingPortion(item.servingSize.toInt().toString())}${item.packageWeight != null ? ' • ${l10n.packageWeightPortion(item.packageWeight!.toInt().toString())}' : ''}',
                 style: GoogleFonts.inter(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.w600),
               ),
             ],
@@ -231,12 +247,12 @@ class _PantryScreenState extends State<PantryScreen> {
               IconButton(
                 key: Key('consume_pantry_${item.id}'),
                 icon: const Icon(Icons.restaurant_outlined, size: 20, color: AppColors.protein),
-                tooltip: 'Registrar a Comida',
+                tooltip: l10n.logToMealTooltip,
                 onPressed: () => _consumeItem(item),
               ),
               IconButton(
                 icon: const Icon(Icons.delete_outline, size: 20),
-                tooltip: 'Eliminar',
+                tooltip: l10n.delete,
                 onPressed: () async {
                   await DatabaseService.instance.pantryDao.deletePantryItem(item.id);
                   _loadItems();

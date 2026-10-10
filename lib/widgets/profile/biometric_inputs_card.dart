@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_card.dart';
 
@@ -95,6 +96,8 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return VeCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -104,7 +107,7 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
               const Icon(Icons.fingerprint_rounded, size: 20, color: AppColors.primary),
               const SizedBox(width: 8),
               Text(
-                'DATOS BIOMÉTRICOS',
+                l10n.biometricDataHeader,
                 style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1.0, color: AppColors.textSecondary(context)),
               ),
             ],
@@ -112,30 +115,30 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
           const SizedBox(height: 16),
 
           // Name Input
-          _buildFieldLabel(context, 'Nombre o Alias'),
+          _buildFieldLabel(context, l10n.nameOrAliasLabel),
           const SizedBox(height: 6),
           TextField(
             controller: _nameController,
             onChanged: (_) => _notifyChanges(),
             textCapitalization: TextCapitalization.words,
             style: GoogleFonts.inter(fontSize: 14, color: AppColors.textPrimary(context)),
-            decoration: const InputDecoration(
-              hintText: 'Ej: Carlos',
-              prefixIcon: Icon(Icons.person_outline, size: 20),
+            decoration: InputDecoration(
+              hintText: l10n.exampleCarlos,
+              prefixIcon: const Icon(Icons.person_outline, size: 20),
             ),
           ),
           const SizedBox(height: 16),
 
           // Biological Gender Selector
           Center(
-            child: _buildFieldLabel(context, 'Género Biológico (Mifflin-St Jeor)', textAlign: TextAlign.center),
+            child: _buildFieldLabel(context, l10n.biologicalSexMifflin, textAlign: TextAlign.center),
           ),
           const SizedBox(height: 6),
           Row(
             children: [
               Expanded(
                 child: _buildGenderOption(
-                  label: 'Masculino',
+                  label: l10n.genderMale,
                   icon: Icons.male_rounded,
                   value: 'male',
                   isSelected: _selectedGender == 'male',
@@ -144,7 +147,7 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
               const SizedBox(width: 12),
               Expanded(
                 child: _buildGenderOption(
-                  label: 'Femenino',
+                  label: l10n.genderFemale,
                   icon: Icons.female_rounded,
                   value: 'female',
                   isSelected: _selectedGender == 'female',
@@ -162,11 +165,11 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
               Expanded(
                 child: _buildNumericInputColumn(
                   context: context,
-                  label: 'Edad',
+                  label: l10n.age,
                   controller: _ageController,
                   focusNode: _ageFocus,
-                  hintText: 'Ej: 25',
-                  suffixText: 'años',
+                  hintText: l10n.exampleAge25,
+                  suffixText: l10n.yearsSuffix,
                   keyboardType: TextInputType.number,
                   formatters: [
                     FilteringTextInputFormatter.digitsOnly,
@@ -180,10 +183,10 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
               Expanded(
                 child: _buildNumericInputColumn(
                   context: context,
-                  label: 'Estatura',
+                  label: l10n.statureLabel,
                   controller: _heightController,
                   focusNode: _heightFocus,
-                  hintText: 'Ej: 175',
+                  hintText: l10n.exampleHeight175,
                   suffixText: 'cm',
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 ),
@@ -194,10 +197,10 @@ class _BiometricInputsCardState extends State<BiometricInputsCard> {
               Expanded(
                 child: _buildNumericInputColumn(
                   context: context,
-                  label: 'Peso Actual',
+                  label: l10n.currentWeightLabel,
                   controller: _weightController,
                   focusNode: _weightFocus,
-                  hintText: 'Ej: 75',
+                  hintText: l10n.exampleWeight75,
                   suffixText: 'kg',
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 ),

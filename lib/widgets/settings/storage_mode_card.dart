@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../controllers/settings_controller.dart';
 import '../../l10n/app_localizations.dart';
-import '../../l10n/app_localizations_es.dart';
 import '../../models/storage_mode.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_card.dart';

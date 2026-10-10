@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/theme_manager.dart';
 
 class MealMicronutrientChipsRow extends StatelessWidget {
@@ -20,6 +21,7 @@ class MealMicronutrientChipsRow extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
+    final l10n = AppLocalizations.of(context);
     final isDark = AppColors.isDark(context);
 
     return Container(
@@ -37,7 +39,7 @@ class MealMicronutrientChipsRow extends StatelessWidget {
           _buildPill(
             context,
             icon: Icons.grass_rounded,
-            label: 'Fibra',
+            label: l10n.fiber,
             value: '${fiber.toStringAsFixed(1)}g',
             color: const Color(0xFF10B981),
           ),
@@ -49,7 +51,7 @@ class MealMicronutrientChipsRow extends StatelessWidget {
           _buildPill(
             context,
             icon: Icons.grain_rounded,
-            label: 'Sodio',
+            label: l10n.sodium,
             value: '${sodium.toStringAsFixed(0)}mg',
             color: const Color(0xFFF59E0B),
           ),
@@ -61,7 +63,7 @@ class MealMicronutrientChipsRow extends StatelessWidget {
           _buildPill(
             context,
             icon: Icons.cookie_outlined,
-            label: 'Azúcar',
+            label: l10n.sugar,
             value: '${sugar.toStringAsFixed(1)}g',
             color: const Color(0xFFEC4899),
           ),

@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/gemini_model_info.dart';
 import '../../services/gemini_model_service.dart';
 import '../../services/theme_manager.dart';
@@ -83,6 +84,7 @@ class _ModelPickerBottomSheetState extends State<ModelPickerBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final filtered = _filteredModels;
 
     return Column(
@@ -110,7 +112,7 @@ class _ModelPickerBottomSheetState extends State<ModelPickerBottomSheet> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Seleccionar Modelo Gemini',
+                  l10n.selectGeminiModelTitle,
                   style: GoogleFonts.outfit(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
@@ -134,7 +136,7 @@ class _ModelPickerBottomSheetState extends State<ModelPickerBottomSheet> {
             onChanged: (val) => setState(() => _searchQuery = val.trim().toLowerCase()),
             style: GoogleFonts.inter(fontSize: 14, color: AppColors.textPrimary(context)),
             decoration: InputDecoration(
-              hintText: 'Buscar por nombre o canonical ID...',
+              hintText: l10n.searchByNameOrIdHint,
               prefixIcon: const Icon(Icons.search, size: 20),
               suffixIcon: _searchQuery.isNotEmpty
                   ? IconButton(
@@ -162,11 +164,11 @@ class _ModelPickerBottomSheetState extends State<ModelPickerBottomSheet> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           child: Row(
             children: [
-              _buildFilterChip('all', 'Todos'),
+              _buildFilterChip('all', l10n.pantryCategoriesAll),
               const SizedBox(width: 8),
-              _buildFilterChip('flash', 'Flash (Rápidos)'),
+              _buildFilterChip('flash', l10n.flashFastTag),
               const SizedBox(width: 8),
-              _buildFilterChip('pro', 'Pro (Razonamiento)'),
+              _buildFilterChip('pro', 'Pro'),
             ],
           ),
         ),
@@ -178,7 +180,7 @@ class _ModelPickerBottomSheetState extends State<ModelPickerBottomSheet> {
           child: filtered.isEmpty
               ? Center(
                   child: Text(
-                    'No se encontraron modelos coincidentes',
+                    l10n.noMatchingModelsFound,
                     style: GoogleFonts.inter(fontSize: 13, color: AppColors.textSecondary(context)),
                   ),
                 )
@@ -250,11 +252,11 @@ class _ModelPickerBottomSheetState extends State<ModelPickerBottomSheet> {
                                     children: [
                                       Icon(Icons.input, size: 12, color: AppColors.textMuted(context)),
                                       const SizedBox(width: 4),
-                                      Text('In: ${_formatTokens(model.inputTokenLimit)}', style: GoogleFonts.inter(fontSize: 10, color: AppColors.textMuted(context))),
+                                      Text(l10n.inputTokensCount(_formatTokens(model.inputTokenLimit)), style: GoogleFonts.inter(fontSize: 10, color: AppColors.textMuted(context))),
                                       const SizedBox(width: 12),
                                       Icon(Icons.output, size: 12, color: AppColors.textMuted(context)),
                                       const SizedBox(width: 4),
-                                      Text('Out: ${_formatTokens(model.outputTokenLimit)}', style: GoogleFonts.inter(fontSize: 10, color: AppColors.textMuted(context))),
+                                      Text(l10n.outputTokensCount(_formatTokens(model.outputTokenLimit)), style: GoogleFonts.inter(fontSize: 10, color: AppColors.textMuted(context))),
                                     ],
                                   ),
                                 ],

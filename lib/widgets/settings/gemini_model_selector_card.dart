@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/gemini_model_info.dart';
 import '../../services/gemini_model_service.dart';
 import '../../services/theme_manager.dart';
@@ -46,6 +47,7 @@ class GeminiModelSelectorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final hasKey = apiKey != null && apiKey!.trim().isNotEmpty;
 
     if (!hasKey) {
@@ -58,7 +60,7 @@ class GeminiModelSelectorCard extends StatelessWidget {
                 const Icon(Icons.psychology_outlined, size: 20, color: AppColors.primary),
                 const SizedBox(width: 8),
                 Text(
-                  'MODELO DE IA',
+                  l10n.aiModelHeader,
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -82,7 +84,7 @@ class GeminiModelSelectorCard extends StatelessWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Ingresa tu Gemini API Key para descubrir y seleccionar modelos',
+                      l10n.enterGeminiKeyToSelect,
                       textAlign: TextAlign.justify,
                       style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary(context), fontWeight: FontWeight.w500),
                     ),
@@ -121,7 +123,7 @@ class GeminiModelSelectorCard extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'MODELO DE IA',
+                  l10n.aiModelHeader,
                   style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1.0, color: AppColors.textSecondary(context)),
                 ),
               ),
@@ -130,7 +132,7 @@ class GeminiModelSelectorCard extends StatelessWidget {
               else
                 IconButton(
                   icon: const Icon(Icons.refresh, size: 18),
-                  tooltip: 'Actualizar modelos',
+                  tooltip: l10n.refreshModelsTooltip,
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                   color: AppColors.textSecondary(context),
@@ -144,7 +146,7 @@ class GeminiModelSelectorCard extends StatelessWidget {
               Container(width: 7, height: 7, decoration: BoxDecoration(shape: BoxShape.circle, color: isOnline ? AppColors.protein : AppColors.carbs)),
               const SizedBox(width: 6),
               Text(
-                isOnline ? 'Modelos en línea desde Google AI Studio' : 'Modo offline (modelos por defecto)',
+                isOnline ? l10n.onlineModelsFromStudio : l10n.offlineModeDefaultModels,
                 style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w500, color: isOnline ? AppColors.protein : AppColors.carbs),
               ),
             ],
@@ -219,7 +221,7 @@ class GeminiModelSelectorCard extends StatelessWidget {
                       if (currentModelInfo.inputTokenLimit > 0) ...[
                         const SizedBox(width: 8),
                         Text(
-                          'Ventana: ${(currentModelInfo.inputTokenLimit / 1024).round()}k tokens',
+                          l10n.tokenWindowLabel('${(currentModelInfo.inputTokenLimit / 1024).round()}'),
                           style: GoogleFonts.inter(fontSize: 10, color: AppColors.textMuted(context)),
                         ),
                       ],
@@ -250,7 +252,7 @@ class GeminiModelSelectorCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 8),
               ),
               icon: const Icon(Icons.tune_rounded, size: 16, color: AppColors.primary),
-              label: Text('Explorar y Cambiar Modelo', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
+              label: Text(l10n.exploreAndChangeModel, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
             ),
           ),
         ],

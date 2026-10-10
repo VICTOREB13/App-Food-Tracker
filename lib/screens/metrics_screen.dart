@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/meal_controller.dart';
+import '../l10n/app_localizations.dart';
 import '../models/meal.dart';
 import '../services/database_service.dart';
 import '../services/theme_manager.dart';
@@ -77,15 +78,16 @@ class _MetricsScreenState extends State<MetricsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: VeAppBar(
-        title: 'Métricas y Progreso',
-        subtitle: 'Analítica Local-First',
+        title: l10n.metricsAndProgress,
+        subtitle: l10n.localFirstAnalytics,
         showVeBadge: false,
         actions: [
           IconButton(
             icon: const Icon(Icons.file_download_outlined, color: AppColors.primary),
-            tooltip: 'Exportar Reporte Clínico',
+            tooltip: l10n.exportClinicalReportTooltip,
             onPressed: () => showClinicalExportDialog(context),
           ),
         ],
@@ -98,12 +100,8 @@ class _MetricsScreenState extends State<MetricsScreen> {
         backgroundColor: AppColors.primary,
         icon: const Icon(Icons.monitor_weight_outlined, color: Colors.white),
         label: Text(
-          'Registrar Peso',
-          style: GoogleFonts.inter(
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
-          ),
+          l10n.recordWeight,
+          style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white),
         ),
       ),
       body: RefreshIndicator(
@@ -172,12 +170,13 @@ class _MetricsScreenState extends State<MetricsScreen> {
   }
 
   Widget _buildRangeSelector() {
+    final l10n = AppLocalizations.of(context);
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
           Text(
-            'PERÍODO:',
+            l10n.periodLabel,
             style: GoogleFonts.inter(
               fontSize: 11,
               fontWeight: FontWeight.w700,
@@ -189,7 +188,7 @@ class _MetricsScreenState extends State<MetricsScreen> {
           Row(
             children: _availableRanges.map((days) {
               final isSelected = _selectedDays == days;
-              final label = days == 0 ? 'Histórico' : '$days días';
+              final label = days == 0 ? l10n.allTimeHistorical : l10n.periodDays(days.toString());
               return Padding(
                 padding: const EdgeInsets.only(left: 6),
                 child: ChoiceChip(

@@ -1,15 +1,50 @@
 ---
 tipo: task_list
 proyecto: App_Food_Tracker
-iteracion: v1.4.0
+iteracion: v1.4.1
 estado: activo
-fecha: 2026-10-08
-tags: [proyecto, tasks, checklist, v1-4-0, background-notifications, socket-resilience, privacy-storage, clinical-pdf, purge-justification, l10n]
+fecha: 2026-10-09
+tags: [proyecto, tasks, checklist, v1-4-1, l10n-architecture, domain-modularization, zero-fallbacks, cleanup]
 ---
 
-# 📋 Checklist Maestro de Tareas de Agentes (v1.4.0)
+# 📋 Checklist Maestro de Tareas de Agentes (v1.4.1)
 
-> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.4.0. Cada tarea completada se marca con `[x]`.
+> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.4.1. Cada tarea completada se marca con `[x]`.
+
+---
+
+## 🌟 Iteración v1.4.1: Saneamiento Integral de Localización (l10n), Arquitectura Modular por Dominios y Lenguajes, Cero Fallbacks Hardcodeados y Limpieza de Archivos Residuales
+
+### 🧭 1. Project-Planner (Master Tech Lead & Orquestador)
+- [x] (Project-Planner) Diseñar la arquitectura modular de carpetas de localización (`lib/l10n/domains/`, `lib/l10n/es/`, `lib/l10n/en/`) para escalabilidad multilingüe.
+- [x] (Project-Planner) Establecer la política de Cero Fallbacks en Dart (`?? 'español'` eliminado; consumo directo de `AppLocalizations.of(context).key`).
+- [x] (Project-Planner) Planificar la purga total de scripts y archivos de auditoría residuales generados durante el escaneo.
+- [x] (Project-Planner) Actualizar los artefactos de planeación y versionado a `v1.4.1` (`task.md`, `changelog_v1.md`).
+
+### 🗄️ 2. Backend-Architect (Arquitectura l10n Pure Dart, Interfaces de Dominio y Agregadores)
+- [x] (Backend-Architect) Definir interfaces abstractas por dominio en `lib/l10n/domains/`: `core`, `dashboard`, `meal`, `metrics`, `profile`, `settings`.
+- [x] (Backend-Architect) Implementar submódulos concretos en español en `lib/l10n/es/` y agregador `AppLocalizationsEs`.
+- [x] (Backend-Architect) Implementar submódulos concretos en inglés en `lib/l10n/en/` y agregador `AppLocalizationsEn`.
+- [x] (Backend-Architect) Configurar `AppLocalizations.of(context)` para retorno no-nulable con fallback interno seguro a `AppLocalizationsEs` y re-exportar fachada unificada.
+- [x] (Backend-Architect) Reubicar extensión `MealTypeLocalization` en `lib/l10n/domains/app_localizations_meal.dart` y exportarla desde `lib/l10n/app_localizations.dart`.
+- [x] (Backend-Architect) Eliminar archivos ARB obsoletos (`lib/l10n/app_es.arb`, `lib/l10n/app_en.arb`) y `l10n.yaml` tras la migración a 100% Pure Dart.
+
+### 🎨 3. Frontend-UI (Saneamiento de UI en Pantallas y Widgets)
+- [x] (Frontend-UI) Sanitizar el 100% de pantallas en `lib/screens/` reemplazando textos estáticos y operadores `??` por `l10n.key`.
+- [x] (Frontend-UI) Conectar el 100% de widgets visuales en `lib/widgets/` (Bento cards, diálogos, sheets, botones, tooltips y banners) a `l10n`.
+- [x] (Frontend-UI) Parametrizar renderizado de gráficos canvas en `WeightLineChartPainter` y `WeightChartRenderUtils` para estados vacíos localizados (`emptyPlaceholderText`).
+- [x] (Frontend-UI) Unificar el 100% de imports del proyecto a `package:food_tracker/l10n/app_localizations.dart`.
+
+### 🚀 4. DevOps-Engineer (Versionado, Pipeline CI/CD y Release)
+- [x] (DevOps-Engineer) Incrementar versión a `1.4.1+1` en `pubspec.yaml` y `AppConstants.appVersion = '1.4.1'`, retirando `generate: true`.
+- [x] (DevOps-Engineer) Purgar shims redundantes (`app_localizations_en.dart`, `app_localizations_es.dart`, `meal_type_l10n.dart`) y scripts residuales temporales del workspace.
+- [x] (DevOps-Engineer) Ejecutar Quality Gate manual en GitHub Actions y publicar release oficial con tag `v1.4.1`.
+
+### 🛡️ 5. Systems-Auditor (Pruebas Automatizadas y Quality Gate)
+- [x] (Systems-Auditor) Actualizar `test/l10n/app_localizations_test.dart` y `test/widgets/meal_analysis_pacing_test.dart` a la fachada unificada.
+- [x] (Systems-Auditor) Validar cobertura de `MealTypeLocalization` con pruebas de widget integradas.
+- [x] (Systems-Auditor) Auditar que el 100% de archivos en `lib/` cumplan estrictamente la regla de oro `< 300 LoC` (0 archivos >= 300).
+- [x] (Systems-Auditor) Emitir veredicto formal `PASS` para la iteración v1.4.1.
 
 ---
 

@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import '../../core/di/service_locator.dart';
 import '../../core/interfaces/app_installer_service_interface.dart';
 import '../../core/interfaces/app_update_service_interface.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/github_release_model.dart';
 import '../../services/theme_manager.dart';
 import '../../services/app_update_service.dart';
@@ -66,8 +67,8 @@ class _InAppUpdateDialogState extends State<InAppUpdateDialog> {
   String _formatSize(int? bytes) =>
       (bytes == null || bytes <= 0) ? '' : '~${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
 
-  static String _sanitizeErrorMessage(dynamic error) {
-    if (error == null) return 'Error desconocido durante la descarga.';
+  static String _sanitizeErrorMessage(dynamic error, AppLocalizations l10n) {
+    if (error == null) return l10n.unknownDownloadError;
     final s = error is HttpException ? error.message : error.toString();
     final clean = s
         .replaceAll(RegExp(r',?\s*uri\s*=\s*https?://\S+', caseSensitive: false), '')
@@ -76,14 +77,14 @@ class _InAppUpdateDialogState extends State<InAppUpdateDialog> {
     final lower = s.toLowerCase();
     if (lower.contains('socketexception') || lower.contains('clientexception') ||
         lower.contains('connection') || lower.contains('timed out') || lower.contains('network')) {
-      return 'Error de conexión al descargar la actualización. Verifica tu red e inténtalo de nuevo.';
+      return l10n.networkDownloadError;
     }
     final trimmed = clean.replaceAll(RegExp(r'^Exception:\s*'), '').trim();
     if (trimmed.length < 8 || trimmed.length > 120) {
       if (lower.contains('403') || lower.contains('404')) {
-        return 'No se pudo acceder al archivo de actualización en GitHub.';
+        return l10n.githubFileNotFoundError;
       }
-      return 'Error al descargar el archivo de actualización. Por favor, reintenta.';
+      return l10n.downloadFailedRetryError;
     }
     return trimmed;
   }
@@ -92,7 +93,7 @@ class _InAppUpdateDialogState extends State<InAppUpdateDialog> {
     _isCancelled = true;
     _downloadClient?.close();
     _downloadClient = null;
-    if (mounted) setState(() { _isDownloading = false; _errorMessage = 'Descarga cancelada por el usuario.'; });
+    if (mounted) setState(() { _isDownloading = false; _errorMessage = null; });
   }
 
   Future<void> _startUpdate() async {
@@ -128,15 +129,17 @@ class _InAppUpdateDialogState extends State<InAppUpdateDialog> {
       setState(() => _isInstalling = false);
 
       if (!success) {
-        setState(() => _errorMessage = 'No se pudo iniciar la instalación automática.');
+        final l10n = AppLocalizations.of(context);
+        setState(() => _errorMessage = l10n.nativeInstallLaunchError);
       }
     } catch (e) {
       if (mounted) {
         if (_isCancelled) {
-          setState(() { _isDownloading = false; _isInstalling = false; _errorMessage = 'Descarga cancelada por el usuario.'; });
+          setState(() { _isDownloading = false; _isInstalling = false; _errorMessage = null; });
           return;
         }
-        setState(() { _isDownloading = false; _isInstalling = false; _errorMessage = _sanitizeErrorMessage(e); });
+        final l10n = AppLocalizations.of(context);
+        setState(() { _isDownloading = false; _isInstalling = false; _errorMessage = _sanitizeErrorMessage(e, l10n); });
       }
     } finally {
       _downloadClient = null;
@@ -145,6 +148,7 @@ class _InAppUpdateDialogState extends State<InAppUpdateDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final release = widget.release;
     final sizeLabel = _formatSize(release.apkSizeBytes);
 
@@ -166,7 +170,7 @@ class _InAppUpdateDialogState extends State<InAppUpdateDialog> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Actualización Disponible', style: GoogleFonts.outfit(fontSize: 17, fontWeight: FontWeight.bold)),
+                Text(l10n.updateAvailableTitle, style: GoogleFonts.outfit(fontSize: 17, fontWeight: FontWeight.bold)),
                 Row(
                   children: [
                     Container(
@@ -193,7 +197,7 @@ class _InAppUpdateDialogState extends State<InAppUpdateDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 8),
-              Text('Notas de la versión:', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary(context))),
+              Text(l10n.releaseNotesLabel, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary(context))),
               const SizedBox(height: 6),
               Container(
                 constraints: const BoxConstraints(maxHeight: 160),
@@ -201,7 +205,7 @@ class _InAppUpdateDialogState extends State<InAppUpdateDialog> {
                 decoration: BoxDecoration(color: AppColors.background(context), borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.border(context))),
                 child: SingleChildScrollView(
                   child: Text(
-                    release.releaseNotes.isNotEmpty ? release.releaseNotes : 'Nuevas mejoras de rendimiento y estabilidad.',
+                    release.releaseNotes.isNotEmpty ? release.releaseNotes : release.tagName,
                     style: GoogleFonts.inter(fontSize: 12, color: AppColors.textPrimary(context), height: 1.4),
                   ),
                 ),
@@ -219,7 +223,7 @@ class _InAppUpdateDialogState extends State<InAppUpdateDialog> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Descargando... ${(_progressRatio * 100).toInt()}% (${(_receivedBytes / (1024 * 1024)).toStringAsFixed(1)} MB / ${_totalBytes > 0 ? (_totalBytes / (1024 * 1024)).toStringAsFixed(1) : '?'} MB)',
+                  l10n.downloadingProgress((_progressRatio * 100).toInt().toString(), (_receivedBytes / (1024 * 1024)).toStringAsFixed(1), _totalBytes > 0 ? (_totalBytes / (1024 * 1024)).toStringAsFixed(1) : '?'),
                   style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary(context)),
                 ),
               ],
@@ -229,7 +233,7 @@ class _InAppUpdateDialogState extends State<InAppUpdateDialog> {
                   children: [
                     const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2)),
                     const SizedBox(width: 8),
-                    Text('Iniciando instalador de paquetes...', style: GoogleFonts.inter(fontSize: 12)),
+                    Text(l10n.launchingInstaller, style: GoogleFonts.inter(fontSize: 12)),
                   ],
                 ),
               ],
@@ -241,7 +245,7 @@ class _InAppUpdateDialogState extends State<InAppUpdateDialog> {
                   TextButton.icon(
                     onPressed: () => _installerService.installApk(_downloadedApkPath!),
                     icon: const Icon(Icons.install_mobile, size: 16),
-                    label: const Text('Reintentar instalación nativa'),
+                    label: Text(l10n.retryNativeInstallAction),
                   ),
                 ],
               ],
@@ -255,24 +259,24 @@ class _InAppUpdateDialogState extends State<InAppUpdateDialog> {
             key: const Key('cancel_download_button'),
             onPressed: _cancelDownload,
             icon: const Icon(Icons.close_rounded, size: 16),
-            label: Text('Cancelar descarga', style: GoogleFonts.inter(color: AppColors.primary)),
+            label: Text(l10n.cancelDownloadAction, style: GoogleFonts.inter(color: AppColors.primary)),
           ),
         if (!_isDownloading && !_isInstalling)
           TextButton(
             key: const Key('later_button'),
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('Más tarde', style: GoogleFonts.inter(color: AppColors.textSecondary(context))),
+            child: Text(l10n.laterAction, style: GoogleFonts.inter(color: AppColors.textSecondary(context))),
           ),
         TextButton(
           onPressed: () => _installerService.openWebRelease(release.htmlUrl),
-          child: Text('Ver en GitHub', style: GoogleFonts.inter(color: AppColors.textSecondary(context))),
+          child: Text(l10n.viewOnGithubAction, style: GoogleFonts.inter(color: AppColors.textSecondary(context))),
         ),
         if (!_isDownloading && !_isInstalling)
           ElevatedButton(
             key: const Key('start_in_app_update_button'),
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
             onPressed: _startUpdate,
-            child: Text(release.hasApk ? 'Actualizar Ahora' : 'Abrir en Navegador', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+            child: Text(release.hasApk ? l10n.updateNowAction : l10n.openInBrowserAction, style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
           ),
       ],
     );

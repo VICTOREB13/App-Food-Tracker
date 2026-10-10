@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../controllers/meal_controller.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_card.dart';
 
@@ -16,18 +17,12 @@ class _PhotoPruningCardState extends State<PhotoPruningCard> {
   int _selectedRetentionDays = 30;
   bool _isPruning = false;
 
-  static const List<Map<String, dynamic>> _retentionOptions = [
-    {'label': 'Para siempre', 'days': 0},
-    {'label': '90 días', 'days': 90},
-    {'label': '30 días', 'days': 30},
-    {'label': '15 días', 'days': 15},
-  ];
-
   Future<void> _prunePhotos() async {
+    final l10n = AppLocalizations.of(context);
     if (_selectedRetentionDays == 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Con "Para siempre" todas las fotos se conservan intactas.'),
+        SnackBar(
+          content: Text(l10n.foreverRetentionInfo),
           backgroundColor: AppColors.protein,
         ),
       );
@@ -43,15 +38,15 @@ class _PhotoPruningCardState extends State<PhotoPruningCard> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Se depuraron $prunedCount fotos antiguas. Tus calorías y macronutrientes permanecen intactos.',
+              l10n.photosPrunedSuccess(prunedCount.toString()),
             ),
             backgroundColor: AppColors.protein,
           ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No se encontraron fotos anteriores al período seleccionado.'),
+          SnackBar(
+            content: Text(l10n.noPhotosBeforePeriod),
             backgroundColor: AppColors.protein,
           ),
         );
@@ -60,7 +55,7 @@ class _PhotoPruningCardState extends State<PhotoPruningCard> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error al depurar fotos: $e'),
+          content: Text(l10n.photoPruneError(e.toString())),
           backgroundColor: AppColors.primary,
         ),
       );
@@ -71,6 +66,14 @@ class _PhotoPruningCardState extends State<PhotoPruningCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final retentionOptions = [
+      {'label': l10n.retentionForever, 'days': 0},
+      {'label': l10n.retentionNinetyDays, 'days': 90},
+      {'label': l10n.retentionThirtyDays, 'days': 30},
+      {'label': l10n.retentionFifteenDays, 'days': 15},
+    ];
+
     return VeCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -81,7 +84,7 @@ class _PhotoPruningCardState extends State<PhotoPruningCard> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'DEPURACIÓN DE FOTOS Y ALMACENAMIENTO',
+                  l10n.photoPruningHeader,
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -94,7 +97,7 @@ class _PhotoPruningCardState extends State<PhotoPruningCard> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Optimiza el almacenamiento local liberando espacio ocupado por fotos de platos anteriores al período seleccionado. Las comidas, calorías, ingredientes y macronutrientes permanecen 100% intactos en la base de datos local SQLite.',
+            l10n.photoPruningDescription,
             textAlign: TextAlign.justify,
             style: GoogleFonts.inter(
               fontSize: 12,
@@ -106,11 +109,11 @@ class _PhotoPruningCardState extends State<PhotoPruningCard> {
           DropdownButtonFormField<int>(
             initialValue: _selectedRetentionDays,
             menuMaxHeight: 280,
-            decoration: const InputDecoration(
-              labelText: 'Retención de fotos de comidas',
-              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: InputDecoration(
+              labelText: l10n.mealPhotoRetentionLabel,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             ),
-            items: _retentionOptions
+            items: retentionOptions
                 .map(
                   (opt) => DropdownMenuItem<int>(
                     value: opt['days'] as int,
@@ -144,7 +147,7 @@ class _PhotoPruningCardState extends State<PhotoPruningCard> {
                     )
                   : const Icon(Icons.delete_sweep_outlined, size: 18),
               label: Text(
-                _isPruning ? 'Depurando fotos...' : 'Depurar fotos antiguas ahora',
+                _isPruning ? l10n.pruningPhotosProgress : l10n.pruneOldPhotosNow,
                 style: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 13),
               ),
             ),

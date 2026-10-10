@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../services/theme_manager.dart';
+import '../../l10n/app_localizations.dart';
 
 class DashboardFabMenu extends StatefulWidget {
   final VoidCallback onAiPhotoScan;
@@ -57,38 +58,39 @@ class _DashboardFabMenuState extends State<DashboardFabMenu>
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (sheetContext) {
+        final l10n = AppLocalizations.of(sheetContext);
         final actions = <_FabItem>[
-          _FabItem(Icons.camera_alt_outlined, AppColors.primary, 'Foto con IA', 'Cámara Gemini 2.5', () {
+          _FabItem(Icons.camera_alt_outlined, AppColors.primary, l10n.fabCameraTitle, l10n.fabCameraSubtitle, () {
             Navigator.of(sheetContext).pop();
             widget.onAiPhotoScan();
           }),
-          _FabItem(Icons.photo_library_outlined, AppColors.caloriesFlame, 'Galería', 'Elegir del carrete', () {
+          _FabItem(Icons.photo_library_outlined, AppColors.caloriesFlame, l10n.fabGalleryTitle, l10n.fabGallerySubtitle, () {
             Navigator.of(sheetContext).pop();
             (widget.onGalleryScan ?? widget.onAiPhotoScan)();
           }),
-          _FabItem(Icons.qr_code_scanner, AppColors.carbs, 'Código Barras', 'Open Food Facts', () {
+          _FabItem(Icons.qr_code_scanner, AppColors.carbs, l10n.fabBarcodeTitle, l10n.fabBarcodeSubtitle, () {
             Navigator.of(sheetContext).pop();
             widget.onBarcodeScan();
           }),
-          _FabItem(Icons.edit_note, AppColors.protein, 'Manual', 'Despensa y macros', () {
+          _FabItem(Icons.edit_note, AppColors.protein, l10n.fabManualTitle, l10n.fabManualSubtitle, () {
             Navigator.of(sheetContext).pop();
             widget.onManualEntry();
           }),
-          _FabItem(Icons.water_drop_outlined, AppColors.water, '+250ml Agua', 'Hidratación rápida', () {
+          _FabItem(Icons.water_drop_outlined, AppColors.water, l10n.fabWaterTitle, l10n.fabWaterSubtitle, () {
             Navigator.of(sheetContext).pop();
             widget.onQuickWater?.call();
           }),
-          _FabItem(Icons.bolt, AppColors.carbsAmber, 'Rápida', 'Calorías directas', () {
+          _FabItem(Icons.bolt, AppColors.carbsAmber, l10n.fabQuickTitle, l10n.fabQuickSubtitle, () {
             Navigator.of(sheetContext).pop();
             widget.onQuickMeal?.call();
           }),
           if (widget.onVoiceDictation != null)
-            _FabItem(Icons.mic_none_rounded, const Color(0xFF8B5CF6), 'Voz / Audio', 'Dictado natural', () {
+            _FabItem(Icons.mic_none_rounded, const Color(0xFF8B5CF6), l10n.fabVoiceTitle, l10n.fabVoiceSubtitle, () {
               Navigator.of(sheetContext).pop();
               widget.onVoiceDictation!();
             }),
           if (widget.onVideoScan != null)
-            _FabItem(Icons.videocam_outlined, const Color(0xFF06B6D4), 'Video Pan', 'Muestreo 3D', () {
+            _FabItem(Icons.videocam_outlined, const Color(0xFF06B6D4), l10n.fabVideoTitle, l10n.fabVideoSubtitle, () {
               Navigator.of(sheetContext).pop();
               widget.onVideoScan!();
             }),
@@ -120,7 +122,7 @@ class _DashboardFabMenuState extends State<DashboardFabMenu>
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'REGISTRAR COMIDA O ACTIVIDAD',
+                          l10n.fabSectionHeader,
                           style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.0, color: AppColors.textSecondary(context)),
                         ),
                         IconButton(
@@ -163,8 +165,8 @@ class _DashboardFabMenuState extends State<DashboardFabMenu>
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text('¿Qué debería comer hoy?', style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary(context))),
-                                    Text('Sugerencias inteligentes según tus macros', style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary(context))),
+                                    Text(l10n.whatToEatTitle, style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary(context))),
+                                    Text(l10n.whatToEatSubtitle, style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary(context))),
                                   ],
                                 ),
                               ),

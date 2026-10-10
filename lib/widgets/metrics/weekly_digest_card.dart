@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/daily_goals.dart';
 import '../../models/meal.dart';
 import '../../services/theme_manager.dart';
@@ -18,6 +19,7 @@ class WeeklyDigestCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     // 1. Calculate 7-day range
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -92,7 +94,7 @@ class WeeklyDigestCard extends StatelessWidget {
                   const SizedBox(width: 6),
                   Flexible(
                     child: Text(
-                      'RESUMEN SEMANAL (7 DÍAS)',
+                      l10n.weeklyDigestHeader,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.inter(
@@ -112,7 +114,7 @@ class WeeklyDigestCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  '$loggedDaysCount / 7 días con registro',
+                  l10n.daysLoggedWeekly(loggedDaysCount.toString()),
                   style: GoogleFonts.inter(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -131,9 +133,9 @@ class WeeklyDigestCard extends StatelessWidget {
               Expanded(
                 child: _buildMetricTile(
                   context,
-                  title: 'Promedio Diario',
+                  title: l10n.dailyAverage,
                   value: '${avgCalories.toInt()} kcal',
-                  subtitle: 'Meta: ${goals.calories.toInt()} kcal ($calAdherence%)',
+                  subtitle: l10n.targetCaloriesCompliance(goals.calories.toInt().toString(), calAdherence.toString()),
                   color: AppColors.calories,
                 ),
               ),
@@ -142,11 +144,11 @@ class WeeklyDigestCard extends StatelessWidget {
               Expanded(
                 child: _buildMetricTile(
                   context,
-                  title: 'Balance Neto Semanal',
+                  title: l10n.weeklyNetBalance,
                   value: '${cumulativeBalance >= 0 ? '+' : ''}${cumulativeBalance.toInt()} kcal',
                   subtitle: isSurplus
-                      ? 'Superávit calórico'
-                      : (isDeficit ? 'Déficit calórico' : 'Mantenimiento'),
+                      ? l10n.caloricSurplus
+                      : (isDeficit ? l10n.caloricDeficit : l10n.maintenanceBalance),
                   color: isSurplus
                       ? AppColors.primary
                       : (isDeficit ? AppColors.success : AppColors.textPrimary(context)),
@@ -158,7 +160,7 @@ class WeeklyDigestCard extends StatelessWidget {
 
           // Macro Consistency Section
           Text(
-            'Consistencia de Macronutrientes (Promedio / Meta):',
+            l10n.macroConsistencyLabel,
             style: GoogleFonts.inter(
               fontSize: 11,
               fontWeight: FontWeight.w600,
@@ -171,7 +173,7 @@ class WeeklyDigestCard extends StatelessWidget {
               Expanded(
                 child: _buildMacroProgress(
                   context,
-                  name: 'Proteína',
+                  name: l10n.protein,
                   avg: avgProtein,
                   target: goals.protein,
                   color: AppColors.protein,
@@ -181,7 +183,7 @@ class WeeklyDigestCard extends StatelessWidget {
               Expanded(
                 child: _buildMacroProgress(
                   context,
-                  name: 'Carbos',
+                  name: l10n.carbs,
                   avg: avgCarbs,
                   target: goals.carbs,
                   color: AppColors.carbs,
@@ -191,7 +193,7 @@ class WeeklyDigestCard extends StatelessWidget {
               Expanded(
                 child: _buildMacroProgress(
                   context,
-                  name: 'Grasas',
+                  name: l10n.fat,
                   avg: avgFat,
                   target: goals.fat,
                   color: AppColors.fat,

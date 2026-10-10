@@ -4,8 +4,8 @@ import '../../models/weight_log.dart';
 /// Auxiliary canvas renderers for empty state and single log state in weight charts.
 class WeightChartRenderUtils {
   /// Renders subtle empty placeholder when there are 0 logs.
-  static void paintEmptyState(Canvas canvas, Size size, TextStyle labelStyle) {
-    const placeholder = 'Sin registros de peso en este rango';
+  static void paintEmptyState(Canvas canvas, Size size, TextStyle labelStyle, {String? placeholderText}) {
+    final placeholder = placeholderText ?? '';
     final textSpan = TextSpan(
       text: placeholder,
       style: labelStyle.copyWith(

@@ -26,6 +26,7 @@ class OnboardingBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final isLastStep = currentStep == 3;
 
     return Container(
@@ -46,7 +47,7 @@ class OnboardingBottomNav extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               ),
               child: Text(
-                AppLocalizations.of(context)?.back ?? 'Atrás',
+                l10n.back,
                 style: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 14),
               ),
             ),
@@ -83,9 +84,8 @@ class OnboardingBottomNav extends StatelessWidget {
                           children: [
                             Text(
                               isLastStep
-                                  ? (AppLocalizations.of(context)?.saveAndStart ??
-                                      'Guardar y Comenzar')
-                                  : (AppLocalizations.of(context)?.continueButton ?? 'Continuar'),
+                                  ? l10n.saveAndStart
+                                  : l10n.continueButton,
                               style: GoogleFonts.outfit(
                                 fontWeight: FontWeight.w700,
                                 fontSize: 15,

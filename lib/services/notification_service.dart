@@ -6,8 +6,6 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import '../controllers/settings_controller.dart';
 import '../core/interfaces/notification_service_interface.dart';
-import '../l10n/app_localizations.dart';
-import '../l10n/app_localizations_es.dart';
 
 /// Service managing local and exact scheduled notifications for meal analysis and intermittent fasting.
 class NotificationService implements INotificationService {

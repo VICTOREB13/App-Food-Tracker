@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_card.dart';
 
@@ -17,6 +18,7 @@ class DatabaseMaintenanceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final mealsCount = stats['meals_count'] ?? 0;
     final pantryCount = stats['pantry_count'] ?? 0;
     final fileSizeKb = stats['file_size_kb'] ?? '0.0';
@@ -30,7 +32,7 @@ class DatabaseMaintenanceCard extends StatelessWidget {
               const Icon(Icons.storage_outlined, size: 20, color: AppColors.carbs),
               const SizedBox(width: 8),
               Text(
-                'MANTENIMIENTO SQLITE LOCAL-FIRST',
+                l10n.databaseMaintenanceHeader,
                 style: GoogleFonts.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
@@ -46,7 +48,7 @@ class DatabaseMaintenanceCard extends StatelessWidget {
               Expanded(
                 child: _buildStatTile(
                   context,
-                  label: 'Comidas',
+                  label: l10n.mealsStatLabel,
                   value: '$mealsCount',
                 ),
               ),
@@ -54,7 +56,7 @@ class DatabaseMaintenanceCard extends StatelessWidget {
               Expanded(
                 child: _buildStatTile(
                   context,
-                  label: 'Despensa',
+                  label: l10n.pantryStatLabel,
                   value: '$pantryCount',
                 ),
               ),
@@ -62,7 +64,7 @@ class DatabaseMaintenanceCard extends StatelessWidget {
               Expanded(
                 child: _buildStatTile(
                   context,
-                  label: 'Tamaño DB',
+                  label: l10n.dbSizeLabel,
                   value: '$fileSizeKb KB',
                 ),
               ),
@@ -85,7 +87,7 @@ class DatabaseMaintenanceCard extends StatelessWidget {
                     )
                   : const Icon(Icons.cleaning_services_outlined, size: 16),
               label: Text(
-                isLoading ? 'Optimizando...' : 'Optimizar y Compactar',
+                isLoading ? l10n.optimizingDatabase : l10n.optimizeAndCompactAction,
                 style: GoogleFonts.inter(fontWeight: FontWeight.w600),
               ),
             ),

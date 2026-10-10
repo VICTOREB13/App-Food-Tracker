@@ -18,6 +18,39 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [1.4.1] - 2026-10-09
+
+La versión v1.4.1 culmina el saneamiento exhaustivo de internacionalización (i18n/l10n) en toda la aplicación, eliminando por completo cualquier texto hardcodeado en pantallas y widgets visuales. Introduce una arquitectura limpia y modular de localización organizada por subdirectorios de idioma (`lib/l10n/es/`, `lib/l10n/en/`) e interfaces abstractas por dominio de negocio (`lib/l10n/domains/`), garantizando que la incorporación futura de nuevos idiomas sea inmediata y desacoplada. Asimismo, se erradica el patrón de fallbacks defensivos hardcodeados en Dart (`?? 'español'`), consumiendo directamente propiedades no-nulables tipadas, y se ejecuta una depuración total de archivos residuales y scripts del repositorio.
+
+### Added
+- **Arquitectura Modular de Localización 100% Pure Dart (`lib/l10n/`):**
+  - Subcarpeta `lib/l10n/domains/`: Contratos e interfaces abstractas por dominio (`app_localizations_core.dart`, `app_localizations_dashboard.dart`, `app_localizations_meal.dart`, `app_localizations_metrics.dart`, `app_localizations_profile.dart`, `app_localizations_settings.dart`).
+  - Subcarpeta `lib/l10n/es/`: Implementaciones concretas en español por dominio y agregador `AppLocalizationsEs`.
+  - Subcarpeta `lib/l10n/en/`: Implementaciones concretas en inglés por dominio y agregador `AppLocalizationsEn`.
+  - Fachada unificada `AppLocalizations.of(context)` en `lib/l10n/app_localizations.dart` que retorna una instancia no-nulable con fallback interno seguro a `AppLocalizationsEs` y re-exporta todos los dominios e implementaciones.
+  - Reubicación de la extensión `MealTypeLocalization` dentro de `lib/l10n/domains/app_localizations_meal.dart` (exportada automáticamente a través de la fachada unificada).
+
+### Changed
+- **Saneamiento Exhaustivo de UI y Cero Fallbacks Hardcodeados:**
+  - Erradicación de `?? 'texto en español'` y `l10n != null ? l10n.x : 'español'` en el 100% de pantallas (`lib/screens/`) y widgets visuales (`lib/widgets/`).
+  - Consumo directo y limpio de `l10n.clave` en todas las tarjetas Bento, banners de estado, modales, hojas inferiores, diálogos de captura y tooltips.
+  - Soporte de textos de estado vacío dinámicos y localizados en renderizado de canvas (`WeightLineChartPainter` y `WeightChartRenderUtils`).
+  - Unificación de todos los imports del proyecto hacia la fachada `package:food_tracker/l10n/app_localizations.dart`.
+- **Actualización de Versión de la Aplicación:**
+  - Versión actualizada a `1.4.1` en `AppConstants.appVersion` (`lib/core/constants/app_constants.dart`).
+  - Versión actualizada a `1.4.1+1` en `pubspec.yaml`.
+
+### Removed
+- **Transición a Pure Dart y Eliminación de Generación de Código Antigua:**
+  - Retiro de `generate: true` en `pubspec.yaml` y eliminación de `l10n.yaml`.
+  - Eliminación de catálogos ARB obsoletos (`lib/l10n/app_es.arb` y `lib/l10n/app_en.arb`).
+  - Purga de archivos shim y sueltos redundantes de la raíz de l10n (`app_localizations_es.dart`, `app_localizations_en.dart`, `meal_type_l10n.dart`).
+- **Purga Total de Archivos Residuales de Auditoría:**
+  - Eliminación de la totalidad de archivos de volcado y scripts de escaneo auxiliares (`prior_attempt.txt`, `audit_findings.json`, `audit_readable.txt`, `screens_audit.txt`, `widgets_audit.txt`, `all_text_widgets.txt`, `scan_strings.py`, `scan_text_widgets.py`, `inspect_findings.py`, `detailed_audit.py`, `check_extra.py`, `update_arb.py`, `generate_dart_l10n.py`, `semantic_l10n_generator.py`).
+  - Limpieza completa del árbol de trabajo en Git.
+
+---
+
 ## [1.4.0] - 2026-10-08
 
 La versión v1.4.0 introduce un sistema completo de notificaciones locales asíncronas y recordatorios programados exactos de ayuno intermitente (`flutter_local_notifications`), eleva la tolerancia a fallos de Gemini Vision con recuperación unaria inmediata (`generateContent`) ante socket cuts / desconexiones abruptas (`OS error 104/10054`) e interfaz desacoplada `IVisionModelProvider`, incorpora selector de privacidad de fotos (Público vs Privado aislado) en Settings, dualidad de exportación de reportes clínicos (CSV RFC 4180 y PDF profesional mediante paquete `pdf`) en `/Documents/FoodTracker`, y purga total de la justificación volumétrica técnica de la UI y del schema de Gemini para una experiencia clínica limpia y centrada en el usuario.

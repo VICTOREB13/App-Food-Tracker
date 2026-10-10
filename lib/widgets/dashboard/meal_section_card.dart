@@ -2,8 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../l10n/app_localizations.dart';
-import '../../l10n/app_localizations_es.dart';
-import '../../l10n/meal_type_l10n.dart';
 import '../../models/meal.dart';
 import '../../services/theme_manager.dart';
 import '../common/macro_indicator_chip.dart';

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/weight_log.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_card.dart';
 import 'weight_line_chart_painter.dart';
+
 
 class WeightTrendBentoCard extends StatelessWidget {
   final List<WeightLog> logs;
@@ -17,6 +19,7 @@ class WeightTrendBentoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final hasData = logs.isNotEmpty;
     final sorted = List<WeightLog>.from(logs)
       ..sort((a, b) => a.date.compareTo(b.date));
@@ -66,7 +69,7 @@ class WeightTrendBentoCard extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Text(
-                'TENDENCIA DE PESO',
+                l10n.weightTrendHeader,
                 style: GoogleFonts.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
@@ -87,7 +90,7 @@ class WeightTrendBentoCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'PESO ACTUAL',
+                    l10n.currentWeightHeader,
                     style: GoogleFonts.inter(
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
@@ -198,6 +201,7 @@ class WeightTrendBentoCard extends StatelessWidget {
                   fontWeight: FontWeight.w500,
                   color: AppColors.textSecondary(context),
                 ),
+                emptyPlaceholderText: l10n.noWeightLogsInRange,
               ),
             ),
           ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_card.dart';
 
@@ -43,6 +44,7 @@ class _ApiKeyInputCardState extends State<ApiKeyInputCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final hasKey = widget.currentApiKey != null && widget.currentApiKey!.isNotEmpty;
 
     return VeCard(
@@ -54,7 +56,7 @@ class _ApiKeyInputCardState extends State<ApiKeyInputCard> {
               const Icon(Icons.key_outlined, size: 20, color: AppColors.primary),
               const SizedBox(width: 8),
               Text(
-                'GEMINI API KEY',
+                l10n.geminiApiKeyHeader,
                 style: GoogleFonts.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
@@ -72,7 +74,7 @@ class _ApiKeyInputCardState extends State<ApiKeyInputCard> {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  hasKey ? 'CONFIGURADA' : 'NO CONFIGURADA',
+                  hasKey ? l10n.statusConfigured : l10n.statusNotConfigured,
                   style: GoogleFonts.inter(
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
@@ -84,7 +86,7 @@ class _ApiKeyInputCardState extends State<ApiKeyInputCard> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Food Tracker opera 100% Local-First. Tu API Key de Google Gemini se almacena en el enclave seguro de tu dispositivo y se conecta directamente con los modelos de Google Gemini.',
+            l10n.geminiApiKeyNotice,
             textAlign: TextAlign.justify,
             style: GoogleFonts.inter(
               fontSize: 12,
@@ -122,7 +124,7 @@ class _ApiKeyInputCardState extends State<ApiKeyInputCard> {
                     side: const BorderSide(color: AppColors.primaryLight),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
-                  child: Text('Eliminar', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                  child: Text(l10n.delete, style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
                 ),
               const Spacer(),
               ElevatedButton.icon(
@@ -134,7 +136,7 @@ class _ApiKeyInputCardState extends State<ApiKeyInputCard> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 ),
                 icon: const Icon(Icons.check, size: 16),
-                label: Text('Guardar Key', style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
+                label: Text(l10n.saveKeyAction, style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
               ),
             ],
           ),

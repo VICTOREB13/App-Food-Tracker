@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/meal.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_card.dart';
@@ -65,19 +66,21 @@ class StreakComplianceBentoCard extends StatelessWidget {
         : (activeDays / days).clamp(0.0, 1.0);
     final int consistencyPercent = (consistencyFraction * 100).toInt();
 
+    final l10n = AppLocalizations.of(context);
+
     final String badgeText;
     final Color badgeColor;
     if (streak >= 7) {
-      badgeText = 'Imparable 🔥';
+      badgeText = l10n.streakUnstoppable;
       badgeColor = AppColors.primary;
     } else if (streak >= 3) {
-      badgeText = 'Buen ritmo ✨';
+      badgeText = l10n.streakGoodPace;
       badgeColor = AppColors.protein;
     } else if (streak >= 1) {
-      badgeText = 'Activo 💪';
+      badgeText = l10n.streakActive;
       badgeColor = AppColors.carbs;
     } else {
-      badgeText = 'Comienza hoy 🎯';
+      badgeText = l10n.streakStartToday;
       badgeColor = AppColors.textSecondary(context);
     }
 
@@ -106,7 +109,7 @@ class StreakComplianceBentoCard extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'CONSTANCIA',
+                  l10n.consistencyHeader,
                   style: GoogleFonts.inter(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
@@ -151,7 +154,7 @@ class StreakComplianceBentoCard extends StatelessWidget {
               ),
               const SizedBox(width: 4),
               Text(
-                streak == 1 ? 'día racha' : 'días racha',
+                streak == 1 ? l10n.dayStreak : l10n.daysStreak,
                 style: GoogleFonts.inter(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
@@ -163,8 +166,8 @@ class StreakComplianceBentoCard extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             isAllTime
-                ? '$activeDays días registrados en total'
-                : '$activeDays de $days días registrados ($consistencyPercent%)',
+                ? l10n.activeDaysTotalLogged(activeDays.toString())
+                : l10n.activeDaysTotalConsistency(activeDays.toString(), days.toString(), consistencyPercent.toString()),
             style: GoogleFonts.inter(
               fontSize: 11,
               color: AppColors.textSecondary(context),
@@ -187,8 +190,8 @@ class StreakComplianceBentoCard extends StatelessWidget {
           // Motivational message
           Text(
             activeDays == 0
-                ? 'Registra tus comidas para crear el hábito'
-                : 'La disciplina supera la motivación',
+                ? l10n.logMealsToBuildHabit
+                : l10n.disciplineBeatsMotivation,
             style: GoogleFonts.inter(
               fontSize: 10,
               color: AppColors.textMuted(context),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_card.dart';
 import 'activity_level_option_tile.dart';
@@ -32,19 +33,6 @@ class _ActivityGoalSelectorCardState extends State<ActivityGoalSelectorCard> {
   late String _selectedActivity;
   late String _selectedGoal;
   late final TextEditingController _stepsController;
-
-  static const List<Map<String, String>> _activityOptions = [
-    {'key': 'sedentary', 'title': 'Sedentario (1.2x)', 'subtitle': 'Trabajo de escritorio, sin ejercicio formal', 'badge': '1.2x'},
-    {'key': 'light', 'title': 'Ligero (1.375x)', 'subtitle': 'Caminatas o actividad ligera 1-3 días/sem', 'badge': '1.375x'},
-    {'key': 'moderate', 'title': 'Moderado (1.55x)', 'subtitle': 'Entrenamiento de fuerza o cardio 3-5 días/sem', 'badge': '1.55x'},
-    {'key': 'very_active', 'title': 'Muy Activo (1.725x)', 'subtitle': 'Atleta o entrenamiento pesado 6-7 días/sem', 'badge': '1.725x'},
-  ];
-
-  static const List<Map<String, String>> _goalOptions = [
-    {'key': 'fat_loss', 'title': 'Pérdida de Grasa', 'delta': '-500 kcal', 'desc': 'Déficit calórico clínico con piso de protección en TMB'},
-    {'key': 'maintenance', 'title': 'Mantenimiento', 'delta': 'Normocalórico', 'desc': 'Balance energético total para recomposición o sostén'},
-    {'key': 'muscle_gain', 'title': 'Ganancia Muscular', 'delta': '+300 kcal', 'desc': 'Superávit calórico controlado para hipertrofia magra'},
-  ];
 
   @override
   void initState() {
@@ -96,6 +84,21 @@ class _ActivityGoalSelectorCardState extends State<ActivityGoalSelectorCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
+    final activityOptions = [
+      {'key': 'sedentary', 'title': '${l10n.activitySedentary} (1.2x)', 'subtitle': l10n.activitySedentaryDesc, 'badge': '1.2x'},
+      {'key': 'light', 'title': '${l10n.activityLight} (1.375x)', 'subtitle': l10n.activityLightDesc, 'badge': '1.375x'},
+      {'key': 'moderate', 'title': '${l10n.activityModerate} (1.55x)', 'subtitle': l10n.activityModerateDesc, 'badge': '1.55x'},
+      {'key': 'very_active', 'title': '${l10n.activityVeryActive} (1.725x)', 'subtitle': l10n.activityVeryActiveDesc, 'badge': '1.725x'},
+    ];
+
+    final goalOptions = [
+      {'key': 'fat_loss', 'title': l10n.fatLossGoal, 'delta': '-500 kcal', 'desc': l10n.fatLossClinicalDesc},
+      {'key': 'maintenance', 'title': l10n.goalMaintenanceTitle, 'delta': l10n.normocaloric, 'desc': l10n.maintenanceBalanceDesc},
+      {'key': 'muscle_gain', 'title': l10n.goalMuscleGainTitle, 'delta': '+300 kcal', 'desc': l10n.muscleGainHypertrophyDesc},
+    ];
+
     return VeCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,15 +108,15 @@ class _ActivityGoalSelectorCardState extends State<ActivityGoalSelectorCard> {
               const Icon(Icons.fitness_center_rounded, size: 20, color: AppColors.protein),
               const SizedBox(width: 8),
               Text(
-                'ACTIVIDAD Y OBJETIVO',
+                l10n.activityAndGoalHeader,
                 style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1.0, color: AppColors.textSecondary(context)),
               ),
             ],
           ),
           const SizedBox(height: 16),
-          _subHeader('Nivel de Actividad Física (Multiplicador TDEE)', context),
+          _subHeader(l10n.physicalActivityMultiplierHeader, context),
           const SizedBox(height: 8),
-          ..._activityOptions.map((opt) => Padding(
+          ...activityOptions.map((opt) => Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: ActivityLevelOptionTile(
                   title: opt['title']!, subtitle: opt['subtitle']!, badge: opt['badge']!,
@@ -122,9 +125,9 @@ class _ActivityGoalSelectorCardState extends State<ActivityGoalSelectorCard> {
                 ),
               )),
           const SizedBox(height: 12),
-          _subHeader('Objetivo Corporal', context),
+          _subHeader(l10n.bodyGoalHeader, context),
           const SizedBox(height: 8),
-          ..._goalOptions.map((opt) => Padding(
+          ...goalOptions.map((opt) => Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: BodyGoalOptionTile(
                   title: opt['title']!, delta: opt['delta']!, desc: opt['desc']!,
@@ -139,9 +142,9 @@ class _ActivityGoalSelectorCardState extends State<ActivityGoalSelectorCard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _subHeader('Pasos Diarios Estimados', context),
+                    _subHeader(l10n.estimatedDailySteps, context),
                     const SizedBox(height: 2),
-                    Text('Para calibración de gasto NEAT', style: GoogleFonts.inter(fontSize: 11, color: AppColors.textMuted(context))),
+                    Text(l10n.neatCalibrationNote, style: GoogleFonts.inter(fontSize: 11, color: AppColors.textMuted(context))),
                   ],
                 ),
               ),
@@ -154,7 +157,7 @@ class _ActivityGoalSelectorCardState extends State<ActivityGoalSelectorCard> {
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   onChanged: (_) => _notifyChanges(),
                   style: GoogleFonts.inter(fontSize: 14, color: AppColors.textPrimary(context)),
-                  decoration: const InputDecoration(hintText: '8000', suffixText: 'pasos', contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10)),
+                  decoration: InputDecoration(hintText: '8000', suffixText: l10n.stepsUnit, contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10)),
                 ),
               ),
             ],

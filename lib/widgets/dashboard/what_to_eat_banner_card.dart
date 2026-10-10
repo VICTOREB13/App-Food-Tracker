@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_card.dart';
 import '../recommendations/recommendation_diagnostic_card.dart';
@@ -24,6 +25,7 @@ class WhatToEatBannerCard extends StatelessWidget {
   }
 
   void _openDiagnosticDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -42,7 +44,7 @@ class WhatToEatBannerCard extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: Text('Cerrar', style: GoogleFonts.inter(color: AppColors.textSecondary(context))),
+            child: Text(l10n.closeAction, style: GoogleFonts.inter(color: AppColors.textSecondary(context))),
           ),
         ],
       ),
@@ -51,6 +53,7 @@ class WhatToEatBannerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return VeCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,11 +74,11 @@ class WhatToEatBannerCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '¿Qué debería comer hoy?',
+                      l10n.whatToEatTitle,
                       style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.w700),
                     ),
                     Text(
-                      'Combinaciones para bajar grasas y alcanzar tus metas',
+                      l10n.whatToEatCombinations,
                       style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary(context)),
                     ),
                   ],
@@ -97,7 +100,7 @@ class WhatToEatBannerCard extends StatelessWidget {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   icon: const Icon(Icons.restaurant_menu, size: 16),
-                  label: Text('Sugerencias de Hoy', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700)),
+                  label: Text(l10n.todaySuggestions, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700)),
                 ),
               ),
               const SizedBox(width: 8),
@@ -110,7 +113,7 @@ class WhatToEatBannerCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
-                  child: Text('Diagnóstico', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600)),
+                  child: Text(l10n.diagnostic, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600)),
                 ),
               ),
             ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../controllers/settings_controller.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_card.dart';
 
@@ -17,6 +18,7 @@ class LanguageSelectorCard extends StatelessWidget {
     return AnimatedBuilder(
       animation: ctrl,
       builder: (context, _) {
+        final l10n = AppLocalizations.of(context);
         final currentCode = ctrl.currentLocale?.languageCode ??
             Localizations.localeOf(context).languageCode;
         final isSpanish = currentCode == 'es';
@@ -30,7 +32,7 @@ class LanguageSelectorCard extends StatelessWidget {
                   const Icon(Icons.language_rounded, color: AppColors.primary, size: 20),
                   const SizedBox(width: 8),
                   Text(
-                    'IDIOMA / LANGUAGE',
+                    l10n.languageSelectorTitle,
                     style: GoogleFonts.inter(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
@@ -42,7 +44,7 @@ class LanguageSelectorCard extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                'Selecciona el idioma de la aplicación en tiempo real.',
+                l10n.languageSelectorSubtitle,
                 style: GoogleFonts.inter(
                   fontSize: 12,
                   color: AppColors.textMuted(context),
@@ -53,8 +55,8 @@ class LanguageSelectorCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _LanguageOptionChip(
-                      label: 'Español',
-                      sublabel: 'Predeterminado (ES)',
+                      label: l10n.spanish,
+                      sublabel: 'ES',
                       isSelected: isSpanish,
                       onTap: () => ctrl.setLocale(const Locale('es')),
                     ),
@@ -62,8 +64,8 @@ class LanguageSelectorCard extends StatelessWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: _LanguageOptionChip(
-                      label: 'English',
-                      sublabel: 'English (US)',
+                      label: l10n.english,
+                      sublabel: 'EN',
                       isSelected: !isSpanish,
                       onTap: () => ctrl.setLocale(const Locale('en')),
                     ),

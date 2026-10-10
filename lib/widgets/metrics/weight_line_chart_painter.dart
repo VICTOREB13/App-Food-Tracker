@@ -11,6 +11,7 @@ class WeightLineChartPainter extends CustomPainter {
   final Color gradientColor;
   final Color gridColor;
   final TextStyle labelStyle;
+  final String? emptyPlaceholderText;
 
   const WeightLineChartPainter({
     required this.logs,
@@ -18,6 +19,7 @@ class WeightLineChartPainter extends CustomPainter {
     this.gradientColor = AppColors.primary,
     this.gridColor = const Color(0xFF27272A),
     this.labelStyle = const TextStyle(fontSize: 10, color: Color(0xFFA1A1AA), fontWeight: FontWeight.w500),
+    this.emptyPlaceholderText,
   });
 
   @override
@@ -26,7 +28,12 @@ class WeightLineChartPainter extends CustomPainter {
 
     // Edge Case: 0 logs (draws subtle empty placeholder/text)
     if (logs.isEmpty) {
-      WeightChartRenderUtils.paintEmptyState(canvas, size, labelStyle);
+      WeightChartRenderUtils.paintEmptyState(
+        canvas,
+        size,
+        labelStyle,
+        placeholderText: emptyPlaceholderText,
+      );
       return;
     }
 

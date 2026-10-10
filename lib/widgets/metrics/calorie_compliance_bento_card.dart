@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../controllers/meal_controller.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/daily_goals.dart';
 import '../../models/meal.dart';
 import '../../services/theme_manager.dart';
@@ -41,22 +42,24 @@ class CalorieComplianceBentoCard extends StatelessWidget {
         ? ((avgCalories / targetCalories) * 100).toInt()
         : 0;
 
+    final l10n = AppLocalizations.of(context);
+
     final String statusText;
     final Color statusColor;
     if (targetCalories <= 0) {
-      statusText = 'Sin meta';
+      statusText = l10n.noTarget;
       statusColor = AppColors.textSecondary(context);
     } else if (avgCalories == 0) {
-      statusText = 'Sin registros';
+      statusText = l10n.noLogs;
       statusColor = AppColors.textSecondary(context);
     } else if (avgCalories < targetCalories - 200) {
-      statusText = 'Déficit saludable';
+      statusText = l10n.healthyDeficit;
       statusColor = AppColors.protein;
     } else if ((avgCalories - targetCalories).abs() <= 200) {
-      statusText = 'Mantenimiento';
+      statusText = l10n.maintenanceBalance;
       statusColor = AppColors.carbs;
     } else {
-      statusText = 'Superávit';
+      statusText = l10n.surplus;
       statusColor = AppColors.primaryLight;
     }
 
@@ -85,7 +88,7 @@ class CalorieComplianceBentoCard extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'CALORÍAS',
+                  l10n.calories.toUpperCase(),
                   style: GoogleFonts.inter(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
@@ -130,7 +133,7 @@ class CalorieComplianceBentoCard extends StatelessWidget {
               ),
               const SizedBox(width: 4),
               Text(
-                'kcal/día',
+                l10n.kcalPerDay,
                 style: GoogleFonts.inter(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
@@ -141,7 +144,7 @@ class CalorieComplianceBentoCard extends StatelessWidget {
           ),
           const SizedBox(height: 2),
           Text(
-            'Meta: ${targetCalories.toStringAsFixed(0)} kcal ($compliancePercent%)',
+            l10n.targetCaloriesCompliance(targetCalories.toStringAsFixed(0), compliancePercent.toString()),
             style: GoogleFonts.inter(
               fontSize: 11,
               color: AppColors.textSecondary(context),
@@ -165,7 +168,7 @@ class CalorieComplianceBentoCard extends StatelessWidget {
 
           // Days registered footer
           Text(
-            '$activeDays de $days días con ingesta',
+            l10n.daysWithIntake(activeDays.toString(), days.toString()),
             style: GoogleFonts.inter(
               fontSize: 10,
               color: AppColors.textMuted(context),

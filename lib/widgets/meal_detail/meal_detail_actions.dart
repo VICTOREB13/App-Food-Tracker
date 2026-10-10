@@ -7,14 +7,16 @@ import '../../services/gemini_vision_service.dart';
 import '../../services/image_processing_service.dart';
 import '../../services/secure_storage_service.dart';
 import '../../services/theme_manager.dart';
+import '../../l10n/app_localizations.dart';
 import '../common/confirmation_dialog.dart';
 
 Future<bool> confirmAndDeleteMeal(BuildContext context, Meal meal) async {
+  final l10n = AppLocalizations.of(context);
   final confirmed = await showVeConfirmationDialog(
     context,
-    title: '¿Eliminar Comida?',
-    message: 'Esta acción eliminará el registro de forma permanente de tu SQLite local.',
-    confirmLabel: 'Eliminar',
+    title: l10n.deleteMealConfirmTitle,
+    message: l10n.deleteMealConfirmMessage,
+    confirmLabel: l10n.delete,
     isDestructive: true,
   );
 
@@ -26,7 +28,7 @@ Future<bool> confirmAndDeleteMeal(BuildContext context, Meal meal) async {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error al eliminar comida: $e'),
+          content: Text(l10n.deleteMealError('$e')),
           backgroundColor: AppColors.primary,
         ),
       );
@@ -50,9 +52,10 @@ Future<bool> saveMealEntry({
   required List<FoodItem> items,
   String? aiBreakdownJson,
 }) async {
+  final l10n = AppLocalizations.of(context);
   if (name.isEmpty) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Por favor ingresa un nombre para el plato.')),
+      SnackBar(content: Text(l10n.pleaseEnterDishName)),
     );
     return false;
   }
@@ -95,7 +98,7 @@ Future<bool> saveMealEntry({
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error al guardar comida: $e'),
+          content: Text(l10n.saveMealError('$e')),
           backgroundColor: AppColors.primary,
         ),
       );
@@ -112,11 +115,12 @@ Future<MealAnalysisResult?> reanalyzeMealWithAi({
   required List<FoodItem> currentItems,
 }) async {
   if (imagePath == null) return null;
+  final l10n = AppLocalizations.of(context);
   final file = File(imagePath);
   if (!file.existsSync()) {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No se encontró el archivo de imagen en disco.')),
+        SnackBar(content: Text(l10n.imageFileNotFoundError)),
       );
     }
     return null;
@@ -126,8 +130,8 @@ Future<MealAnalysisResult?> reanalyzeMealWithAi({
   if (apiKey == null || apiKey.trim().isEmpty) {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Configura tu API Key de Gemini en Perfil para re-analizar.'),
+        SnackBar(
+          content: Text(l10n.configureGeminiKeyInProfile),
           backgroundColor: AppColors.primary,
         ),
       );
@@ -167,8 +171,8 @@ Future<MealAnalysisResult?> reanalyzeMealWithAi({
 
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Plato re-analizado y actualizado con IA.'),
+        SnackBar(
+          content: Text(l10n.mealReanalyzedSuccess),
           backgroundColor: AppColors.success,
         ),
       );
@@ -178,7 +182,7 @@ Future<MealAnalysisResult?> reanalyzeMealWithAi({
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error al re-analizar imagen: $e'),
+          content: Text(l10n.reanalyzeMealError('$e')),
           backgroundColor: AppColors.primary,
         ),
       );

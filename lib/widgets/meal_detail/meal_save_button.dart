@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../l10n/app_localizations.dart';
-import '../../l10n/app_localizations_es.dart';
 import '../../services/theme_manager.dart';
 
 class MealSaveButton extends StatelessWidget {

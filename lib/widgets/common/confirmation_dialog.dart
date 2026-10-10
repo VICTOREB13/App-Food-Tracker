@@ -1,15 +1,20 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/theme_manager.dart';
 
 Future<bool?> showVeConfirmationDialog(
   BuildContext context, {
   required String title,
   required String message,
-  String confirmLabel = 'Confirmar',
-  String cancelLabel = 'Cancelar',
+  String? confirmLabel,
+  String? cancelLabel,
   bool isDestructive = false,
 }) {
+  final l10n = AppLocalizations.of(context);
+  final effectiveConfirmLabel = confirmLabel ?? l10n.confirm;
+  final effectiveCancelLabel = cancelLabel ?? l10n.cancel;
+
   return showDialog<bool>(
     context: context,
     builder: (dialogContext) => AlertDialog(
@@ -37,7 +42,7 @@ Future<bool?> showVeConfirmationDialog(
         TextButton(
           onPressed: () => Navigator.of(dialogContext).pop(false),
           child: Text(
-            cancelLabel,
+            effectiveCancelLabel,
             style: GoogleFonts.inter(
               fontWeight: FontWeight.w600,
               color: AppColors.textSecondary(context),
@@ -56,7 +61,7 @@ Future<bool?> showVeConfirmationDialog(
             ),
           ),
           child: Text(
-            confirmLabel,
+            effectiveConfirmLabel,
             style: GoogleFonts.inter(fontWeight: FontWeight.w700),
           ),
         ),

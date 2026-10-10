@@ -2,7 +2,7 @@ name: food_tracker
 description: "Food Tracker"
 publish_to: 'none'
 
-version: 1.4.0+1
+version: 1.4.1+1
 
 environment:
   sdk: '>=3.4.0 <4.0.0'
@@ -41,7 +41,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  generate: true
   assets:
     - lib/assets/images/
     - lib/assets/android_widgets/

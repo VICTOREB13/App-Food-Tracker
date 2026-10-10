@@ -1,5 +1,6 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/theme_manager.dart';
 
 class MealMacroChipsRow extends StatelessWidget {
@@ -18,12 +19,13 @@ class MealMacroChipsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Row(
       children: [
         Expanded(
           child: _buildTile(
             context,
-            label: 'Calorías',
+            label: l10n.calories,
             value: calories.toStringAsFixed(0),
             unit: 'kcal',
             color: AppColors.calories,
@@ -33,7 +35,7 @@ class MealMacroChipsRow extends StatelessWidget {
         Expanded(
           child: _buildTile(
             context,
-            label: 'Proteínas',
+            label: l10n.protein,
             value: protein.toStringAsFixed(0),
             unit: 'g',
             color: AppColors.protein,
@@ -43,7 +45,7 @@ class MealMacroChipsRow extends StatelessWidget {
         Expanded(
           child: _buildTile(
             context,
-            label: 'Carbos',
+            label: l10n.carbs,
             value: carbs.toStringAsFixed(0),
             unit: 'g',
             color: AppColors.carbs,
@@ -53,7 +55,7 @@ class MealMacroChipsRow extends StatelessWidget {
         Expanded(
           child: _buildTile(
             context,
-            label: 'Grasas',
+            label: l10n.fat,
             value: fat.toStringAsFixed(0),
             unit: 'g',
             color: AppColors.fat,

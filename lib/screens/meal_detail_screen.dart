@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../controllers/meal_controller.dart';
 import '../l10n/app_localizations.dart';
-import '../l10n/app_localizations_es.dart';
 import '../models/food_item.dart';
 import '../models/meal.dart';
 import '../services/image_processing_service.dart';
@@ -90,9 +89,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
     _progressTimer?.cancel();
     final l10n = AppLocalizations.of(context);
     _analysisProgress = MealAnalysisPacing.initialProgress;
-    _analysisStage = l10n != null
-        ? MealAnalysisPacing.getStageMessage(_analysisProgress!, l10n)
-        : 'Optimizando foto y calibración de vajilla...';
+    _analysisStage = MealAnalysisPacing.getStageMessage(_analysisProgress!, l10n);
     _progressTimer = Timer.periodic(const Duration(milliseconds: 500), (t) {
       if (!mounted || !_isReanalyzing) return t.cancel();
       final cur = _analysisProgress ?? MealAnalysisPacing.initialProgress;
@@ -100,9 +97,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
       final currentL10n = AppLocalizations.of(context);
       setState(() {
         _analysisProgress = next;
-        if (currentL10n != null) {
-          _analysisStage = MealAnalysisPacing.getStageMessage(next, currentL10n);
-        }
+        _analysisStage = MealAnalysisPacing.getStageMessage(next, currentL10n);
       });
     });
   }
@@ -142,7 +137,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
         final l10n = AppLocalizations.of(context);
         setState(() {
           _analysisProgress = 1.0;
-          _analysisStage = l10n?.analysisStageComplete ?? '¡Desglose nutricional completado!';
+          _analysisStage = l10n.analysisStageComplete;
         });
         await Future.delayed(const Duration(milliseconds: 350));
         if (!mounted) return;
@@ -152,7 +147,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
           }
           if (_notesController.text.trim().isEmpty && analysis.items.isNotEmpty) {
             final summary = analysis.items.map((e) => '${e.name} (${e.estimatedGrams.toStringAsFixed(0)}g)').join(', ');
-            _notesController.text = 'Ingredientes: $summary';
+            _notesController.text = '${l10n.ingredients}: $summary';
           }
           _items = List.from(analysis.items);
           _calories = analysis.totalCalories; _protein = analysis.totalProtein;

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../controllers/meal_controller.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/theme_manager.dart';
 import 'quick_weight_adjuster_row.dart';
 
@@ -68,8 +69,9 @@ class _QuickWeightEntryDialogState extends State<QuickWeightEntryDialog> {
   Future<void> _handleSave() async {
     final rawText = _weightController.text.trim().replaceAll(',', '.');
     final weight = double.tryParse(rawText);
+    final l10n = AppLocalizations.of(context);
     if (weight == null || weight.isNaN || weight.isInfinite || weight < 20.0 || weight > 350.0) {
-      setState(() => _errorMessage = 'El peso debe estar entre 20.0 y 350.0 kg');
+      setState(() => _errorMessage = l10n.weightRangeError);
       return;
     }
     setState(() { _errorMessage = null; _isSaving = true; });
@@ -79,13 +81,13 @@ class _QuickWeightEntryDialogState extends State<QuickWeightEntryDialog> {
       if (!mounted) return;
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('⚖️ Peso guardado: ${weight % 1 == 0 ? weight.toInt().toString() : weight.toString()} kg'),
+        content: Text(l10n.weightLoggedSuccess(weight % 1 == 0 ? weight.toInt().toString() : weight.toString())),
         backgroundColor: AppColors.primary,
         duration: const Duration(seconds: 2),
       ));
     } catch (e) {
       if (!mounted) return;
-      setState(() { _errorMessage = 'Error al registrar peso: $e'; _isSaving = false; });
+      setState(() { _errorMessage = l10n.weightLogError(e.toString()); _isSaving = false; });
     }
   }
 
@@ -135,25 +137,25 @@ class _QuickWeightEntryDialogState extends State<QuickWeightEntryDialog> {
                 Expanded(child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Registrar Peso', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary(context))),
-                    Text('Seguimiento metabólico y analítica', style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary(context))),
+                    Text(l10n.recordWeight, style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary(context))),
+                    Text(l10n.weightTrackingSubtitle, style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary(context))),
                   ],
                 )),
                 IconButton(icon: const Icon(Icons.close, size: 20), color: AppColors.textSecondary(context), onPressed: () => Navigator.of(context).pop()),
               ]),
               const SizedBox(height: 18),
-              _label('PESO CORPORAL (KG)', context),
+              _label(l10n.bodyWeightHeader, context),
               const SizedBox(height: 6),
               TextField(
                 controller: _weightController,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 style: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary(context)),
-                decoration: _fieldDec(bg: fieldBg, border: borderColor, hint: 'ej. 78.5', hintStyle: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.w400, color: AppColors.textMuted(context)), suffix: 'kg'),
+                decoration: _fieldDec(bg: fieldBg, border: borderColor, hint: l10n.exampleWeightHint, hintStyle: GoogleFonts.outfit(fontSize: 22, fontWeight: FontWeight.w400, color: AppColors.textMuted(context)), suffix: 'kg'),
               ),
               const SizedBox(height: 8),
               QuickWeightAdjusterRow(onAdjust: _adjustWeight),
               const SizedBox(height: 14),
-              _label('FECHA DEL REGISTRO', context),
+              _label(l10n.recordDateHeader, context),
               const SizedBox(height: 6),
               InkWell(
                 onTap: _pickDate,
@@ -163,22 +165,22 @@ class _QuickWeightEntryDialogState extends State<QuickWeightEntryDialog> {
                   decoration: BoxDecoration(color: fieldBg, borderRadius: BorderRadius.circular(12), border: Border.all(color: borderColor)),
                   child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                     Row(children: [
-                      const Icon(Icons.calendar_today_outlined, size: 16, color: AppColors.primary),
-                      const SizedBox(width: 8),
-                      Text(dateStr, style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.textPrimary(context))),
+                       const Icon(Icons.calendar_today_outlined, size: 16, color: AppColors.primary),
+                       const SizedBox(width: 8),
+                       Text(dateStr, style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.textPrimary(context))),
                     ]),
-                    Text('Cambiar', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primary)),
+                    Text(l10n.changeAction, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primary)),
                   ]),
                 ),
               ),
               const SizedBox(height: 14),
-              _label('NOTAS (OPCIONAL)', context),
+              _label(l10n.notesOptionalHeader, context),
               const SizedBox(height: 6),
               TextField(
                 controller: _notesController,
                 maxLines: 2,
                 style: GoogleFonts.inter(fontSize: 13, color: AppColors.textPrimary(context)),
-                decoration: _fieldDec(bg: fieldBg, border: borderColor, hint: 'ej. En ayunas, post-entreno', hintStyle: GoogleFonts.inter(fontSize: 13, color: AppColors.textMuted(context))),
+                decoration: _fieldDec(bg: fieldBg, border: borderColor, hint: l10n.exampleNotesHint, hintStyle: GoogleFonts.inter(fontSize: 13, color: AppColors.textMuted(context))),
               ),
               if (_errorMessage != null)
                 Padding(
@@ -198,7 +200,7 @@ class _QuickWeightEntryDialogState extends State<QuickWeightEntryDialog> {
                 Expanded(child: OutlinedButton(
                   onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
                   style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12), side: BorderSide(color: borderColor), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-                  child: Text('Cancelar', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textSecondary(context))),
+                  child: Text(l10n.cancel, style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textSecondary(context))),
                 )),
                 const SizedBox(width: 12),
                 Expanded(child: ElevatedButton(
@@ -206,7 +208,7 @@ class _QuickWeightEntryDialogState extends State<QuickWeightEntryDialog> {
                   style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, padding: const EdgeInsets.symmetric(vertical: 12), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
                   child: _isSaving
                       ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                      : Text('Guardar', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white)),
+                      : Text(l10n.save, style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white)),
                 )),
               ]),
             ],

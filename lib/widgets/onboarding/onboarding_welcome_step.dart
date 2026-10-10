@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_card.dart';
 import '../common/ve_logo.dart';
@@ -44,6 +45,7 @@ class _OnboardingWelcomeStepState extends State<OnboardingWelcomeStep> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Column(
@@ -53,7 +55,7 @@ class _OnboardingWelcomeStepState extends State<OnboardingWelcomeStep> {
           const VeLogo(size: 64, borderRadius: 16),
           const SizedBox(height: 24),
           Text(
-            '¡Bienvenido a Food Tracker!',
+            l10n.welcomeTitle,
             textAlign: TextAlign.center,
             style: GoogleFonts.outfit(
               fontSize: 26,
@@ -64,7 +66,7 @@ class _OnboardingWelcomeStepState extends State<OnboardingWelcomeStep> {
           ),
           const SizedBox(height: 10),
           Text(
-            'Tu asistente nutricional 100% privado, local-first e impulsado por IA.',
+            l10n.welcomeTagline,
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(
               fontSize: 14,
@@ -79,7 +81,7 @@ class _OnboardingWelcomeStepState extends State<OnboardingWelcomeStep> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '¿CÓMO TE LLAMAS?',
+                  l10n.whatIsYourName,
                   style: GoogleFonts.inter(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
@@ -94,7 +96,7 @@ class _OnboardingWelcomeStepState extends State<OnboardingWelcomeStep> {
                   textCapitalization: TextCapitalization.words,
                   style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
                   decoration: InputDecoration(
-                    hintText: 'Ej: Carlos',
+                    hintText: l10n.nameHint,
                     prefixIcon: const Icon(Icons.person_outline, size: 20),
                     filled: true,
                     fillColor: AppColors.surfaceSubtle(context),
@@ -119,22 +121,22 @@ class _OnboardingWelcomeStepState extends State<OnboardingWelcomeStep> {
           _buildFeaturePill(
             context,
             icon: Icons.shield_outlined,
-            title: '100% Local-First & Privado',
-            description: 'Tus fotos, comidas y métricas jamás salen de tu dispositivo.',
+            title: l10n.privacyLocalFeatureTitle,
+            description: l10n.privacyLocalFeature,
           ),
           const SizedBox(height: 12),
           _buildFeaturePill(
             context,
             icon: Icons.auto_awesome_outlined,
-            title: 'Inteligencia Artificial Gemini',
-            description: 'Estimación inmediata de calorías y macros con tu propia API Key.',
+            title: l10n.byokFeatureTitle,
+            description: l10n.byokFeatureDesc,
           ),
           const SizedBox(height: 12),
           _buildFeaturePill(
             context,
             icon: Icons.monitor_weight_outlined,
-            title: 'Metabolismo Clínico Preciso',
-            description: 'Fórmulas de Mifflin-St Jeor adaptadas a tu rutina y objetivos.',
+            title: l10n.clinicalMetabolismTitle,
+            description: l10n.clinicalMetabolismDesc,
           ),
         ],
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/daily_goals.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_card.dart';
@@ -78,6 +79,7 @@ class _DailyGoalsCardState extends State<DailyGoalsCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return VeCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -87,7 +89,7 @@ class _DailyGoalsCardState extends State<DailyGoalsCard> {
               const Icon(Icons.track_changes_outlined, size: 20, color: AppColors.protein),
               const SizedBox(width: 8),
               Text(
-                'METAS NUTRICIONALES DIARIAS',
+                l10n.dailyGoalsHeader,
                 style: GoogleFonts.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
@@ -104,7 +106,7 @@ class _DailyGoalsCardState extends State<DailyGoalsCard> {
                 child: TextField(
                   controller: _caloriesController,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(labelText: 'Calorías (kcal)'),
+                  decoration: InputDecoration(labelText: l10n.caloriesKcalLabel),
                 ),
               ),
               const SizedBox(width: 8),
@@ -112,7 +114,7 @@ class _DailyGoalsCardState extends State<DailyGoalsCard> {
                 child: TextField(
                   controller: _proteinController,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(labelText: 'Proteínas (g)'),
+                  decoration: InputDecoration(labelText: l10n.proteinGramsLabel),
                 ),
               ),
             ],
@@ -124,7 +126,7 @@ class _DailyGoalsCardState extends State<DailyGoalsCard> {
                 child: TextField(
                   controller: _carbsController,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(labelText: 'Carbohidratos (g)'),
+                  decoration: InputDecoration(labelText: l10n.carbsGramsLabel),
                 ),
               ),
               const SizedBox(width: 8),
@@ -132,7 +134,7 @@ class _DailyGoalsCardState extends State<DailyGoalsCard> {
                 child: TextField(
                   controller: _fatController,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(labelText: 'Grasas (g)'),
+                  decoration: InputDecoration(labelText: l10n.fatGramsLabel),
                 ),
               ),
             ],
@@ -152,7 +154,7 @@ class _DailyGoalsCardState extends State<DailyGoalsCard> {
                 ),
               ),
               icon: const Icon(Icons.save_outlined, size: 16),
-              label: Text('Actualizar Metas', style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
+              label: Text(l10n.updateGoalsAction, style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
             ),
           ),
         ],

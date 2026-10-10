@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../controllers/meal_controller.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/daily_goals.dart';
 import '../../models/meal.dart';
 import '../../services/theme_manager.dart';
@@ -28,6 +29,7 @@ class MacroDistributionBentoCard extends StatelessWidget {
     }
 
     final activeDays = math.max(1, daysSet.length);
+    final l10n = AppLocalizations.of(context);
     final hasData = meals.isNotEmpty;
 
     final totalProtein = meals.fold<double>(0.0, (acc, m) => acc + m.protein);
@@ -76,7 +78,7 @@ class MacroDistributionBentoCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'DISTRIBUCIÓN DE MACROS',
+                      l10n.macroDistributionHeader,
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
@@ -86,7 +88,7 @@ class MacroDistributionBentoCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Promedio diario',
+                      l10n.dailyAverage,
                       style: GoogleFonts.inter(
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
@@ -134,7 +136,7 @@ class MacroDistributionBentoCard extends StatelessWidget {
               Expanded(
                 child: _buildMacroItem(
                   context,
-                  label: 'Proteína',
+                  label: l10n.protein,
                   grams: avgProtein,
                   distributionPct: pctProtein,
                   targetGrams: effectiveGoals.protein,
@@ -150,7 +152,7 @@ class MacroDistributionBentoCard extends StatelessWidget {
               Expanded(
                 child: _buildMacroItem(
                   context,
-                  label: 'Carbos',
+                  label: l10n.carbs,
                   grams: avgCarbs,
                   distributionPct: pctCarbs,
                   targetGrams: effectiveGoals.carbs,
@@ -166,7 +168,7 @@ class MacroDistributionBentoCard extends StatelessWidget {
               Expanded(
                 child: _buildMacroItem(
                   context,
-                  label: 'Grasas',
+                  label: l10n.fat,
                   grams: avgFat,
                   distributionPct: pctFat,
                   targetGrams: effectiveGoals.fat,
@@ -243,7 +245,7 @@ class MacroDistributionBentoCard extends StatelessWidget {
             ],
           ),
           Text(
-            '${goalPercent.toStringAsFixed(0)}% · Meta: ${targetGrams.toStringAsFixed(0)}g',
+            AppLocalizations.of(context).macroGoalTarget(goalPercent.toStringAsFixed(0), targetGrams.toStringAsFixed(0)),
             style: GoogleFonts.inter(
               fontSize: 10,
               color: AppColors.textMuted(context),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/weight_log.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_card.dart';
@@ -23,6 +24,7 @@ class _WeightHistoryBentoCardState extends State<WeightHistoryBentoCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final sortedLogs = List<WeightLog>.from(widget.logs)
       ..sort((a, b) => b.date.compareTo(a.date));
 
@@ -54,7 +56,7 @@ class _WeightHistoryBentoCardState extends State<WeightHistoryBentoCard> {
                   ),
                   const SizedBox(width: 10),
                   Text(
-                    'HISTORIAL DE PESO',
+                    l10n.weightHistoryHeader,
                     style: GoogleFonts.inter(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
@@ -65,7 +67,7 @@ class _WeightHistoryBentoCardState extends State<WeightHistoryBentoCard> {
                 ],
               ),
               Text(
-                '${sortedLogs.length} ${sortedLogs.length == 1 ? 'registro' : 'registros'}',
+                '${sortedLogs.length} ${sortedLogs.length == 1 ? l10n.singleRecord : l10n.multipleRecords}',
                 style: GoogleFonts.inter(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
@@ -81,7 +83,7 @@ class _WeightHistoryBentoCardState extends State<WeightHistoryBentoCard> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               child: Center(
                 child: Text(
-                  'Sin registros de peso en este período.',
+                  l10n.noWeightRecordsInPeriod,
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     color: AppColors.textMuted(context),
@@ -185,7 +187,7 @@ class _WeightHistoryBentoCardState extends State<WeightHistoryBentoCard> {
                     color: AppColors.primary,
                   ),
                   label: Text(
-                    _expanded ? 'Ver menos' : 'Ver todos (${sortedLogs.length})',
+                    _expanded ? l10n.viewLess : l10n.viewAllCount('${sortedLogs.length}'),
                     style: GoogleFonts.inter(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,

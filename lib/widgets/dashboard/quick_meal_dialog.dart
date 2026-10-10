@@ -74,7 +74,8 @@ class _QuickMealDialogState extends State<_QuickMealDialog> {
   }
 
   void _submit() {
-    final name = _nameController.text.trim().isEmpty ? 'Comida rápida' : _nameController.text.trim();
+    final l10n = AppLocalizations.of(context);
+    final name = _nameController.text.trim().isEmpty ? l10n.quickMealDefaultName : _nameController.text.trim();
     final cal = double.tryParse(_caloriesController.text.trim()) ?? 0.0;
     if (cal <= 0) return;
 
@@ -90,13 +91,14 @@ class _QuickMealDialogState extends State<_QuickMealDialog> {
       protein: protein,
       carbs: carbs,
       fat: fat,
-      notes: 'Registro rápido de comida',
+      notes: l10n.quickMealNotesDefault,
     );
     Navigator.of(context).pop(meal);
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AlertDialog(
       backgroundColor: AppColors.surface(context),
       shape: RoundedRectangleBorder(
@@ -108,7 +110,7 @@ class _QuickMealDialogState extends State<_QuickMealDialog> {
           const Icon(Icons.bolt, color: AppColors.carbsAmber, size: 22),
           const SizedBox(width: 8),
           Text(
-            'Comida Rápida',
+            l10n.quickMealTitle,
             style: GoogleFonts.outfit(
               fontSize: 18,
               fontWeight: FontWeight.w700,
@@ -125,11 +127,11 @@ class _QuickMealDialogState extends State<_QuickMealDialog> {
             children: [
               TextField(
                 controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Descripción / Alimento',
-                  hintText: 'Ej. Manzana, Avena, Yogur',
-                  suffixIcon: Icon(Icons.search, size: 18, color: AppColors.primary),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                decoration: InputDecoration(
+                  labelText: l10n.quickMealDescriptionLabel,
+                  hintText: l10n.foodItemExamples,
+                  suffixIcon: const Icon(Icons.search, size: 18, color: AppColors.primary),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                 ),
               ),
               if (_suggestions.isNotEmpty)
@@ -166,7 +168,7 @@ class _QuickMealDialogState extends State<_QuickMealDialog> {
               TextField(
                 controller: _caloriesController,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(labelText: 'Calorías estimadas (kcal) *'),
+                decoration: InputDecoration(labelText: l10n.estimatedCaloriesLabel),
               ),
               const SizedBox(height: 12),
               Row(
@@ -175,7 +177,7 @@ class _QuickMealDialogState extends State<_QuickMealDialog> {
                     child: TextField(
                       controller: _proteinController,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      decoration: const InputDecoration(labelText: 'Prot (g)', hintText: '0'),
+                      decoration: InputDecoration(labelText: l10n.proteinGramsLabel, hintText: '0'),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -183,7 +185,7 @@ class _QuickMealDialogState extends State<_QuickMealDialog> {
                     child: TextField(
                       controller: _carbsController,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      decoration: const InputDecoration(labelText: 'Carb (g)', hintText: '0'),
+                      decoration: InputDecoration(labelText: l10n.carbsGramsLabel, hintText: '0'),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -191,7 +193,7 @@ class _QuickMealDialogState extends State<_QuickMealDialog> {
                     child: TextField(
                       controller: _fatController,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      decoration: const InputDecoration(labelText: 'Grasa (g)', hintText: '0'),
+                      decoration: InputDecoration(labelText: l10n.fatGramsLabel, hintText: '0'),
                     ),
                   ),
                 ],
@@ -200,9 +202,9 @@ class _QuickMealDialogState extends State<_QuickMealDialog> {
               DropdownButtonFormField<String>(
                 initialValue: _mealType,
                 menuMaxHeight: 280,
-                decoration: const InputDecoration(labelText: 'Tipo de Comida'),
+                decoration: InputDecoration(labelText: l10n.mealTypeFieldLabel),
                 items: Meal.validMealTypes
-                    .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                    .map((t) => DropdownMenuItem(value: t, child: Text(t.toLocalizedMealType(context))))
                     .toList(),
                 onChanged: (val) {
                   if (val != null) setState(() => _mealType = val);
@@ -216,7 +218,7 @@ class _QuickMealDialogState extends State<_QuickMealDialog> {
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(
-            AppLocalizations.of(context)?.cancel ?? 'Cancelar',
+            l10n.cancel,
             style: GoogleFonts.inter(color: AppColors.textSecondary(context)),
           ),
         ),
@@ -228,7 +230,7 @@ class _QuickMealDialogState extends State<_QuickMealDialog> {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
           child: Text(
-            AppLocalizations.of(context)?.save ?? 'Añadir',
+            l10n.addAction,
             style: GoogleFonts.inter(fontWeight: FontWeight.w700),
           ),
         ),

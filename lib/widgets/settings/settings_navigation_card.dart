@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../screens/dishware_settings_screen.dart';
 import '../../screens/onboarding_screen.dart';
 import '../../screens/pantry_screen.dart';
@@ -12,6 +13,7 @@ class SettingsNavigationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return VeCard(
       child: Column(
         children: [
@@ -19,8 +21,8 @@ class SettingsNavigationCard extends StatelessWidget {
             context,
             icon: Icons.person_outline,
             iconColor: AppColors.primary,
-            title: 'Perfil Nutricional y Metas (Mifflin-St Jeor)',
-            subtitle: 'Parámetros biológicos, TDEE y Master Prompt',
+            title: l10n.navProfileTitle,
+            subtitle: l10n.navProfileSubtitle,
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const UserProfileScreen()),
             ),
@@ -30,8 +32,8 @@ class SettingsNavigationCard extends StatelessWidget {
             context,
             icon: Icons.straighten_rounded,
             iconColor: AppColors.calories,
-            title: 'Calibración de Vajilla / Escala Métrica',
-            subtitle: 'Diámetro de platos para cubicaje visual de IA',
+            title: l10n.navDishwareTitle,
+            subtitle: l10n.navDishwareSubtitle,
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const DishwareSettingsScreen()),
             ),
@@ -41,8 +43,8 @@ class SettingsNavigationCard extends StatelessWidget {
             context,
             icon: Icons.kitchen_outlined,
             iconColor: AppColors.protein,
-            title: 'Mi Despensa y Marcas Locales',
-            subtitle: 'Productos y contexto de marcas para Gemini Vision',
+            title: l10n.navPantryTitle,
+            subtitle: l10n.navPantrySubtitle,
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const PantryScreen()),
             ),
@@ -52,8 +54,8 @@ class SettingsNavigationCard extends StatelessWidget {
             context,
             icon: Icons.auto_fix_high_rounded,
             iconColor: AppColors.carbs,
-            title: 'Asistente de Inicio / Reconfigurar Perfil',
-            subtitle: 'Paso a paso guiado de configuración inicial',
+            title: l10n.navOnboardingTitle,
+            subtitle: l10n.navOnboardingSubtitle,
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const OnboardingScreen()),
             ),

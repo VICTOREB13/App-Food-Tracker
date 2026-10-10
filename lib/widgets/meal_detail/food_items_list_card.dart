@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../l10n/app_localizations.dart';
-import '../../l10n/app_localizations_es.dart';
 import '../../models/food_item.dart';
 import '../../services/theme_manager.dart';
 import '../common/macro_indicator_chip.dart';
@@ -23,7 +22,7 @@ class FoodItemsListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEs();
+    final l10n = AppLocalizations.of(context);
 
     return VeCard(
       child: Column(
@@ -33,7 +32,7 @@ class FoodItemsListCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'DESGLOSE DE INGREDIENTES (${items.length})',
+                l10n.ingredientsBreakdownTitle('${items.length}'),
                 style: GoogleFonts.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
@@ -56,7 +55,7 @@ class FoodItemsListCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Center(
                 child: Text(
-                  'No hay ingredientes desglosados en este plato.',
+                  l10n.noIngredientsInMeal,
                   style: GoogleFonts.inter(
                     fontSize: 13,
                     color: AppColors.textMuted(context),
@@ -83,7 +82,7 @@ class FoodItemsListCard extends StatelessWidget {
   }
 
   Widget _buildItemTile(BuildContext context, FoodItem item) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEs();
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(

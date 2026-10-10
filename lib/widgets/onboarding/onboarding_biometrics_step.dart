@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_card.dart';
 
@@ -87,6 +88,7 @@ class _OnboardingBiometricsStepState extends State<OnboardingBiometricsStep> {
   @override
   Widget build(BuildContext context) {
     final isMale = widget.gender == 'male';
+    final l10n = AppLocalizations.of(context);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -95,7 +97,7 @@ class _OnboardingBiometricsStepState extends State<OnboardingBiometricsStep> {
         children: [
           const SizedBox(height: 10),
           Text(
-            'Parámetros Biológicos',
+            l10n.biometricsTitle,
             textAlign: TextAlign.center,
             style: GoogleFonts.outfit(
               fontSize: 24,
@@ -106,7 +108,7 @@ class _OnboardingBiometricsStepState extends State<OnboardingBiometricsStep> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Fórmulas clínicas de Mifflin-St Jeor para determinar con precisión tu gasto metabólico.',
+            l10n.biometricsSubtitle,
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(
               fontSize: 13,
@@ -122,7 +124,7 @@ class _OnboardingBiometricsStepState extends State<OnboardingBiometricsStep> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'SEXO BIOLÓGICO',
+                  l10n.biologicalSexHeader,
                   style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.0, color: AppColors.textSecondary(context)),
                 ),
                 const SizedBox(height: 12),
@@ -131,7 +133,7 @@ class _OnboardingBiometricsStepState extends State<OnboardingBiometricsStep> {
                     Expanded(
                       child: _buildGenderOption(
                         context,
-                        label: 'Masculino',
+                        label: l10n.genderMale,
                         icon: Icons.male_rounded,
                         isSelected: isMale,
                         onTap: () => widget.onChanged(gender: 'male'),
@@ -141,7 +143,7 @@ class _OnboardingBiometricsStepState extends State<OnboardingBiometricsStep> {
                     Expanded(
                       child: _buildGenderOption(
                         context,
-                        label: 'Femenino',
+                        label: l10n.genderFemale,
                         icon: Icons.female_rounded,
                         isSelected: !isMale,
                         onTap: () => widget.onChanged(gender: 'female'),
@@ -161,15 +163,15 @@ class _OnboardingBiometricsStepState extends State<OnboardingBiometricsStep> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'DATOS CORPORALES',
+                  l10n.bodyDataTitle,
                   style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.0, color: AppColors.textSecondary(context)),
                 ),
                 const SizedBox(height: 16),
-                _buildNumericField(context, controller: _ageController, label: 'Edad', suffix: 'años', hintText: 'Ej: 25', icon: Icons.cake_outlined, onChanged: _onAgeChanged, keyboardType: TextInputType.number),
+                _buildNumericField(context, controller: _ageController, label: l10n.age, suffix: l10n.yearsSuffix, hintText: l10n.exampleAge25, icon: Icons.cake_outlined, onChanged: _onAgeChanged, keyboardType: TextInputType.number),
                 const SizedBox(height: 14),
-                _buildNumericField(context, controller: _heightController, label: 'Estatura', suffix: 'cm', hintText: 'Ej: 175', icon: Icons.height_rounded, onChanged: _onHeightChanged, keyboardType: const TextInputType.numberWithOptions(decimal: true)),
+                _buildNumericField(context, controller: _heightController, label: l10n.statureLabel, suffix: 'cm', hintText: l10n.exampleHeight175, icon: Icons.height_rounded, onChanged: _onHeightChanged, keyboardType: const TextInputType.numberWithOptions(decimal: true)),
                 const SizedBox(height: 14),
-                _buildNumericField(context, controller: _weightController, label: 'Peso Actual', suffix: 'kg', hintText: 'Ej: 75', icon: Icons.monitor_weight_outlined, onChanged: _onWeightChanged, keyboardType: const TextInputType.numberWithOptions(decimal: true)),
+                _buildNumericField(context, controller: _weightController, label: l10n.currentWeightLabel, suffix: 'kg', hintText: l10n.exampleWeight75, icon: Icons.monitor_weight_outlined, onChanged: _onWeightChanged, keyboardType: const TextInputType.numberWithOptions(decimal: true)),
               ],
             ),
           ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/theme_manager.dart';
 
 /// Renders self-validation chips displaying the AI model's estimated confidence
@@ -26,6 +27,7 @@ class MealAiValidationChips extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
+    final l10n = AppLocalizations.of(context);
     final isDark = AppColors.isDark(context);
 
     return Wrap(
@@ -37,8 +39,8 @@ class MealAiValidationChips extends StatelessWidget {
           _buildChip(
             context,
             icon: Icons.verified_outlined,
-            label: '$confidencePercentage% Certeza',
-            tooltip: 'Certeza de estimación visual: $confidencePercentage%',
+            label: l10n.confidenceCertaintyLabel('$confidencePercentage'),
+            tooltip: l10n.visualConfidenceTooltip('$confidencePercentage'),
             color: _resolveConfidenceColor(confidencePercentage!),
             isDark: isDark,
           ),
@@ -47,7 +49,7 @@ class MealAiValidationChips extends StatelessWidget {
             context,
             icon: Icons.tune,
             label: '±$calorieErrorMargin kcal',
-            tooltip: 'Margen de error calórico estimado: ±$calorieErrorMargin kcal',
+            tooltip: l10n.calorieErrorMarginTooltip('$calorieErrorMargin'),
             color: AppColors.portion,
             isDark: isDark,
           ),

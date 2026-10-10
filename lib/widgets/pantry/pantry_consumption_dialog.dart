@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../controllers/meal_controller.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/meal.dart';
 import '../../models/pantry_item.dart';
 import '../../services/theme_manager.dart';
@@ -63,24 +64,27 @@ class _PantryConsumptionDialogState extends State<PantryConsumptionDialog> {
       await MealController.instance.saveMeal(meal);
 
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
         Navigator.of(context).pop(true);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('🍽️ ${meal.name} registrado en $_selectedMealType (${meal.calories.toInt()} kcal).'),
+            content: Text(l10n.pantryItemLoggedSuccess(meal.name, _selectedMealType.toLocalizedMealType(context), meal.calories.toInt().toString())),
             backgroundColor: AppColors.protein,
           ),
         );
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
         setState(() => _isSaving = false);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error al registrar: $e'), backgroundColor: AppColors.primary));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.errorRegisteringMeal(e.toString())), backgroundColor: AppColors.primary));
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final grams = _currentGrams;
     final scaled = widget.pantryItem.toScaledFoodItem(gramsConsumed: grams > 0 ? grams : 0.0);
     final ref = widget.pantryItem.servingSize > 0 ? widget.pantryItem.servingSize : 100.0;
@@ -92,7 +96,7 @@ class _PantryConsumptionDialogState extends State<PantryConsumptionDialog> {
         children: [
           const Icon(Icons.restaurant_outlined, color: AppColors.primary, size: 22),
           const SizedBox(width: 8),
-          Expanded(child: Text('Registrar a Comida', style: GoogleFonts.outfit(fontWeight: FontWeight.w700, fontSize: 18))),
+          Expanded(child: Text(l10n.pantryLogToMealTitle, style: GoogleFonts.outfit(fontWeight: FontWeight.w700, fontSize: 18))),
         ],
       ),
       content: SingleChildScrollView(
@@ -104,14 +108,14 @@ class _PantryConsumptionDialogState extends State<PantryConsumptionDialog> {
             if (widget.pantryItem.brand != null)
               Text(widget.pantryItem.brand!, style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary(context))),
             const SizedBox(height: 12),
-            Text('Comida de destino:', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold)),
+            Text(l10n.targetMealLabel, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold)),
             const SizedBox(height: 6),
             Wrap(
               spacing: 6,
               children: _mealTypes.map((type) {
                 final isSel = _selectedMealType == type;
                 return ChoiceChip(
-                  label: Text(type),
+                  label: Text(type.toLocalizedMealType(context)),
                   selected: isSel,
                   selectedColor: AppColors.primary,
                   backgroundColor: AppColors.surfaceSubtle(context),
@@ -126,9 +130,9 @@ class _PantryConsumptionDialogState extends State<PantryConsumptionDialog> {
               controller: _gramsController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               decoration: InputDecoration(
-                labelText: 'Gramos a consumir',
+                labelText: l10n.gramsToConsume,
                 suffixText: 'g',
-                helperText: 'Porción de referencia del producto: ${ref.toInt()}g',
+                helperText: l10n.referenceServingInfo(ref.toInt().toString()),
                 isDense: true,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
               ),
@@ -144,15 +148,15 @@ class _PantryConsumptionDialogState extends State<PantryConsumptionDialog> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Nutrientes Calculados en Vivo:', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                  Text(l10n.liveCalculatedNutrients, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primary)),
                   const SizedBox(height: 6),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildMacroItem('Calorías', '${scaled.calories.round()} kcal', AppColors.primary),
-                      _buildMacroItem('Proteína', '${scaled.protein.toStringAsFixed(1)}g', AppColors.protein),
-                      _buildMacroItem('Carbos', '${scaled.carbs.toStringAsFixed(1)}g', AppColors.carbs),
-                      _buildMacroItem('Grasas', '${scaled.fat.toStringAsFixed(1)}g', AppColors.fat),
+                      _buildMacroItem(l10n.calories, '${scaled.calories.round()} kcal', AppColors.primary),
+                      _buildMacroItem(l10n.protein, '${scaled.protein.toStringAsFixed(1)}g', AppColors.protein),
+                      _buildMacroItem(l10n.carbs, '${scaled.carbs.toStringAsFixed(1)}g', AppColors.carbs),
+                      _buildMacroItem(l10n.fat, '${scaled.fat.toStringAsFixed(1)}g', AppColors.fat),
                     ],
                   ),
                 ],
@@ -162,14 +166,14 @@ class _PantryConsumptionDialogState extends State<PantryConsumptionDialog> {
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text('Cancelar', style: GoogleFonts.inter(color: AppColors.textSecondary(context)))),
+        TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text(l10n.cancel, style: GoogleFonts.inter(color: AppColors.textSecondary(context)))),
         ElevatedButton(
           key: const Key('consumption_confirm_button'),
           onPressed: (_isSaving || grams <= 0) ? null : _handleConfirm,
           style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
           child: _isSaving
               ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-              : Text('Añadir a $_selectedMealType', style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+              : Text(l10n.addToMealTypeAction(_selectedMealType.toLocalizedMealType(context)), style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
         ),
       ],
     );

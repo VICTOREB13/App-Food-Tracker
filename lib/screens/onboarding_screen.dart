@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../l10n/app_localizations.dart';
 import '../models/user_profile.dart';
 import '../services/database_service.dart';
 import '../services/metabolic_calculator.dart';
@@ -92,15 +93,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _handleContinue() {
+    final l10n = AppLocalizations.of(context);
     if (_currentStep == 0 && _name.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, ingresa tu nombre para continuar.'), backgroundColor: AppColors.primary),
+        SnackBar(content: Text(l10n.enterNamePrompt), backgroundColor: AppColors.primary),
       );
       return;
     }
     if (_currentStep == 1 && !_isCurrentStepValid) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, completa tus datos corporales válidos para continuar.'), backgroundColor: AppColors.primary),
+        SnackBar(content: Text(l10n.enterValidBiometricsPrompt), backgroundColor: AppColors.primary),
       );
       return;
     }
@@ -137,9 +139,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       }
     } catch (e) {
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error al guardar perfil: $e'),
+          content: Text(l10n.saveProfileError('$e')),
           backgroundColor: AppColors.primary,
         ),
       );
@@ -171,7 +174,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         title: Column(
           children: [
             Text(
-              'PASO ${_currentStep + 1} DE 4',
+              AppLocalizations.of(context).onboardingStepOf('${_currentStep + 1}', '4'),
               style: GoogleFonts.inter(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,

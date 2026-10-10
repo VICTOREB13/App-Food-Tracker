@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_card.dart';
 
@@ -16,41 +17,43 @@ class OnboardingActivityStep extends StatelessWidget {
     required this.onChanged,
   });
 
-  static const List<Map<String, dynamic>> _activityOptions = [
-    {
-      'id': 'sedentary',
-      'title': 'Sedentario',
-      'subtitle': 'Oficina / poco o ningún ejercicio estructurado',
-      'factor': '1.20x',
-      'icon': Icons.weekend_outlined,
-    },
-    {
-      'id': 'light',
-      'title': 'Ligero',
-      'subtitle': 'Caminatas o deporte ligero 1-3 días/semana',
-      'factor': '1.375x',
-      'icon': Icons.directions_walk_rounded,
-    },
-    {
-      'id': 'moderate',
-      'title': 'Moderado',
-      'subtitle': 'Entrenamiento activo 3-5 días/semana',
-      'factor': '1.55x',
-      'icon': Icons.fitness_center_rounded,
-    },
-    {
-      'id': 'very_active',
-      'title': 'Muy Activo',
-      'subtitle': 'Ejercicio intenso o físico 6-7 días/semana',
-      'factor': '1.725x',
-      'icon': Icons.sports_gymnastics_rounded,
-    },
-  ];
-
   static const List<int> _stepOptions = [6000, 8000, 10000, 12000, 15000];
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
+    final activityOptions = [
+      {
+        'id': 'sedentary',
+        'title': l10n.activitySedentary,
+        'subtitle': l10n.activitySedentaryDesc,
+        'factor': '1.20x',
+        'icon': Icons.weekend_outlined,
+      },
+      {
+        'id': 'light',
+        'title': l10n.activityLight,
+        'subtitle': l10n.activityLightDesc,
+        'factor': '1.375x',
+        'icon': Icons.directions_walk_rounded,
+      },
+      {
+        'id': 'moderate',
+        'title': l10n.activityModerate,
+        'subtitle': l10n.activityModerateDesc,
+        'factor': '1.55x',
+        'icon': Icons.fitness_center_rounded,
+      },
+      {
+        'id': 'very_active',
+        'title': l10n.activityVeryActive,
+        'subtitle': l10n.activityVeryActiveDesc,
+        'factor': '1.725x',
+        'icon': Icons.sports_gymnastics_rounded,
+      },
+    ];
+
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Column(
@@ -58,7 +61,7 @@ class OnboardingActivityStep extends StatelessWidget {
         children: [
           const SizedBox(height: 10),
           Text(
-            'Actividad y Movimiento Diario',
+            l10n.activityStepTitle,
             textAlign: TextAlign.center,
             style: GoogleFonts.outfit(
               fontSize: 24,
@@ -69,7 +72,7 @@ class OnboardingActivityStep extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Selecciona el ritmo de tu rutina semanal para calcular tu gasto calórico real (TDEE).',
+            l10n.activityStepSubtitle,
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(
               fontSize: 13,
@@ -85,7 +88,7 @@ class OnboardingActivityStep extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'NIVEL DE ACTIVIDAD',
+                  l10n.activityLevelHeader,
                   style: GoogleFonts.inter(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
@@ -94,7 +97,7 @@ class OnboardingActivityStep extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-                ..._activityOptions.map((opt) {
+                ...activityOptions.map((opt) {
                   final isSelected = activityLevel == opt['id'];
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 10),
@@ -199,7 +202,7 @@ class OnboardingActivityStep extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'PASOS DIARIOS ESTIMADOS',
+                      l10n.estimatedDailySteps,
                       style: GoogleFonts.inter(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
@@ -208,7 +211,7 @@ class OnboardingActivityStep extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '${estimatedSteps.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},')} pasos',
+                      l10n.formattedSteps(estimatedSteps.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},')),
                       style: GoogleFonts.outfit(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
@@ -228,7 +231,7 @@ class OnboardingActivityStep extends StatelessWidget {
                           (m) => '${m[1]},',
                         );
                     return ChoiceChip(
-                      label: Text('$formatted pasos'),
+                      label: Text(l10n.formattedSteps(formatted)),
                       selected: isSelected,
                       onSelected: (_) => onChanged(estimatedSteps: steps),
                       selectedColor: AppColors.primary,

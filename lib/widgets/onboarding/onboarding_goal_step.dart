@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/user_profile.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_card.dart';
@@ -17,39 +18,41 @@ class OnboardingGoalStep extends StatelessWidget {
     required this.profile,
   });
 
-  static const List<Map<String, dynamic>> _goalOptions = [
-    {
-      'id': 'fat_loss',
-      'title': 'Pérdida de Grasa',
-      'delta': '-500 kcal',
-      'desc': 'Déficit óptimo para quemar grasa preservando músculo',
-      'icon': Icons.local_fire_department_rounded,
-      'color': AppColors.calories,
-    },
-    {
-      'id': 'maintenance',
-      'title': 'Mantenimiento',
-      'delta': 'Normocalórico',
-      'desc': 'Mantener peso y composición corporal actual',
-      'icon': Icons.balance_rounded,
-      'color': AppColors.carbs,
-    },
-    {
-      'id': 'muscle_gain',
-      'title': 'Ganancia Muscular',
-      'delta': '+300 kcal',
-      'desc': 'Superávit limpio para favorecer síntesis proteica',
-      'icon': Icons.fitness_center_rounded,
-      'color': AppColors.protein,
-    },
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
+    final goalOptions = [
+      {
+        'id': 'fat_loss',
+        'title': l10n.fatLossGoal,
+        'delta': '-500 kcal',
+        'desc': l10n.goalFatLossDesc,
+        'icon': Icons.local_fire_department_rounded,
+        'color': AppColors.calories,
+      },
+      {
+        'id': 'maintenance',
+        'title': l10n.goalMaintenanceTitle,
+        'delta': l10n.normocaloric,
+        'desc': l10n.goalMaintenanceDesc,
+        'icon': Icons.balance_rounded,
+        'color': AppColors.carbs,
+      },
+      {
+        'id': 'muscle_gain',
+        'title': l10n.goalMuscleGainTitle,
+        'delta': '+300 kcal',
+        'desc': l10n.goalMuscleGainDesc,
+        'icon': Icons.fitness_center_rounded,
+        'color': AppColors.protein,
+      },
+    ];
+
     final heightDisplay = (profile.height % 1 == 0) ? profile.height.toInt().toString() : profile.height.toString();
     final weightDisplay = (profile.weight % 1 == 0) ? profile.weight.toInt().toString() : profile.weight.toString();
-    final genderStr = profile.gender == 'female' ? 'Femenino' : 'Masculino';
-    final biometricsPill = '${profile.age} años • $heightDisplay cm • $weightDisplay kg • $genderStr';
+    final genderStr = profile.gender == 'female' ? l10n.genderFemale : l10n.genderMale;
+    final biometricsPill = l10n.profileBioSummary(profile.age.toString(), heightDisplay, weightDisplay, genderStr);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -58,7 +61,7 @@ class OnboardingGoalStep extends StatelessWidget {
         children: [
           const SizedBox(height: 10),
           Text(
-            'Objetivo y Plan Metabólico',
+            l10n.goalStepTitle,
             textAlign: TextAlign.center,
             style: GoogleFonts.outfit(
               fontSize: 24,
@@ -69,7 +72,7 @@ class OnboardingGoalStep extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Ajustamos tu ingesta diaria para alcanzar tu meta de composición corporal.',
+            l10n.goalStepSubtitle,
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(
               fontSize: 13,
@@ -79,7 +82,7 @@ class OnboardingGoalStep extends StatelessWidget {
           const SizedBox(height: 20),
 
           // Goal selection options
-          ..._goalOptions.map((opt) {
+          ...goalOptions.map((opt) {
             final isSelected = bodyGoal == opt['id'];
             final optColor = opt['color'] as Color;
             return Padding(
@@ -143,7 +146,7 @@ class OnboardingGoalStep extends StatelessWidget {
                   children: [
                     const Icon(Icons.bolt_rounded, size: 18, color: AppColors.calories),
                     const SizedBox(width: 6),
-                    Text('RESUMEN METABÓLICO EN VIVO', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.0, color: AppColors.textSecondary(context))),
+                    Text(l10n.liveMetabolicSummary, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.0, color: AppColors.textSecondary(context))),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -165,7 +168,7 @@ class OnboardingGoalStep extends StatelessWidget {
                   ),
                   child: Column(
                     children: [
-                      Text('META CALÓRICA DIARIA', style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.8, color: AppColors.primary)),
+                      Text(l10n.dailyCalorieGoalHeader, style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.8, color: AppColors.primary)),
                       const SizedBox(height: 4),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -174,7 +177,7 @@ class OnboardingGoalStep extends StatelessWidget {
                         children: [
                           Text(profile.targetCalories.toStringAsFixed(0), style: GoogleFonts.outfit(fontSize: 32, fontWeight: FontWeight.w900, color: AppColors.textPrimary(context), letterSpacing: -1.0)),
                           const SizedBox(width: 4),
-                          Text('kcal / día', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textSecondary(context))),
+                          Text(l10n.kcalPerDaySpacing, style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textSecondary(context))),
                         ],
                       ),
                       const SizedBox(height: 4),
@@ -187,11 +190,11 @@ class OnboardingGoalStep extends StatelessWidget {
                 // Macros 3-Column Breakdown
                 Row(
                   children: [
-                    Expanded(child: _buildMacroItem(context, label: 'Proteínas', grams: profile.targetProtein, color: AppColors.protein)),
+                    Expanded(child: _buildMacroItem(context, label: l10n.protein, grams: profile.targetProtein, color: AppColors.protein)),
                     Container(width: 1, height: 44, color: AppColors.border(context)),
-                    Expanded(child: _buildMacroItem(context, label: 'Carbos', grams: profile.targetCarbs, color: AppColors.carbs)),
+                    Expanded(child: _buildMacroItem(context, label: l10n.carbs, grams: profile.targetCarbs, color: AppColors.carbs)),
                     Container(width: 1, height: 44, color: AppColors.border(context)),
-                    Expanded(child: _buildMacroItem(context, label: 'Grasas', grams: profile.targetFat, color: AppColors.fat)),
+                    Expanded(child: _buildMacroItem(context, label: l10n.fat, grams: profile.targetFat, color: AppColors.fat)),
                   ],
                 ),
               ],

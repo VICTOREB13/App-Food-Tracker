@@ -1,8 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/l10n/app_localizations.dart';
-import 'package:food_tracker/l10n/app_localizations_en.dart';
-import 'package:food_tracker/l10n/app_localizations_es.dart';
 
 void main() {
   group('AppLocalizations Unit Tests', () {
@@ -26,6 +24,11 @@ void main() {
       expect(l10n.sodium, equals('Sodio'));
       expect(l10n.fasting, equals('Ayuno Intermitente'));
       expect(l10n.clinicalReport, equals('Reporte Clínico'));
+      expect(l10n.viewLess, equals('Ver menos'));
+      expect(l10n.viewAllCount('5'), equals('Ver todos (5)'));
+      expect(l10n.noWeightLogsInRange, equals('Sin registros de peso en este rango'));
+      expect(l10n.quickWaterMealName, equals('Agua (+250 ml)'));
+      expect(l10n.navPantrySubtitle, equals('Productos y contexto de marcas para Gemini Vision'));
     });
 
     test('AppLocalizationsEn contains valid English strings', () {
@@ -48,6 +51,11 @@ void main() {
       expect(l10n.sodium, equals('Sodium'));
       expect(l10n.fasting, equals('Intermittent Fasting'));
       expect(l10n.clinicalReport, equals('Clinical Report'));
+      expect(l10n.viewLess, equals('View less'));
+      expect(l10n.viewAllCount('5'), equals('View all (5)'));
+      expect(l10n.noWeightLogsInRange, equals('No weight logs in this range'));
+      expect(l10n.quickWaterMealName, equals('Water (+250 ml)'));
+      expect(l10n.navPantrySubtitle, equals('Products and brand context for Gemini Vision'));
     });
 
     test('lookupAppLocalizations returns appropriate instance for locale', () {
@@ -66,6 +74,26 @@ void main() {
     test('AppLocalizations.supportedLocales contains es and en', () {
       expect(AppLocalizations.supportedLocales, contains(const Locale('es')));
       expect(AppLocalizations.supportedLocales, contains(const Locale('en')));
+    });
+
+    testWidgets('MealTypeLocalization translates correctly in context', (tester) async {
+      await tester.pumpWidget(
+        Localizations(
+          locale: const Locale('en'),
+          delegates: AppLocalizations.localizationsDelegates,
+          child: Builder(
+            builder: (context) {
+              expect('Desayuno'.toLocalizedMealType(context), equals('Breakfast'));
+              expect('Almuerzo'.toLocalizedMealType(context), equals('Lunch'));
+              expect('Cena'.toLocalizedMealType(context), equals('Dinner'));
+              expect('Snack'.toLocalizedMealType(context), equals('Snack'));
+              expect('Otro'.toLocalizedMealType(context), equals('Other'));
+              expect('Custom'.toLocalizedMealType(context), equals('Custom'));
+              return const SizedBox();
+            },
+          ),
+        ),
+      );
     });
   });
 }

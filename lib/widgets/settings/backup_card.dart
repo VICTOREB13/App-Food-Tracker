@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:path/path.dart' as p;
+import '../../l10n/app_localizations.dart';
 import '../../services/backup_service.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_card.dart';
@@ -37,6 +38,7 @@ class BackupCard extends StatelessWidget {
       final fileName = p.basename(file.path);
 
       if (!context.mounted) return;
+      final l10n = AppLocalizations.of(context);
 
       await showDialog<void>(
         context: context,
@@ -51,7 +53,7 @@ class BackupCard extends StatelessWidget {
               const Icon(Icons.check_circle_outline, color: AppColors.protein, size: 24),
               const SizedBox(width: 8),
               Text(
-                'Archivo JSON Creado',
+                l10n.jsonFileCreatedTitle,
                 style: GoogleFonts.outfit(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
@@ -65,7 +67,7 @@ class BackupCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Se generó el archivo de respaldo completo en el almacenamiento de tu dispositivo:',
+                l10n.backupGeneratedPathDesc,
                 style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary(dialogCtx), height: 1.4),
               ),
               const SizedBox(height: 12),
@@ -81,7 +83,7 @@ class BackupCard extends StatelessWidget {
                   children: [
                     Text(fileName, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.protein)),
                     const SizedBox(height: 4),
-                    Text('Tamaño: $fileSizeKb KB', style: GoogleFonts.inter(fontSize: 10, color: AppColors.textSecondary(dialogCtx))),
+                    Text(l10n.fileSizeLabel(fileSizeKb.toString()), style: GoogleFonts.inter(fontSize: 10, color: AppColors.textSecondary(dialogCtx))),
                     const SizedBox(height: 6),
                     Text(
                       file.path,
@@ -99,10 +101,10 @@ class BackupCard extends StatelessWidget {
               onPressed: () {
                 Clipboard.setData(ClipboardData(text: file.path));
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Ruta del archivo copiada al portapapeles')),
+                  SnackBar(content: Text(l10n.filePathCopiedSnackBar)),
                 );
               },
-              child: Text('Copiar ruta', style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: AppColors.protein)),
+              child: Text(l10n.copyPathAction, style: GoogleFonts.inter(fontWeight: FontWeight.w600, color: AppColors.protein)),
             ),
             ElevatedButton(
               onPressed: () => Navigator.of(dialogCtx).pop(),
@@ -111,16 +113,17 @@ class BackupCard extends StatelessWidget {
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
-              child: Text('Aceptar', style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
+              child: Text(l10n.acceptAction, style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
             ),
           ],
         ),
       );
     } catch (e) {
       if (!context.mounted) return;
+      final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error al generar archivo de respaldo: $e'),
+          content: Text(l10n.backupGenerationError(e.toString())),
           backgroundColor: AppColors.primary,
         ),
       );
@@ -141,10 +144,14 @@ class BackupCard extends StatelessWidget {
     );
 
     if (result != null && context.mounted) {
+      final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '¡Restauración exitosa! Se importaron ${result['imported_meals'] ?? 0} comidas y ${result['imported_pantry'] ?? 0} productos.',
+            l10n.backupRestoreSuccess(
+              (result['imported_meals'] ?? 0).toString(),
+              (result['imported_pantry'] ?? 0).toString(),
+            ),
           ),
           backgroundColor: AppColors.protein,
         ),
@@ -154,6 +161,7 @@ class BackupCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return VeCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -163,7 +171,7 @@ class BackupCard extends StatelessWidget {
               const Icon(Icons.sync_alt_outlined, size: 20, color: AppColors.protein),
               const SizedBox(width: 8),
               Text(
-                'RESPALDO Y MIGRACIÓN EN ARCHIVOS',
+                l10n.backupAndMigrationHeader,
                 style: GoogleFonts.inter(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
@@ -175,7 +183,7 @@ class BackupCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Genera archivos físicos (.json) descargables para guardar tus comidas y despensa, o importa un archivo de respaldo previo sin usar el portapapeles.',
+            l10n.backupAndMigrationDesc,
             textAlign: TextAlign.justify,
             style: GoogleFonts.inter(
               fontSize: 12,
@@ -193,7 +201,7 @@ class BackupCard extends StatelessWidget {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   icon: const Icon(Icons.file_upload_outlined, size: 16),
-                  label: Text('Exportar JSON', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                  label: Text(l10n.exportJsonAction, style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
                 ),
               ),
               const SizedBox(width: 8),
@@ -205,7 +213,7 @@ class BackupCard extends StatelessWidget {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   icon: const Icon(Icons.file_download_outlined, size: 16),
-                  label: Text('Importar JSON', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
+                  label: Text(l10n.importJsonAction, style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
                 ),
               ),
             ],

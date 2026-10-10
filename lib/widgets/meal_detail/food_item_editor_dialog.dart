@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/food_item.dart';
 import '../../models/food_search_suggestion.dart';
 import '../../services/food_search_coordinator.dart';
@@ -168,11 +169,12 @@ class _FoodItemEditorDialogState extends State<_FoodItemEditorDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final isEditing = widget.initialItem != null;
     return AlertDialog(
       backgroundColor: AppColors.surface(context),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14), side: BorderSide(color: AppColors.border(context))),
-      title: Text(isEditing ? 'Editar Ingrediente' : 'Añadir Ingrediente', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary(context))),
+      title: Text(isEditing ? l10n.editIngredientTitle : l10n.addIngredientTitle, style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary(context))),
       content: SingleChildScrollView(
         child: SizedBox(
           width: 320,
@@ -183,7 +185,7 @@ class _FoodItemEditorDialogState extends State<_FoodItemEditorDialog> {
                 controller: _nameController,
                 style: GoogleFonts.inter(fontSize: 14, color: AppColors.textPrimary(context)),
                 decoration: InputDecoration(
-                  labelText: 'Nombre del alimento *',
+                  labelText: l10n.foodNameLabel,
                   labelStyle: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary(context)),
                   suffixIcon: const Icon(Icons.search, size: 18, color: AppColors.primary),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
@@ -195,7 +197,7 @@ class _FoodItemEditorDialogState extends State<_FoodItemEditorDialog> {
               ),
               if (_hasAutoEstimated && _suggestions.isEmpty) ...[
                 const SizedBox(height: 4),
-                Align(alignment: Alignment.centerLeft, child: Text('⚡ Sugerencia nutricional aplicada', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.success))),
+                Align(alignment: Alignment.centerLeft, child: Text(l10n.nutritionalSuggestionApplied, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.success))),
               ],
               const SizedBox(height: 10),
               Row(
@@ -205,7 +207,7 @@ class _FoodItemEditorDialogState extends State<_FoodItemEditorDialog> {
                       controller: _gramsController,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       style: GoogleFonts.inter(fontSize: 14, color: AppColors.textPrimary(context)),
-                      decoration: const InputDecoration(labelText: 'Gramos', suffixText: 'g', contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12)),
+                      decoration: InputDecoration(labelText: l10n.gramsLabel, suffixText: 'g', contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12)),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -214,7 +216,7 @@ class _FoodItemEditorDialogState extends State<_FoodItemEditorDialog> {
                       controller: _caloriesController,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       style: GoogleFonts.inter(fontSize: 14, color: AppColors.textPrimary(context)),
-                      decoration: const InputDecoration(labelText: 'Calorías', suffixText: 'kcal', contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12)),
+                      decoration: InputDecoration(labelText: l10n.calories, suffixText: 'kcal', contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12)),
                     ),
                   ),
                 ],
@@ -222,23 +224,23 @@ class _FoodItemEditorDialogState extends State<_FoodItemEditorDialog> {
               const SizedBox(height: 14),
               Row(
                 children: [
-                  Expanded(child: _buildMacroField('Proteína', _proteinController, AppColors.protein)),
+                  Expanded(child: _buildMacroField(l10n.protein, _proteinController, AppColors.protein)),
                   const SizedBox(width: 12),
-                  Expanded(child: _buildMacroField('Grasas', _fatController, AppColors.fat)),
+                  Expanded(child: _buildMacroField(l10n.fat, _fatController, AppColors.fat)),
                 ],
               ),
               const SizedBox(height: 12),
-              _buildMacroField('Carbohidratos', _carbsController, AppColors.carbs),
+              _buildMacroField(l10n.carbs, _carbsController, AppColors.carbs),
             ],
           ),
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text('Cancelar', style: GoogleFonts.inter(color: AppColors.textSecondary(context)))),
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(l10n.cancel, style: GoogleFonts.inter(color: AppColors.textSecondary(context)))),
         ElevatedButton(
           onPressed: _onSave,
           style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-          child: Text('Guardar', style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
+          child: Text(l10n.save, style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
         ),
       ],
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/pantry_item.dart';
 import '../../services/barcode_lookup_service.dart';
 import '../../services/theme_manager.dart';
@@ -44,15 +45,17 @@ class _BarcodeScannerDialogState extends State<_BarcodeScannerDialog> {
       if (item != null) {
         Navigator.of(context).pop(item);
       } else {
+        final l10n = AppLocalizations.of(context);
         setState(() {
-          _errorMessage = 'Producto no encontrado en USDA ni Open Food Facts.';
+          _errorMessage = l10n.barcodeProductNotFound;
           _isLoading = false;
         });
       }
     } catch (e) {
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context);
       setState(() {
-        _errorMessage = 'Error al consultar código: $e';
+        _errorMessage = l10n.barcodeLookupError(e.toString());
         _isLoading = false;
       });
     }
@@ -60,6 +63,8 @@ class _BarcodeScannerDialogState extends State<_BarcodeScannerDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return AlertDialog(
       backgroundColor: AppColors.surface(context),
       shape: RoundedRectangleBorder(
@@ -71,7 +76,7 @@ class _BarcodeScannerDialogState extends State<_BarcodeScannerDialog> {
           const Icon(Icons.qr_code_scanner, color: AppColors.carbs, size: 22),
           const SizedBox(width: 8),
           Text(
-            'Escanear Código',
+            l10n.scanBarcodeDialogTitle,
             style: GoogleFonts.outfit(
               fontSize: 18,
               fontWeight: FontWeight.w700,
@@ -85,7 +90,7 @@ class _BarcodeScannerDialogState extends State<_BarcodeScannerDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Ingresa o escanea el código de barras (EAN/UPC) del alimento:',
+            l10n.barcodeInstruction,
             style: GoogleFonts.inter(fontSize: 13, color: AppColors.textSecondary(context)),
           ),
           const SizedBox(height: 12),
@@ -93,7 +98,7 @@ class _BarcodeScannerDialogState extends State<_BarcodeScannerDialog> {
             controller: _codeController,
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
-              hintText: 'Ej. 737628064502',
+              hintText: l10n.barcodeExampleHint,
               suffixIcon: IconButton(
                 icon: const Icon(Icons.search),
                 onPressed: () => _searchBarcode(_codeController.text),
@@ -110,9 +115,9 @@ class _BarcodeScannerDialogState extends State<_BarcodeScannerDialog> {
             Text(
               _errorMessage!,
               style: GoogleFonts.inter(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: AppColors.primary,
+                 fontSize: 12,
+                 fontWeight: FontWeight.w600,
+                 color: AppColors.primary,
               ),
             ),
           ],
@@ -121,7 +126,7 @@ class _BarcodeScannerDialogState extends State<_BarcodeScannerDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text('Cancelar', style: GoogleFonts.inter(color: AppColors.textSecondary(context))),
+          child: Text(l10n.cancel, style: GoogleFonts.inter(color: AppColors.textSecondary(context))),
         ),
         ElevatedButton(
           onPressed: _isLoading ? null : () => _searchBarcode(_codeController.text),
@@ -131,7 +136,7 @@ class _BarcodeScannerDialogState extends State<_BarcodeScannerDialog> {
             elevation: 0,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
-          child: Text('Buscar', style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
+          child: Text(l10n.searchAction, style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
         ),
       ],
     );

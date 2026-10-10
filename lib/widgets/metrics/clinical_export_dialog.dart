@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:path/path.dart' as p;
 import '../../l10n/app_localizations.dart';
-import '../../l10n/app_localizations_es.dart';
 import '../../services/accessible_storage_resolver.dart';
 import '../../services/clinical_excel_export_service.dart';
 import '../../services/clinical_pdf_export_service.dart';
@@ -56,10 +55,11 @@ class _ClinicalExportDialogState extends State<_ClinicalExportDialog> {
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
         setState(() => _isExporting = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error al exportar: $e'),
+            content: Text(l10n.exportError(e.toString())),
             backgroundColor: AppColors.primary,
           ),
         );
@@ -69,7 +69,7 @@ class _ClinicalExportDialogState extends State<_ClinicalExportDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEs();
+    final l10n = AppLocalizations.of(context);
 
     return AlertDialog(
       backgroundColor: AppColors.surface(context),
@@ -134,10 +134,10 @@ class _ClinicalExportDialogState extends State<_ClinicalExportDialog> {
               Wrap(
                 spacing: 8,
                 children: [
-                  _buildRangeChip(7, '7 días'),
-                  _buildRangeChip(30, '30 días'),
-                  _buildRangeChip(90, '90 días'),
-                  _buildRangeChip(0, 'Histórico'),
+                  _buildRangeChip(7, l10n.sevenDaysLabel),
+                  _buildRangeChip(30, l10n.thirtyDaysLabel),
+                  _buildRangeChip(90, l10n.ninetyDaysLabel),
+                  _buildRangeChip(0, l10n.allTimeHistorical),
                 ],
               ),
               const SizedBox(height: 16),

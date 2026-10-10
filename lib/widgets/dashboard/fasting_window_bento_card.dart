@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../controllers/fasting_controller.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_loading_ring.dart';
 
@@ -29,6 +30,7 @@ class _FastingWindowBentoCardState extends State<FastingWindowBentoCard> {
   }
 
   void _showStartFastDialog() {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (ctx) {
@@ -37,12 +39,12 @@ class _FastingWindowBentoCardState extends State<FastingWindowBentoCard> {
           builder: (dialogCtx, setDialogState) => AlertDialog(
             backgroundColor: AppColors.surface(context),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: AppColors.border(context))),
-            title: Text('Iniciar Ayuno Intermitente', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold)),
+            title: Text(l10n.startFastingTitle, style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold)),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Selecciona tu protocolo de ayuno:', style: GoogleFonts.inter(fontSize: 13, color: AppColors.textSecondary(context))),
+                Text(l10n.selectFastingProtocol, style: GoogleFonts.inter(fontSize: 13, color: AppColors.textSecondary(context))),
                 const SizedBox(height: 12),
                 Wrap(
                   spacing: 8,
@@ -61,7 +63,7 @@ class _FastingWindowBentoCardState extends State<FastingWindowBentoCard> {
               ],
             ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
+              TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
                 onPressed: () {
@@ -70,7 +72,7 @@ class _FastingWindowBentoCardState extends State<FastingWindowBentoCard> {
                   _controller.startFast(targetHours: hours);
                   Navigator.pop(ctx);
                 },
-                child: const Text('Comenzar'),
+                child: Text(l10n.startAction),
               ),
             ],
           ),
@@ -80,15 +82,16 @@ class _FastingWindowBentoCardState extends State<FastingWindowBentoCard> {
   }
 
   void _confirmStopFast() {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface(context),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: AppColors.border(context))),
-        title: Text('¿Terminar Ayuno?', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold)),
-        content: Text('Llevas ${_controller.fastingDurationFormatted} de ayuno. Se registrará la sesión en tu historial.', style: GoogleFonts.inter(fontSize: 13)),
+        title: Text(l10n.endFastingDialogTitle, style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold)),
+        content: Text(l10n.endFastingDialogBody(_controller.fastingDurationFormatted), style: GoogleFonts.inter(fontSize: 13)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Continuar')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.continueButton)),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
             onPressed: () {
@@ -97,7 +100,7 @@ class _FastingWindowBentoCardState extends State<FastingWindowBentoCard> {
               _controller.stopActiveFast();
               Navigator.pop(ctx);
             },
-            child: const Text('Terminar sesión'),
+            child: Text(l10n.endSessionAction),
           ),
         ],
       ),
@@ -121,6 +124,7 @@ class _FastingWindowBentoCardState extends State<FastingWindowBentoCard> {
   }
 
   Widget _buildCompactCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return InkWell(
       key: const Key('fasting_bento_compact_pill'),
       onTap: () => setState(() => _isManuallyExpanded = true),
@@ -147,13 +151,13 @@ class _FastingWindowBentoCardState extends State<FastingWindowBentoCard> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'AYUNO INTERMITENTE',
+                    l10n.fasting.toUpperCase(),
                     style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5, color: AppColors.textSecondary(context)),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 1),
-                  Text('• Sin ayuno activo', style: GoogleFonts.inter(fontSize: 11, color: AppColors.textMuted(context)), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  Text(l10n.noActiveFast, style: GoogleFonts.inter(fontSize: 11, color: AppColors.textMuted(context)), maxLines: 1, overflow: TextOverflow.ellipsis),
                 ],
               ),
             ),
@@ -168,7 +172,7 @@ class _FastingWindowBentoCardState extends State<FastingWindowBentoCard> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('Iniciar', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                    Text(l10n.startAction, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primary)),
                     const SizedBox(width: 2),
                     const Icon(Icons.keyboard_arrow_down_rounded, size: 15, color: AppColors.primary),
                   ],
@@ -182,6 +186,7 @@ class _FastingWindowBentoCardState extends State<FastingWindowBentoCard> {
   }
 
   Widget _buildExpandedCard(BuildContext context, bool isActive) {
+    final l10n = AppLocalizations.of(context);
     final progress = _controller.progressRatio;
     final isGoalReached = progress >= 1.0;
 
@@ -204,13 +209,13 @@ class _FastingWindowBentoCardState extends State<FastingWindowBentoCard> {
             children: [
               Icon(Icons.timer_outlined, size: 14, color: isActive ? AppColors.primary : AppColors.textSecondary(context)),
               const SizedBox(width: 6),
-              Text('AYUNO INTERMITENTE', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5, color: isActive ? AppColors.primary : AppColors.textSecondary(context))),
+              Text(l10n.fasting.toUpperCase(), style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5, color: isActive ? AppColors.primary : AppColors.textSecondary(context))),
               if (isActive) ...[
                 const SizedBox(width: 6),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(color: (isGoalReached ? AppColors.success : AppColors.primary).withValues(alpha: 0.12), borderRadius: BorderRadius.circular(6)),
-                  child: Text(isGoalReached ? '¡Meta Lograda!' : 'En curso', style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.bold, color: isGoalReached ? AppColors.success : AppColors.primary)),
+                  child: Text(isGoalReached ? l10n.goalReached : l10n.inProgress, style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.bold, color: isGoalReached ? AppColors.success : AppColors.primary)),
                 ),
               ],
               const Spacer(),
@@ -223,7 +228,7 @@ class _FastingWindowBentoCardState extends State<FastingWindowBentoCard> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text('Colapsar', style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.textMuted(context))),
+                        Text(l10n.collapseAction, style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.textMuted(context))),
                         const SizedBox(width: 2),
                         Icon(Icons.keyboard_arrow_up_rounded, size: 16, color: AppColors.textMuted(context)),
                       ],
@@ -249,12 +254,12 @@ class _FastingWindowBentoCardState extends State<FastingWindowBentoCard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(isActive ? _controller.fastingDurationFormatted : 'Sin ayuno activo', style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary(context))),
+                    Text(isActive ? _controller.fastingDurationFormatted : l10n.noActiveFastTitle, style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary(context))),
                     const SizedBox(height: 2),
                     Text(
                       isActive
-                          ? (isGoalReached ? 'Meta superada (+${(progress * 100).toInt()}%)' : 'Restan ${_controller.remainingDurationFormatted} de ${_controller.targetHours.toInt()}h')
-                          : 'Inicia para dar seguimiento a tu ventana de comida',
+                          ? (isGoalReached ? l10n.goalExceededPercent('${(progress * 100).toInt()}') : l10n.remainingFastDuration(_controller.remainingDurationFormatted, '${_controller.targetHours.toInt()}'))
+                          : l10n.fastingStartTrackingPrompt,
                       style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary(context)),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -273,7 +278,7 @@ class _FastingWindowBentoCardState extends State<FastingWindowBentoCard> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
                 onPressed: isActive ? _confirmStopFast : _showStartFastDialog,
-                child: Text(isActive ? 'Terminar' : 'Iniciar', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold)),
+                child: Text(isActive ? l10n.finish : l10n.startAction, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold)),
               ),
             ],
           ),

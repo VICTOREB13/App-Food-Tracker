@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/theme_manager.dart';
 
 class StreakBadge extends StatelessWidget {
@@ -12,6 +13,7 @@ class StreakBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(
@@ -28,7 +30,7 @@ class StreakBadge extends StatelessWidget {
           const Text('🔥', style: TextStyle(fontSize: 12)),
           const SizedBox(width: 4),
           Text(
-            streakDays == 1 ? '1 día' : '$streakDays días',
+            streakDays == 1 ? l10n.streakOneDay : l10n.streakMultipleDays('$streakDays'),
             style: GoogleFonts.inter(
               fontSize: 12,
               fontWeight: FontWeight.w700,

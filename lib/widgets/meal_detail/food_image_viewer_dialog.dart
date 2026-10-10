@@ -1,6 +1,7 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Opens a full-screen interactive inspection view of a meal photograph.
 void showFoodImageViewer(
@@ -31,11 +32,12 @@ class FoodImageViewerScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final file = File(imagePath);
     final exists = file.existsSync();
     final displayName = (dishName != null && dishName!.trim().isNotEmpty)
         ? dishName!.trim()
-        : 'Inspeccionar Comida';
+        : l10n.inspectDishTitle;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -55,12 +57,12 @@ class FoodImageViewerScreen extends StatelessWidget {
                           child: Image.file(
                             file,
                             fit: BoxFit.contain,
-                            errorBuilder: (_, __, ___) => _buildErrorWidget(),
+                            errorBuilder: (_, __, ___) => _buildErrorWidget(context),
                           ),
                         ),
                       ),
                     )
-                  : _buildErrorWidget(),
+                  : _buildErrorWidget(context),
             ),
 
             // Top Bar with translucent background and close button
@@ -84,7 +86,7 @@ class FoodImageViewerScreen extends StatelessWidget {
                   children: [
                     IconButton(
                       icon: const Icon(Icons.close_rounded, color: Colors.white, size: 26),
-                      tooltip: 'Cerrar',
+                      tooltip: l10n.closeAction,
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                     const SizedBox(width: 8),
@@ -94,7 +96,7 @@ class FoodImageViewerScreen extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'Inspeccionar comida',
+                            l10n.inspectMeal,
                             style: GoogleFonts.inter(
                               fontSize: 11,
                               fontWeight: FontWeight.w500,
@@ -139,7 +141,7 @@ class FoodImageViewerScreen extends StatelessWidget {
                       const Icon(Icons.pinch_outlined, color: Colors.white70, size: 16),
                       const SizedBox(width: 6),
                       Text(
-                        'Pellizca para ampliar y explorar detalles',
+                        l10n.pinchToZoomHint,
                         style: GoogleFonts.inter(
                           fontSize: 12,
                           color: Colors.white70,
@@ -157,7 +159,8 @@ class FoodImageViewerScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildErrorWidget() {
+  Widget _buildErrorWidget(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -165,7 +168,7 @@ class FoodImageViewerScreen extends StatelessWidget {
           const Icon(Icons.broken_image_outlined, size: 54, color: Colors.white54),
           const SizedBox(height: 12),
           Text(
-            'No se pudo cargar la imagen para inspección.',
+            l10n.failedToLoadImageError,
             style: GoogleFonts.inter(color: Colors.white70, fontSize: 14),
           ),
         ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../l10n/app_localizations.dart';
 import '../models/calibrated_dishware.dart';
 import '../services/database_service.dart';
 import '../services/theme_manager.dart';
@@ -44,20 +45,21 @@ class _DishwareSettingsScreenState extends State<DishwareSettingsScreen> {
     final depthCtrl = TextEditingController(text: existing != null ? existing.depthCm.toStringAsFixed(1) : '2.5');
     bool isDefault = existing?.isDefault ?? (_dishwareList.isEmpty);
 
+    final l10n = AppLocalizations.of(context);
     final saved = await showDialog<bool>(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDlgState) => AlertDialog(
           backgroundColor: AppColors.surface(context),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14), side: BorderSide(color: AppColors.border(context))),
-          title: Text(existing == null ? 'Calibrar Plato' : 'Editar Plato', style: GoogleFonts.outfit(fontWeight: FontWeight.w700)),
+          title: Text(existing == null ? l10n.calibrateDishTitle : l10n.editDishTitle, style: GoogleFonts.outfit(fontWeight: FontWeight.w700)),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
                   controller: nameCtrl,
-                  decoration: const InputDecoration(labelText: 'Nombre (ej. Plato Llano Blanco)'),
+                  decoration: InputDecoration(labelText: l10n.dishNameWithExample),
                 ),
                 const SizedBox(height: 12),
                 Row(
@@ -66,7 +68,7 @@ class _DishwareSettingsScreenState extends State<DishwareSettingsScreen> {
                       child: TextField(
                         controller: diameterCtrl,
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        decoration: const InputDecoration(labelText: 'Diámetro', suffixText: 'cm'),
+                        decoration: InputDecoration(labelText: l10n.diameterLabel, suffixText: 'cm'),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -74,7 +76,7 @@ class _DishwareSettingsScreenState extends State<DishwareSettingsScreen> {
                       child: TextField(
                         controller: depthCtrl,
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        decoration: const InputDecoration(labelText: 'Profundidad', suffixText: 'cm'),
+                        decoration: InputDecoration(labelText: l10n.depthLabel, suffixText: 'cm'),
                       ),
                     ),
                   ],
@@ -82,7 +84,7 @@ class _DishwareSettingsScreenState extends State<DishwareSettingsScreen> {
                 const SizedBox(height: 12),
                 CheckboxListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: Text('Usar como referencia por defecto en IA', style: GoogleFonts.inter(fontSize: 12)),
+                  title: Text(l10n.useAsDefaultReference, style: GoogleFonts.inter(fontSize: 12)),
                   value: isDefault,
                   onChanged: (val) => setDlgState(() => isDefault = val ?? false),
                 ),
@@ -90,7 +92,7 @@ class _DishwareSettingsScreenState extends State<DishwareSettingsScreen> {
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancelar')),
+            TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(l10n.cancel)),
             ElevatedButton(
               onPressed: () async {
                 final name = nameCtrl.text.trim();
@@ -99,25 +101,18 @@ class _DishwareSettingsScreenState extends State<DishwareSettingsScreen> {
                 if (name.isEmpty) return;
 
                 final dishware = CalibratedDishware(
-                  id: existing?.id,
-                  name: name,
-                  diameterCm: diameter,
-                  depthCm: depth,
-                  isDefault: isDefault,
+                  id: existing?.id, name: name, diameterCm: diameter, depthCm: depth, isDefault: isDefault,
                 );
-
                 final dao = DatabaseService.instance.dishwareDao;
                 if (existing == null) {
                   await dao.insertDishware(dishware);
                 } else {
                   await dao.updateDishware(dishware);
                 }
-                if (isDefault) {
-                  await dao.setDefaultDishware(dishware.id);
-                }
+                if (isDefault) await dao.setDefaultDishware(dishware.id);
                 if (ctx.mounted) Navigator.of(ctx).pop(true);
               },
-              child: const Text('Guardar'),
+              child: Text(l10n.save),
             ),
           ],
         ),
@@ -139,17 +134,18 @@ class _DishwareSettingsScreenState extends State<DishwareSettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: const VeAppBar(
-        title: 'Calibración de Vajilla',
-        subtitle: 'Referencia Métrica para IA',
+      appBar: VeAppBar(
+        title: l10n.calibratedDishware,
+        subtitle: l10n.dishwareSubtitle,
         showVeBadge: false,
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddEditDialog(),
         backgroundColor: AppColors.primary,
         icon: const Icon(Icons.add, color: Colors.white),
-        label: Text('Nuevo Plato', style: GoogleFonts.inter(fontWeight: FontWeight.w700, color: Colors.white)),
+        label: Text(l10n.newDishAction, style: GoogleFonts.inter(fontWeight: FontWeight.w700, color: Colors.white)),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -170,7 +166,7 @@ class _DishwareSettingsScreenState extends State<DishwareSettingsScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          'El diámetro de tu vajilla se inyecta en Gemini Vision para estimar el volumen y peso de las porciones con escala métrica real.',
+                          l10n.dishwareDescription,
                           style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary(context), height: 1.3),
                         ),
                       ),
@@ -183,7 +179,7 @@ class _DishwareSettingsScreenState extends State<DishwareSettingsScreen> {
                     child: Padding(
                       padding: const EdgeInsets.all(32),
                       child: Text(
-                        'No tienes vajilla calibrada.\nPulsa "+ Nuevo Plato" para agregar tu primer plato.',
+                        l10n.noCalibratedDishware,
                         textAlign: TextAlign.center,
                         style: GoogleFonts.inter(fontSize: 13, color: AppColors.textMuted(context)),
                       ),
@@ -198,14 +194,14 @@ class _DishwareSettingsScreenState extends State<DishwareSettingsScreen> {
   }
 
   Widget _buildDishTile(CalibratedDishware dish) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       child: VeCard(
         child: ListTile(
           contentPadding: EdgeInsets.zero,
           leading: Container(
-            width: 44,
-            height: 44,
+            width: 44, height: 44,
             decoration: BoxDecoration(
               color: dish.isDefault ? AppColors.primary.withValues(alpha: 0.15) : AppColors.surface(context),
               shape: BoxShape.circle,
@@ -225,12 +221,12 @@ class _DishwareSettingsScreenState extends State<DishwareSettingsScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(4)),
-                  child: Text('POR DEFECTO', style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w800, color: Colors.white)),
+                  child: Text(l10n.defaultReferenceBadge, style: GoogleFonts.inter(fontSize: 9, fontWeight: FontWeight.w800, color: Colors.white)),
                 ),
             ],
           ),
           subtitle: Text(
-            'Diámetro: ${dish.diameterCm.toStringAsFixed(1)} cm • Profundidad: ${dish.depthCm.toStringAsFixed(1)} cm',
+            l10n.dishDimensions(dish.diameterCm.toStringAsFixed(1), dish.depthCm.toStringAsFixed(1)),
             style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary(context)),
           ),
           trailing: PopupMenuButton<String>(
@@ -241,9 +237,9 @@ class _DishwareSettingsScreenState extends State<DishwareSettingsScreen> {
               if (val == 'delete') _deleteDishware(dish);
             },
             itemBuilder: (_) => [
-              if (!dish.isDefault) const PopupMenuItem(value: 'default', child: Text('Establecer por defecto')),
-              const PopupMenuItem(value: 'edit', child: Text('Editar')),
-              const PopupMenuItem(value: 'delete', child: Text('Eliminar')),
+              if (!dish.isDefault) PopupMenuItem(value: 'default', child: Text(l10n.setAsDefaultAction)),
+              PopupMenuItem(value: 'edit', child: Text(l10n.edit)),
+              PopupMenuItem(value: 'delete', child: Text(l10n.delete)),
             ],
           ),
         ),

@@ -63,10 +63,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
       if (updateService.isUpdateAvailable(AppConstants.appVersion, release.tagName)) {
         final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(l10n != null ? l10n.updateAvailable(release.tagName) : 'Nueva versión: ${release.tagName}'),
+          content: Text(l10n.updateAvailable(release.tagName)),
           duration: const Duration(seconds: 8),
           action: SnackBarAction(
-            label: l10n?.viewUpdateAction ?? 'Ver actualización',
+            label: l10n.viewUpdateAction,
             textColor: AppColors.primaryLight,
             onPressed: () => showInAppUpdateDialog(context, release: release),
           ),
@@ -119,66 +119,58 @@ class _DashboardScreenState extends State<DashboardScreen> {
       date: _mealController.selectedDate,
     );
 
+    final l10n = AppLocalizations.of(context);
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('✨ Analizando comida en segundo plano. Puedes seguir usando la app.'),
-          backgroundColor: AppColors.primary,
-          duration: Duration(seconds: 3),
-        ),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(l10n.analyzingMealBackground),
+        backgroundColor: AppColors.primary,
+        duration: const Duration(seconds: 3),
+      ));
     }
   }
 
   Future<void> _handleBarcodeScan() async {
     final PantryItem? item = await showBarcodeScannerDialog(context);
     if (item == null || !mounted) return;
+    final l10n = AppLocalizations.of(context);
 
     final foodItem = FoodItem(
-      name: item.name,
-      estimatedGrams: 100,
+      name: item.name, estimatedGrams: 100,
       calories: item.calories, protein: item.protein, carbs: item.carbs, fat: item.fat,
-      visualJustification: 'Escaneado por código de barras (100g base)',
+      visualJustification: l10n.barcodeScannedDefaultNote,
     );
 
     final meal = Meal(
-      name: item.name,
-      date: _mealController.selectedDate,
+      name: item.name, date: _mealController.selectedDate,
       calories: item.calories, protein: item.protein, carbs: item.carbs, fat: item.fat,
     ).recalculateFromItems([foodItem]);
 
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => MealDetailScreen(initialMeal: meal)),
-    );
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => MealDetailScreen(initialMeal: meal)));
   }
 
   void _openManualEntry({String? defaultType}) {
     final type = defaultType ?? ImageProcessingService.inferMealTypeByTime(_mealController.selectedDate);
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => MealDetailScreen(defaultMealType: type),
-    ));
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => MealDetailScreen(defaultMealType: type)));
   }
 
   Future<void> _handleQuickWater() async {
+    final l10n = AppLocalizations.of(context);
     final waterMeal = Meal(
-      name: 'Agua (+250 ml)',
-      mealType: 'Snack',
-      date: _mealController.selectedDate,
+      name: l10n.quickWaterMealName, mealType: 'Snack', date: _mealController.selectedDate,
       calories: 0, protein: 0, carbs: 0, fat: 0,
-      notes: 'Hidratación rápida (+250 ml)',
+      notes: l10n.quickHydrationNote,
     );
     try {
       await _mealController.saveMeal(waterMeal);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('💧 +250 ml de agua registrados con éxito.'),
-        backgroundColor: AppColors.water,
-        duration: Duration(seconds: 2),
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(l10n.waterLoggedSuccess),
+        backgroundColor: AppColors.water, duration: const Duration(seconds: 2),
       ));
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Error al registrar agua: $e'),
+        content: Text(l10n.waterLogError('$e')),
         backgroundColor: AppColors.primary,
       ));
     }
@@ -187,17 +179,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Future<void> _handleQuickMeal() async {
     final quickMeal = await showQuickMealDialog(context, date: _mealController.selectedDate);
     if (quickMeal != null) {
+      final l10n = AppLocalizations.of(context);
       try {
         await _mealController.saveMeal(quickMeal);
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('⚡ ${quickMeal.name} registrado (${quickMeal.calories.toInt()} kcal).'),
+          content: Text(l10n.quickMealLoggedSuccess(quickMeal.name, quickMeal.calories.toInt().toString())),
           backgroundColor: AppColors.protein,
         ));
       } catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Error al registrar comida rápida: $e'),
+          content: Text(l10n.quickMealLogError('$e')),
           backgroundColor: AppColors.primary,
         ));
       }
@@ -206,9 +199,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   void _openWhatToEatSheet() {
     showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
       builder: (_) => WhatToEatSheet(date: _mealController.selectedDate),
     );
   }
@@ -216,6 +207,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final mealsMap = _mealController.mealsByType;
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: VeAppBar(
@@ -224,8 +216,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         subtitle: 'Victor Engineer',
         actions: [
           Center(child: StreakBadge(streakDays: _mealController.currentStreak)),
-          IconButton(icon: const Icon(Icons.insights_outlined), tooltip: 'Métricas', onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MetricsScreen()))),
-          IconButton(icon: const Icon(Icons.settings_outlined), tooltip: 'Ajustes', onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SettingsScreen()))),
+          IconButton(icon: const Icon(Icons.insights_outlined), tooltip: l10n.metrics, onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MetricsScreen()))),
+          IconButton(icon: const Icon(Icons.settings_outlined), tooltip: l10n.settings, onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SettingsScreen()))),
         ],
       ),
       floatingActionButton: DashboardFabMenu(
