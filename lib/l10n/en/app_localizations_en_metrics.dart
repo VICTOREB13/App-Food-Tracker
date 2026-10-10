@@ -11,10 +11,10 @@ abstract class AppLocalizationsEnMetrics extends AppLocalizationsEnMeal {
   @override String get clinicalReportTitle => 'Clinical Report';
   @override String get timeRangeLabel => 'Time range:';
   @override String get streakOneDay => '1 day';
-  @override String streakMultipleDays(String days) => '${days} days';
+  @override String streakMultipleDays(String days) => '$days days';
   @override String get metricsAndProgress => 'Metrics & Progress';
-  @override String targetCaloriesCompliance(String target, String percent) => 'Target: ${target} kcal (${percent}%)';
-  @override String daysRange(String days) => '${days} days';
+  @override String targetCaloriesCompliance(String target, String percent) => 'Target: $target kcal ($percent%)';
+  @override String daysRange(String days) => '$days days';
   @override String get macroDistributionHeader => 'MACRO DISTRIBUTION';
   @override String get weightRangeError => 'Weight must be between 20.0 and 350.0 kg';
   @override String get streakDaySingular => 'day streak';
@@ -32,7 +32,7 @@ abstract class AppLocalizationsEnMetrics extends AppLocalizationsEnMeal {
   @override String get enterBiometricsToCalculate => 'Enter your biometric data to calculate profile';
   @override String get macroDistributionTitle => 'Macronutrient Distribution';
 
-  @override String macroGoalTarget(String percent, String target) => '$percent% · Goal: ${target}g';
+  @override String macroGoalTarget(String percent, String target) => '$percent% · Goal: $targetg';
   @override String weightLoggedSuccess(String weight) => '⚖️ Weight logged: $weight kg';
   @override String weightLogError(String error) => 'Error recording weight: $error';
   @override String get dayStreak => 'day streak';

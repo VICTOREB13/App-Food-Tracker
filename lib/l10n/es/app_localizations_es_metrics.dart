@@ -11,10 +11,10 @@ abstract class AppLocalizationsEsMetrics extends AppLocalizationsEsMeal {
   @override String get clinicalReportTitle => 'Reporte Clínico';
   @override String get timeRangeLabel => 'Rango temporal:';
   @override String get streakOneDay => '1 día';
-  @override String streakMultipleDays(String days) => '${days} días';
+  @override String streakMultipleDays(String days) => '$days días';
   @override String get metricsAndProgress => 'Métricas y Progreso';
-  @override String targetCaloriesCompliance(String target, String percent) => 'Meta: ${target} kcal (${percent}%)';
-  @override String daysRange(String days) => '${days} días';
+  @override String targetCaloriesCompliance(String target, String percent) => 'Meta: $target kcal ($percent%)';
+  @override String daysRange(String days) => '$days días';
   @override String get macroDistributionHeader => 'DISTRIBUCIÓN DE MACROS';
   @override String get weightRangeError => 'El peso debe estar entre 20.0 y 350.0 kg';
   @override String get streakDaySingular => 'día racha';
@@ -32,7 +32,7 @@ abstract class AppLocalizationsEsMetrics extends AppLocalizationsEsMeal {
   @override String get enterBiometricsToCalculate => 'Ingresa tus datos biométricos para calcular el perfil';
   @override String get macroDistributionTitle => 'Distribución de Macronutrientes';
 
-  @override String macroGoalTarget(String percent, String target) => '$percent% · Meta: ${target}g';
+  @override String macroGoalTarget(String percent, String target) => '$percent% · Meta: $targetg';
   @override String weightLoggedSuccess(String weight) => '⚖️ Peso guardado: $weight kg';
   @override String weightLogError(String error) => 'Error al registrar peso: $error';
   @override String get dayStreak => 'día racha';

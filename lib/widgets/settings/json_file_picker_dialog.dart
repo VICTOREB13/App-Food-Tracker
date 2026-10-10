@@ -44,6 +44,7 @@ class _JsonFilePickerDialogState extends State<JsonFilePickerDialog> {
         if (await file.exists()) {
           await _selectFile(file);
         } else {
+          if (!mounted) return;
           final l10n = AppLocalizations.of(context);
           setState(() => _errorMessage = l10n.invalidOrCorruptFileError(picked.path!));
         }

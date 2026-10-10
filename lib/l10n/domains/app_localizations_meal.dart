@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 
 import '../app_localizations.dart';
-import 'app_localizations_dashboard.dart';
 
 abstract class AppLocalizationsMeal extends AppLocalizationsDashboard {
   AppLocalizationsMeal(super.locale);

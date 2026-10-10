@@ -119,14 +119,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
       date: _mealController.selectedDate,
     );
 
+    if (!mounted) return;
     final l10n = AppLocalizations.of(context);
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(l10n.analyzingMealBackground),
-        backgroundColor: AppColors.primary,
-        duration: const Duration(seconds: 3),
-      ));
-    }
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(l10n.analyzingMealBackground),
+      backgroundColor: AppColors.primary,
+      duration: const Duration(seconds: 3),
+    ));
   }
 
   Future<void> _handleBarcodeScan() async {
@@ -179,6 +178,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Future<void> _handleQuickMeal() async {
     final quickMeal = await showQuickMealDialog(context, date: _mealController.selectedDate);
     if (quickMeal != null) {
+      if (!mounted) return;
       final l10n = AppLocalizations.of(context);
       try {
         await _mealController.saveMeal(quickMeal);
