@@ -66,6 +66,42 @@
                 android:resource="@xml/food_tracker_widget_wide_info" />
         </receiver>
 
+        <!-- Streak & Habits 2x2 Home Widget Provider -->
+        <receiver
+            android:name="com.victorengineer.foodtracker.FoodTrackerStreakWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/food_tracker_widget_streak_info" />
+        </receiver>
+
+        <!-- Quick Actions 2x2 Home Widget Provider -->
+        <receiver
+            android:name="com.victorengineer.foodtracker.FoodTrackerActionsWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/food_tracker_widget_actions_info" />
+        </receiver>
+
+        <!-- Fasting & Date 2x2 Home Widget Provider -->
+        <receiver
+            android:name="com.victorengineer.foodtracker.FoodTrackerFastingWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/food_tracker_widget_fasting_info" />
+        </receiver>
+
         <!-- Flutter Local Notifications Receivers for scheduled exact alarms -->
         <receiver
             android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"

@@ -82,6 +82,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 'scan_food': _handleAiPhotoScan(ImageSource.camera); break;
       case 'scan_barcode': _handleBarcodeScan(); break;
       case 'new_meal': _openManualEntry(); break;
+      case 'quick_meal': _handleQuickMeal(); break;
+      case 'add_water': _handleQuickWater(); break;
+      case 'metrics':
+        Navigator.of(context).push(MaterialPageRoute(builder: (_) => const MetricsScreen()));
+        break;
+      case 'fasting':
+        Navigator.of(context).popUntil((route) => route.isFirst);
+        break;
     }
   }
 

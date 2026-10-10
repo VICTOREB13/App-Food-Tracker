@@ -1,11 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:path/path.dart' as p;
 import '../../l10n/app_localizations.dart';
 import '../../services/accessible_storage_resolver.dart';
 import '../../services/clinical_excel_export_service.dart';
 import '../../services/clinical_pdf_export_service.dart';
+import '../../services/clinical_share_service.dart';
 import '../../services/theme_manager.dart';
 
 Future<void> showClinicalExportDialog(BuildContext context) {
@@ -73,29 +75,19 @@ class _ClinicalExportDialogState extends State<_ClinicalExportDialog> {
 
     return AlertDialog(
       backgroundColor: AppColors.surface(context),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: AppColors.border(context)),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: AppColors.border(context))),
       title: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(8),
-            ),
+            decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(8)),
             child: const Icon(Icons.table_chart_rounded, size: 20, color: AppColors.primary),
           ),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               l10n.clinicalReportTitle,
-              style: GoogleFonts.outfit(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary(context),
-              ),
+              style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary(context)),
             ),
           ),
         ],
@@ -117,12 +109,11 @@ class _ClinicalExportDialogState extends State<_ClinicalExportDialog> {
                 style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary(context)),
               ),
               const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
+              Row(
                 children: [
-                  _buildFormatChip('CSV', l10n.exportFormatCsv),
-                  _buildFormatChip('PDF', l10n.exportFormatPdf),
+                  Expanded(child: _buildFormatChip('CSV', l10n.exportFormatCsv)),
+                  const SizedBox(width: 8),
+                  Expanded(child: _buildFormatChip('PDF', l10n.exportFormatPdf)),
                 ],
               ),
               const SizedBox(height: 14),
@@ -131,13 +122,23 @@ class _ClinicalExportDialogState extends State<_ClinicalExportDialog> {
                 style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary(context)),
               ),
               const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
+              Column(
                 children: [
-                  _buildRangeChip(7, l10n.sevenDaysLabel),
-                  _buildRangeChip(30, l10n.thirtyDaysLabel),
-                  _buildRangeChip(90, l10n.ninetyDaysLabel),
-                  _buildRangeChip(0, l10n.allTimeHistorical),
+                  Row(
+                    children: [
+                      Expanded(child: _buildRangeChip(7, l10n.sevenDaysLabel)),
+                      const SizedBox(width: 8),
+                      Expanded(child: _buildRangeChip(30, l10n.thirtyDaysLabel)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(child: _buildRangeChip(90, l10n.ninetyDaysLabel)),
+                      const SizedBox(width: 8),
+                      Expanded(child: _buildRangeChip(0, l10n.allTimeHistorical)),
+                    ],
+                  ),
                 ],
               ),
               const SizedBox(height: 16),
@@ -174,6 +175,44 @@ class _ClinicalExportDialogState extends State<_ClinicalExportDialog> {
                         p.basename(_exportedFile!.path),
                         style: GoogleFonts.inter(fontSize: 11, color: AppColors.textMuted(context)),
                       ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: () {
+                                HapticFeedback.selectionClick();
+                                ClinicalShareService.instance.shareFile(_exportedFile!);
+                              },
+                              icon: const Icon(Icons.share_outlined, size: 16),
+                              label: Text(l10n.shareReportAction, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: AppColors.textPrimary(context),
+                                side: BorderSide(color: AppColors.border(context)),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                padding: const EdgeInsets.symmetric(vertical: 8),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                HapticFeedback.selectionClick();
+                                ClinicalShareService.instance.openFile(_exportedFile!);
+                              },
+                              icon: const Icon(Icons.open_in_new_rounded, size: 16),
+                              label: Text(l10n.openReportAction, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.success,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                padding: const EdgeInsets.symmetric(vertical: 8),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -205,10 +244,14 @@ class _ClinicalExportDialogState extends State<_ClinicalExportDialog> {
   Widget _buildFormatChip(String format, String label) {
     final isSelected = _selectedFormat == format;
     return ChoiceChip(
-      label: Text(label),
+      showCheckmark: false,
+      label: Center(child: Text(label)),
       selected: isSelected,
       onSelected: (selected) {
-        if (selected) setState(() => _selectedFormat = format);
+        if (selected) {
+          HapticFeedback.selectionClick();
+          setState(() => _selectedFormat = format);
+        }
       },
       selectedColor: AppColors.primary.withValues(alpha: 0.15),
       labelStyle: GoogleFonts.inter(
@@ -222,10 +265,14 @@ class _ClinicalExportDialogState extends State<_ClinicalExportDialog> {
   Widget _buildRangeChip(int days, String label) {
     final isSelected = _selectedDays == days;
     return ChoiceChip(
-      label: Text(label),
+      showCheckmark: false,
+      label: Center(child: Text(label)),
       selected: isSelected,
       onSelected: (selected) {
-        if (selected) setState(() => _selectedDays = days);
+        if (selected) {
+          HapticFeedback.selectionClick();
+          setState(() => _selectedDays = days);
+        }
       },
       selectedColor: AppColors.primary.withValues(alpha: 0.15),
       labelStyle: GoogleFonts.inter(

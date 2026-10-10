@@ -14,6 +14,9 @@ class HomeWidgetService {
   static const String appGroupId = 'group.com.victorengineer.foodtracker';
   static const String compactWidgetProvider = 'FoodTrackerCompactWidgetProvider';
   static const String wideWidgetProvider = 'FoodTrackerWideWidgetProvider';
+  static const String streakWidgetProvider = 'FoodTrackerStreakWidgetProvider';
+  static const String actionsWidgetProvider = 'FoodTrackerActionsWidgetProvider';
+  static const String fastingWidgetProvider = 'FoodTrackerFastingWidgetProvider';
 
   HomeWidgetDeepLinkHandler? _deepLinkHandler;
   StreamSubscription<Uri?>? _widgetClickedSubscription;
@@ -102,6 +105,7 @@ class HomeWidgetService {
     required int carbsLeft,
     required int fatConsumed,
     required int fatLeft,
+    int streakCount = 0,
   }) async {
     if (!isPlatformSupported) return;
     try {
@@ -115,25 +119,45 @@ class HomeWidgetService {
         HomeWidget.saveWidgetData<int>('carbs_left', carbsLeft),
         HomeWidget.saveWidgetData<int>('fat_consumed', fatConsumed),
         HomeWidget.saveWidgetData<int>('fat_left', fatLeft),
+        HomeWidget.saveWidgetData<int>('streak_count', streakCount),
       ]).timeout(const Duration(seconds: 2));
     } catch (e) {
       debugPrint('HomeWidgetService: Failed saving widget data: $e');
     }
   }
 
-  /// Notifies the Android widget subsystem to re-render the compact and wide widgets.
+  /// Synchronizes fasting state and timing into native widget storage.
+  Future<void> updateFastingData({
+    required bool isActive,
+    required String timeFormatted,
+    required int targetHours,
+  }) async {
+    if (!isPlatformSupported) return;
+    try {
+      await Future.wait([
+        HomeWidget.saveWidgetData<bool>('fasting_active', isActive),
+        HomeWidget.saveWidgetData<String>('fasting_time_formatted', timeFormatted),
+        HomeWidget.saveWidgetData<int>('fasting_target_hours', targetHours),
+      ]).timeout(const Duration(seconds: 2));
+      await HomeWidget.updateWidget(
+        name: fastingWidgetProvider,
+        androidName: fastingWidgetProvider,
+      ).timeout(const Duration(seconds: 2));
+    } catch (e) {
+      debugPrint('HomeWidgetService: Failed updating fasting widget: $e');
+    }
+  }
+
+  /// Notifies the Android widget subsystem to re-render all Nothing OS widgets.
   Future<void> updateWidgets() async {
     if (!isPlatformSupported) return;
     try {
       await Future.wait([
-        HomeWidget.updateWidget(
-          name: compactWidgetProvider,
-          androidName: compactWidgetProvider,
-        ),
-        HomeWidget.updateWidget(
-          name: wideWidgetProvider,
-          androidName: wideWidgetProvider,
-        ),
+        HomeWidget.updateWidget(name: compactWidgetProvider, androidName: compactWidgetProvider),
+        HomeWidget.updateWidget(name: wideWidgetProvider, androidName: wideWidgetProvider),
+        HomeWidget.updateWidget(name: streakWidgetProvider, androidName: streakWidgetProvider),
+        HomeWidget.updateWidget(name: actionsWidgetProvider, androidName: actionsWidgetProvider),
+        HomeWidget.updateWidget(name: fastingWidgetProvider, androidName: fastingWidgetProvider),
       ]).timeout(const Duration(seconds: 2));
     } catch (e) {
       debugPrint('HomeWidgetService: Failed updating native widgets: $e');
@@ -150,6 +174,7 @@ class HomeWidgetService {
     required double targetCarbs,
     required double consumedFat,
     required double targetFat,
+    int streakCount = 0,
   }) async {
     final cConsumed = consumedCalories.round();
     final cTarget = targetCalories.round();
@@ -174,6 +199,7 @@ class HomeWidgetService {
       carbsLeft: carbLeft,
       fatConsumed: fConsumed,
       fatLeft: fLeft,
+      streakCount: streakCount,
     );
 
     await updateWidgets();

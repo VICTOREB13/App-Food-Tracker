@@ -125,5 +125,11 @@ abstract class AppLocalizationsSettings extends AppLocalizationsProfile {
   String get usdaApiKeyRemoved;
   String get usdaApiKeySavedSecurely;
   String get dishNameWithExample;
+  String get shareReportAction;
+  String get openReportAction;
+  String get promptCopiedToClipboard;
+  String get restoreDefaultPromptAction;
+  String get previewTabTitle;
+  String get editorTabTitle;
 }
 

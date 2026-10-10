@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_streak_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/widget_background"
+    android:padding="14dp"
+    android:gravity="center">
+
+    <!-- Header / Tracking Nothing OS -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="RACHA ACTIVA"
+        android:textSize="9sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.12"
+        android:textColor="@color/widget_accent" />
+
+    <!-- Huge Streak Counter -->
+    <TextView
+        android:id="@+id/widget_streak_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="🔥 1 DÍA"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="@color/widget_text_primary" />
+
+    <!-- Subtitle -->
+    <TextView
+        android:id="@+id/widget_streak_subtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="HÁBITOS DIARIOS"
+        android:textSize="8sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.1"
+        android:textColor="@color/widget_text_secondary" />
+
+    <!-- 7-Day Habit Dot Matrix -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <FrameLayout
+            android:id="@+id/widget_dot_1"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_margin="3dp"
+            android:background="@drawable/widget_dot_active" />
+
+        <FrameLayout
+            android:id="@+id/widget_dot_2"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_margin="3dp"
+            android:background="@drawable/widget_dot_active" />
+
+        <FrameLayout
+            android:id="@+id/widget_dot_3"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_margin="3dp"
+            android:background="@drawable/widget_dot_active" />
+
+        <FrameLayout
+            android:id="@+id/widget_dot_4"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_margin="3dp"
+            android:background="@drawable/widget_dot_active" />
+
+        <FrameLayout
+            android:id="@+id/widget_dot_5"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_margin="3dp"
+            android:background="@drawable/widget_dot_active" />
+
+        <FrameLayout
+            android:id="@+id/widget_dot_6"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_margin="3dp"
+            android:background="@drawable/widget_dot_active" />
+
+        <FrameLayout
+            android:id="@+id/widget_dot_7"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_margin="3dp"
+            android:background="@drawable/widget_dot_active" />
+    </LinearLayout>
+
+    <!-- Adherence Status Pill -->
+    <TextView
+        android:id="@+id/widget_streak_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Consistencia Semanal"
+        android:textSize="9sp"
+        android:textColor="@color/widget_text_muted" />
+
+</LinearLayout>

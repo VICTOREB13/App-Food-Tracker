@@ -1,5 +1,6 @@
 package com.victorengineer.foodtracker
 
+import android.content.ClipData
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -72,6 +73,70 @@ open class MainActivity: FlutterActivity() {
                             }
                         } else {
                             result.success(false)
+                        }
+                    }
+                    "shareFile" -> {
+                        val filePath = call.argument<String>("filePath")
+                        val mimeType = call.argument<String>("mimeType") ?: "application/octet-stream"
+                        val title = call.argument<String>("title") ?: "Compartir archivo"
+                        if (filePath.isNullOrBlank()) {
+                            result.error("INVALID_ARGUMENTS", "filePath must not be null or empty", null)
+                            return@setMethodCallHandler
+                        }
+                        val file = File(filePath)
+                        if (!file.exists()) {
+                            result.error("FILE_NOT_FOUND", "File does not exist at: $filePath", null)
+                            return@setMethodCallHandler
+                        }
+                        try {
+                            val contentUri = FileProvider.getUriForFile(
+                                applicationContext,
+                                "${applicationContext.packageName}.fileprovider",
+                                file
+                            )
+                            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                type = mimeType
+                                putExtra(Intent.EXTRA_STREAM, contentUri)
+                                clipData = ClipData.newRawUri("", contentUri)
+                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            }
+                            val chooser = Intent.createChooser(shareIntent, title).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            }
+                            startActivity(chooser)
+                            result.success(true)
+                        } catch (e: Exception) {
+                            result.error("SHARE_ERROR", e.localizedMessage, e.message)
+                        }
+                    }
+                    "openFile" -> {
+                        val filePath = call.argument<String>("filePath")
+                        val mimeType = call.argument<String>("mimeType") ?: "*/*"
+                        if (filePath.isNullOrBlank()) {
+                            result.error("INVALID_ARGUMENTS", "filePath must not be null or empty", null)
+                            return@setMethodCallHandler
+                        }
+                        val file = File(filePath)
+                        if (!file.exists()) {
+                            result.error("FILE_NOT_FOUND", "File does not exist at: $filePath", null)
+                            return@setMethodCallHandler
+                        }
+                        try {
+                            val contentUri = FileProvider.getUriForFile(
+                                applicationContext,
+                                "${applicationContext.packageName}.fileprovider",
+                                file
+                            )
+                            val openIntent = Intent(Intent.ACTION_VIEW).apply {
+                                setDataAndType(contentUri, mimeType)
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            }
+                            startActivity(openIntent)
+                            result.success(true)
+                        } catch (e: Exception) {
+                            result.error("OPEN_ERROR", e.localizedMessage, e.message)
                         }
                     }
                     else -> result.notImplemented()

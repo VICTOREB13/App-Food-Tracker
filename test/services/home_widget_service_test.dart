@@ -20,9 +20,12 @@ void main() {
       expect(HomeWidgetService.appGroupId, equals('group.com.victorengineer.foodtracker'));
       expect(HomeWidgetService.compactWidgetProvider, equals('FoodTrackerCompactWidgetProvider'));
       expect(HomeWidgetService.wideWidgetProvider, equals('FoodTrackerWideWidgetProvider'));
+      expect(HomeWidgetService.streakWidgetProvider, equals('FoodTrackerStreakWidgetProvider'));
+      expect(HomeWidgetService.actionsWidgetProvider, equals('FoodTrackerActionsWidgetProvider'));
+      expect(HomeWidgetService.fastingWidgetProvider, equals('FoodTrackerFastingWidgetProvider'));
     });
 
-    test('updateFromDailyTotals computes rounded macro differences safely', () async {
+    test('updateFromDailyTotals computes rounded macro differences safely with streak and fasting', () async {
       await expectLater(
         service.updateFromDailyTotals(
           consumedCalories: 1450.4,
@@ -33,6 +36,27 @@ void main() {
           targetCarbs: 250.0,
           consumedFat: 45.1,
           targetFat: 70.0,
+          streakCount: 5,
+        ),
+        completes,
+      );
+    });
+
+    test('updateFastingData completes safely with active and inactive fasting states', () async {
+      await expectLater(
+        service.updateFastingData(
+          isActive: true,
+          timeFormatted: '14h 30m',
+          targetHours: 16,
+        ),
+        completes,
+      );
+
+      await expectLater(
+        service.updateFastingData(
+          isActive: false,
+          timeFormatted: '0h 0m',
+          targetHours: 16,
         ),
         completes,
       );

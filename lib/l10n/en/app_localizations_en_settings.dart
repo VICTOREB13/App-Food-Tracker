@@ -125,5 +125,11 @@ abstract class AppLocalizationsEnSettings extends AppLocalizationsEnProfile {
   @override String get usdaApiKeyRemoved => 'USDA API Key removed';
   @override String get usdaApiKeySavedSecurely => 'USDA API Key saved securely';
   @override String get dishNameWithExample => 'Dish name (e.g. Flat White Plate)';
+  @override String get shareReportAction => 'Share';
+  @override String get openReportAction => 'Open Report';
+  @override String get promptCopiedToClipboard => 'Master Prompt copied to clipboard';
+  @override String get restoreDefaultPromptAction => 'Restore Default';
+  @override String get previewTabTitle => 'Preview';
+  @override String get editorTabTitle => 'Editor';
 }
 

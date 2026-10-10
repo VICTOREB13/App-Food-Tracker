@@ -107,10 +107,20 @@ class AppTheme {
       colorScheme: const ColorScheme.dark(
         primary: Color(0xFFDC2626),
         secondary: Color(0xFF10B981),
+        secondaryContainer: Color(0x26DC2626),
         surface: Color(0xFF121215),
         error: Color(0xFFEF4444),
         onPrimary: Colors.white,
         onSurface: Color(0xFFFAFAFA),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: Colors.transparent,
+        selectedColor: const Color(0x26DC2626),
+        secondarySelectedColor: const Color(0x26DC2626),
+        side: const BorderSide(color: Color(0xFF27272A)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        labelStyle: GoogleFonts.inter(fontSize: 12),
+        showCheckmark: false,
       ),
       cardTheme: CardThemeData(
         color: const Color(0xFF121215),
@@ -179,10 +189,20 @@ class AppTheme {
       colorScheme: const ColorScheme.light(
         primary: Color(0xFFDC2626),
         secondary: Color(0xFF10B981),
+        secondaryContainer: Color(0x26DC2626),
         surface: Color(0xFFFFFFFF),
         error: Color(0xFFDC2626),
         onPrimary: Colors.white,
         onSurface: Color(0xFF09090B),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: Colors.transparent,
+        selectedColor: const Color(0x26DC2626),
+        secondarySelectedColor: const Color(0x26DC2626),
+        side: const BorderSide(color: Color(0xFFE4E4E7)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        labelStyle: GoogleFonts.inter(fontSize: 12),
+        showCheckmark: false,
       ),
       cardTheme: CardThemeData(
         color: const Color(0xFFFFFFFF),

@@ -1,15 +1,15 @@
 ---
 tipo: abstracciones
 proyecto: App_Food_Tracker
-version: v1.4.1
+version: v1.4.2
 estado: activo
-fecha: 2026-10-09
-tags: [proyecto, arquitectura, abstracciones, backend, gemini-streaming, 16k-tokens, thinking-level-medium, micronutrients-harmonization, dynamic-pacing, local-notifications, socket-resilience, privacy-storage, clinical-pdf, pure-dart-l10n, zero-fallbacks]
+fecha: 2026-10-10
+tags: [proyecto, arquitectura, abstracciones, backend, nothing-os, native-widgets, master-prompt, clinical-export, parity, pure-dart-l10n]
 ---
 
-# Abstracciones del Sistema y Arquitectura de Código: Victor Engineer - Food Tracker (v1.4.1)
+# Abstracciones del Sistema y Arquitectura de Código: Victor Engineer - Food Tracker (v1.4.2)
 
-> **Mesa de Control & Backend-Architect:** Este documento centraliza las clases maestras, interfaces de dominio, servicios de negocio, funciones utilitarias nucleares, variables de estado seguro y costuras de flujo de datos (data seams) de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.4.1` (Saneamiento Integral de Localización 100% Pure Dart, Modularización por Dominios e Idiomas, Erradicación de Fallbacks Defensivos Hardcodeados y Limpieza de Residuos). Complementa conceptualmente a [[PRJ_App_Food_Tracker_api_spec|Especificación de API y Modelos]] para posibilitar el entendimiento exhaustivo del software sin necesidad de inspeccionar línea por línea el código fuente.
+> **Mesa de Control & Backend-Architect:** Este documento centraliza las clases maestras, interfaces de dominio, servicios de negocio, funciones utilitarias nucleares, variables de estado seguro y costuras de flujo de datos (data seams) de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.4.2` (Widgets Nativos Nothing OS, Hoja Modal Desacoplada de Master Prompt, Compartición Nativa de Reportes Clínicos y Armonización Visual). Complementa conceptualmente a [[PRJ_App_Food_Tracker_api_spec|Especificación de API y Modelos]] para posibilitar el entendimiento exhaustivo del software sin necesidad de inspeccionar línea por línea el código fuente.
 
 ---
 
@@ -97,6 +97,9 @@ lib/
 │   │   ├── pantry_dao.dart
 │   │   ├── user_profile_dao.dart
 │   │   └── weight_log_dao.dart
+│   ├── clinical_excel_export_service.dart
+│   ├── clinical_pdf_export_service.dart
+│   ├── clinical_share_service.dart
 │   ├── database_service.dart
 │   ├── gemini_model_service.dart
 │   ├── gemini_resilience_helper.dart
@@ -115,8 +118,8 @@ lib/
     ├── common/           # VeLoadingRing, VeAppBar, VeCard, VeLogo...
     ├── dashboard/        # AnalysisProgressBanner, FastingWindowBentoCard...
     ├── meal_detail/      # FoodItemEditorDialog con autocompletado local...
-    ├── metrics/          # WeeklyDigestCard, CalorieComplianceBentoCard...
-    ├── profile/          # DishwareCalibrationCard, BiometricInputsCard...
+    ├── metrics/          # WeeklyDigestCard, CalorieComplianceBentoCard, ClinicalExportDialog...
+    ├── profile/          # DishwareCalibrationCard, BiometricInputsCard, MasterPromptBottomSheet...
     └── settings/         # LanguageSelectorCard, GeminiModelSelectorCard...
 ```
 
@@ -665,6 +668,39 @@ Para garantizar la estricta mantenibilidad del monolito modular sin romper compa
 ### 14.4. Extensión Contextual de Tipos de Comida (`MealTypeLocalization`)
 - **Ubicación:** `lib/l10n/domains/app_localizations_meal.dart`.
 - **Implementación:** `String toLocalizedMealType(BuildContext context)` mapea transparentemente las claves invariantes persistidas en SQLite (`'Desayuno'`, `'Almuerzo'`, `'Cena'`, `'Snack'`, `'Otro'`) al idioma activo en la UI sin modificar los registros en disco.
+
+---
+
+## 📱 15. Abstracciones de Widgets Nativos Nothing OS, Master Prompt Modal y Exportación Clínica (v1.4.2)
+
+### 15.1. Proveedores y Sincronización de Widgets Nativos (`HomeWidgetService`)
+- **Ubicación:** `lib/services/home_widget_service.dart` (192 LoC) y `android/app/src/main/kotlin/com/victorengineer/foodtracker/`.
+- **Proveedores Registrados (AppWidgetProvider):**
+  - `FoodTrackerCompactWidgetProvider` (2x2): Medidor heroico circular monocromático Nothing OS (`widget_circle_gauge.xml`) que proyecta calorías restantes y porcentaje de meta.
+  - `FoodTrackerWideWidgetProvider` (4x2): Resumen expandido de macronutrientes con paridad de color (#10B981, #F59E0B, #0EA5E9).
+  - `FoodTrackerStreakWidgetProvider` (2x2): Matriz de puntos de racha semanal (`widget_dot_active.xml` vs `widget_dot_inactive.xml`) y contador total de días consecutivos.
+  - `FoodTrackerActionsWidgetProvider` (2x2): Hub de accesos directos rápidos Nothing OS con botones tipo píldora (`widget_pill_button.xml`) para `scan_food`, `quick_meal` y `add_water`.
+  - `FoodTrackerFastingWidgetProvider` (2x2): Cronómetro y monitor de protocolo de ayuno intermitente o reloj de fecha con badge monoespaciado.
+- **Sincronización Determinista del Día Actual:**
+  - `MealController._syncNativeWidgets()` calcula estrictamente los totales de hoy (`DateTime.now()`) delegando en `_mealDao.getMealsForDate(DateTime.now())`. Esto aísla por completo la navegación por fechas históricas en la interfaz gráfica respecto al estado reflejado en el launcher del dispositivo.
+  - `FastingController._syncWidgetFasting()` envía el estado de ayuno activo (`isFasting`, `elapsedHours`, `targetHours`, `fastingStartTime`) mediante `HomeWidgetService.instance.updateFastingData()`.
+
+### 15.2. Servicio de Compartición e Intents de Archivos (`ClinicalShareService`)
+- **Ubicación:** `lib/services/clinical_share_service.dart` (90 LoC) y `MainActivity.kt`.
+- **Canal de Plataforma:** `com.victorengineer.foodtracker/app_installer`
+- **Operaciones:**
+  - `shareFile(File file, {String? title})`: Despacha un intent `ACTION_SEND` envuelto en `Intent.createChooser` en Android para compartir reportes clínicos generados (CSV/PDF) mediante WhatsApp, Telegram, correo o almacenamiento en nube. Proporciona fallback a apertura en plataformas de escritorio.
+  - `openFile(File file)`: Despacha un intent `ACTION_VIEW` con `FLAG_GRANT_READ_URI_PERMISSION` resuelto mediante `FileProvider` en Android, o invocación nativa de visor de documentos en Windows/macOS/Linux.
+  - `resolveMimeType(String filePath)`: Mapeador determinista de extensiones a tipos MIME (`.pdf` -> `application/pdf`, `.csv` -> `text/csv`, etc.).
+
+### 15.3. Hoja Modal del Master Prompt Metabólico (`MasterPromptBottomSheet`)
+- **Ubicación:** `lib/widgets/profile/master_prompt_bottom_sheet.dart` (262 LoC).
+- **Desacoplamiento Ergonómico:**
+  - Sustituye el campo `TextFormField` embebido en `MetabolicSummaryBentoCard` que generaba fricción y conflictos en la arena de gestos (`VerticalDragGestureRecognizer`) del scroll de perfil.
+  - Modal Bottom Sheet con `heightFactor: 0.85` alineado con `ModelPickerBottomSheet`.
+  - Pestañas independientes gestionadas por `TabController`:
+    - **Pestaña Vista Previa:** Muestra tarjetas Bento resumidas de TDEE, Meta Calórica, Proteína y Grasas junto al texto formateado monoespaciado del prompt para el modelo de IA.
+    - **Pestaña Editor:** Editor multilínea a toda la altura disponible con acciones de guardado (`onSaved`), copiado en 1 tap y restauración a la plantilla generada por `MetabolicCalculator`.
 
 
 

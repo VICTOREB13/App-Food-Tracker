@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_actions_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/widget_background"
+    android:padding="10dp"
+    android:gravity="center">
+
+    <!-- Row 1: Scan Food (Camera) & Scan Barcode -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <!-- Action: Cámara IA -->
+        <LinearLayout
+            android:id="@+id/widget_action_scan_food"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_margin="3dp"
+            android:orientation="vertical"
+            android:background="@drawable/widget_surface_box"
+            android:padding="6dp"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📸"
+                android:textSize="18sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="CÁMARA IA"
+                android:textSize="8sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.06"
+                android:textColor="@color/widget_text_primary" />
+        </LinearLayout>
+
+        <!-- Action: Código de Barras -->
+        <LinearLayout
+            android:id="@+id/widget_action_barcode"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_margin="3dp"
+            android:orientation="vertical"
+            android:background="@drawable/widget_surface_box"
+            android:padding="6dp"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🔍"
+                android:textSize="18sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="BARRAS"
+                android:textSize="8sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.06"
+                android:textColor="@color/widget_text_primary" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Row 2: Quick Meal & Add Water -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="4dp"
+        android:orientation="horizontal">
+
+        <!-- Action: Comida Rápida -->
+        <LinearLayout
+            android:id="@+id/widget_action_quick_meal"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_margin="3dp"
+            android:orientation="vertical"
+            android:background="@drawable/widget_surface_box"
+            android:padding="6dp"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⚡"
+                android:textSize="18sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="RÁPIDA"
+                android:textSize="8sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.06"
+                android:textColor="@color/widget_text_primary" />
+        </LinearLayout>
+
+        <!-- Action: Agua +250ml -->
+        <LinearLayout
+            android:id="@+id/widget_action_water"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_margin="3dp"
+            android:orientation="vertical"
+            android:background="@drawable/widget_surface_box"
+            android:padding="6dp"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="💧"
+                android:textSize="18sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="+250ML"
+                android:textSize="8sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.06"
+                android:textColor="@color/widget_text_primary" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

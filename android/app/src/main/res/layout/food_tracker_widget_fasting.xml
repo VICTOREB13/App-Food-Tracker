@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_fasting_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/widget_background"
+    android:padding="12dp"
+    android:gravity="center">
+
+    <!-- Nothing OS Date Header -->
+    <TextView
+        android:id="@+id/widget_fasting_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="10 SÁB OCT"
+        android:textSize="9sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.12"
+        android:textColor="@color/widget_text_secondary" />
+
+    <!-- Status Label -->
+    <TextView
+        android:id="@+id/widget_fasting_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:text="AYUNO INTERMITENTE"
+        android:textSize="8sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.08"
+        android:textColor="@color/widget_accent" />
+
+    <!-- Hero Fasting Time -->
+    <TextView
+        android:id="@+id/widget_fasting_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="---"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="@color/widget_text_primary" />
+
+    <!-- Fasting Target Note -->
+    <TextView
+        android:id="@+id/widget_fasting_target"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="Meta 16h"
+        android:textSize="9sp"
+        android:textColor="@color/widget_text_muted" />
+
+    <!-- Action Pill Button -->
+    <LinearLayout
+        android:id="@+id/widget_btn_fasting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:background="@drawable/widget_pill_button"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="5dp">
+
+        <TextView
+            android:id="@+id/widget_btn_fasting_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Iniciar / Ver"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.04"
+            android:textColor="@color/widget_text_primary" />
+    </LinearLayout>
+
+</LinearLayout>

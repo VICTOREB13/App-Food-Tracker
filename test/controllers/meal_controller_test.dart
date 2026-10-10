@@ -149,5 +149,17 @@ void main() {
       final pruned = await controller.pruneOldPhotos(0);
       expect(pruned, equals(0));
     });
+
+    test('Navegar a fechas pasadas mantiene la consulta de comidas de hoy para sincronizacion nativa', () async {
+      final controller = MealController.instance;
+      final pastDate = DateTime.now().subtract(const Duration(days: 3));
+      await controller.setSelectedDate(pastDate);
+
+      final pastMeal = Meal(name: 'Comida Pasada', calories: 999, date: pastDate);
+      await controller.saveMeal(pastMeal);
+
+      expect(controller.selectedDate.day, equals(pastDate.day));
+      expect(controller.meals.first.calories, equals(999));
+    });
   });
 }

@@ -4,4 +4,10 @@
     <string name="widget_compact_description">Resumen rápido de calorías y registro de comida</string>
     <string name="widget_wide_name">Food Tracker - Completo</string>
     <string name="widget_wide_description">Resumen de calorías, desglose de macronutrientes y accesos directos de escaneo</string>
+    <string name="widget_streak_name">Food Tracker - Racha &amp; Hábitos</string>
+    <string name="widget_streak_description">Racha activa y matriz de hábitos diarios estilo Nothing OS</string>
+    <string name="widget_actions_name">Food Tracker - Acciones Rápidas</string>
+    <string name="widget_actions_description">Disparadores rápidos para cámara IA, código de barras, comida rápida y agua</string>
+    <string name="widget_fasting_name">Food Tracker - Ayuno &amp; Fecha</string>
+    <string name="widget_fasting_description">Reloj de fecha y temporizador de ayuno intermitente estilo Nothing OS</string>
 </resources>

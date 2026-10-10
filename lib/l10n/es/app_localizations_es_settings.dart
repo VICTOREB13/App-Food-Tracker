@@ -125,5 +125,11 @@ abstract class AppLocalizationsEsSettings extends AppLocalizationsEsProfile {
   @override String get usdaApiKeyRemoved => 'USDA API Key eliminada';
   @override String get usdaApiKeySavedSecurely => 'USDA API Key guardada de forma segura';
   @override String get dishNameWithExample => 'Nombre del plato (ej. Plato Llano Blanco)';
+  @override String get shareReportAction => 'Compartir';
+  @override String get openReportAction => 'Abrir Reporte';
+  @override String get promptCopiedToClipboard => 'Master Prompt copiado al portapapeles';
+  @override String get restoreDefaultPromptAction => 'Restaurar por Defecto';
+  @override String get previewTabTitle => 'Vista Previa';
+  @override String get editorTabTitle => 'Editor';
 }
 

@@ -1,15 +1,52 @@
 ---
 tipo: task_list
 proyecto: App_Food_Tracker
-iteracion: v1.4.1
+iteracion: v1.4.2
 estado: activo
-fecha: 2026-10-09
-tags: [proyecto, tasks, checklist, v1-4-1, l10n-architecture, domain-modularization, zero-fallbacks, cleanup]
+fecha: 2026-10-10
+tags: [proyecto, tasks, checklist, v1-4-2, native-widgets, nothing-os, master-prompt, clinical-export, parity]
 ---
 
-# 📋 Checklist Maestro de Tareas de Agentes (v1.4.1)
+# 📋 Checklist Maestro de Tareas de Agentes (v1.4.2)
 
-> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.4.1. Cada tarea completada se marca con `[x]`.
+> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.4.2. Cada tarea completada se marca con `[x]`.
+
+---
+
+## 🌟 Iteración v1.4.2: Widgets Nativos Nothing OS (Dot Matrix, Quick Actions, Fasting Timer), Rediseño de Master Prompt con Tabs, Exportación Clínica con Share Sheet Nativo y Armonización Visual
+
+### 🧭 1. Project-Planner (Master Tech Lead & Orquestador)
+- [x] (Project-Planner) Diseñar la arquitectura técnica de widgets nativos Nothing OS (Dot Matrix, Hub de Acciones Rápidas, Cronómetro de Ayuno y rediseño de widget compacto) en `artifacts/planning/implementation_plan.md`.
+- [x] (Project-Planner) Diseñar la hoja modal inferior desacoplada `MasterPromptBottomSheet` (`heightFactor: 0.85`) con pestañas de Vista Previa y Editor para eliminar conflicto de gestos.
+- [x] (Project-Planner) Diseñar la integración de Share Sheet nativo e intents de apertura de archivos con retroalimentación háptica en la exportación clínica.
+- [x] (Project-Planner) Mantener la regla de oro de arquitectura estricta: 100% de archivos en `lib/` con `LOC < 300`.
+
+### 🗄️ 2. Backend-Architect (Lógica de Sincronización, Intents Nativos y Colorimetría)
+- [x] (Backend-Architect) Corregir desfase de sincronización en `MealController._syncNativeWidgets()` para calcular estrictamente métricas del día actual (`DateTime.now()`).
+- [x] (Backend-Architect) Armonizar colores de macronutrientes en XMLs nativos (`colors.xml`, `colors_night.xml` en Android y assets) para paridad exacta con Flutter (Proteína `#10B981`, Carbohidratos `#F59E0B`, Grasas `#0EA5E9`).
+- [x] (Backend-Architect) Erradicar destello verde global al seleccionar chips/filtros mediante `secondaryContainer: Color(0x26DC2626)` y `chipTheme` en `ThemeManager`.
+- [x] (Backend-Architect) Implementar `MainActivity.kt` con canales `shareFile` (`ACTION_SEND`) y `openFile` (`ACTION_VIEW`).
+- [x] (Backend-Architect) Crear servicio desacoplado `ClinicalShareService` (< 300 LoC) con resolución de tipo MIME y soporte multiplataforma.
+
+### 🎨 3. Frontend-UI (Widgets Nativos Nothing OS, Master Prompt Sheet y UI Clínica)
+- [x] (Frontend-UI) Diseñar drawables Nothing OS (`widget_circle_gauge.xml`, `widget_dot_active.xml`, `widget_dot_inactive.xml`, `widget_pill_button.xml`) y layouts (`food_tracker_widget_compact.xml`, `food_tracker_widget_streak.xml`, `food_tracker_widget_actions.xml`, `food_tracker_widget_fasting.xml`).
+- [x] (Frontend-UI) Implementar `MasterPromptBottomSheet` (< 300 LoC) con pestañas "Vista Previa" y "Editor", métricas de resumen, copiado en 1 tap y restauración a valores por defecto.
+- [x] (Frontend-UI) Actualizar `MetabolicSummaryBentoCard` eliminando el campo de texto estrecho y agregando botón directo de copiado y apertura de modal.
+- [x] (Frontend-UI) Corregir layout jump en `ClinicalExportDialog` reorganizando chips en fila 50/50 y cuadrícula fija 2x2 para días, agregando botones "Compartir" y "Abrir Reporte" tras la exportación.
+- [x] (Frontend-UI) Incorporar deep links `quick_meal` y `add_water` en `DashboardScreen`.
+
+### 🚀 4. DevOps-Engineer (Android Manifest, Proveedores Nativos y Versionado)
+- [x] (DevOps-Engineer) Actualizar `pubspec.yaml` a `version: 1.4.2+1` y `AppConstants.appVersion = '1.4.2'`.
+- [x] (DevOps-Engineer) Registrar los 3 nuevos receivers en `AndroidManifest.xml` (`FoodTrackerStreakWidgetProvider`, `FoodTrackerActionsWidgetProvider`, `FoodTrackerFastingWidgetProvider`).
+- [x] (DevOps-Engineer) Sincronizar drawables, layouts, providers y XMLs con `lib/assets/android_widgets/`.
+- [x] (DevOps-Engineer) Actualizar `changelog_v1.md` con las notas formales de la versión `[1.4.2] - 2026-10-10`.
+
+### 🛡️ 5. Systems-Auditor (Pruebas Automatizadas y Quality Gate)
+- [x] (Systems-Auditor) Crear pruebas unitarias para `ClinicalShareService` en `test/services/clinical_share_service_test.dart`.
+- [x] (Systems-Auditor) Actualizar pruebas de `HomeWidgetService` en `test/services/home_widget_service_test.dart` cubriendo los nuevos providers y métodos de ayuno/racha.
+- [x] (Systems-Auditor) Crear pruebas de widget para `MasterPromptBottomSheet` en `test/widgets/master_prompt_bottom_sheet_test.dart`.
+- [x] (Systems-Auditor) Auditar que el 100% de archivos en `lib/` cumplan estrictamente `< 300 LoC` (0 archivos >= 300).
+- [x] (Systems-Auditor) Emitir reporte de auditoría y Quality Gate para v1.4.2.
 
 ---
 

@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../core/interfaces/fasting_dao_interface.dart';
 import '../models/fasting_log.dart';
 import '../services/database_service.dart';
+import '../services/home_widget_service.dart';
 import '../services/notification_service.dart';
 
 /// State management controller handling Intermittent Fasting tracking and timer tickers.
@@ -86,6 +87,7 @@ class FastingController extends ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
+      _syncWidgetFasting();
     }
   }
 
@@ -108,6 +110,7 @@ class FastingController extends ChangeNotifier {
     _activeFast = newLog;
     _manageTicker();
     notifyListeners();
+    _syncWidgetFasting();
 
     final scheduledEnd = newLog.startTime.add(targetDuration);
     await NotificationService.instance.scheduleFastingCompleted(
@@ -130,9 +133,20 @@ class FastingController extends ChangeNotifier {
     _activeFast = null;
     _manageTicker();
     notifyListeners();
+    _syncWidgetFasting();
 
     await NotificationService.instance.cancelFastingReminder();
     return updated;
+  }
+
+  void _syncWidgetFasting() {
+    try {
+      HomeWidgetService.instance.updateFastingData(
+        isActive: isFastingActive,
+        timeFormatted: fastingDurationFormatted,
+        targetHours: targetHours.round(),
+      );
+    } catch (_) {}
   }
 
   void _manageTicker() {

@@ -18,6 +18,40 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [1.4.2] - 2026-10-10
+
+La versión v1.4.2 eleva la experiencia del usuario y la integración con el sistema operativo incorporando un conjunto completo de widgets de escritorio nativos para Android con lenguaje visual Nothing OS (matriz de puntos, indicadores monocromáticos y acentos rojos translúcidos), rediseña la gestión del Master Prompt del perfil metabólico en una hoja inferior modal dedicada con pestañas de vista previa y edición, soluciona desajustes visuales y saltos de layout en la exportación clínica añadiendo apertura y compartición directa mediante Share Sheet del sistema, y erradica inconsistencias de colorimetría y sincronización en segundo plano.
+
+### Added
+- **Suite de Widgets de Escritorio Nativos Nothing OS (Android 2x2):**
+  - **W1: Habit Dot Matrix (2x2) (`FoodTrackerStreakWidgetProvider`):** Matriz de puntos de racha semanal con microetiquetas para cada día de la semana (`D`, `L`, `M`, `M`, `J`, `V`, `S`) e indicador del total de días en racha.
+  - **W2: Quick Actions Hub (2x2) (`FoodTrackerActionsWidgetProvider`):** Acceso directo en 1 toque desde la pantalla de inicio con botones tipo píldora para escanear comida (`foodtracker://scan_food`), registro rápido (`foodtracker://quick_meal`) y añadir agua (`foodtracker://add_water`).
+  - **W3: Fasting & Date Timer (2x2) (`FoodTrackerFastingWidgetProvider`):** Monitor de ayuno intermitente Nothing OS con badge de estado ("AYUNANDO" / "INACTIVO"), horas transcurridas en tipografía monoespaciada e indicador de meta.
+  - **Rediseño del Widget Compacto 2x2 (`FoodTrackerCompactWidgetProvider`):** Nuevo medidor heroico circular Nothing OS (`widget_circle_gauge.xml`) con visualización de calorías restantes y barra de progreso de meta.
+- **Hoja Modal de Master Prompt (`MasterPromptBottomSheet`):**
+  - Modal desacoplado (`heightFactor: 0.85`) accesible desde `MetabolicSummaryBentoCard`.
+  - Pestañas fluidas de "Vista Previa" (con tarjetas métricas TDEE/Meta/Macros y texto resaltado) y "Editor" (con área de texto amplia y multilínea).
+  - Acciones de copiado instantáneo al portapapeles con microinteracción háptica y botón de restauración al prompt predeterminado generado por `MetabolicCalculator`.
+- **Integración de Compartir y Abrir Archivos Clínicos (`ClinicalShareService`):**
+  - Canales nativos `shareFile` (`ACTION_SEND` con `Intent.createChooser`) y `openFile` (`ACTION_VIEW` con `FLAG_GRANT_READ_URI_PERMISSION`) en `MainActivity.kt`.
+  - Botones "Compartir" y "Abrir Reporte" en `ClinicalExportDialog` activados inmediatamente tras generar el archivo CSV o PDF.
+  - Retroalimentación háptica en la selección de opciones y exportación.
+
+### Changed
+- **Armonización de Paleta de Macronutrientes y Paridad de Color:**
+  - Corrección de `colors.xml` y `colors_night.xml` en Android y assets para alinearse al 100% con los tokens de Flutter: Proteína `#10B981`, Carbohidratos `#F59E0B`, Grasas `#0EA5E9`.
+- **Erradicación del Destello Verde Global (ThemeManager):**
+  - Configuración explícita de `secondaryContainer: Color(0x26DC2626)` y `chipTheme: ChipThemeData(...)` en temas claro y oscuro para evitar que la paleta por defecto de Flutter (verde) parpadee al pulsar o seleccionar chips de filtro.
+- **Corrección de Sincronización en Widget Nativo (`MealController`):**
+  - `_syncNativeWidgets()` calcula estrictamente los totales de hoy (`DateTime.now()`) usando `_mealDao.getMealsForDate(DateTime.now())`, impidiendo que navegar hacia atrás en el calendario del dashboard sobreescriba los datos del widget en la pantalla de inicio.
+- **Rediseño Libre de Saltos en `ClinicalExportDialog`:**
+  - Distribución de selectores de formato en fila horizontal fija (50%/50%) y opciones de temporalidad en cuadrícula 2x2, fijando un ancho modal de 320 px y `showCheckmark: false` para evitar deformaciones visuales y saltos de layout durante la selección.
+- **Actualización de Versión de la Aplicación:**
+  - Actualizado a `1.4.2` en `AppConstants.appVersion` (`lib/core/constants/app_constants.dart`).
+  - Actualizado a `1.4.2+1` en `pubspec.yaml`.
+
+---
+
 ## [1.4.1] - 2026-10-09
 
 La versión v1.4.1 culmina el saneamiento exhaustivo de internacionalización (i18n/l10n) en toda la aplicación, eliminando por completo cualquier texto hardcodeado en pantallas y widgets visuales. Introduce una arquitectura limpia y modular de localización organizada por subdirectorios de idioma (`lib/l10n/es/`, `lib/l10n/en/`) e interfaces abstractas por dominio de negocio (`lib/l10n/domains/`), garantizando que la incorporación futura de nuevos idiomas sea inmediata y desacoplada. Asimismo, se erradica el patrón de fallbacks defensivos hardcodeados en Dart (`?? 'español'`), consumiendo directamente propiedades no-nulables tipadas, y se ejecuta una depuración total de archivos residuales y scripts del repositorio.

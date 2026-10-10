@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/user_profile.dart';
@@ -6,6 +7,7 @@ import '../../services/metabolic_calculator.dart';
 import '../../services/secure_storage_service.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_card.dart';
+import 'master_prompt_bottom_sheet.dart';
 
 class MetabolicSummaryBentoCard extends StatefulWidget {
   final UserProfile? profile;
@@ -18,50 +20,36 @@ class MetabolicSummaryBentoCard extends StatefulWidget {
 }
 
 class _MetabolicSummaryBentoCardState extends State<MetabolicSummaryBentoCard> {
-  bool _showPromptDetails = false;
-  late final TextEditingController _promptController;
-
-  @override
-  void initState() {
-    super.initState();
-    _promptController = TextEditingController(text: widget.profile?.masterPrompt ?? '');
-  }
-
-  @override
-  void didUpdateWidget(covariant MetabolicSummaryBentoCard oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.profile?.masterPrompt != oldWidget.profile?.masterPrompt &&
-        widget.profile?.masterPrompt != null) {
-      _promptController.text = widget.profile!.masterPrompt!;
-    }
-  }
-
-  @override
-  void dispose() {
-    _promptController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _saveCustomPrompt() async {
-    final text = _promptController.text.trim();
-    if (text.isEmpty) return;
-    await SecureStorageService.instance.setMasterPrompt(text);
-    if (!mounted) return;
+  void _copyPrompt() {
+    HapticFeedback.selectionClick();
+    if (widget.profile == null) return;
+    final prompt = widget.profile!.masterPrompt ??
+        MetabolicCalculator.generateMasterPrompt(widget.profile!);
+    Clipboard.setData(ClipboardData(text: prompt));
     final l10n = AppLocalizations.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.customPromptSavedSuccess), backgroundColor: AppColors.protein),
+      SnackBar(
+        content: Text(l10n.promptCopiedToClipboard),
+        backgroundColor: AppColors.primary,
+        duration: const Duration(seconds: 2),
+      ),
     );
   }
 
-  Future<void> _resetPromptToCalculated() async {
+  void _openPromptBottomSheet() {
+    HapticFeedback.selectionClick();
     if (widget.profile == null) return;
-    final calculated = MetabolicCalculator.generateMasterPrompt(widget.profile!);
-    setState(() => _promptController.text = calculated);
-    await SecureStorageService.instance.setMasterPrompt(calculated);
-    if (!mounted) return;
-    final l10n = AppLocalizations.of(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.promptResetSuccess), backgroundColor: AppColors.carbs),
+    MasterPromptBottomSheet.show(
+      context,
+      profile: widget.profile!,
+      onSaved: (newPrompt) async {
+        await SecureStorageService.instance.setMasterPrompt(newPrompt);
+        if (!mounted) return;
+        final l10n = AppLocalizations.of(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.customPromptSavedSuccess), backgroundColor: AppColors.protein),
+        );
+      },
     );
   }
 
@@ -204,63 +192,42 @@ class _MetabolicSummaryBentoCardState extends State<MetabolicSummaryBentoCard> {
           // Master Prompt Section
           const SizedBox(height: 14),
           const Divider(),
-          const SizedBox(height: 6),
-          InkWell(
-            onTap: () => setState(() => _showPromptDetails = !_showPromptDetails),
-            borderRadius: BorderRadius.circular(8),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
                 children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.psychology_outlined, size: 18, color: AppColors.primaryLight),
-                      const SizedBox(width: 6),
-                      Text(l10n.multimodalMasterPrompt, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primaryLight)),
-                    ],
+                  const Icon(Icons.psychology_outlined, size: 18, color: AppColors.primaryLight),
+                  const SizedBox(width: 6),
+                  Text(
+                    l10n.multimodalMasterPrompt,
+                    style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primaryLight),
                   ),
-                  Icon(_showPromptDetails ? Icons.expand_less : Icons.expand_more, size: 20, color: AppColors.textSecondary(context)),
                 ],
               ),
-            ),
-          ),
-          if (_showPromptDetails) ...[
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _promptController,
-              maxLines: 6,
-              style: GoogleFonts.robotoMono(fontSize: 11, color: AppColors.textPrimary(context), height: 1.4),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: AppColors.surfaceSubtle(context),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: AppColors.border(context))),
-                hintText: l10n.aiVisionPromptHint,
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.copy_rounded, size: 18, color: AppColors.primaryLight),
+                    tooltip: l10n.shareReportAction,
+                    padding: const EdgeInsets.all(4),
+                    constraints: const BoxConstraints(),
+                    onPressed: _copyPrompt,
+                  ),
+                  const SizedBox(width: 12),
+                  IconButton(
+                    icon: const Icon(Icons.open_in_full_rounded, size: 18, color: AppColors.primaryLight),
+                    tooltip: l10n.edit,
+                    padding: const EdgeInsets.all(4),
+                    constraints: const BoxConstraints(),
+                    onPressed: _openPromptBottomSheet,
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: _resetPromptToCalculated,
-                    style: OutlinedButton.styleFrom(side: BorderSide(color: AppColors.border(context)), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding: const EdgeInsets.symmetric(vertical: 8)),
-                    icon: const Icon(Icons.restart_alt, size: 16),
-                    label: Text(l10n.resetAction, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600)),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: _saveCustomPrompt,
-                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding: const EdgeInsets.symmetric(vertical: 8)),
-                    icon: const Icon(Icons.save_outlined, size: 16),
-                    label: Text(l10n.savePromptAction, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700)),
-                  ),
-                ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ],
       ),
     );

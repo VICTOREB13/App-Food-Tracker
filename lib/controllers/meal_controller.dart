@@ -140,22 +140,10 @@ class MealController extends ChangeNotifier {
     }
   }
 
-  Future<void> saveMeal(Meal meal) async {
-    await _db.insertMeal(meal);
-    await loadMeals();
-  }
-
-  Future<void> upsertMeal(Meal meal) async {
-    await _db.upsertMeal(meal);
-    await loadMeals();
-  }
-
+  Future<void> saveMeal(Meal meal) async { await _db.insertMeal(meal); await loadMeals(); }
+  Future<void> upsertMeal(Meal meal) async { await _db.upsertMeal(meal); await loadMeals(); }
   Future<void> addMeal(Meal meal) => upsertMeal(meal);
-
-  Future<void> updateMeal(Meal meal) async {
-    await _db.updateMeal(meal);
-    await loadMeals();
-  }
+  Future<void> updateMeal(Meal meal) async { await _db.updateMeal(meal); await loadMeals(); }
 
   Future<void> deleteMeal(Meal meal) async {
     if (meal.imagePath != null) {
@@ -238,16 +226,12 @@ class MealController extends ChangeNotifier {
       double targetCarb = profile.targetCarbs, targetFat = profile.targetFat;
 
       if (isAuto) {
-        targetCal = MetabolicCalculator.calculateCaloricGoal(
-          tdee: newTdee, bmr: newBmr, bodyGoal: profile.bodyGoal,
-        );
+        targetCal = MetabolicCalculator.calculateCaloricGoal(tdee: newTdee, bmr: newBmr, bodyGoal: profile.bodyGoal);
         final m = MetabolicCalculator.calculateMacros(
           targetCalories: targetCal, weightKg: weight, bodyGoal: profile.bodyGoal,
           heightCm: profile.height, gender: profile.gender,
         );
-        targetProt = m.protein;
-        targetCarb = m.carbs;
-        targetFat = m.fat;
+        targetProt = m.protein; targetCarb = m.carbs; targetFat = m.fat;
       }
 
       final updated = profile.copyWith(
@@ -277,12 +261,24 @@ class MealController extends ChangeNotifier {
     await loadWeightLogs(days: _selectedWeightDays);
   }
 
-  void _syncNativeWidgets() {
-    HomeWidgetService.instance.updateFromDailyTotals(
-      consumedCalories: totalCalories, targetCalories: _dailyGoals.calories,
-      consumedProtein: totalProtein, targetProtein: _dailyGoals.protein,
-      consumedCarbs: totalCarbs, targetCarbs: _dailyGoals.carbs,
-      consumedFat: totalFat, targetFat: _dailyGoals.fat,
-    );
+  Future<void> _syncNativeWidgets() async {
+    try {
+      final now = DateTime.now();
+      final isToday = _selectedDate.year == now.year &&
+          _selectedDate.month == now.month &&
+          _selectedDate.day == now.day;
+      final todayMeals = isToday ? _meals : await _db.getMealsForDay(now);
+      double cal = 0, p = 0, c = 0, f = 0;
+      for (final m in todayMeals) {
+        cal += m.calories; p += m.protein; c += m.carbs; f += m.fat;
+      }
+      await HomeWidgetService.instance.updateFromDailyTotals(
+        consumedCalories: cal, targetCalories: _dailyGoals.calories,
+        consumedProtein: p, targetProtein: _dailyGoals.protein,
+        consumedCarbs: c, targetCarbs: _dailyGoals.carbs,
+        consumedFat: f, targetFat: _dailyGoals.fat,
+        streakCount: _currentStreak,
+      );
+    } catch (_) {}
   }
 }

@@ -1,17 +1,17 @@
 ---
 tipo: arquitectura
 proyecto: App_Food_Tracker
-version: v1.4.1
+version: v1.4.2
 estado: activo
-fecha: 2026-10-09
-stack_principal: [Flutter, SQLite WAL v4, Google Gemini API, USDA FoodData Central, Open Food Facts, FlutterSecureStorage, GetIt, Flutter Localizations, HomeWidget, BackupNormalizer, NutritionalRecommendationService, GitHubReleasesUpdateService, MethodChannelAppInstaller, GeminiResilienceHelper, NotificationService, ClinicalPdfExportService]
+fecha: 2026-10-10
+stack_principal: [Flutter, SQLite WAL v4, Google Gemini API, USDA FoodData Central, Open Food Facts, FlutterSecureStorage, GetIt, Flutter Localizations, HomeWidget, BackupNormalizer, NutritionalRecommendationService, GitHubReleasesUpdateService, MethodChannelAppInstaller, GeminiResilienceHelper, NotificationService, ClinicalPdfExportService, ClinicalShareService]
 diagrama_html: PRJ_App_Food_Tracker_architecture_diagram.html
-tags: [proyecto, arquitectura, tech-stack, archify, local-first, get-it, l10n, result-pattern, android-widgets, sqlite-v4, recommendations, saf-backup, auto-repair, in-app-updater, microinteractions, android-16, gemini-vision-precision, timeout-resilience, atomic-image-persistence, i18n-native, gemini-streaming, resumable-downloads, http-206, 16k-tokens, thinking-level-medium, dynamic-pacing, local-notifications, socket-resilience, privacy-storage, clinical-pdf, purge-justification, pure-dart-l10n, zero-fallbacks]
+tags: [proyecto, arquitectura, tech-stack, archify, local-first, get-it, l10n, result-pattern, android-widgets, nothing-os, sqlite-v4, recommendations, saf-backup, auto-repair, in-app-updater, microinteractions, android-16, gemini-vision-precision, timeout-resilience, atomic-image-persistence, i18n-native, gemini-streaming, resumable-downloads, http-206, 16k-tokens, thinking-level-medium, dynamic-pacing, local-notifications, socket-resilience, privacy-storage, clinical-pdf, clinical-share, master-prompt, pure-dart-l10n, zero-fallbacks]
 ---
 
-# 🏗️ Arquitectura del Sistema: Victor Engineer - Food Tracker (v1.4.1)
+# 🏗️ Arquitectura del Sistema: Victor Engineer - Food Tracker (v1.4.2)
 
-> **Mesa de Control & Backend-Architect:** Este documento establece los componentes fundamentales, el Tech Stack tecnológico, las decisiones arquitectónicas estructurales y el flujo de datos integral de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.4.1` (Saneamiento Integral de Localización 100% Pure Dart, Modularización por Dominios e Idiomas, Erradicación de Fallbacks Defensivos Hardcodeados y Limpieza de Residuos).
+> **Mesa de Control & Backend-Architect:** Este documento establece los componentes fundamentales, el Tech Stack tecnológico, las decisiones arquitectónicas estructurales y el flujo de datos integral de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.4.2` (Suite de Widgets Nativos Nothing OS, Hoja Modal Desacoplada de Master Prompt, Compartición Nativa de Reportes Clínicos y Armonización Visual).
 
 ---
 
@@ -33,10 +33,13 @@ tags: [proyecto, arquitectura, tech-stack, archify, local-first, get-it, l10n, r
   - Selector nativo de archivos SAF (`file_picker ^13.1.0`) para integración fluida sin tipeo manual de rutas.
   - Normalización en Isolate secundario (`Isolate.run`) y persistencia atómica por lotes con `txn.batch()` y `batch.commit(noResult: true)` a 60 FPS.
   - Motor auto-reparador de JSON truncado (`_tryRepairTruncatedJson`): Cierre de strings huérfanos, balanceo LIFO de `{`, `[` y sanitización sintáctica.
-- **Widgets Nativos de Android (AppWidgets):** `home_widget: ^0.7.0` con sincronización en SharedPreferences y layouts XML nativos en `res/layout/`:
-  - **Widget Compacto (2x2):** Anillo de progreso calórico, calorías restantes vs meta, y botón de acción directa `[+ Registrar]`.
-  - **Widget Extendido (4x2):** Anillo de calorías a la izquierda, desglose tri-columna de macronutrientes (Proteína, Carbohidratos, Grasas), y botones táctiles interactivos de 1 toque con deep links directos (`foodtracker://scan_food` para cámara IA y `foodtracker://scan_barcode` para escáner USDA).
-  - **Doble Tema Nativo:** `res/values/colors.xml` (Modo Claro) y `res/values-night/colors.xml` (Modo Oscuro Zinc/Carmesí con esquinas redondeadas de 24dp).
+- **Suite de Widgets Nativos Nothing OS de Android (AppWidgets):** `home_widget: ^0.7.0` con sincronización en SharedPreferences y layouts XML nativos en `res/layout/`:
+  - **W1: Habit Dot Matrix (2x2):** Matriz de puntos activa para la semana en curso y contador de racha (`FoodTrackerStreakWidgetProvider`).
+  - **W2: Quick Actions Hub (2x2):** Botones tipo píldora para `scan_food`, `quick_meal` y `add_water` (`FoodTrackerActionsWidgetProvider`).
+  - **W3: Fasting & Date Timer (2x2):** Monitor de ayuno intermitente o reloj de fecha Nothing OS (`FoodTrackerFastingWidgetProvider`).
+  - **Widget Compacto Rediseñado (2x2):** Anillo heroico circular Nothing OS (`widget_circle_gauge.xml`) y calorías restantes (`FoodTrackerCompactWidgetProvider`).
+  - **Widget Extendido (4x2):** Desglose tri-columna con paridad de color (#10B981, #F59E0B, #0EA5E9) y accesos directos (`FoodTrackerWideWidgetProvider`).
+  - **Doble Tema Nativo:** `res/values/colors.xml` y `res/values-night/colors.xml` (Modo Oscuro Zinc/Carmesí con drawables dedicados).
 - **Inferencia IA & Visión Multimodal:** Google Generative AI SDK (`google_generative_ai: ^0.4.6`):
   - Streaming Continuo Resiliente (`model.generateContentStream`): Flujo de tokens acumulados en `StringBuffer` que mantiene activo el socket TCP/TLS, mitigando cierres por inactividad de gateways NAT móviles durante fases de inferencia profunda.
   - Presupuesto Ampliado a 16k Tokens (`maxOutputTokens: 16384`): Evita el agotamiento de salida por cadenas de razonamiento latente y descarta truncamientos por `finishReason: MAX_TOKENS`.
