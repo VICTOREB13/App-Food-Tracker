@@ -101,7 +101,7 @@ abstract class AppLocalizationsEnCore extends AppLocalizations {
   @override String get failedToExtractNutritionLabel => 'Could not extract nutrition label.';
   @override String get addProductAction => 'Product';
   @override String get noProductsInCategory => 'No products in this category.\nUse scanner or tap "+ Product".';
-  @override String referenceServingInfo(String grams) => 'Product reference serving: $gramsg';
+  @override String referenceServingInfo(String grams) => 'Product reference serving: ${grams}g';
   @override String get liveCalculatedNutrients => 'Live Calculated Nutrients:';
   @override String get editProductTitle => 'Edit Product';
   @override String get nutrientsPerReferenceServing => 'Nutrients per reference serving:';
@@ -139,7 +139,7 @@ abstract class AppLocalizationsEnCore extends AppLocalizations {
   @override String get aiModelHeader => 'AI MODEL';
   @override String get onlineModelsFromStudio => 'Online models from Google AI Studio';
   @override String get offlineModeDefaultModels => 'Offline mode (default models)';
-  @override String tokenWindowLabel(String tokens) => 'Window: $tokensk tokens';
+  @override String tokenWindowLabel(String tokens) => 'Window: ${tokens}k tokens';
   @override String get exploreAndChangeModel => 'Explore & Change Model';
   @override String get unknownDownloadError => 'Unknown error during download.';
   @override String get networkDownloadError => 'Connection error downloading update. Check your network and try again.';

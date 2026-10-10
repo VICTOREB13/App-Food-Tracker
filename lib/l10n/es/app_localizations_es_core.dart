@@ -101,7 +101,7 @@ abstract class AppLocalizationsEsCore extends AppLocalizations {
   @override String get failedToExtractNutritionLabel => 'No se pudo extraer la etiqueta nutricional.';
   @override String get addProductAction => 'Producto';
   @override String get noProductsInCategory => 'No hay productos en esta categoría.\nUsa el escáner o pulsa "+ Producto".';
-  @override String referenceServingInfo(String grams) => 'Porción de referencia del producto: $gramsg';
+  @override String referenceServingInfo(String grams) => 'Porción de referencia del producto: ${grams}g';
   @override String get liveCalculatedNutrients => 'Nutrientes Calculados en Vivo:';
   @override String get editProductTitle => 'Editar Producto';
   @override String get nutrientsPerReferenceServing => 'Nutrientes por cada porción de referencia:';
@@ -139,7 +139,7 @@ abstract class AppLocalizationsEsCore extends AppLocalizations {
   @override String get aiModelHeader => 'MODELO DE IA';
   @override String get onlineModelsFromStudio => 'Modelos en línea desde Google AI Studio';
   @override String get offlineModeDefaultModels => 'Modo offline (modelos por defecto)';
-  @override String tokenWindowLabel(String tokens) => 'Ventana: $tokensk tokens';
+  @override String tokenWindowLabel(String tokens) => 'Ventana: ${tokens}k tokens';
   @override String get exploreAndChangeModel => 'Explorar y Cambiar Modelo';
   @override String get unknownDownloadError => 'Error desconocido durante la descarga.';
   @override String get networkDownloadError => 'Error de conexión al descargar la actualización. Verifica tu red e inténtalo de nuevo.';

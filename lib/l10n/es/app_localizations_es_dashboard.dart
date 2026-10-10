@@ -53,7 +53,7 @@ abstract class AppLocalizationsEsDashboard extends AppLocalizationsEsCore {
   @override String get fabVoiceSubtitle => 'Dictado natural';
   @override String get fabVideoTitle => 'Video Pan';
   @override String get fabVideoSubtitle => 'Muestreo 3D';
-  @override String remainingFastDuration(String remaining, String total) => 'Restan $remaining de $totalh';
+  @override String remainingFastDuration(String remaining, String total) => 'Restan $remaining de ${total}h';
   @override String get fastingStartTrackingPrompt => 'Inicia para dar seguimiento a tu ventana de comida';
 
   @override String dishRegisteredSuccess(String name) => '✨ "$name" registrada con éxito en tu día';

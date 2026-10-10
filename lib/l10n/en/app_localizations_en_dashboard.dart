@@ -53,7 +53,7 @@ abstract class AppLocalizationsEnDashboard extends AppLocalizationsEnCore {
   @override String get fabVoiceSubtitle => 'Natural dictation';
   @override String get fabVideoTitle => 'Video Pan';
   @override String get fabVideoSubtitle => '3D sampling';
-  @override String remainingFastDuration(String remaining, String total) => '$remaining of $totalh remaining';
+  @override String remainingFastDuration(String remaining, String total) => '$remaining of ${total}h remaining';
   @override String get fastingStartTrackingPrompt => 'Start to track your eating window';
 
   @override String dishRegisteredSuccess(String name) => '✨ "$name" successfully logged today';

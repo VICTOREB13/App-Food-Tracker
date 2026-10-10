@@ -32,7 +32,7 @@ abstract class AppLocalizationsEnMetrics extends AppLocalizationsEnMeal {
   @override String get enterBiometricsToCalculate => 'Enter your biometric data to calculate profile';
   @override String get macroDistributionTitle => 'Macronutrient Distribution';
 
-  @override String macroGoalTarget(String percent, String target) => '$percent% · Goal: $targetg';
+  @override String macroGoalTarget(String percent, String target) => '$percent% · Goal: ${target}g';
   @override String weightLoggedSuccess(String weight) => '⚖️ Weight logged: $weight kg';
   @override String weightLogError(String error) => 'Error recording weight: $error';
   @override String get dayStreak => 'day streak';

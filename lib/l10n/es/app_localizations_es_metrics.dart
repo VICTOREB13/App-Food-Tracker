@@ -32,7 +32,7 @@ abstract class AppLocalizationsEsMetrics extends AppLocalizationsEsMeal {
   @override String get enterBiometricsToCalculate => 'Ingresa tus datos biométricos para calcular el perfil';
   @override String get macroDistributionTitle => 'Distribución de Macronutrientes';
 
-  @override String macroGoalTarget(String percent, String target) => '$percent% · Meta: $targetg';
+  @override String macroGoalTarget(String percent, String target) => '$percent% · Meta: ${target}g';
   @override String weightLoggedSuccess(String weight) => '⚖️ Peso guardado: $weight kg';
   @override String weightLogError(String error) => 'Error al registrar peso: $error';
   @override String get dayStreak => 'día racha';

@@ -59,7 +59,7 @@ abstract class AppLocalizationsEsProfile extends AppLocalizationsEsMetrics {
   @override String get goalMuscleGainDesc => 'Superávit limpio para favorecer síntesis proteica';
   @override String bmrTdeeSummary(String bmr, String tdee) => 'BMR: $bmr kcal • TDEE: $tdee kcal';
   @override String get pantryCategoriesBeverages => 'Bebidas';
-  @override String packageWeightPortion(String package) => 'Empaque: $packageg';
+  @override String packageWeightPortion(String package) => 'Empaque: ${package}g';
   @override String get profileAndGoalsSyncedSuccess => 'Perfil metabólico y metas sincronizadas con éxito';
   @override String profileSaveError(String error) => 'Error al guardar el perfil: $error';
   @override String get configureYourProfile => 'Configura tu Perfil';

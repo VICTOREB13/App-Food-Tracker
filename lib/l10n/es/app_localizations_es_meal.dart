@@ -78,7 +78,7 @@ abstract class AppLocalizationsEsMeal extends AppLocalizationsEsDashboard {
   @override String get pantryCategoriesSnacks => 'Snacks';
   @override String scanError(String error) => 'Error al escanear: $error';
   @override String get pantryDescription => 'Tus productos se inyectan en Gemini Vision para reconocer automáticamente tus marcas habituales.';
-  @override String servingPortion(String serving) => 'Porción: $servingg';
+  @override String servingPortion(String serving) => 'Porción: ${serving}g';
   @override String get logToMealTooltip => 'Registrar a Comida';
   @override String pantryItemLoggedSuccess(String name, String meal, String calories) => '🍽️ $name registrado en $meal ($calories kcal).';
   @override String get pantryLogToMealTitle => 'Registrar a Comida';
@@ -101,11 +101,11 @@ abstract class AppLocalizationsEsMeal extends AppLocalizationsEsDashboard {
   @override String get scanBarcodeDialogTitle => 'Escanear Código';
   @override String get openDish => 'Abrir plato';
   @override String get gramsToConsume => 'Gramos a consumir';
-  @override String referencePortion(String grams) => 'Porción de referencia del producto: $gramsg';
+  @override String referencePortion(String grams) => 'Porción de referencia del producto: ${grams}g';
   @override String get ingredients => 'ingredientes';
   @override String get foodItemExamples => 'Ej. Manzana, Avena, Yogur';
 
-  @override String pantryReferenceServing(String grams) => 'Porción de referencia del producto: $gramsg';
+  @override String pantryReferenceServing(String grams) => 'Porción de referencia del producto: ${grams}g';
   @override String addToMealType(String mealType) => 'Añadir a $mealType';
   @override String get portionGramsLabel => 'Porción (g)';
   @override String get packageGramsLabel => 'Envase (g)';

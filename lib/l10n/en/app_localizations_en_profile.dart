@@ -59,7 +59,7 @@ abstract class AppLocalizationsEnProfile extends AppLocalizationsEnMetrics {
   @override String get goalMuscleGainDesc => 'Clean surplus to promote protein synthesis';
   @override String bmrTdeeSummary(String bmr, String tdee) => 'BMR: $bmr kcal • TDEE: $tdee kcal';
   @override String get pantryCategoriesBeverages => 'Beverages';
-  @override String packageWeightPortion(String package) => 'Package: $packageg';
+  @override String packageWeightPortion(String package) => 'Package: ${package}g';
   @override String get profileAndGoalsSyncedSuccess => 'Metabolic profile and goals synced successfully';
   @override String profileSaveError(String error) => 'Error saving profile: $error';
   @override String get configureYourProfile => 'Configure your Profile';
