@@ -48,9 +48,9 @@ tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid, get-it, 
    - APIs seguras en DAOs y controladores que erradican excepciones no controladas mediante combinadores funcionales (`fold`, `map`, `flatMap`, `guardAsync`).
    - Jerarquía sellada `Failure` tipada por dominio (`DatabaseFailure`, `AiServiceFailure`, `NetworkFailure`, etc.).
 
-6. **Internacionalización y Localización Nativa (`l10n` / `i18n`):**
-   - Catálogos de idioma completos en español (`lib/l10n/app_es.arb`) e inglés (`lib/l10n/app_en.arb`).
-   - Integración nativa con `AppLocalizations` en `NutriTrackerApp` con soporte para detección automática del idioma del dispositivo.
+6. **Internacionalización y Localización 100% Pure Dart (`l10n` / `i18n`):**
+   - Arquitectura modular desacoplada por dominios (`lib/l10n/domains/`) e idiomas (`lib/l10n/es/`, `lib/l10n/en/`) con cero dependencias de generación de código `.arb`.
+   - Fachada unificada no-nulable `AppLocalizations.of(context)` en `NutriTrackerApp` con soporte para detección automática y selector en caliente en Ajustes.
 
 7. **Cascada Híbrida de Consulta Nutricional (USDA FoodData Central + Open Food Facts):**
    - **Motor Cascada Resiliente (`BarcodeLookupService`):** Prioriza la base de datos oficial del Departamento de Agricultura de EE.UU. (**USDA FoodData Central**) con coincidencia exacta GTIN a 14 dígitos.

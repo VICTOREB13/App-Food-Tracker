@@ -1,15 +1,15 @@
 ---
 tipo: api_spec
 proyecto: App_Food_Tracker
-version: v1.4.0
+version: v1.4.1
 estado: activo
-fecha: 2026-10-08
-tags: [proyecto, api, backend, contratos, sqlite-v4, github-releases, methodchannel-installer, gemini-streaming, 16k-tokens, thinking-level-medium, dynamic-pacing, local-notifications, socket-resilience, privacy-storage, clinical-pdf, purge-justification]
+fecha: 2026-10-09
+tags: [proyecto, api, backend, contratos, sqlite-v4, github-releases, methodchannel-installer, gemini-streaming, 16k-tokens, thinking-level-medium, dynamic-pacing, local-notifications, socket-resilience, privacy-storage, clinical-pdf, purge-justification, pure-dart-l10n, zero-fallbacks]
 ---
 
-# 📡 Especificación de Contrato de Datos, Esquema SQLite v4 y Servicios Backend (v1.4.0)
+# 📡 Especificación de Contrato de Datos, Esquema SQLite v4 y Servicios Backend (v1.4.1)
 
-> **Backend-Architect:** Este artefacto define formalmente el esquema relacional de base de datos local SQLite v4, los índices B-Tree de cobertura, los modelos de dominio inmutables (Sentinel), los contratos de servicios internos (DAOs, Service Locator, Result Pattern, BackupNormalizer con auto-reparación, NotificationService, ClinicalPdfExportService) y externos (Dynamic Gemini API con Streaming, Fallback Unario, IVisionModelProvider, 16k Tokens, Thinking Level MEDIUM, Descargas Resumibles HTTP 206 en GitHub Releases, HomeWidget, USDA FoodData Central, Open Food Facts y Calculadora Metabólica).
+> **Backend-Architect:** Este artefacto define formalmente el esquema relacional de base de datos local SQLite v4, los índices B-Tree de cobertura, los modelos de dominio inmutables (Sentinel), los contratos de servicios internos (DAOs, Service Locator, Result Pattern, BackupNormalizer con auto-reparación, NotificationService, ClinicalPdfExportService, Pure Dart AppLocalizations) y externos (Dynamic Gemini API con Streaming, Fallback Unario, IVisionModelProvider, 16k Tokens, Thinking Level MEDIUM, Descargas Resumibles HTTP 206 en GitHub Releases, HomeWidget, USDA FoodData Central, Open Food Facts y Calculadora Metabólica).
 
 ---
 
@@ -380,6 +380,26 @@ Para evitar alucinaciones autorregresivas y cuellos de botella de constrained gr
 - **Exportación PDF Clínico (`IClinicalPdfExportService` / `ClinicalPdfExportService`):**
   - `Future<Result<String, Failure>> exportToClinicalPdf({required List<Meal> meals, required DateTime startDate, required DateTime endDate, ...})`
   - Genera documento binario con cabecera `%PDF-`, estructurado con tablas completas de macronutrientes, micronutrientes (fibra, sodio, azúcar), promedios diarios e historial secuencial de comidas, guardado en el mismo directorio `/Documents/FoodTracker`.
+
+---
+
+## 🌐 10. Contrato de Localización Modular 100% Pure Dart (`AppLocalizations`) (v1.4.1)
+
+- **Fachada Canónica (`lib/l10n/app_localizations.dart`):**
+  - `static AppLocalizations of(BuildContext context)`: Retorna la instancia activa tipada no-nulable con fallback interno seguro a `AppLocalizationsEs`.
+  - `static const LocalizationsDelegate<AppLocalizations> delegate`: Delegado síncrono para resolución de `Locale('es')` y `Locale('en')`.
+  - `static const List<LocalizationsDelegate<dynamic>> localizationsDelegates`: Delegados globales de Material, Cupertino y Widgets.
+  - `static const List<Locale> supportedLocales`: Soporte bilingüe estricto `[Locale('es'), Locale('en')]`.
+- **Contratos Segregados por Dominio (`lib/l10n/domains/`):**
+  - `AppLocalizationsCore`: Cadenas base del sistema, acciones globales (`save`, `cancel`, `errorGeneric`).
+  - `AppLocalizationsDashboard`: Métricas de dashboard, fab menu, ayuno intermitente.
+  - `AppLocalizationsMeal`: Desglose nutricional, porciones, tags de autovalidación y extensión contextual `MealTypeLocalization`.
+  - `AppLocalizationsMetrics`: Histórico de peso, balances semanales, promedios diarios.
+  - `AppLocalizationsProfile`: Fórmulas BMR/TDEE, perfil antropométrico, onboarding.
+  - `AppLocalizationsSettings`: Selector de modelos Gemini, almacenamiento de fotos, backups JSON y mantenimiento SQLite.
+- **Extensión Contextual de Invariantes (`MealTypeLocalization`):**
+  - `String toLocalizedMealType(BuildContext context)`: Transforma valores invariantes persistidos ('Desayuno', 'Almuerzo', 'Cena', 'Snack', 'Otro') a la traducción activa sin mutar la base de datos relacional.
+
 
 
 

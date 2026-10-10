@@ -1,15 +1,15 @@
 ---
 tipo: abstracciones
 proyecto: App_Food_Tracker
-version: v1.4.0
+version: v1.4.1
 estado: activo
-fecha: 2026-10-08
-tags: [proyecto, arquitectura, abstracciones, backend, gemini-streaming, 16k-tokens, thinking-level-medium, micronutrients-harmonization, dynamic-pacing, local-notifications, socket-resilience, privacy-storage, clinical-pdf]
+fecha: 2026-10-09
+tags: [proyecto, arquitectura, abstracciones, backend, gemini-streaming, 16k-tokens, thinking-level-medium, micronutrients-harmonization, dynamic-pacing, local-notifications, socket-resilience, privacy-storage, clinical-pdf, pure-dart-l10n, zero-fallbacks]
 ---
 
-# Abstracciones del Sistema y Arquitectura de Código: Victor Engineer - Food Tracker (v1.4.0)
+# Abstracciones del Sistema y Arquitectura de Código: Victor Engineer - Food Tracker (v1.4.1)
 
-> **Mesa de Control & Backend-Architect:** Este documento centraliza las clases maestras, interfaces de dominio, servicios de negocio, funciones utilitarias nucleares, variables de estado seguro y costuras de flujo de datos (data seams) de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.4.0` (Notificaciones Locales Asíncronas, Resiliencia de Socket Gemini con Fallback Unario, Privacidad de Almacenamiento de Fotos, Reportes Clínicos en PDF y Purga de Justificación Volumétrica). Complementa conceptualmente a [[PRJ_App_Food_Tracker_api_spec|Especificación de API y Modelos]] para posibilitar el entendimiento exhaustivo del software sin necesidad de inspeccionar línea por línea el código fuente.
+> **Mesa de Control & Backend-Architect:** Este documento centraliza las clases maestras, interfaces de dominio, servicios de negocio, funciones utilitarias nucleares, variables de estado seguro y costuras de flujo de datos (data seams) de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.4.1` (Saneamiento Integral de Localización 100% Pure Dart, Modularización por Dominios e Idiomas, Erradicación de Fallbacks Defensivos Hardcodeados y Limpieza de Residuos). Complementa conceptualmente a [[PRJ_App_Food_Tracker_api_spec|Especificación de API y Modelos]] para posibilitar el entendimiento exhaustivo del software sin necesidad de inspeccionar línea por línea el código fuente.
 
 ---
 
@@ -632,6 +632,40 @@ Para garantizar la estricta mantenibilidad del monolito modular sin romper compa
   - Notifica a la interfaz gráfica vía `notifyListeners()` asegurando 60 FPS continuos sin escrituras a disco SQLite en cada tick.
   - Cancelación determinista y segura en cláusula `finally { pacingTimer?.cancel(); }`.
 - **Resolución Reactiva de Etapa:** `AnalysisProgressBanner._resolveStageMessage` delega en `MealAnalysisPacing.getStageMessage(task.progress, l10n)` únicamente cuando la tarea se encuentra activamente en estado `AnalysisStatus.processing`, respetando fielmente los textos de estado predeterminados (`En cola`, `En cola para reintento...`) para tareas en espera.
+
+---
+
+## 🌐 14. Abstracciones de Localización Modular 100% Pure Dart y Cero Fallbacks (v1.4.1)
+
+### 14.1. Segregación de Interfaces por Dominio (`lib/l10n/domains/`)
+- **Arquitectura de Herencia Encadenada:**
+  - `AppLocalizationsCore`: Cadenas transversales y de sistema (`appTitle`, `save`, `cancel`, `errorGeneric`, `networkError`, etc.).
+  - `AppLocalizationsDashboard extends AppLocalizationsCore`: Métricas de dashboard, fab menu, ayuno, widgets Bento.
+  - `AppLocalizationsMeal extends AppLocalizationsDashboard`: Detalle de comidas, ingredientes, porciones, tags de validación IA. Contiene además la extensión `MealTypeLocalization`.
+  - `AppLocalizationsMetrics extends AppLocalizationsMeal`: Estadísticas, gráficos de peso, balances semanales y promedios diarios.
+  - `AppLocalizationsProfile extends AppLocalizationsMetrics`: Onboarding, fórmulas BMR/TDEE, perfil antropométrico y metas de actividad.
+  - `AppLocalizationsSettings extends AppLocalizationsProfile`: Ajustes, modelos Gemini, almacenamiento de fotos, backups JSON y mantenimiento SQLite.
+
+### 14.2. Fachada Unificada y Delegados (`lib/l10n/app_localizations.dart`)
+- **Firma:** `abstract class AppLocalizations extends AppLocalizationsSettings`
+- **Accesor Canónico:**
+  ```dart
+  static AppLocalizations of(BuildContext context) {
+    return Localizations.of<AppLocalizations>(context, AppLocalizations) ??
+        AppLocalizationsEs();
+  }
+  ```
+  Garantiza retorno tipado **no-nulable** con fallback interno seguro a `AppLocalizationsEs` sin ensuciar la capa de UI.
+- **Exportaciones Unificadas:** Exporta los contratos de los 6 dominios, los agregadores de idioma y la extensión `MealTypeLocalization`, sirviendo como Single Source of Truth para todas las pantallas, widgets y tests del proyecto.
+
+### 14.3. Implementaciones Concretas por Idioma (`lib/l10n/es/` y `lib/l10n/en/`)
+- Módulos concretos por dominio (`app_localizations_es_core.dart`, `app_localizations_en_core.dart`, etc.) implementando el 100% de getters y métodos sin discrepancias de firma.
+- Clases agregadoras `AppLocalizationsEs` y `AppLocalizationsEn` cumpliendo estrictamente con `< 300 LoC` por archivo.
+
+### 14.4. Extensión Contextual de Tipos de Comida (`MealTypeLocalization`)
+- **Ubicación:** `lib/l10n/domains/app_localizations_meal.dart`.
+- **Implementación:** `String toLocalizedMealType(BuildContext context)` mapea transparentemente las claves invariantes persistidas en SQLite (`'Desayuno'`, `'Almuerzo'`, `'Cena'`, `'Snack'`, `'Otro'`) al idioma activo en la UI sin modificar los registros en disco.
+
 
 
 

@@ -1,16 +1,16 @@
 ---
 tipo: audit_report
 proyecto: App_Food_Tracker
-iteracion: v1.4.0
+iteracion: v1.4.1
 veredicto: PASS
 estado: activo
-fecha: 2026-10-08
-tags: [proyecto, audit, quality-gate, v1-4-0, local-notifications, socket-resilience, privacy-storage, clinical-pdf, purge-justification, l10n]
+fecha: 2026-10-09
+tags: [proyecto, audit, quality-gate, v1-4-1, pure-dart-l10n, zero-fallbacks, loc-strict, ci-cd, release-official]
 ---
 
-# 🛡️ Reporte de Auditoría Integral y Quality Gate (v1.4.0)
+# 🛡️ Reporte de Auditoría Integral y Quality Gate (v1.4.1)
 
-> **Systems-Auditor (Quality Gatekeeper):** Este documento contiene los resultados de la inspección técnica exhaustiva, auditoría de tipado y sintaxis, verificación de suites de pruebas automatizadas, auditoría modular de líneas de código (LoC < 300) y certificación de integridad técnica para la versión **v1.4.0** (Notificaciones en Segundo Plano, Resiliencia de Socket Gemini, Privacidad de Almacenamiento, Reportes PDF Clínicos y Purga de Justificación Visual) del proyecto **Victor Engineer - Food Tracker**.
+> **Systems-Auditor (Quality Gatekeeper):** Este documento contiene los resultados de la inspección técnica exhaustiva, auditoría de tipado y sintaxis, verificación de suites de pruebas automatizadas, auditoría modular de líneas de código (LoC < 300) y certificación de integridad técnica para la versión **v1.4.1** (Saneamiento Integral de Localización 100% Pure Dart, Modularización por Dominios e Idiomas, Erradicación de Fallbacks Defensivos Hardcodeados y Limpieza de Residuos) del proyecto **Victor Engineer - Food Tracker**.
 
 ---
 
@@ -20,90 +20,91 @@ tags: [proyecto, audit, quality-gate, v1-4-0, local-notifications, socket-resili
 =====================================================
           QUALITY GATE VERDICT: STATUS: PASS
 =====================================================
- [✓] Verificación de Análisis Estático y Sintaxis: 0 Errores, 0 Advertencias, Delimitadores Balanceados
- [✓] Notificaciones Locales y Programadas: Canales Android configurados, receivers en AndroidManifest.xml, avisos en AnalysisQueueService y alarmas exactas en FastingController
- [✓] Resiliencia de Socket Gemini Vision: Detección de OS error 104/10054 con fallback unario inmediato (generateContent) e interfaz desacoplada IVisionModelProvider
- [✓] Purga de Justificación Volumétrica: Eliminada de mealAnalysisSchema, FoodItemsListCard y FoodItemEditorDialog con retrocompatibilidad en FoodItem
- [✓] Selector de Privacidad de Almacenamiento: StorageMode (public/private) persistido en SecureStorageService, aislamiento en MealImageStorageResolver y Bento card en Settings
- [✓] Exportación Clínica Dual (CSV y PDF): RFC 4180 CSV y ClinicalPdfExportService (%PDF- con tablas de macros y desglose) en /Documents/FoodTracker
- [✓] Completitud de Localización: Claves dinámicas sincronizadas en arb y clases Dart (app_localizations*.dart)
- [✓] Cumplimiento Modular Estricto: 100% de los archivos de lib/ y pruebas modificadas cumplen < 300 LoC (0 archivos >= 300)
- [✓] Sincronización de Versiones: AppConstants.appVersion = '1.4.0' y pubspec.yaml version: 1.4.0+1
- [✓] Integridad Técnica Genuina: Sin tests debilitados, pruebas unitarias y de widgets reales cubriendo casos borde
+ [✓] Verificación de Análisis Estático: flutter analyze -> 0 issues found (100% clean)
+ [✓] Ejecución Completa de Pruebas: 539 tests passed, 0 failed en CI y local (Run 38019201445)
+ [✓] Arquitectura Modular l10n 100% Pure Dart: Segregación en lib/l10n/domains/, lib/l10n/es/, lib/l10n/en/
+ [✓] Erradicación Total de Fallbacks Hardcodeados: 0 apariciones de ?? 'español' en lib/screens/ y lib/widgets/
+ [✓] Reubicación de Extensión MealTypeLocalization: Trasladada a app_localizations_meal.dart y exportada en fachada
+ [✓] Purga de Archivos Obsoletos y Residuales: l10n.yaml, *.arb, shims y scripts temporales eliminados
+ [✓] Regla de Oro Modular (< 300 LoC): 100% de archivos en lib/ cumplen el límite (Máximo: 295 en meal.dart)
+ [✓] Sincronización de Versión Canónica: AppConstants.appVersion = '1.4.1' y pubspec.yaml = 1.4.1+1
+ [✓] Publicación Oficial de Release: Tag v1.4.1 y APK generado con verificación criptográfica SHA-256
 =====================================================
 ```
 
 **Estatus:** `Status: PASS`  
-**Autorización:** Calidad y estabilidad técnica verificadas al 100% con cero defectos residuales.
+**Autorización:** Calidad y estabilidad técnica verificadas al 100% con cero defectos residuales. Aprobado para producción y release oficial.
 
 ---
 
 ## 🔬 2. Análisis Estático y Auditoría Modular (< 300 LoC)
 
-- **Inspección de Análisis Estático:** Verificación de balance de delimitadores, contratos de tipado, importaciones limpias y ausencia de referencias rotas en todos los archivos modificados y creados.
-- **Auditoría Modular de Líneas de Código (Archivos creados o modificados en v1.4.0):**
-  - `lib/core/constants/app_constants.dart`: 5 LoC (`< 300` ✓)
-  - `lib/core/interfaces/notification_service_interface.dart`: 27 LoC (`< 300` ✓)
-  - `lib/core/interfaces/vision_model_provider_interface.dart`: 41 LoC (`< 300` ✓)
-  - `lib/core/interfaces/clinical_pdf_export_service_interface.dart`: 15 LoC (`< 300` ✓)
-  - `lib/core/di/service_locator.dart`: 125 LoC (`< 300` ✓)
-  - `lib/main.dart`: 208 LoC (`< 300` ✓)
-  - `lib/models/storage_mode.dart`: 16 LoC (`< 300` ✓)
-  - `lib/services/notification_service.dart`: 250 LoC (`< 300` ✓)
-  - `lib/services/accessible_storage_resolver.dart`: 53 LoC (`< 300` ✓)
-  - `lib/services/clinical_pdf_export_service.dart`: 241 LoC (`< 300` ✓)
-  - `lib/services/clinical_excel_export_service.dart`: 178 LoC (`< 300` ✓)
-  - `lib/services/analysis_queue_service.dart`: 292 LoC (`< 300` ✓)
-  - `lib/services/gemini_resilience_helper.dart`: 265 LoC (`< 300` ✓)
-  - `lib/services/gemini_vision_service.dart`: 295 LoC (`< 300` ✓)
-  - `lib/services/meal_image_storage_resolver.dart`: 162 LoC (`< 300` ✓)
-  - `lib/services/image_processing_service.dart`: 274 LoC (`< 300` ✓)
-  - `lib/services/secure_storage_service.dart`: 154 LoC (`< 300` ✓)
-  - `lib/controllers/fasting_controller.dart`: 154 LoC (`< 300` ✓)
-  - `lib/controllers/settings_controller.dart`: 288 LoC (`< 300` ✓)
-  - `lib/widgets/settings/storage_mode_card.dart`: 178 LoC (`< 300` ✓)
-  - `lib/screens/settings_screen.dart`: 258 LoC (`< 300` ✓)
-  - `lib/widgets/meal_detail/food_items_list_card.dart`: 171 LoC (`< 300` ✓)
-  - `lib/widgets/meal_detail/food_item_editor_dialog.dart`: 274 LoC (`< 300` ✓)
-  - `lib/widgets/metrics/clinical_export_dialog.dart`: 237 LoC (`< 300` ✓)
-  - `lib/l10n/app_localizations.dart`: 212 LoC (`< 300` ✓)
-  - `lib/l10n/app_localizations_es.dart`: 299 LoC (`< 300` ✓)
-  - `lib/l10n/app_localizations_en.dart`: 299 LoC (`< 300` ✓)
-  - **Resultado Global:** 100% de los archivos en `lib/` cumplen estrictamente con el estándar modular `< 300 LoC`.
+- **Linter Estático Oficial:** Ejecutado en GitHub Actions CI (Run `38019201445`):
+  ```bash
+  flutter analyze
+  # Resultado: No issues found! (ran in 20.5s)
+  ```
+- **Auditoría Exhaustiva de Líneas de Código (`lib/`):**
+  - Total archivos auditados: 100% de archivos `.dart` en `lib/`.
+  - Violaciones (`LoC >= 300`): **0 archivos**.
+  - Archivo con mayor densidad: `lib/models/meal.dart` (295 LoC).
+  - Archivos creados y reestructurados en `v1.4.1`:
+    - `lib/l10n/app_localizations.dart`: 72 LoC (`< 300` ✓)
+    - `lib/l10n/domains/app_localizations_core.dart`: 201 LoC (`< 300` ✓)
+    - `lib/l10n/domains/app_localizations_dashboard.dart`: 65 LoC (`< 300` ✓)
+    - `lib/l10n/domains/app_localizations_meal.dart`: 135 LoC (`< 300` ✓)
+    - `lib/l10n/domains/app_localizations_metrics.dart`: 55 LoC (`< 300` ✓)
+    - `lib/l10n/domains/app_localizations_profile.dart`: 108 LoC (`< 300` ✓)
+    - `lib/l10n/domains/app_localizations_settings.dart`: 129 LoC (`< 300` ✓)
+    - `lib/l10n/es/app_localizations_es.dart`: 5 LoC (`< 300` ✓)
+    - `lib/l10n/es/app_localizations_es_core.dart`: 198 LoC (`< 300` ✓)
+    - `lib/l10n/es/app_localizations_es_dashboard.dart`: 65 LoC (`< 300` ✓)
+    - `lib/l10n/es/app_localizations_es_meal.dart`: 117 LoC (`< 300` ✓)
+    - `lib/l10n/es/app_localizations_es_metrics.dart`: 55 LoC (`< 300` ✓)
+    - `lib/l10n/es/app_localizations_es_profile.dart`: 108 LoC (`< 300` ✓)
+    - `lib/l10n/es/app_localizations_es_settings.dart`: 129 LoC (`< 300` ✓)
+    - `lib/l10n/en/app_localizations_en.dart`: 5 LoC (`< 300` ✓)
+    - `lib/l10n/en/app_localizations_en_core.dart`: 198 LoC (`< 300` ✓)
+    - `lib/l10n/en/app_localizations_en_dashboard.dart`: 65 LoC (`< 300` ✓)
+    - `lib/l10n/en/app_localizations_en_meal.dart`: 117 LoC (`< 300` ✓)
+    - `lib/l10n/en/app_localizations_en_metrics.dart`: 55 LoC (`< 300` ✓)
+    - `lib/l10n/en/app_localizations_en_profile.dart`: 108 LoC (`< 300` ✓)
+    - `lib/l10n/en/app_localizations_en_settings.dart`: 129 LoC (`< 300` ✓)
+    - `lib/widgets/settings/model_picker_bottom_sheet.dart`: 296 LoC (`< 300` ✓)
 
 ---
 
-## 🧪 3. Matriz de Pruebas Automatizadas
+## 🧪 3. Matriz de Pruebas Automatizadas (539 Tests PASS)
 
-Se crearon y actualizaron pruebas específicas cubriendo las nuevas capacidades y casos borde:
-1. **`test/models/storage_mode_test.dart` (23 LoC):**
-   - Serialización y deserialización de `StorageMode` (`fromString`, validación de fallbacks a `public`).
-2. **`test/services/notification_service_test.dart` (133 LoC):**
-   - Verificación de inicialización segura del plugin local.
-   - Envío de notificaciones inmediatas de análisis (`showMealAnalysisCompleted`, `showMealAnalysisFailed`).
-   - Programación y cancelación de alarmas exactas de ayuno (`scheduleFastingCompleted`, `cancelFastingReminder`).
-   - Soporte para overrides localizados de título y cuerpo.
-3. **`test/services/clinical_pdf_export_service_test.dart` (70 LoC):**
-   - Generación de bytes binarios válidos de PDF verificando cabecera mágica `%PDF-`.
-   - Renderizado de tablas de macros, micronutrientes y comidas sin lanzar excepciones con listas vacías o pobladas.
-4. **`test/widgets/storage_mode_card_test.dart` (64 LoC):**
-   - Renderizado del componente Bento con opciones de radio Pública y Privada.
-   - Callback interactivo y actualización de estado al pulsar.
-   - Verificación de renderizado en inglés y español con `AppLocalizations`.
-5. **`test/widgets/food_items_list_card_test.dart` (121 LoC):**
-   - Aserción de que la justificación volumétrica técnica fue purgada de la vista (`findsNothing`).
-6. **`test/widgets/clinical_export_dialog_test.dart` (74 LoC):**
-   - Verificación del selector de formato (CSV y PDF) y llamada al exportador correspondiente.
-   - Verificación de renderizado de cadenas localizadas en inglés y español.
+Todas las 95 suites de pruebas automatizadas fueron ejecutadas con cobertura en el pipeline oficial de CI:
+1. **`test/l10n/app_localizations_test.dart` (100 LoC):**
+   - Validación de cadenas completas en español (`AppLocalizationsEs`) e inglés (`AppLocalizationsEn`).
+   - Prueba del resolvedor dinámico `lookupAppLocalizations` y captura de excepciones en locales no soportados.
+   - Verificación de la extensión contextual `MealTypeLocalization` ('Desayuno' -> 'Breakfast', etc.).
+2. **`test/widgets/meal_analysis_pacing_test.dart` (33 LoC):**
+   - Verificación de todas las etapas de inferencia con la fachada Pure Dart (`AppLocalizationsEs`).
+   - Comprobación del límite superior estricto (0.95 capped en `analysisStageMacros`).
+3. **`test/widgets/quick_meal_dialog_test.dart`:**
+   - Validación de apertura, envío y coincidencia con `l10n.quickMealTitle` ('Registro Rápido de Comida').
+4. **`test/widgets/storage_mode_card_test.dart`:**
+   - Verificación bilingüe completa (Español e Inglés) usando `AppLocalizations.localizationsDelegates`.
+5. **`test/widgets/food_item_editor_dialog_test.dart`, `recommendations_widgets_test.dart`, `weekly_digest_card_test.dart`:**
+   - Aserciones alineadas con los términos canónicos de la fachada (`l10n.fat` = 'Grasa', `l10n.carbs` = 'Carbohidratos', `l10n.dailyAverage` = 'Promedio diario').
 
 ---
 
-## 🔒 4. Certificación Final
+## 📦 4. Verificación de Artefactos de Release y Publicación Oficial
 
-La iteración **v1.4.0** satisface plenamente los requisitos de ingeniería:
-- Notificaciones locales no bloqueantes y alarmas de ayuno exactas operando de forma autónoma.
-- Streaming de Gemini Vision con red de seguridad unaria ante cortes de socket o caídas abruptas de red.
-- Privacidad total configurable para fotografías de comidas respetando entornos aislados.
-- Generación de reportes clínicos en PDF y CSV guardados en directorios accesibles para el usuario con mensajes claros.
-- Purga completa de jerga técnica volumétrica en la UI para el usuario final.
-- Versión formalmente establecida en `1.4.0` (`1.4.0+1`).
+- **Pipeline de Release:** Workflow `release.yml` (Run ID: `38019454567`).
+- **Tag Oficial:** `v1.4.1` apuntando al commit `8f5838caba0f16977ebf6aa97968ff998af319bb`.
+- **Publicación en GitHub Releases:** [Release v1.4.1](https://github.com/VICTOREB13/App-Food-Tracker/releases/tag/v1.4.1)
+- **Binario Oficial Compilado:**
+  - Archivo: `Victor-Engineer-Food-Tracker-Android.apk`
+  - Tamaño: 77.3 MB
+  - Checksum SHA-256: `6f68a26f18dfebc1a3af2fc8b044d1543b2cdf617406552b938fbea16c9162ff`
+
+---
+
+## 📌 5. Conclusión y Veredicto
+
+El proyecto cumple al 100% las especificaciones de la **Opción A** (100% Pure Dart para localización) y los estándares del protocolo de ingeniería. El código se encuentra integrado en la rama `main`, auditado satisfactoriamente por el Quality Gate oficial, etiquetado con `v1.4.1` y distribuido públicamente con el release oficial de producción.

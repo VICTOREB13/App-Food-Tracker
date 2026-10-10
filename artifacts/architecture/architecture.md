@@ -1,17 +1,17 @@
 ---
 tipo: arquitectura
 proyecto: App_Food_Tracker
-version: v1.4.0
+version: v1.4.1
 estado: activo
-fecha: 2026-10-08
+fecha: 2026-10-09
 stack_principal: [Flutter, SQLite WAL v4, Google Gemini API, USDA FoodData Central, Open Food Facts, FlutterSecureStorage, GetIt, Flutter Localizations, HomeWidget, BackupNormalizer, NutritionalRecommendationService, GitHubReleasesUpdateService, MethodChannelAppInstaller, GeminiResilienceHelper, NotificationService, ClinicalPdfExportService]
 diagrama_html: PRJ_App_Food_Tracker_architecture_diagram.html
-tags: [proyecto, arquitectura, tech-stack, archify, local-first, get-it, l10n, result-pattern, android-widgets, sqlite-v4, recommendations, saf-backup, auto-repair, in-app-updater, microinteractions, android-16, gemini-vision-precision, timeout-resilience, atomic-image-persistence, i18n-native, gemini-streaming, resumable-downloads, http-206, 16k-tokens, thinking-level-medium, dynamic-pacing, local-notifications, socket-resilience, privacy-storage, clinical-pdf, purge-justification]
+tags: [proyecto, arquitectura, tech-stack, archify, local-first, get-it, l10n, result-pattern, android-widgets, sqlite-v4, recommendations, saf-backup, auto-repair, in-app-updater, microinteractions, android-16, gemini-vision-precision, timeout-resilience, atomic-image-persistence, i18n-native, gemini-streaming, resumable-downloads, http-206, 16k-tokens, thinking-level-medium, dynamic-pacing, local-notifications, socket-resilience, privacy-storage, clinical-pdf, purge-justification, pure-dart-l10n, zero-fallbacks]
 ---
 
-# 🏗️ Arquitectura del Sistema: Victor Engineer - Food Tracker (v1.4.0)
+# 🏗️ Arquitectura del Sistema: Victor Engineer - Food Tracker (v1.4.1)
 
-> **Mesa de Control & Backend-Architect:** Este documento establece los componentes fundamentales, el Tech Stack tecnológico, las decisiones arquitectónicas estructurales y el flujo de datos integral de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.4.0` (Notificaciones Locales Asíncronas, Resiliencia de Socket Gemini con Fallback Unario, Privacidad de Almacenamiento de Fotos, Reportes Clínicos en PDF y Purga de Justificación Volumétrica).
+> **Mesa de Control & Backend-Architect:** Este documento establece los componentes fundamentales, el Tech Stack tecnológico, las decisiones arquitectónicas estructurales y el flujo de datos integral de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.4.1` (Saneamiento Integral de Localización 100% Pure Dart, Modularización por Dominios e Idiomas, Erradicación de Fallbacks Defensivos Hardcodeados y Limpieza de Residuos).
 
 ---
 
@@ -21,7 +21,7 @@ tags: [proyecto, arquitectura, tech-stack, archify, local-first, get-it, l10n, r
 - **Backend & Lógica de Dominio:** Dart Core, Clean Monolith modular (<300 LoC por archivo), Inmutabilidad con Patrón Sentinel, `ModelSanitizer`.
 - **Inyección de Dependencias & Service Locator:** `get_it: ^9.0.0` centralizado en `lib/core/di/service_locator.dart`, registrando contratos abstractos (`IDatabaseService`, `IImageProcessingService`, `IMealDao`, `IWeightLogDao`, `IUserProfileDao`, `IPantryDao`, `IDishwareDao`, `IMealTemplateDao`, `IFastingDao`, `INutritionalRecommendationService`) con inyección por constructor y compatibilidad transparente con accesores estáticos `.instance`.
 - **Manejo Funcional de Errores (Result / Either):** Tipo suma sellado en Dart 3 `Result<T, Failure>` (`Success`, `FailureResult`) en `lib/core/errors/result.dart` con combinadores funcionales (`fold`, `map`, `flatMap`, `guardAsync`) y jerarquía exhaustiva `Failure` en `lib/core/errors/failures.dart`.
-- **Internacionalización y Localización Multi-idioma:** `flutter_localizations`, `intl` y `l10n.yaml` con contratos tipados en `AppLocalizations` (`lib/l10n/app_es.arb` y `lib/l10n/app_en.arb`) desacoplados de los widgets, con selector dinámico en caliente sin reiniciar la app.
+- **Internacionalización y Localización 100% Pure Dart:** `flutter_localizations` e `intl` con contratos abstractos segregados por dominios en `lib/l10n/domains/`, implementaciones concretas en `lib/l10n/es/` y `lib/l10n/en/`, fachada no-nulable `AppLocalizations.of(context)` con fallback interno seguro a español, y extensión `MealTypeLocalization` exportada globalmente, con cero dependencias de generación de código (.arb / l10n.yaml eliminados).
 - **Base de Datos & Cache (Local-First):** SQLite v4 mediante `sqflite` (móvil) y `sqflite_common_ffi` (escritorio/tests):
   - `PRAGMA journal_mode = WAL;` (Concurrencia óptima de lecturas y escrituras simultáneas).
   - `PRAGMA synchronous = NORMAL;` (Persistencia confiable y latencia < 16 ms).
