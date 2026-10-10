@@ -6,7 +6,7 @@ abstract class AppLocalizationsEsDashboard extends AppLocalizationsEsCore {
   @override String get dashboard => 'Panel Principal';
   @override String get breakfast => 'Desayuno';
   @override String get quickMeal => 'Comida rápida';
-  @override String get quickMealTitle => 'Registro Rápido de Comida';
+  @override String get quickMealTitle => 'Comida Rápida';
   @override String get fasting => 'Ayuno Intermitente';
   @override String get fastingWindow => 'Ventana de Ayuno';
   @override String get startFast => 'Comenzar Ayuno';
@@ -49,6 +49,7 @@ abstract class AppLocalizationsEsDashboard extends AppLocalizationsEsCore {
   @override String get voiceDictationInstruction => 'Describe tu plato con lenguaje natural. Gemini Vision extraerá ingredientes, porciones y macronutrientes.';
   @override String get whatToEatCombinations => 'Combinaciones para bajar grasas y alcanzar tus metas';
   @override String get flashFastTag => 'Flash (Rápidos)';
+  @override String get proReasoningTag => 'Pro (Razonamiento)';
   @override String get fabVoiceTitle => 'Voz / Audio';
   @override String get fabVoiceSubtitle => 'Dictado natural';
   @override String get fabVideoTitle => 'Video Pan';

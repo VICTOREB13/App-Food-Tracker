@@ -151,6 +151,7 @@ abstract class AppLocalizationsEnCore extends AppLocalizations {
   @override String get launchingInstaller => 'Launching package installer...';
   @override String get retryNativeInstallAction => 'Retry native installation';
   @override String get cancelDownloadAction => 'Cancel download';
+  @override String get downloadCancelledByUser => 'Download cancelled by user.';
   @override String get laterAction => 'Later';
   @override String get viewOnGithubAction => 'View on GitHub';
   @override String filePickerOpenError(String error) => 'Error opening picker: $error';

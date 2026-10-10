@@ -95,10 +95,7 @@ class _ModelPickerBottomSheetState extends State<ModelPickerBottomSheet> {
           child: Container(
             width: 40,
             height: 4,
-            decoration: BoxDecoration(
-              color: AppColors.border(context),
-              borderRadius: BorderRadius.circular(2),
-            ),
+            decoration: BoxDecoration(color: AppColors.border(context), borderRadius: BorderRadius.circular(2)),
           ),
         ),
         const SizedBox(height: 12),
@@ -168,7 +165,7 @@ class _ModelPickerBottomSheetState extends State<ModelPickerBottomSheet> {
               const SizedBox(width: 8),
               _buildFilterChip('flash', l10n.flashFastTag),
               const SizedBox(width: 8),
-              _buildFilterChip('pro', 'Pro'),
+              _buildFilterChip('pro', l10n.proReasoningTag),
             ],
           ),
         ),

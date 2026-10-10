@@ -6,7 +6,7 @@ abstract class AppLocalizationsEnDashboard extends AppLocalizationsEnCore {
   @override String get dashboard => 'Dashboard';
   @override String get breakfast => 'Breakfast';
   @override String get quickMeal => 'Quick Meal';
-  @override String get quickMealTitle => 'Quick Meal Entry';
+  @override String get quickMealTitle => 'Quick Meal';
   @override String get fasting => 'Intermittent Fasting';
   @override String get fastingWindow => 'Fasting Window';
   @override String get startFast => 'Start Fast';
@@ -49,6 +49,7 @@ abstract class AppLocalizationsEnDashboard extends AppLocalizationsEnCore {
   @override String get voiceDictationInstruction => 'Describe your dish in natural language. Gemini Vision will extract ingredients, portions, and macros.';
   @override String get whatToEatCombinations => 'Combinations to reduce fat and reach goals';
   @override String get flashFastTag => 'Flash (Fast)';
+  @override String get proReasoningTag => 'Pro (Reasoning)';
   @override String get fabVoiceTitle => 'Voice / Audio';
   @override String get fabVoiceSubtitle => 'Natural dictation';
   @override String get fabVideoTitle => 'Video Pan';

@@ -40,7 +40,7 @@ abstract class AppLocalizationsEsCore extends AppLocalizations {
   @override String get editManually => 'Editar manualmente';
   @override String get retryAction => 'Reintentar';
   @override String get goToSettings => 'Ir a Ajustes';
-  @override String get startAction => 'Comenzar';
+  @override String get startAction => 'Iniciar';
   @override String get endSessionAction => 'Terminar sesión';
   @override String get startToTrackWindow => 'Inicia para dar seguimiento a tu ventana de comida';
   @override String get inProgress => 'En curso';
@@ -151,6 +151,7 @@ abstract class AppLocalizationsEsCore extends AppLocalizations {
   @override String get launchingInstaller => 'Iniciando instalador de paquetes...';
   @override String get retryNativeInstallAction => 'Reintentar instalación nativa';
   @override String get cancelDownloadAction => 'Cancelar descarga';
+  @override String get downloadCancelledByUser => 'Descarga cancelada por el usuario.';
   @override String get laterAction => 'Más tarde';
   @override String get viewOnGithubAction => 'Ver en GitHub';
   @override String filePickerOpenError(String error) => 'Error al abrir el selector: $error';

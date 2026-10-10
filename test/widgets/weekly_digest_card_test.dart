@@ -26,11 +26,11 @@ void main() {
       );
 
       expect(find.text('RESUMEN SEMANAL (7 DÍAS)'), findsOneWidget);
-      expect(find.text('Promedio Diario'), findsOneWidget);
+      expect(find.text('Promedio diario'), findsOneWidget);
       expect(find.text('Balance Neto Semanal'), findsOneWidget);
       expect(find.text('Proteína'), findsOneWidget);
-      expect(find.text('Carbos'), findsOneWidget);
-      expect(find.text('Grasas'), findsOneWidget);
+      expect(find.text('Carbohidratos'), findsOneWidget);
+      expect(find.text('Grasa'), findsOneWidget);
     });
 
     testWidgets('renders on narrow 320dp viewport without horizontal overflow', (tester) async {

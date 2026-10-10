@@ -45,8 +45,8 @@ void main() {
       expect(find.text('Margen restante de hoy:'), findsOneWidget);
       expect(find.text('Calorías'), findsOneWidget);
       expect(find.text('Proteína'), findsOneWidget);
-      expect(find.text('Carbos'), findsOneWidget);
-      expect(find.text('Grasas'), findsOneWidget);
+      expect(find.text('Carbohidratos'), findsOneWidget);
+      expect(find.text('Grasa'), findsOneWidget);
       expect(find.text('Platos recomendados a tu medida:'), findsOneWidget);
       expect(find.text('Pechuga de Pollo con Quinoa y Espárragos'), findsOneWidget);
       expect(find.byType(ElevatedButton), findsWidgets);

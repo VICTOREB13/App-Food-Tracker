@@ -154,6 +154,7 @@ abstract class AppLocalizationsCore {
   String get launchingInstaller;
   String get retryNativeInstallAction;
   String get cancelDownloadAction;
+  String get downloadCancelledByUser;
   String get laterAction;
   String get viewOnGithubAction;
   String filePickerOpenError(String error);

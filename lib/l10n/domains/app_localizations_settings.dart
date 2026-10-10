@@ -66,6 +66,7 @@ abstract class AppLocalizationsSettings extends AppLocalizationsProfile {
   String get backupAndMigrationDesc;
   String get exportJsonAction;
   String get importJsonAction;
+  String get selectJsonFileAction;
   String get updateGoalsAction;
   String get databaseMaintenanceHeader;
   String get enterGeminiKeyToSelect;

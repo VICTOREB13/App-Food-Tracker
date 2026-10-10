@@ -144,7 +144,7 @@ class _JsonFilePickerDialogState extends State<JsonFilePickerDialog> {
                     ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                     : const Icon(Icons.folder_open_rounded, size: 20),
                 label: Text(
-                  _isPicking ? '...' : l10n.importJsonAction,
+                  _isPicking ? '...' : l10n.selectJsonFileAction,
                   style: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 13),
                 ),
               ),

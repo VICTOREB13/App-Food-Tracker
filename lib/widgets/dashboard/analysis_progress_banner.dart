@@ -53,8 +53,10 @@ class AnalysisProgressBanner extends StatelessWidget {
 
   String _resolveStageMessage(BuildContext context, AnalysisTask task) {
     if (task.status == AnalysisStatus.processing) {
-      final l10n = AppLocalizations.of(context);
-      return MealAnalysisPacing.getStageMessage(task.progress, l10n);
+      final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
+      if (l10n != null) {
+        return MealAnalysisPacing.getStageMessage(task.progress, l10n);
+      }
     }
     return task.stage;
   }

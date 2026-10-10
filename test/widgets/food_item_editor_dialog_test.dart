@@ -32,7 +32,7 @@ void main() {
       expect(find.text('Calorías'), findsOneWidget);
       expect(find.text('Proteína'), findsOneWidget);
       expect(find.text('Carbohidratos'), findsOneWidget);
-      expect(find.text('Grasas'), findsOneWidget);
+      expect(find.text('Grasa'), findsOneWidget);
       expect(find.text('Guardar'), findsOneWidget);
 
       // Enter food name

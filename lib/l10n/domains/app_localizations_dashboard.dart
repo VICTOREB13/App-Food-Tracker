@@ -49,6 +49,7 @@ abstract class AppLocalizationsDashboard extends AppLocalizationsCore {
   String get voiceDictationInstruction;
   String get whatToEatCombinations;
   String get flashFastTag;
+  String get proReasoningTag;
   String get fabVoiceTitle;
   String get fabVoiceSubtitle;
   String get fabVideoTitle;

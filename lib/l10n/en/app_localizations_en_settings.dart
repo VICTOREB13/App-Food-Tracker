@@ -66,6 +66,7 @@ abstract class AppLocalizationsEnSettings extends AppLocalizationsEnProfile {
   @override String get backupAndMigrationDesc => 'Generate downloadable physical files (.json) to store meals and pantry, or import a previous backup file.';
   @override String get exportJsonAction => 'Export JSON';
   @override String get importJsonAction => 'Import JSON';
+  @override String get selectJsonFileAction => 'Select JSON File';
   @override String get updateGoalsAction => 'Update Goals';
   @override String get databaseMaintenanceHeader => 'LOCAL-FIRST SQLITE MAINTENANCE';
   @override String get enterGeminiKeyToSelect => 'Enter your Gemini API Key to discover and select models';

@@ -93,7 +93,8 @@ class _InAppUpdateDialogState extends State<InAppUpdateDialog> {
     _isCancelled = true;
     _downloadClient?.close();
     _downloadClient = null;
-    if (mounted) setState(() { _isDownloading = false; _errorMessage = null; });
+    final l10n = AppLocalizations.of(context);
+    if (mounted) setState(() { _isDownloading = false; _errorMessage = l10n.downloadCancelledByUser; });
   }
 
   Future<void> _startUpdate() async {
@@ -134,11 +135,11 @@ class _InAppUpdateDialogState extends State<InAppUpdateDialog> {
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
         if (_isCancelled) {
-          setState(() { _isDownloading = false; _isInstalling = false; _errorMessage = null; });
+          setState(() { _isDownloading = false; _isInstalling = false; _errorMessage = l10n.downloadCancelledByUser; });
           return;
         }
-        final l10n = AppLocalizations.of(context);
         setState(() { _isDownloading = false; _isInstalling = false; _errorMessage = _sanitizeErrorMessage(e, l10n); });
       }
     } finally {

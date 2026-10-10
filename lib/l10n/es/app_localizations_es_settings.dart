@@ -16,7 +16,7 @@ abstract class AppLocalizationsEsSettings extends AppLocalizationsEsProfile {
   @override String get photoRetention => 'Retención de Fotos';
   @override String get language => 'Idioma';
   @override String get spanish => 'Español';
-  @override String get english => 'Inglés';
+  @override String get english => 'English';
   @override String get previousDayTooltip => 'Día anterior';
   @override String get updateMeal => 'Actualizar Comida';
   @override String updateAvailable(String version) => 'Nueva versión disponible: $version';
@@ -66,6 +66,7 @@ abstract class AppLocalizationsEsSettings extends AppLocalizationsEsProfile {
   @override String get backupAndMigrationDesc => 'Genera archivos físicos (.json) descargables para guardar tus comidas y despensa, o importa un archivo de respaldo previo sin usar el portapapeles.';
   @override String get exportJsonAction => 'Exportar JSON';
   @override String get importJsonAction => 'Importar JSON';
+  @override String get selectJsonFileAction => 'Seleccionar Archivo JSON';
   @override String get updateGoalsAction => 'Actualizar Metas';
   @override String get databaseMaintenanceHeader => 'MANTENIMIENTO SQLITE LOCAL-FIRST';
   @override String get enterGeminiKeyToSelect => 'Ingresa tu Gemini API Key para descubrir y seleccionar modelos';
