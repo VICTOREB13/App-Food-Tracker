@@ -17,7 +17,7 @@ class MealSaveButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEs();
+    final l10n = AppLocalizations.of(context);
 
     return ElevatedButton.icon(
       onPressed: isSaving ? null : onSave,

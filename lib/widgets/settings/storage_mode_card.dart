@@ -13,7 +13,7 @@ class StorageModeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = SettingsController.instance;
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEs();
+    final l10n = AppLocalizations.of(context);
 
     return ListenableBuilder(
       listenable: controller,

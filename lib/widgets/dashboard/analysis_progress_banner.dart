@@ -60,6 +60,7 @@ class AnalysisProgressBanner extends StatelessWidget {
   }
 
   Widget _buildTaskCard(BuildContext context, AnalysisTask task) {
+    final l10n = AppLocalizations.of(context);
     final isPending = task.isPending;
     final isCompleted = task.status == AnalysisStatus.completed;
     final isFailed = task.status == AnalysisStatus.failed;

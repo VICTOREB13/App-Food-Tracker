@@ -158,7 +158,7 @@ class MealImageCard extends StatelessWidget {
   }
 
   Widget _buildPlaceholder(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEs();
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,

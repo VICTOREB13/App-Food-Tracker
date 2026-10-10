@@ -111,6 +111,7 @@ class _QuickWeightEntryDialogState extends State<QuickWeightEntryDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final borderColor = AppColors.border(context);
     final fieldBg = isDark ? const Color(0xFF18181B) : const Color(0xFFF4F4F5);

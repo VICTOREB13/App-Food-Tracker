@@ -83,14 +83,14 @@ abstract class AppLocalizationsEsSettings extends AppLocalizationsEsProfile {
   @override String get retentionFifteenDays => '15 días';
   @override String get retentionForever => 'Para siempre';
   @override String get foreverRetentionInfo => 'Con "Para siempre" todas las fotos se conservan intactas.';
-  @override String photosPrunedSuccess(String count) => 'Se depuraron ${count} fotos antiguas. Tus calorías y macronutrientes permanecen intactos.';
-  @override String photoPruneError(String error) => 'Error al depurar fotos: ${error}';
+  @override String photosPrunedSuccess(String count) => 'Se depuraron $count fotos antiguas. Tus calorías y macronutrientes permanecen intactos.';
+  @override String photoPruneError(String error) => 'Error al depurar fotos: $error';
   @override String get photoPruningHeader => 'DEPURACIÓN DE FOTOS Y ALMACENAMIENTO';
   @override String get photoPruningDescription => 'Optimiza el almacenamiento local liberando espacio ocupado por fotos de platos anteriores al período seleccionado. Las comidas, calorías, ingredientes y macronutrientes permanecen 100% intactos en la base de datos local SQLite.';
   @override String get mealPhotoRetentionLabel => 'Retención de fotos de comidas';
   @override String get usdaApiKeyHeader => 'USDA FOODDATA CENTRAL (API KEY)';
   @override String get usdaApiKeyNotice => 'Conexión oficial con USDA FoodData Central (https://fdc.nal.usda.gov) para enriquecer la biblioteca de alimentos y códigos de barras. Si se omite la clave o se agota la cuota (1,000 req/hr), el sistema utiliza Open Food Facts automáticamente como respaldo.';
-  @override String backupFileSize(String size) => 'Tamaño: ${size} KB';
+  @override String backupFileSize(String size) => 'Tamaño: $size KB';
   @override String get photoPruningWith => 'Con';
   @override String get geminiVisionPromptHint => 'Prompt para Gemini Vision...';
 

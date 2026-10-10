@@ -25,7 +25,7 @@ class DailyCalorieSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEs();
+    final l10n = AppLocalizations.of(context);
     final calorieProgress = goals.calories > 0
         ? (currentCalories / goals.calories).clamp(0.0, 1.0)
         : 0.0;

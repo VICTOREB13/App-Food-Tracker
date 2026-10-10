@@ -28,7 +28,7 @@ class DateSelectorBar extends StatelessWidget {
   }
 
   String _formatDate(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEs();
+    final l10n = AppLocalizations.of(context);
     final localeName = l10n.localeName;
     try {
       final now = DateTime.now();
@@ -58,7 +58,7 @@ class DateSelectorBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEs();
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(

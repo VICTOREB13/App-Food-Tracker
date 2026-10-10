@@ -83,14 +83,14 @@ abstract class AppLocalizationsEnSettings extends AppLocalizationsEnProfile {
   @override String get retentionFifteenDays => '15 days';
   @override String get retentionForever => 'Forever';
   @override String get foreverRetentionInfo => 'With "Forever", all photos are kept intact.';
-  @override String photosPrunedSuccess(String count) => 'Pruned ${count} old photos. Your calories and macronutrients remain intact.';
-  @override String photoPruneError(String error) => 'Error pruning photos: ${error}';
+  @override String photosPrunedSuccess(String count) => 'Pruned $count old photos. Your calories and macronutrients remain intact.';
+  @override String photoPruneError(String error) => 'Error pruning photos: $error';
   @override String get photoPruningHeader => 'PHOTO PRUNING & STORAGE';
   @override String get photoPruningDescription => 'Optimize local storage by freeing space used by meal photos before the selected period. Meals, calories, ingredients, and macros remain 100% intact in SQLite.';
   @override String get mealPhotoRetentionLabel => 'Meal photo retention';
   @override String get usdaApiKeyHeader => 'USDA FOODDATA CENTRAL (API KEY)';
   @override String get usdaApiKeyNotice => 'Official connection to USDA FoodData Central (https://fdc.nal.usda.gov) to enrich foods and barcodes. If key omitted or quota exhausted, Open Food Facts is used as fallback.';
-  @override String backupFileSize(String size) => 'Size: ${size} KB';
+  @override String backupFileSize(String size) => 'Size: $size KB';
   @override String get photoPruningWith => 'With';
   @override String get geminiVisionPromptHint => 'Prompt for Gemini Vision...';
 

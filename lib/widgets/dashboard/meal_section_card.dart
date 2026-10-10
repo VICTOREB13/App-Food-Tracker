@@ -38,7 +38,7 @@ class MealSectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEs();
+    final l10n = AppLocalizations.of(context);
     final localizedMealType = mealType.toLocalizedMealType(context);
 
     return VeCard(
