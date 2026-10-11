@@ -36,7 +36,7 @@ tags: [proyecto, arquitectura, abstracciones, backend, nothing-os, native-widget
 
 ---
 
-## 🧩 Módulos y Capas del Sistema (v1.4.0)
+## 🧩 Módulos y Capas del Sistema (v1.4.3)
 
 ```text
 lib/
@@ -60,7 +60,8 @@ lib/
 │       ├── image_processing_service_interface.dart
 │       ├── notification_service_interface.dart
 │       ├── vision_model_provider_interface.dart
-│       └── clinical_pdf_export_service_interface.dart
+│       ├── clinical_pdf_export_service_interface.dart
+│       └── nutritional_recommendation_service_interface.dart
 ├── l10n/                 # Localización e Internacionalización Multi-idioma (100% Pure Dart)
 │   ├── app_localizations.dart
 │   ├── domains/          # Interfaces abstractas segregadas por dominio (< 300 LoC)
@@ -79,6 +80,7 @@ lib/
 │   ├── meal_image_file_info.dart
 │   ├── meal_template.dart
 │   ├── model_sanitizer.dart
+│   ├── nutritional_recommendation.dart
 │   ├── pantry_item.dart
 │   ├── usda_food_item.dart
 │   ├── user_profile.dart
@@ -97,6 +99,14 @@ lib/
 │   │   ├── pantry_dao.dart
 │   │   ├── user_profile_dao.dart
 │   │   └── weight_log_dao.dart
+│   ├── recommendations/  # Catálogos Modulares y Motor de Filtrado (<300 LoC)
+│   │   ├── breakfast_dish_catalog.dart
+│   │   ├── dinner_dish_catalog.dart
+│   │   ├── lunch_dish_catalog.dart
+│   │   ├── recommendation_dish_catalog.dart
+│   │   ├── recommendation_filter_engine.dart
+│   │   ├── recommendation_scoring_engine.dart
+│   │   └── snack_dish_catalog.dart
 │   ├── clinical_excel_export_service.dart
 │   ├── clinical_pdf_export_service.dart
 │   ├── clinical_share_service.dart
@@ -105,10 +115,12 @@ lib/
 │   ├── gemini_resilience_helper.dart
 │   ├── gemini_vision_service.dart
 │   ├── home_widget_service.dart
+│   ├── home_widget_strings.dart
 │   ├── image_processing_service.dart
 │   ├── meal_image_file_namer.dart
 │   ├── meal_image_storage_resolver.dart
 │   ├── metabolic_calculator.dart
+│   ├── nutritional_recommendation_service.dart
 │   ├── offline_food_estimator_service.dart
 │   ├── open_food_facts_service.dart
 │   ├── secure_storage_service.dart
@@ -119,7 +131,8 @@ lib/
     ├── dashboard/        # AnalysisProgressBanner, FastingWindowBentoCard...
     ├── meal_detail/      # FoodItemEditorDialog con autocompletado local...
     ├── metrics/          # WeeklyDigestCard, CalorieComplianceBentoCard, ClinicalExportDialog...
-    ├── profile/          # DishwareCalibrationCard, BiometricInputsCard, MasterPromptBottomSheet...
+    ├── profile/          # DishwareCalibrationCard, BiometricInputsCard, MasterPromptBottomSheet, MasterPromptBentoTrigger...
+    ├── recommendations/  # WhatToEatSheet, CategorySelectorBar, RecommendationDishCard...
     └── settings/         # LanguageSelectorCard, GeminiModelSelectorCard...
 ```
 

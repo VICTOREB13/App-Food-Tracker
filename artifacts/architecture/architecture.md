@@ -69,7 +69,7 @@ El diagrama interactivo de componentes, límites de seguridad, widgets nativos d
 
 ---
 
-## 🏛️ 3. Principios y Decisiones Clave de Diseño v1.1.0
+## 🏛️ 3. Principios y Decisiones Clave de Diseño (v1.4.3)
 
 ### 3.1. Local-First & Cero Dependencia de Red para Operaciones Básicas
 - Todas las operaciones CRUD de comidas, despensa, calibración de platos, registros de ayuno, metas calóricas, registros de peso e historial son ejecutadas de manera síncrona/inmediata en SQLite local.
@@ -221,5 +221,44 @@ El diagrama interactivo de componentes, límites de seguridad, widgets nativos d
   - Almacenamiento directo en el directorio accesible `/Documents/FoodTracker` vía `AccessibleStorageResolver`.
   - Diálogo `ClinicalExportDialog` con selector segmented button (CSV / PDF) y confirmación amigable (`Se guardó en /Documents/FoodTracker: {archivo}`).
 - **Versión Canónica:** `AppConstants.appVersion = '1.4.0'` y `pubspec.yaml version: 1.4.0+1`.
+
+### 3.16. Saneamiento Integral de Localización (l10n), Arquitectura Modular por Dominios y Cero Fallbacks (v1.4.1)
+- **Localización Modular 100% Pure Dart:**
+  - Segregación de contratos de localización en interfaces abstractas por dominio en `lib/l10n/domains/` (`core`, `dashboard`, `meal`, `metrics`, `profile`, `settings`).
+  - Implementaciones bilingües desacopladas en `lib/l10n/es/` y `lib/l10n/en/` (<300 LoC cada una), unificadas en los agregadores `AppLocalizationsEs` y `AppLocalizationsEn`.
+  - Fachada no-nulable `AppLocalizations.of(context)` con fallback interno seguro a español sin riesgo de desreferencias nulas.
+- **Política Estricta de Cero Fallbacks Hardcodeados:**
+  - Erradicación de cadenas hardcodeadas y patrones `?? 'español'` en toda la capa de presentación (`screens/` y `widgets/`).
+  - Extensión `toLocalizedMealType(context)` reubicada en `app_localizations_meal.dart` para consumo idiomático.
+- **Versión Canónica:** `AppConstants.appVersion = '1.4.1'` y `pubspec.yaml version: 1.4.1+1`.
+
+### 3.17. Suite de Widgets Nativos Nothing OS, Master Prompt Desacoplado y Share Sheet Nativo (v1.4.2)
+- **Suite de Widgets Nativos Nothing OS (2x2 y 4x2):**
+  - Incorporación de 3 nuevos widgets nativos para Android: Habit Dot Matrix (`FoodTrackerStreakWidgetProvider`), Quick Actions Hub (`FoodTrackerActionsWidgetProvider`) y Fasting & Date Timer (`FoodTrackerFastingWidgetProvider`).
+  - Rediseño estético Nothing OS del widget compacto 2x2 (`FoodTrackerCompactWidgetProvider`) con medidor circular heroico (`widget_circle_gauge.xml`).
+  - Sincronización determinista de métricas del día actual (`DateTime.now()`) en `MealController._syncNativeWidgets()`, aislando la navegación histórica del launcher.
+  - Armonización de paleta cromática en XMLs nativos con paridad exacta con Flutter (Proteína `#10B981`, Carbohidratos `#F59E0B`, Grasas `#0EA5E9`).
+- **Hoja Modal Desacoplada del Master Prompt (`MasterPromptBottomSheet`):**
+  - Sustitución de campos de texto incrustados en tarjetas Bento por un modalBottomSheet (`heightFactor: 0.85`) con pestañas independientes de Vista Previa y Editor.
+  - Eliminación definitiva del conflicto de gestos de scroll en la pantalla de Perfil.
+- **Exportación Clínica con Share Sheet Nativo (`ClinicalShareService`):**
+  - Integración de intents nativos de plataforma (`ACTION_SEND` y `ACTION_VIEW`) en `MainActivity.kt` para compartir y previsualizar reportes clínicos (CSV/PDF) con un solo toque.
+- **Versión Canónica:** `AppConstants.appVersion = '1.4.2'` y `pubspec.yaml version: 1.4.2+1`.
+
+### 3.18. Localización Data-Driven en Widgets Android sin values-xx/, Catálogos Modulares de Recomendaciones con Snacks Prácticos y Disparador Ergonómico de Master Prompt (v1.4.3)
+- **Localización Data-Driven en Widgets de Android:**
+  - Eliminación de directorios `values-xx/` redundantes en Android en favor de inyección dinámica desde SharedPreferences (`widgetData.getString("label_*")`).
+  - Diccionario exhaustivo `HomeWidgetStrings` serializando 28 claves de UI localizadas desde `AppLocalizations`.
+  - Inyección reactiva automática en arranque en frío (`loadLocale`) y cambio de idioma en caliente (`setLocale`) en `SettingsController`.
+  - Timeout preventivo ampliado a 4s en `HomeWidgetService.saveLocaleStrings()` para persistencia concurrente robusta.
+  - Paridad byte a byte del 100% entre `android/app/src/main/` y `lib/assets/android_widgets/`.
+- **Motor de Recomendaciones Modular con Snacks Prácticos:**
+  - Descomposición estricta en 4 catálogos modulares (< 300 LoC): `BreakfastDishCatalog`, `LunchDishCatalog`, `DinnerDishCatalog` y `SnackDishCatalog` (38 platos en total).
+  - 11 opciones de snacks ligeros, prácticos y portables (barras de proteína, maní tostado, frutos secos, yogur griego, etc.).
+  - Selector de categorías `CategorySelectorBar` y botón interactivo "Recargar ideas" con rotación y barajado real en `RecommendationFilterEngine`.
+- **Disparador Ergonómico de Master Prompt (`MasterPromptBentoTrigger`):**
+  - Extracción modular (< 300 LoC) con botón explícito `[Ver / Configurar]` e icono `Icons.tune_rounded`, permitiendo abrir `MasterPromptBottomSheet` tanto pulsando el botón como cualquier parte de la tarjeta Bento.
+- **Versión Canónica:** `AppConstants.appVersion = '1.4.3'` y `pubspec.yaml version: 1.4.3+1`.
+
 
 

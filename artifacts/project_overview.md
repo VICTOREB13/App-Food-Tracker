@@ -131,6 +131,26 @@ tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid, get-it, 
     - Temporizador periódico no bloqueante en memoria durante la inferencia IA en `AnalysisQueueService._processTask` (0.45 a 0.90) que actualiza el progreso a 60 FPS con `MealAnalysisPacing.nextProgress` sin saturar el almacenamiento SQLite con escrituras en cada tick.
     - Resolución dinámica localizada de etapas de análisis en `AnalysisProgressBanner` con `MealAnalysisPacing.getStageMessage` cuando la tarea está en progreso, preservando las descripciones fijas cuando está en cola o completada.
 
+21. **Notificaciones Asíncronas en Background, Resiliencia de Sockets y Exportación Clínica (v1.4.0):**
+    - Canales de notificación local y alarmas programadas exactas para finalización de inferencia de comidas y cronómetro de ayuno intermitente.
+    - Detección de cortes de conexión en streaming con conmutación unaria instantánea y segura.
+    - Selector bento de modo de almacenamiento de fotos (público vs privado en sandbox).
+    - Exportación clínica profesional en PDF tabular y CSV RFC 4180.
+
+22. **Saneamiento Integral de Localización l10n y Cero Fallbacks (v1.4.1):**
+    - Arquitectura de localización 100% Pure Dart con interfaces segregadas por dominio y cero dependencias de generación de código (.arb).
+    - Erradicación absoluta de textos estáticos y operadores `?? 'español'` en screens y widgets.
+
+23. **Suite de Widgets Nativos Nothing OS, Master Prompt Desacoplado y Share Sheet Nativo (v1.4.2):**
+    - 5 widgets nativos para Android Nothing OS: Dot Matrix de rachas, Hub de acciones rápidas, cronómetro de ayuno, widget compacto heroico y widget amplio de macros.
+    - Hoja modal desacoplada `MasterPromptBottomSheet` con pestañas de Vista Previa y Editor.
+    - Integración nativa de Share Sheet (`ACTION_SEND`) y visor de archivos (`ACTION_VIEW`).
+
+24. **Localización Data-Driven en Widgets Android, Recomendaciones Modulares y Disparador Ergonómico (v1.4.3):**
+    - Supresión de directorios `values-xx/` en Android en favor de inyección dinámica desde SharedPreferences (`HomeWidgetStrings`), sincronizada reactivamente en arranque y cambio de idioma.
+    - Descomposición modular del motor de recomendaciones en 4 catálogos independientes (< 300 LoC) con 11 snacks portables, selector de categorías y rotación real en "Recargar ideas".
+    - Disparador visual ergonómico `MasterPromptBentoTrigger` con botón explícito `[Ver / Configurar]`.
+
 ---
 
 ## 🗺️ 2. Índice Oficial de Artefactos del Proyecto
@@ -156,6 +176,7 @@ Todos los enlaces internos siguen estrictamente el estándar de Obsidian con el 
 | **Project-Planner** | Tech Lead & Orquestador Maestro | `project_overview.md`, `implementation_plan.md`, `task.md`, `changelog_v1.md`, diagramas Archify. |
 | **Backend-Architect** | Arquitecto de Datos y Servicios | `api_spec.md`, `architecture.md`, `abstractions.md`, `DatabaseService` (SQLite v2 & DAOs), `service_locator.dart`, `Result<T, Failure>`, `GeminiModelService`, `UsdaFoodDataService`, `BarcodeLookupService`, `MetabolicCalculator`. |
 | **Frontend-UI** | Especialista de Interfaz y Tokens | `design_system.md`, `ThemeManager`, `AppLocalizations`, `DashboardScreen`, `MealDetailScreen`, `SettingsScreen`, `UserProfileScreen`, `MetricsScreen`, `OnboardingScreen`, widgets atómicos (< 300 LoC), microinteracciones y `WeightLineChartPainter`. |
-| **Systems-Auditor** | Guardián del Quality Gate y Pruebas | `audit_report.md`, batería de 53 suites de pruebas automatizadas (370 tests), auditoría N+1, WCAG, SecOps. |
+| **Systems-Auditor** | Guardián del Quality Gate y Pruebas | `audit_report.md`, batería de 73 suites de pruebas automatizadas (562 tests), auditoría N+1, WCAG, SecOps. |
 | **DevOps-Engineer** | Infraestructura, CI/CD y Releases | `.github/workflows/ci.yml`, `build_apk.yml`, `release.yml`, Keystore RSA permanente, empaquetado y publicación oficial. |
+
 
