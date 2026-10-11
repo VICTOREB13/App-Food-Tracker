@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/l10n/app_localizations.dart';
 import 'package:food_tracker/models/user_profile.dart';
+import 'package:food_tracker/widgets/profile/master_prompt_bottom_sheet.dart';
 import 'package:food_tracker/widgets/profile/metabolic_summary_bento_card.dart';
 
 void main() {
@@ -54,7 +55,7 @@ void main() {
       await tester.tap(find.byKey(const Key('master_prompt_open_sheet_button')));
       await tester.pumpAndSettle();
 
-      expect(find.text('Master Prompt IA Multimodal (Editable)'), findsOneWidget);
+      expect(find.byType(MasterPromptBottomSheet), findsOneWidget);
       expect(find.text('Prompt de prueba bento'), findsOneWidget);
     });
 
@@ -78,7 +79,7 @@ void main() {
       await tester.tap(find.byKey(const Key('master_prompt_bento_trigger')));
       await tester.pumpAndSettle();
 
-      expect(find.text('Master Prompt IA Multimodal (Editable)'), findsOneWidget);
+      expect(find.byType(MasterPromptBottomSheet), findsOneWidget);
     });
 
     testWidgets('Tapping quick copy button shows feedback snackbar', (tester) async {

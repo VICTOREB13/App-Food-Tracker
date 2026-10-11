@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:food_tracker/core/interfaces/nutritional_recommendation_service_interface.dart';
 import 'package:food_tracker/models/nutritional_recommendation.dart';
 import 'package:food_tracker/widgets/recommendations/recommendation_diagnostic_card.dart';
 import 'package:food_tracker/widgets/recommendations/what_to_eat_sheet.dart';
@@ -213,10 +214,15 @@ void main() {
         ],
       );
 
+      final fakeService = _FakeNutritionalRecommendationService(samplePlan);
+
       await tester.pumpWidget(
-        const MaterialApp(
+        MaterialApp(
           home: Scaffold(
-            body: WhatToEatSheet(initialPlan: samplePlan),
+            body: WhatToEatSheet(
+              initialPlan: samplePlan,
+              service: fakeService,
+            ),
           ),
         ),
       );
@@ -246,4 +252,32 @@ void main() {
       expect(find.byKey(const Key('recommendations_refresh_button')), findsOneWidget);
     });
   });
+}
+
+class _FakeNutritionalRecommendationService implements INutritionalRecommendationService {
+  final TodayRecommendationPlan planToReturn;
+  _FakeNutritionalRecommendationService(this.planToReturn);
+
+  @override
+  Future<NutritionalAnalysisReport> analyzeHistory({int days = 7}) async {
+    return const NutritionalAnalysisReport(
+      daysAnalyzed: 7,
+      mealsLogged: 5,
+      averageDailyCalories: 1900,
+      averageDailyProtein: 130,
+      averageDailyCarbs: 200,
+      averageDailyFat: 60,
+      generalDiagnosis: 'Diagnóstico',
+      suggestedFocus: 'Foco',
+    );
+  }
+
+  @override
+  Future<TodayRecommendationPlan> getWhatShouldIEatToday({
+    DateTime? date,
+    String? category,
+    bool shuffle = false,
+  }) async {
+    return planToReturn.copyWith(selectedCategory: category ?? 'Todos');
+  }
 }
