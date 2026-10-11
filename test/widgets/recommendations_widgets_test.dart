@@ -259,17 +259,8 @@ class _FakeNutritionalRecommendationService implements INutritionalRecommendatio
   _FakeNutritionalRecommendationService(this.planToReturn);
 
   @override
-  Future<NutritionalAnalysisReport> analyzeHistory({int days = 7}) async {
-    return const NutritionalAnalysisReport(
-      daysAnalyzed: 7,
-      mealsLogged: 5,
-      averageDailyCalories: 1900,
-      averageDailyProtein: 130,
-      averageDailyCarbs: 200,
-      averageDailyFat: 60,
-      generalDiagnosis: 'Diagnóstico',
-      suggestedFocus: 'Foco',
-    );
+  Future<NutritionalAnalysisReport> analyzeHistory({int days = 7}) {
+    throw UnimplementedError();
   }
 
   @override
