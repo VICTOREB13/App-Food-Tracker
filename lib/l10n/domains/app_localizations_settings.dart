@@ -131,5 +131,35 @@ abstract class AppLocalizationsSettings extends AppLocalizationsProfile {
   String get restoreDefaultPromptAction;
   String get previewTabTitle;
   String get editorTabTitle;
+
+  String get widgetLabelCalories;
+  String get widgetCaloriesSubtitle;
+  String get widgetKcalRemaining;
+  String get widgetActionAdd;
+  String get widgetLabelProtein;
+  String get widgetLabelCarbs;
+  String get widgetLabelFat;
+  String get widgetSuffixLeft;
+  String get widgetScanCameraTitle;
+  String get widgetScanCameraSubtitle;
+  String get widgetScanBarcodeTitle;
+  String get widgetScanBarcodeSubtitle;
+  String get widgetStreakHeader;
+  String get widgetStreakSubtitle;
+  String get widgetStreakStatus;
+  String get widgetStreakDaySingular;
+  String get widgetStreakDayPlural;
+  String get widgetFastingStatusActive;
+  String get widgetFastingStatusInactive;
+  String get widgetFastingInactive;
+  String get widgetFastingTargetActivePrefix;
+  String get widgetFastingTargetInactivePrefix;
+  String get widgetBtnFastingEnd;
+  String get widgetBtnFastingStart;
+  String get widgetActionScanFood;
+  String get widgetActionBarcode;
+  String get widgetActionQuickMeal;
+  String get widgetActionWater;
+  List<String> get weekDaysLetters;
 }
 

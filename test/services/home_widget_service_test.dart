@@ -1,5 +1,7 @@
+import 'dart:ui' show Locale;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/services/home_widget_service.dart';
+import 'package:food_tracker/services/home_widget_strings.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -116,6 +118,146 @@ void main() {
       );
 
       await expectLater(service.updateWidgets(), completes);
+    });
+
+    test('HomeWidgetStrings generates complete Spanish dictionary', () {
+      final strings = HomeWidgetStrings.fromLocale(const Locale('es'));
+      final map = strings.toMap();
+
+      expect(map['app_locale_code'], equals('es'));
+      expect(map['widget_label_calories'], equals('CALORÍAS'));
+      expect(map['widget_calories_subtitle'], equals('REST.'));
+      expect(map['widget_kcal_remaining'], equals('kcal restantes'));
+      expect(map['widget_action_add'], equals('+ Registrar'));
+      expect(map['widget_label_protein'], equals('PROT'));
+      expect(map['widget_label_carbs'], equals('CARB'));
+      expect(map['widget_label_fat'], equals('GRASAS'));
+      expect(map['widget_suffix_left'], equals('rest'));
+      expect(map['widget_scan_camera_title'], equals('📸 Cámara IA'));
+      expect(map['widget_scan_camera_subtitle'], equals('Escanear'));
+      expect(map['widget_scan_barcode_title'], equals('🔍 Código'));
+      expect(map['widget_scan_barcode_subtitle'], equals('de Barras'));
+      expect(map['widget_streak_header'], equals('RACHA ACTIVA'));
+      expect(map['widget_streak_subtitle'], equals('HÁBITOS DIARIOS'));
+      expect(map['widget_streak_status'], equals('Consistencia Semanal'));
+      expect(map['widget_streak_day_singular'], equals('DÍA'));
+      expect(map['widget_streak_day_plural'], equals('DÍAS'));
+      expect(map['widget_fasting_status_active'], equals('AYUNO EN CURSO'));
+      expect(map['widget_fasting_status_inactive'], equals('AYUNO INTERMITENTE'));
+      expect(map['widget_fasting_inactive'], equals('INACTIVO'));
+      expect(map['widget_fasting_target_active_prefix'], equals('Meta'));
+      expect(map['widget_fasting_target_inactive_prefix'], equals('Objetivo:'));
+      expect(map['widget_btn_fasting_end'], equals('Terminar Ayuno'));
+      expect(map['widget_btn_fasting_start'], equals('Iniciar Ayuno'));
+      expect(map['widget_action_scan_food'], equals('CÁMARA IA'));
+      expect(map['widget_action_barcode'], equals('BARRAS'));
+      expect(map['widget_action_quick_meal'], equals('RÁPIDA'));
+      expect(map['widget_action_water'], equals('+250ML'));
+      expect(map['label_calories'], equals('CALORÍAS'));
+      expect(map['label_calories_subtitle'], equals('REST.'));
+      expect(map['label_kcal_remaining'], equals('kcal restantes'));
+      expect(map['label_action_add'], equals('+ Registrar'));
+      expect(map['label_protein'], equals('PROT'));
+      expect(map['label_carbs'], equals('CARB'));
+      expect(map['label_fat'], equals('GRASAS'));
+      expect(map['label_suffix_left'], equals('rest'));
+      expect(map['label_scan_camera_title'], equals('📸 Cámara IA'));
+      expect(map['label_scan_camera_subtitle'], equals('Escanear'));
+      expect(map['label_scan_barcode_title'], equals('🔍 Código'));
+      expect(map['label_scan_barcode_subtitle'], equals('de Barras'));
+      expect(map['label_streak_header'], equals('RACHA ACTIVA'));
+      expect(map['label_streak_subtitle'], equals('HÁBITOS DIARIOS'));
+      expect(map['label_streak_status'], equals('Consistencia Semanal'));
+      expect(map['label_streak_day_singular'], equals('DÍA'));
+      expect(map['label_streak_day_plural'], equals('DÍAS'));
+      expect(map['label_fasting_status_active'], equals('AYUNO EN CURSO'));
+      expect(map['label_fasting_status_inactive'], equals('AYUNO INTERMITENTE'));
+      expect(map['label_fasting_inactive'], equals('INACTIVO'));
+      expect(map['label_fasting_target_active_prefix'], equals('Meta'));
+      expect(map['label_fasting_target_inactive_prefix'], equals('Objetivo:'));
+      expect(map['label_btn_fasting_end'], equals('Terminar Ayuno'));
+      expect(map['label_btn_fasting_start'], equals('Iniciar Ayuno'));
+      expect(map['label_action_scan_food'], equals('CÁMARA IA'));
+      expect(map['label_action_barcode'], equals('BARRAS'));
+      expect(map['label_action_quick_meal'], equals('RÁPIDA'));
+      expect(map['label_action_water'], equals('+250ML'));
+    });
+
+    test('HomeWidgetStrings generates complete English dictionary', () {
+      final strings = HomeWidgetStrings.fromLocale(const Locale('en'));
+      final map = strings.toMap();
+
+      expect(map['app_locale_code'], equals('en'));
+      expect(map['widget_label_calories'], equals('CALORIES'));
+      expect(map['widget_calories_subtitle'], equals('LEFT'));
+      expect(map['widget_kcal_remaining'], equals('kcal remaining'));
+      expect(map['widget_action_add'], equals('+ Log'));
+      expect(map['widget_label_protein'], equals('PROT'));
+      expect(map['widget_label_carbs'], equals('CARB'));
+      expect(map['widget_label_fat'], equals('FAT'));
+      expect(map['widget_suffix_left'], equals('left'));
+      expect(map['widget_scan_camera_title'], equals('📸 AI Camera'));
+      expect(map['widget_scan_camera_subtitle'], equals('Scan'));
+      expect(map['widget_scan_barcode_title'], equals('🔍 Barcode'));
+      expect(map['widget_scan_barcode_subtitle'], equals('Scanner'));
+      expect(map['widget_streak_header'], equals('ACTIVE STREAK'));
+      expect(map['widget_streak_subtitle'], equals('DAILY HABITS'));
+      expect(map['widget_streak_status'], equals('Weekly Consistency'));
+      expect(map['widget_streak_day_singular'], equals('DAY'));
+      expect(map['widget_streak_day_plural'], equals('DAYS'));
+      expect(map['widget_fasting_status_active'], equals('FASTING IN PROGRESS'));
+      expect(map['widget_fasting_status_inactive'], equals('INTERMITTENT FASTING'));
+      expect(map['widget_fasting_inactive'], equals('INACTIVE'));
+      expect(map['widget_fasting_target_active_prefix'], equals('Goal'));
+      expect(map['widget_fasting_target_inactive_prefix'], equals('Target:'));
+      expect(map['widget_btn_fasting_end'], equals('End Fast'));
+      expect(map['widget_btn_fasting_start'], equals('Start Fast'));
+      expect(map['widget_action_scan_food'], equals('AI CAMERA'));
+      expect(map['widget_action_barcode'], equals('BARCODE'));
+      expect(map['widget_action_quick_meal'], equals('QUICK'));
+      expect(map['widget_action_water'], equals('+250ML'));
+      expect(map['label_calories'], equals('CALORIES'));
+      expect(map['label_calories_subtitle'], equals('LEFT'));
+      expect(map['label_kcal_remaining'], equals('kcal remaining'));
+      expect(map['label_action_add'], equals('+ Log'));
+      expect(map['label_protein'], equals('PROT'));
+      expect(map['label_carbs'], equals('CARB'));
+      expect(map['label_fat'], equals('FAT'));
+      expect(map['label_suffix_left'], equals('left'));
+      expect(map['label_scan_camera_title'], equals('📸 AI Camera'));
+      expect(map['label_scan_camera_subtitle'], equals('Scan'));
+      expect(map['label_scan_barcode_title'], equals('🔍 Barcode'));
+      expect(map['label_scan_barcode_subtitle'], equals('Scanner'));
+      expect(map['label_streak_header'], equals('ACTIVE STREAK'));
+      expect(map['label_streak_subtitle'], equals('DAILY HABITS'));
+      expect(map['label_streak_status'], equals('Weekly Consistency'));
+      expect(map['label_streak_day_singular'], equals('DAY'));
+      expect(map['label_streak_day_plural'], equals('DAYS'));
+      expect(map['label_fasting_status_active'], equals('FASTING IN PROGRESS'));
+      expect(map['label_fasting_status_inactive'], equals('INTERMITTENT FASTING'));
+      expect(map['label_fasting_inactive'], equals('INACTIVE'));
+      expect(map['label_fasting_target_active_prefix'], equals('Goal'));
+      expect(map['label_fasting_target_inactive_prefix'], equals('Target:'));
+      expect(map['label_btn_fasting_end'], equals('End Fast'));
+      expect(map['label_btn_fasting_start'], equals('Start Fast'));
+      expect(map['label_action_scan_food'], equals('AI CAMERA'));
+      expect(map['label_action_barcode'], equals('BARCODE'));
+      expect(map['label_action_quick_meal'], equals('QUICK'));
+      expect(map['label_action_water'], equals('+250ML'));
+    });
+
+    test('syncAllWidgetsWithLocale and saveLocaleStrings execute safely', () async {
+      await expectLater(
+        service.syncAllWidgetsWithLocale(const Locale('en')),
+        completes,
+      );
+      expect(service.currentLocale, equals(const Locale('en')));
+
+      await expectLater(
+        service.syncAllWidgetsWithLocale(const Locale('es')),
+        completes,
+      );
+      expect(service.currentLocale, equals(const Locale('es')));
     });
   });
 }

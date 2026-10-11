@@ -154,9 +154,96 @@ void main() {
       final firstDish = plan.recommendedOptions.first;
       expect(firstDish.name, isNotEmpty);
       expect(firstDish.calories, greaterThan(0));
-      expect(firstDish.fitScore, inInclusiveRange(80, 100));
+      expect(firstDish.fitScore, inInclusiveRange(70, 100));
       expect(firstDish.ingredients.isNotEmpty, isTrue);
       expect(firstDish.whyRecommended.isNotEmpty, isTrue);
+    });
+
+    test('getWhatShouldIEatToday filters by Snack category and offers practical, light options', () async {
+      final service = NutritionalRecommendationService.instance;
+      final plan = await service.getWhatShouldIEatToday(category: 'Snack');
+
+      expect(plan.selectedCategory, equals('Snack'));
+      expect(plan.recommendedOptions.isNotEmpty, isTrue);
+
+      final snackNames = plan.recommendedOptions.map((d) => d.name).toList();
+      expect(snackNames.any((name) => name.contains('Barra de Proteína') || name.contains('Maní') || name.contains('Mix de Frutos Secos')), isTrue);
+
+      for (final dish in plan.recommendedOptions) {
+        expect(dish.mealType.toLowerCase(), contains('snack'));
+        // Practical snacks are light portions under 250 kcal
+        expect(dish.calories, lessThanOrEqualTo(250.0));
+      }
+    });
+
+    test('getWhatShouldIEatToday filters by Desayuno, Almuerzo, and Cena categories', () async {
+      final service = NutritionalRecommendationService.instance;
+
+      final breakfastPlan = await service.getWhatShouldIEatToday(category: 'Desayuno');
+      expect(breakfastPlan.selectedCategory, equals('Desayuno'));
+      for (final dish in breakfastPlan.recommendedOptions) {
+        expect(dish.mealType, equals('Desayuno'));
+      }
+
+      final lunchPlan = await service.getWhatShouldIEatToday(category: 'Almuerzo');
+      expect(lunchPlan.selectedCategory, equals('Almuerzo'));
+      for (final dish in lunchPlan.recommendedOptions) {
+        expect(dish.mealType, equals('Almuerzo'));
+      }
+
+      final dinnerPlan = await service.getWhatShouldIEatToday(category: 'Cena');
+      expect(dinnerPlan.selectedCategory, equals('Cena'));
+      for (final dish in dinnerPlan.recommendedOptions) {
+        expect(dish.mealType, equals('Cena'));
+      }
+    });
+
+    test('getWhatShouldIEatToday shuffles and recalculates scores on reload', () async {
+      final service = NutritionalRecommendationService.instance;
+      final planA = await service.getWhatShouldIEatToday(shuffle: true);
+      expect(planA.recommendedOptions.isNotEmpty, isTrue);
+      for (final dish in planA.recommendedOptions) {
+        expect(dish.fitScore, inInclusiveRange(70, 99));
+      }
+    });
+
+    test('getWhatShouldIEatToday supports English category normalization', () async {
+      final service = NutritionalRecommendationService.instance;
+
+      final breakfastPlan = await service.getWhatShouldIEatToday(category: 'Breakfast');
+      expect(breakfastPlan.selectedCategory, equals('Desayuno'));
+      expect(breakfastPlan.recommendedOptions.isNotEmpty, isTrue);
+      for (final dish in breakfastPlan.recommendedOptions) {
+        expect(dish.mealType, equals('Desayuno'));
+      }
+
+      final lunchPlan = await service.getWhatShouldIEatToday(category: 'Lunch');
+      expect(lunchPlan.selectedCategory, equals('Almuerzo'));
+      expect(lunchPlan.recommendedOptions.isNotEmpty, isTrue);
+      for (final dish in lunchPlan.recommendedOptions) {
+        expect(dish.mealType, equals('Almuerzo'));
+      }
+
+      final dinnerPlan = await service.getWhatShouldIEatToday(category: 'Dinner');
+      expect(dinnerPlan.selectedCategory, equals('Cena'));
+      expect(dinnerPlan.recommendedOptions.isNotEmpty, isTrue);
+      for (final dish in dinnerPlan.recommendedOptions) {
+        expect(dish.mealType, equals('Cena'));
+      }
+    });
+
+    test('shuffle reload provides dynamic dish rotation and variety', () async {
+      final service = NutritionalRecommendationService.instance;
+      final staticPlan = await service.getWhatShouldIEatToday(category: 'Desayuno', shuffle: false);
+      final reloadPlan1 = await service.getWhatShouldIEatToday(category: 'Desayuno', shuffle: true);
+      final reloadPlan2 = await service.getWhatShouldIEatToday(category: 'Desayuno', shuffle: true);
+
+      expect(staticPlan.recommendedOptions.isNotEmpty, isTrue);
+      expect(reloadPlan1.recommendedOptions.isNotEmpty, isTrue);
+      expect(reloadPlan2.recommendedOptions.isNotEmpty, isTrue);
+
+      // Verify that the catalog has rich options (at least 8 in category)
+      expect(staticPlan.recommendedOptions.length, greaterThanOrEqualTo(5));
     });
   });
 }

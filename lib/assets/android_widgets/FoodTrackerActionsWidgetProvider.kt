@@ -18,6 +18,25 @@ class FoodTrackerActionsWidgetProvider : HomeWidgetProvider() {
     ) {
         appWidgetIds.forEach { widgetId ->
             val views = RemoteViews(context.packageName, R.layout.food_tracker_widget_actions).apply {
+                val scanFoodText = widgetData.getString("label_action_scan_food", null)
+                    ?: widgetData.getString("widget_action_scan_food", null)
+                    ?: context.getString(R.string.widget_action_scan_food)
+                val barcodeText = widgetData.getString("label_action_barcode", null)
+                    ?: widgetData.getString("widget_action_barcode", null)
+                    ?: context.getString(R.string.widget_action_barcode)
+                val quickMealText = widgetData.getString("label_action_quick_meal", null)
+                    ?: widgetData.getString("widget_action_quick_meal", null)
+                    ?: context.getString(R.string.widget_action_quick_meal)
+                val waterText = widgetData.getString("label_action_water", null)
+                    ?: widgetData.getString("widget_action_water", null)
+                    ?: context.getString(R.string.widget_action_water)
+
+                setTextViewText(R.id.widget_action_scan_food_text, scanFoodText)
+                setTextViewText(R.id.widget_action_barcode_text, barcodeText)
+                setTextViewText(R.id.widget_action_quick_meal_text, quickMealText)
+                setTextViewText(R.id.widget_action_water_text, waterText)
+
+                // Deep link 1: Camera AI
                 val scanFoodIntent = HomeWidgetLaunchIntent.getActivity(
                     context,
                     MainActivity::class.java,
@@ -25,6 +44,7 @@ class FoodTrackerActionsWidgetProvider : HomeWidgetProvider() {
                 )
                 setOnClickPendingIntent(R.id.widget_action_scan_food, scanFoodIntent)
 
+                // Deep link 2: Barcode scanner
                 val barcodeIntent = HomeWidgetLaunchIntent.getActivity(
                     context,
                     MainActivity::class.java,
@@ -32,6 +52,7 @@ class FoodTrackerActionsWidgetProvider : HomeWidgetProvider() {
                 )
                 setOnClickPendingIntent(R.id.widget_action_barcode, barcodeIntent)
 
+                // Deep link 3: Quick meal dialog
                 val quickMealIntent = HomeWidgetLaunchIntent.getActivity(
                     context,
                     MainActivity::class.java,
@@ -39,6 +60,7 @@ class FoodTrackerActionsWidgetProvider : HomeWidgetProvider() {
                 )
                 setOnClickPendingIntent(R.id.widget_action_quick_meal, quickMealIntent)
 
+                // Deep link 4: Add 250ml water
                 val waterIntent = HomeWidgetLaunchIntent.getActivity(
                     context,
                     MainActivity::class.java,
@@ -46,6 +68,7 @@ class FoodTrackerActionsWidgetProvider : HomeWidgetProvider() {
                 )
                 setOnClickPendingIntent(R.id.widget_action_water, waterIntent)
 
+                // Default root tap
                 setOnClickPendingIntent(R.id.widget_actions_root, quickMealIntent)
             }
             appWidgetManager.updateAppWidget(widgetId, views)

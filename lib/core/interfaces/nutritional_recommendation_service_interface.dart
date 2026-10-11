@@ -6,5 +6,11 @@ abstract class INutritionalRecommendationService {
   Future<NutritionalAnalysisReport> analyzeHistory({int days = 7});
 
   /// Computes remaining calories/macros for today and recommends optimal dishes.
-  Future<TodayRecommendationPlan> getWhatShouldIEatToday({DateTime? date});
+  /// Supports optional filtering by [category] ('Todos', 'Desayuno', 'Almuerzo', 'Cena', 'Snack')
+  /// and dynamic variety via [shuffle].
+  Future<TodayRecommendationPlan> getWhatShouldIEatToday({
+    DateTime? date,
+    String? category,
+    bool shuffle = false,
+  });
 }

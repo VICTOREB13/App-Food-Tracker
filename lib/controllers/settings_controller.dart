@@ -10,6 +10,7 @@ import '../services/database_service.dart';
 import '../services/gemini_model_service.dart';
 import '../services/metabolic_calculator.dart';
 import '../services/secure_storage_service.dart';
+import '../services/home_widget_service.dart';
 import 'meal_controller.dart';
 
 class SettingsController extends ChangeNotifier {
@@ -75,6 +76,8 @@ class SettingsController extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       final code = prefs.getString('app_locale_code');
       if (code != null && code.isNotEmpty) _currentLocale = Locale(code);
+      final active = _currentLocale ?? const Locale('es');
+      await HomeWidgetService.instance.syncAllWidgetsWithLocale(active);
     } catch (_) {}
   }
 
@@ -84,6 +87,7 @@ class SettingsController extends ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('app_locale_code', locale.languageCode);
+      await HomeWidgetService.instance.syncAllWidgetsWithLocale(locale);
     } catch (_) {}
   }
 
@@ -214,12 +218,8 @@ class SettingsController extends ChangeNotifier {
     try {
       var profile = await _db.getUserProfile();
       profile ??= MetabolicCalculator.calculateProfile(
-        age: 25,
-        gender: 'male',
-        height: 175,
-        weight: 70,
-        activityLevel: 'moderate',
-        bodyGoal: 'maintenance',
+        age: 25, gender: 'male', height: 175, weight: 70,
+        activityLevel: 'moderate', bodyGoal: 'maintenance',
       );
       final updated = profile.copyWith(
         targetCalories: goals.calories,

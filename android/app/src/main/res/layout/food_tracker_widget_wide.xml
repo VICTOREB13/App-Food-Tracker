@@ -20,9 +20,10 @@
         android:gravity="center">
 
         <TextView
+            android:id="@+id/widget_label_calories"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="CALORÍAS"
+            android:text="@string/widget_label_calories"
             android:textSize="9sp"
             android:textStyle="bold"
             android:letterSpacing="0.08"
@@ -39,9 +40,10 @@
             android:textColor="@color/widget_text_primary" />
 
         <TextView
+            android:id="@+id/widget_label_kcal_left"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="kcal restantes"
+            android:text="@string/widget_kcal_remaining"
             android:textSize="10sp"
             android:textColor="@color/widget_text_secondary" />
 
@@ -74,9 +76,10 @@
             android:orientation="horizontal"
             android:gravity="center_vertical">
             <TextView
+                android:id="@+id/widget_label_protein"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="PROT"
+                android:text="@string/widget_label_protein"
                 android:textSize="9sp"
                 android:textStyle="bold"
                 android:textColor="@color/widget_protein" />
@@ -107,9 +110,10 @@
             android:orientation="horizontal"
             android:gravity="center_vertical">
             <TextView
+                android:id="@+id/widget_label_carbs"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="CARB"
+                android:text="@string/widget_label_carbs"
                 android:textSize="9sp"
                 android:textStyle="bold"
                 android:textColor="@color/widget_carbs" />
@@ -140,9 +144,10 @@
             android:orientation="horizontal"
             android:gravity="center_vertical">
             <TextView
+                android:id="@+id/widget_label_fat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="GRASAS"
+                android:text="@string/widget_label_fat"
                 android:textSize="9sp"
                 android:textStyle="bold"
                 android:textColor="@color/widget_fat" />
@@ -179,17 +184,19 @@
             android:padding="6dp">
 
             <TextView
+                android:id="@+id/widget_btn_scan_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="📸 Cámara IA"
+                android:text="@string/widget_scan_camera_title"
                 android:textSize="10sp"
                 android:textStyle="bold"
                 android:textColor="#FFFFFF" />
 
             <TextView
+                android:id="@+id/widget_btn_scan_subtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Escanear"
+                android:text="@string/widget_scan_camera_subtitle"
                 android:textSize="9sp"
                 android:textColor="#FEE2E2" />
         </LinearLayout>
@@ -210,17 +217,19 @@
             android:padding="6dp">
 
             <TextView
+                android:id="@+id/widget_btn_barcode_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🔍 Código"
+                android:text="@string/widget_scan_barcode_title"
                 android:textSize="10sp"
                 android:textStyle="bold"
                 android:textColor="@color/widget_text_primary" />
 
             <TextView
+                android:id="@+id/widget_btn_barcode_subtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="de Barras"
+                android:text="@string/widget_scan_barcode_subtitle"
                 android:textSize="9sp"
                 android:textColor="@color/widget_text_secondary" />
         </LinearLayout>

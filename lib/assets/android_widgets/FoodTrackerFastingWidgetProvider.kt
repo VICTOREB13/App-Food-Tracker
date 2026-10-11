@@ -19,8 +19,10 @@ class FoodTrackerFastingWidgetProvider : HomeWidgetProvider() {
         appWidgetIds: IntArray,
         widgetData: SharedPreferences
     ) {
-        val dateFormat = SimpleDateFormat("dd EEE MMM", Locale.getDefault())
-        val todayStr = dateFormat.format(Date()).uppercase(Locale.getDefault())
+        val localeCode = widgetData.getString("app_locale_code", null)
+        val locale = if (!localeCode.isNullOrEmpty()) Locale(localeCode) else Locale.getDefault()
+        val dateFormat = SimpleDateFormat("dd EEE MMM", locale)
+        val todayStr = dateFormat.format(Date()).uppercase(locale)
 
         appWidgetIds.forEach { widgetId ->
             val views = RemoteViews(context.packageName, R.layout.food_tracker_widget_fasting).apply {
@@ -31,15 +33,38 @@ class FoodTrackerFastingWidgetProvider : HomeWidgetProvider() {
                 val targetHours = widgetData.getInt("fasting_target_hours", 16)
 
                 if (isActive) {
-                    setTextViewText(R.id.widget_fasting_status, "AYUNO EN CURSO")
+                    val statusActive = widgetData.getString("label_fasting_status_active", null)
+                        ?: widgetData.getString("widget_fasting_status_active", null)
+                        ?: context.getString(R.string.widget_fasting_status_active)
+                    val targetPrefix = widgetData.getString("label_fasting_target_active_prefix", null)
+                        ?: widgetData.getString("widget_fasting_target_active_prefix", null)
+                        ?: context.getString(R.string.widget_fasting_target_active_prefix)
+                    val btnEnd = widgetData.getString("label_btn_fasting_end", null)
+                        ?: widgetData.getString("widget_btn_fasting_end", null)
+                        ?: context.getString(R.string.widget_btn_fasting_end)
+
+                    setTextViewText(R.id.widget_fasting_status, statusActive)
                     setTextViewText(R.id.widget_fasting_time, timeFormatted)
-                    setTextViewText(R.id.widget_fasting_target, "Meta ${targetHours}h")
-                    setTextViewText(R.id.widget_btn_fasting_text, "Terminar Ayuno")
+                    setTextViewText(R.id.widget_fasting_target, "$targetPrefix ${targetHours}h")
+                    setTextViewText(R.id.widget_btn_fasting_text, btnEnd)
                 } else {
-                    setTextViewText(R.id.widget_fasting_status, "AYUNO INTERMITENTE")
-                    setTextViewText(R.id.widget_fasting_time, "INACTIVO")
-                    setTextViewText(R.id.widget_fasting_target, "Objetivo: ${targetHours}h")
-                    setTextViewText(R.id.widget_btn_fasting_text, "Iniciar Ayuno")
+                    val statusInactive = widgetData.getString("label_fasting_status_inactive", null)
+                        ?: widgetData.getString("widget_fasting_status_inactive", null)
+                        ?: context.getString(R.string.widget_fasting_status_inactive)
+                    val inactiveText = widgetData.getString("label_fasting_inactive", null)
+                        ?: widgetData.getString("widget_fasting_inactive", null)
+                        ?: context.getString(R.string.widget_fasting_inactive)
+                    val targetPrefix = widgetData.getString("label_fasting_target_inactive_prefix", null)
+                        ?: widgetData.getString("widget_fasting_target_inactive_prefix", null)
+                        ?: context.getString(R.string.widget_fasting_target_inactive_prefix)
+                    val btnStart = widgetData.getString("label_btn_fasting_start", null)
+                        ?: widgetData.getString("widget_btn_fasting_start", null)
+                        ?: context.getString(R.string.widget_btn_fasting_start)
+
+                    setTextViewText(R.id.widget_fasting_status, statusInactive)
+                    setTextViewText(R.id.widget_fasting_time, inactiveText)
+                    setTextViewText(R.id.widget_fasting_target, "$targetPrefix ${targetHours}h")
+                    setTextViewText(R.id.widget_btn_fasting_text, btnStart)
                 }
 
                 val fastingIntent = HomeWidgetLaunchIntent.getActivity(

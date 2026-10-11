@@ -61,5 +61,11 @@ abstract class AppLocalizationsDashboard extends AppLocalizationsCore {
   String errorRegisteringMeal(String error);
   String suggestionsForNextMeal(String mealType);
   String get quickWaterMealName;
+  String get refreshIdeasAction;
+  String get categoryAll;
+  String get practicalSnackHint;
+  String get viewEditPromptAction;
+  String get viewEditPromptSubtitle;
+  String get copyPromptAction;
 }
 

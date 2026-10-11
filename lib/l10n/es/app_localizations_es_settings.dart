@@ -131,5 +131,35 @@ abstract class AppLocalizationsEsSettings extends AppLocalizationsEsProfile {
   @override String get restoreDefaultPromptAction => 'Restaurar por Defecto';
   @override String get previewTabTitle => 'Vista Previa';
   @override String get editorTabTitle => 'Editor';
+
+  @override String get widgetLabelCalories => 'CALORÍAS';
+  @override String get widgetCaloriesSubtitle => 'REST.';
+  @override String get widgetKcalRemaining => 'kcal restantes';
+  @override String get widgetActionAdd => '+ Registrar';
+  @override String get widgetLabelProtein => 'PROT';
+  @override String get widgetLabelCarbs => 'CARB';
+  @override String get widgetLabelFat => 'GRASAS';
+  @override String get widgetSuffixLeft => 'rest';
+  @override String get widgetScanCameraTitle => '📸 Cámara IA';
+  @override String get widgetScanCameraSubtitle => 'Escanear';
+  @override String get widgetScanBarcodeTitle => '🔍 Código';
+  @override String get widgetScanBarcodeSubtitle => 'de Barras';
+  @override String get widgetStreakHeader => 'RACHA ACTIVA';
+  @override String get widgetStreakSubtitle => 'HÁBITOS DIARIOS';
+  @override String get widgetStreakStatus => 'Consistencia Semanal';
+  @override String get widgetStreakDaySingular => 'DÍA';
+  @override String get widgetStreakDayPlural => 'DÍAS';
+  @override String get widgetFastingStatusActive => 'AYUNO EN CURSO';
+  @override String get widgetFastingStatusInactive => 'AYUNO INTERMITENTE';
+  @override String get widgetFastingInactive => 'INACTIVO';
+  @override String get widgetFastingTargetActivePrefix => 'Meta';
+  @override String get widgetFastingTargetInactivePrefix => 'Objetivo:';
+  @override String get widgetBtnFastingEnd => 'Terminar Ayuno';
+  @override String get widgetBtnFastingStart => 'Iniciar Ayuno';
+  @override String get widgetActionScanFood => 'CÁMARA IA';
+  @override String get widgetActionBarcode => 'BARRAS';
+  @override String get widgetActionQuickMeal => 'RÁPIDA';
+  @override String get widgetActionWater => '+250ML';
+  @override List<String> get weekDaysLetters => const ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 }
 

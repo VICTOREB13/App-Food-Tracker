@@ -19,8 +19,28 @@ class FoodTrackerStreakWidgetProvider : HomeWidgetProvider() {
         appWidgetIds.forEach { widgetId ->
             val views = RemoteViews(context.packageName, R.layout.food_tracker_widget_streak).apply {
                 val streak = widgetData.getInt("streak_count", 0)
-                val daySuffix = if (streak == 1) "DÍA" else "DÍAS"
+                val daySingular = widgetData.getString("label_streak_day_singular", null)
+                    ?: widgetData.getString("widget_streak_day_singular", null)
+                    ?: context.getString(R.string.widget_streak_day_singular)
+                val dayPlural = widgetData.getString("label_streak_day_plural", null)
+                    ?: widgetData.getString("widget_streak_day_plural", null)
+                    ?: context.getString(R.string.widget_streak_day_plural)
+                val daySuffix = if (streak == 1) daySingular else dayPlural
                 setTextViewText(R.id.widget_streak_count, "🔥 $streak $daySuffix")
+
+                val header = widgetData.getString("label_streak_header", null)
+                    ?: widgetData.getString("widget_streak_header", null)
+                    ?: context.getString(R.string.widget_streak_header)
+                val subtitle = widgetData.getString("label_streak_subtitle", null)
+                    ?: widgetData.getString("widget_streak_subtitle", null)
+                    ?: context.getString(R.string.widget_streak_subtitle)
+                val status = widgetData.getString("label_streak_status", null)
+                    ?: widgetData.getString("widget_streak_status", null)
+                    ?: context.getString(R.string.widget_streak_status)
+
+                setTextViewText(R.id.widget_streak_header, header)
+                setTextViewText(R.id.widget_streak_subtitle, subtitle)
+                setTextViewText(R.id.widget_streak_status, status)
 
                 // Update 7-day dot matrix based on streak
                 val dotIds = intArrayOf(

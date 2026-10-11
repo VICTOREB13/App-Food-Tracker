@@ -1,15 +1,15 @@
 ---
 tipo: abstracciones
 proyecto: App_Food_Tracker
-version: v1.4.2
+version: v1.4.3
 estado: activo
 fecha: 2026-10-10
-tags: [proyecto, arquitectura, abstracciones, backend, nothing-os, native-widgets, master-prompt, clinical-export, parity, pure-dart-l10n]
+tags: [proyecto, arquitectura, abstracciones, backend, nothing-os, native-widgets, master-prompt, clinical-export, parity, pure-dart-l10n, data-driven-widgets, recommendation-catalogs]
 ---
 
-# Abstracciones del Sistema y Arquitectura de Código: Victor Engineer - Food Tracker (v1.4.2)
+# Abstracciones del Sistema y Arquitectura de Código: Victor Engineer - Food Tracker (v1.4.3)
 
-> **Mesa de Control & Backend-Architect:** Este documento centraliza las clases maestras, interfaces de dominio, servicios de negocio, funciones utilitarias nucleares, variables de estado seguro y costuras de flujo de datos (data seams) de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.4.2` (Widgets Nativos Nothing OS, Hoja Modal Desacoplada de Master Prompt, Compartición Nativa de Reportes Clínicos y Armonización Visual). Complementa conceptualmente a [[PRJ_App_Food_Tracker_api_spec|Especificación de API y Modelos]] para posibilitar el entendimiento exhaustivo del software sin necesidad de inspeccionar línea por línea el código fuente.
+> **Mesa de Control & Backend-Architect:** Este documento centraliza las clases maestras, interfaces de dominio, servicios de negocio, funciones utilitarias nucleares, variables de estado seguro y costuras de flujo de datos (data seams) de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.4.3` (Localización Data-Driven en Widgets de Android, Catálogos Modulares de Recomendaciones con Snacks Prácticos y Disparador Ergonómico de Master Prompt). Complementa conceptualmente a [[PRJ_App_Food_Tracker_api_spec|Especificación de API y Modelos]] para posibilitar el entendimiento exhaustivo del software sin necesidad de inspeccionar línea por línea el código fuente.
 
 ---
 
@@ -701,6 +701,41 @@ Para garantizar la estricta mantenibilidad del monolito modular sin romper compa
   - Pestañas independientes gestionadas por `TabController`:
     - **Pestaña Vista Previa:** Muestra tarjetas Bento resumidas de TDEE, Meta Calórica, Proteína y Grasas junto al texto formateado monoespaciado del prompt para el modelo de IA.
     - **Pestaña Editor:** Editor multilínea a toda la altura disponible con acciones de guardado (`onSaved`), copiado en 1 tap y restauración a la plantilla generada por `MetabolicCalculator`.
+
+---
+
+## 🍱 16. Abstracciones de Localización Data-Driven en Widgets Android y Catálogos Modulares de Recomendaciones (v1.4.3)
+
+### 16.1. Localización Data-Driven de Widgets Nativos (`HomeWidgetStrings`)
+- **Ubicación:** `lib/services/home_widget_strings.dart` (165 LoC).
+- **Responsabilidad:** Puente de datos que serializa las cadenas localizadas de la aplicación Flutter (`AppLocalizations`) a un diccionario clave-valor almacenado en los `SharedPreferences` compartidos de Android.
+- **Claves Exportadas:** Mapeo exhaustivo con prefijos dobles `label_*` y `widget_*` (28 claves por idioma: `label_calories`, `label_protein`, `label_action_add`, `label_streak_header`, `label_fasting_status_active`, etc.).
+- **Consumo en Android:**
+  - Los 5 proveedores de `AppWidgetProvider` (`FoodTrackerCompactWidgetProvider.kt`, `FoodTrackerWideWidgetProvider.kt`, `FoodTrackerStreakWidgetProvider.kt`, `FoodTrackerActionsWidgetProvider.kt`, `FoodTrackerFastingWidgetProvider.kt`) leen dinámicamente las cadenas traducidas mediante `widgetData.getString("label_*", null)` o `widgetData.getString("widget_*", null)`.
+  - Si un valor aún no se ha sincronizado (arranque en frío inicial del sistema operativo), se realiza fallback a `context.getString(R.string.*)`.
+- **Sincronización Reactiva en Ciclo de Vida:**
+  - `SettingsController.loadLocale()` sincroniza los widgets de Android inmediatamente en arranque en frío y en segundo plano sin requerir navegación a la pantalla de Ajustes.
+  - `SettingsController.setLocale()` desencadena `HomeWidgetService.syncAllWidgetsWithLocale()`, actualizando los widgets nativos en tiempo real al cambiar entre Español e Inglés.
+  - Timeout preventivo ampliado a 4 segundos en `HomeWidgetService.saveLocaleStrings()` para persistencia masiva concurrente de las 50 claves sin riesgo de cancelación prematura.
+
+### 16.2. Arquitectura de Catálogos Modulares de Recomendaciones (`lib/services/recommendations/`)
+- **Ubicación:** `lib/services/recommendations/` (< 300 LoC por archivo).
+- **Submódulos Especializados:**
+  - `BreakfastDishCatalog`: Catálogo de 9 opciones balanceadas de desayuno (Huevos revueltos, Avena con proteína, Tostadas de aguacate, etc.).
+  - `LunchDishCatalog`: Catálogo de 9 opciones completas de almuerzo (Pechuga a la plancha, Salmón con quinoa, Bowl de atún, etc.).
+  - `DinnerDishCatalog`: Catálogo de 9 opciones ligeras de cena (Tortilla de claras, Ensalada de pollo, Crema de verduras, etc.).
+  - `SnackDishCatalog`: Catálogo de 11 opciones prácticas, ligeras y portables (Barra de proteína, Maní tostado, Frutos secos mixtos, Yogur griego, Manzana con mantequilla de maní, Edamame al vapor, Semillas de calabaza, etc.).
+  - `RecommendationDishCatalog`: Agregador inmutable de los 38 platos organizados por categorías semánticas.
+  - `RecommendationFilterEngine`: Motor de filtrado y rotación dinámica por categoría normalizada. Elimina reordenamientos rígidos post-shuffle para garantizar variedad inmediata al pulsar "Recargar ideas".
+  - `RecommendationScoringEngine`: Algoritmo de ajuste calórico y de macronutrientes contra el presupuesto restante del usuario en el día.
+
+### 16.3. Disparador Ergonómico de Master Prompt (`MasterPromptBentoTrigger`)
+- **Ubicación:** `lib/widgets/profile/master_prompt_bento_trigger.dart` (140 LoC).
+- **Responsabilidad:** Extrae la lógica de invocación del Master Prompt fuera de `MetabolicSummaryBentoCard` (reduciendo su tamaño a 207 LoC).
+- **Interacción:**
+  - Disparador visual con botón prominente `[Ver / Configurar]` e icono `Icons.tune_rounded`.
+  - Detección de toque unificada mediante `InkWell`: tanto el botón explícito como el contenedor Bento completo despachan `MasterPromptBottomSheet.show(context, ...)`.
+
 
 
 

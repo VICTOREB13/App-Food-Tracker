@@ -187,5 +187,63 @@ void main() {
 
       expect(find.text('Diagnóstico Nutricional'), findsNothing);
     });
+
+    testWidgets('WhatToEatSheet renders category chips, snack hint on selection, and refresh button', (tester) async {
+      const samplePlan = TodayRecommendationPlan(
+        remainingCalories: 550,
+        remainingProtein: 45,
+        remainingCarbs: 60,
+        remainingFat: 15,
+        nextMealType: 'Almuerzo',
+        generalAdvice: 'Tienes un margen favorable para tu próxima comida.',
+        recommendedOptions: [
+          RecommendedDish(
+            id: 'snack_bar_1',
+            name: 'Barra de Proteína Baja en Azúcar',
+            mealType: 'Snack',
+            calories: 195,
+            protein: 20,
+            carbs: 14,
+            fat: 6,
+            fitScore: 98,
+            description: 'Snack portátil para llevar',
+            ingredients: ['Barra de proteína (60g)'],
+            whyRecommended: 'Práctico y alto en proteína',
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: WhatToEatSheet(initialPlan: samplePlan),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Check category chips exist
+      expect(find.byKey(const Key('category_chip_todos')), findsOneWidget);
+      expect(find.byKey(const Key('category_chip_desayuno')), findsOneWidget);
+      expect(find.byKey(const Key('category_chip_almuerzo')), findsOneWidget);
+      expect(find.byKey(const Key('category_chip_cena')), findsOneWidget);
+      expect(find.byKey(const Key('category_chip_snack')), findsOneWidget);
+
+      // Check refresh button exists
+      expect(find.byKey(const Key('recommendations_refresh_button')), findsOneWidget);
+
+      // Tap Snack category chip
+      await tester.tap(find.byKey(const Key('category_chip_snack')));
+      await tester.pumpAndSettle();
+
+      // Verify snack hint appears
+      expect(find.text('Opciones prácticas, ligeras y sencillas para picar'), findsOneWidget);
+
+      // Tap refresh button
+      await tester.tap(find.byKey(const Key('recommendations_refresh_button')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('recommendations_refresh_button')), findsOneWidget);
+    });
   });
 }

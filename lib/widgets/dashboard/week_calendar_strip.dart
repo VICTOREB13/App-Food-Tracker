@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/theme_manager.dart';
 
 class WeekCalendarStrip extends StatelessWidget {
@@ -30,8 +31,8 @@ class WeekCalendarStrip extends StatelessWidget {
     final isDark = AppColors.isDark(context);
     final days = _getWeekDays();
     final now = DateTime.now();
-
-    const weekLetters = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+    final l10n = AppLocalizations.of(context);
+    final weekLetters = l10n.weekDaysLetters;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),

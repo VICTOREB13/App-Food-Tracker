@@ -131,5 +131,35 @@ abstract class AppLocalizationsEnSettings extends AppLocalizationsEnProfile {
   @override String get restoreDefaultPromptAction => 'Restore Default';
   @override String get previewTabTitle => 'Preview';
   @override String get editorTabTitle => 'Editor';
+
+  @override String get widgetLabelCalories => 'CALORIES';
+  @override String get widgetCaloriesSubtitle => 'LEFT';
+  @override String get widgetKcalRemaining => 'kcal remaining';
+  @override String get widgetActionAdd => '+ Log';
+  @override String get widgetLabelProtein => 'PROT';
+  @override String get widgetLabelCarbs => 'CARB';
+  @override String get widgetLabelFat => 'FAT';
+  @override String get widgetSuffixLeft => 'left';
+  @override String get widgetScanCameraTitle => '📸 AI Camera';
+  @override String get widgetScanCameraSubtitle => 'Scan';
+  @override String get widgetScanBarcodeTitle => '🔍 Barcode';
+  @override String get widgetScanBarcodeSubtitle => 'Scanner';
+  @override String get widgetStreakHeader => 'ACTIVE STREAK';
+  @override String get widgetStreakSubtitle => 'DAILY HABITS';
+  @override String get widgetStreakStatus => 'Weekly Consistency';
+  @override String get widgetStreakDaySingular => 'DAY';
+  @override String get widgetStreakDayPlural => 'DAYS';
+  @override String get widgetFastingStatusActive => 'FASTING IN PROGRESS';
+  @override String get widgetFastingStatusInactive => 'INTERMITTENT FASTING';
+  @override String get widgetFastingInactive => 'INACTIVE';
+  @override String get widgetFastingTargetActivePrefix => 'Goal';
+  @override String get widgetFastingTargetInactivePrefix => 'Target:';
+  @override String get widgetBtnFastingEnd => 'End Fast';
+  @override String get widgetBtnFastingStart => 'Start Fast';
+  @override String get widgetActionScanFood => 'AI CAMERA';
+  @override String get widgetActionBarcode => 'BARCODE';
+  @override String get widgetActionQuickMeal => 'QUICK';
+  @override String get widgetActionWater => '+250ML';
+  @override List<String> get weekDaysLetters => const ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 }
 

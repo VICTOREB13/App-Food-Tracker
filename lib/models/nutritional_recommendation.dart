@@ -155,6 +155,7 @@ class TodayRecommendationPlan {
   final String nextMealType;
   final String generalAdvice;
   final List<RecommendedDish> recommendedOptions;
+  final String selectedCategory;
 
   const TodayRecommendationPlan({
     required this.remainingCalories,
@@ -164,5 +165,28 @@ class TodayRecommendationPlan {
     required this.nextMealType,
     required this.generalAdvice,
     required this.recommendedOptions,
+    this.selectedCategory = 'Todos',
   });
+
+  TodayRecommendationPlan copyWith({
+    double? remainingCalories,
+    double? remainingProtein,
+    double? remainingCarbs,
+    double? remainingFat,
+    String? nextMealType,
+    String? generalAdvice,
+    List<RecommendedDish>? recommendedOptions,
+    String? selectedCategory,
+  }) {
+    return TodayRecommendationPlan(
+      remainingCalories: remainingCalories ?? this.remainingCalories,
+      remainingProtein: remainingProtein ?? this.remainingProtein,
+      remainingCarbs: remainingCarbs ?? this.remainingCarbs,
+      remainingFat: remainingFat ?? this.remainingFat,
+      nextMealType: nextMealType ?? this.nextMealType,
+      generalAdvice: generalAdvice ?? this.generalAdvice,
+      recommendedOptions: recommendedOptions ?? this.recommendedOptions,
+      selectedCategory: selectedCategory ?? this.selectedCategory,
+    );
+  }
 }

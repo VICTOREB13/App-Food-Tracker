@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Launcher App Widget Names & Descriptions (Spanish) -->
+    <string name="widget_compact_name">Food Tracker - Resumen</string>
+    <string name="widget_compact_description">Resumen rápido de calorías y registro de comida</string>
+    <string name="widget_wide_name">Food Tracker - Completo</string>
+    <string name="widget_wide_description">Resumen de calorías, desglose de macronutrientes y accesos directos de escaneo</string>
+    <string name="widget_streak_name">Food Tracker - Racha &amp; Hábitos</string>
+    <string name="widget_streak_description">Racha activa y matriz de hábitos diarios estilo Nothing OS</string>
+    <string name="widget_actions_name">Food Tracker - Acciones Rápidas</string>
+    <string name="widget_actions_description">Disparadores rápidos para cámara IA, código de barras, comida rápida y agua</string>
+    <string name="widget_fasting_name">Food Tracker - Ayuno &amp; Fecha</string>
+    <string name="widget_fasting_description">Reloj de fecha y temporizador de ayuno intermitente estilo Nothing OS</string>
+
+    <!-- Widget Content Labels & Actions (Spanish Default) -->
+    <string name="widget_label_calories">CALORÍAS</string>
+    <string name="widget_calories_subtitle">REST.</string>
+    <string name="widget_kcal_remaining">kcal restantes</string>
+    <string name="widget_action_add">+ Registrar</string>
+    <string name="widget_label_protein">PROT</string>
+    <string name="widget_label_carbs">CARB</string>
+    <string name="widget_label_fat">GRASAS</string>
+    <string name="widget_suffix_left">rest</string>
+    <string name="widget_scan_camera_title">📸 Cámara IA</string>
+    <string name="widget_scan_camera_subtitle">Escanear</string>
+    <string name="widget_scan_barcode_title">🔍 Código</string>
+    <string name="widget_scan_barcode_subtitle">de Barras</string>
+    <string name="widget_streak_header">RACHA ACTIVA</string>
+    <string name="widget_streak_subtitle">HÁBITOS DIARIOS</string>
+    <string name="widget_streak_status">Consistencia Semanal</string>
+    <string name="widget_streak_day_singular">DÍA</string>
+    <string name="widget_streak_day_plural">DÍAS</string>
+    <string name="widget_fasting_status_active">AYUNO EN CURSO</string>
+    <string name="widget_fasting_status_inactive">AYUNO INTERMITENTE</string>
+    <string name="widget_fasting_inactive">INACTIVO</string>
+    <string name="widget_fasting_target_default">Meta 16h</string>
+    <string name="widget_fasting_target_active_prefix">Meta</string>
+    <string name="widget_fasting_target_inactive_prefix">Objetivo:</string>
+    <string name="widget_btn_fasting_end">Terminar Ayuno</string>
+    <string name="widget_btn_fasting_start">Iniciar Ayuno</string>
+    <string name="widget_action_scan_food">CÁMARA IA</string>
+    <string name="widget_action_barcode">BARRAS</string>
+    <string name="widget_action_quick_meal">RÁPIDA</string>
+    <string name="widget_action_water">+250ML</string>
+</resources>

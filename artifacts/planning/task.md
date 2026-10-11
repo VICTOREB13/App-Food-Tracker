@@ -1,15 +1,53 @@
 ---
 tipo: task_list
 proyecto: App_Food_Tracker
-iteracion: v1.4.2
+iteracion: v1.4.3
 estado: activo
 fecha: 2026-10-10
-tags: [proyecto, tasks, checklist, v1-4-2, native-widgets, nothing-os, master-prompt, clinical-export, parity]
+tags: [proyecto, tasks, checklist, v1-4-3, data-driven-widgets, recommendations-engine, snacks-catalog, master-prompt-trigger]
 ---
 
-# 📋 Checklist Maestro de Tareas de Agentes (v1.4.2)
+# 📋 Checklist Maestro de Tareas de Agentes (v1.4.3)
 
-> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.4.2. Cada tarea completada se marca con `[x]`.
+> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.4.3. Cada tarea completada se marca con `[x]`.
+
+---
+
+## 🌟 Iteración v1.4.3: Localización Data-Driven en Widgets Android (Sin values-xx/), Motor de Recomendaciones con Catálogos Modulares y Snacks Prácticos, y Disparador Ergonómico de Master Prompt
+
+### 🧭 1. Project-Planner (Master Tech Lead & Orquestador)
+- [x] (Project-Planner) Diseñar la arquitectura Data-Driven para widgets de Android (inyección dinámica desde Flutter SharedPreferences evitando carpetas `values-xx/` y redundancia de XMLs).
+- [x] (Project-Planner) Diseñar la descomposición modular del catálogo de recomendaciones por tipos de comida (< 300 LoC por catálogo: Desayuno, Almuerzo, Cena, Snack).
+- [x] (Project-Planner) Diseñar la experiencia de recarga y rotación dinámica ("Recargar ideas") con selector por categorías y snacks ligeros/prácticos.
+- [x] (Project-Planner) Diseñar el disparador visible y ergonómico del Master Prompt en `MetabolicSummaryBentoCard` con botón dedicado `[Ver / Configurar Prompt]`.
+- [x] (Project-Planner) Mantener la regla de oro de arquitectura estricta: 100% de archivos en `lib/` con `LOC < 300`.
+
+### 🗄️ 2. Backend-Architect (Lógica de Inyección SharedPreferences y Motor de Recomendación)
+- [x] (Backend-Architect) Crear `HomeWidgetStrings` mapeando el 100% de etiquetas (`label_*` y `widget_*`) desde `AppLocalizations` hacia SharedPreferences para Android.
+- [x] (Backend-Architect) Actualizar `HomeWidgetService` con `saveLocaleStrings()` y `syncAllWidgetsWithLocale()`, ampliando timeout a 4s para persistencia concurrente robusta.
+- [x] (Backend-Architect) Conectar `SettingsController.loadLocale()` y `setLocale()` para sincronizar inmediatamente los widgets de Android en cold-boot y al conmutar idioma.
+- [x] (Backend-Architect) Modularizar catálogo en `BreakfastDishCatalog`, `LunchDishCatalog`, `DinnerDishCatalog` y `SnackDishCatalog` (38 opciones en total).
+- [x] (Backend-Architect) Incorporar snacks prácticos y ligeros (barra de proteína, maní, frutos secos, yogur griego, frutas frescas, edamame, etc.) en lugar de platos complejos.
+- [x] (Backend-Architect) Corregir motor de filtrado y rotación en `RecommendationFilterEngine` eliminando reordenamiento post-shuffle que anulaba la variedad al recargar.
+
+### 🎨 3. Frontend-UI (Widgets Nativos Data-Driven, Selector de Categorías y Master Prompt Trigger)
+- [x] (Frontend-UI) Actualizar los 5 providers de Nothing OS (`FoodTrackerCompactWidgetProvider.kt`, `Wide`, `Streak`, `Actions`, `Fasting`) para leer dinámicamente `widgetData.getString("label_*")` con fallbacks en `R.string.*`.
+- [x] (Frontend-UI) Eliminar carpeta `values-en/` en Android y `strings_en.xml` en assets, manteniendo una única fuente XML para defaults de SO.
+- [x] (Frontend-UI) Garantizar 100% de paridad byte a byte entre `android/app/src/main/...` y `lib/assets/android_widgets/`.
+- [x] (Frontend-UI) Extraer componente táctil `MasterPromptBentoTrigger` con botón explícito `[Ver / Configurar]` e icono de apertura.
+- [x] (Frontend-UI) Implementar `CategorySelectorBar` y botón "Recargar ideas" en `WhatToEatSheet` para rotación inmediata de recomendaciones.
+- [x] (Frontend-UI) Registrar cadenas localizadas en `app_localizations_dashboard.dart` (`es` y `en`) para todas las nuevas interacciones.
+
+### 🚀 4. DevOps-Engineer (Control de Versión y Despliegue)
+- [x] (DevOps-Engineer) Incrementar versión a `1.4.3+1` en `pubspec.yaml` y `AppConstants.appVersion = '1.4.3'`.
+- [x] (DevOps-Engineer) Documentar la versión `[1.4.3] - 2026-10-10` en `artifacts/planning/changelog_v1.md`.
+
+### 🛡️ 5. Systems-Auditor (Pruebas Automatizadas y Quality Gate)
+- [x] (Systems-Auditor) Crear pruebas unitarias para `HomeWidgetStrings` verificando el 100% de claves `label_*` en español e inglés.
+- [x] (Systems-Auditor) Actualizar pruebas de `SettingsController` validando sincronización de widgets en `loadLocale()` y `setLocale()`.
+- [x] (Systems-Auditor) Actualizar pruebas unitarias y de widgets para catálogos y categorías de recomendaciones en `test/services/nutritional_recommendation_service_test.dart` y `test/widgets/recommendations_widgets_test.dart`.
+- [x] (Systems-Auditor) Crear pruebas para `MetabolicSummaryBentoCard` y su disparador de Master Prompt en `test/widgets/metabolic_summary_bento_card_test.dart`.
+- [x] (Systems-Auditor) Auditar cumplimiento estricto del límite modular: 100% de archivos en `lib/` con `LOC < 300` (0 archivos >= 300).
 
 ---
 

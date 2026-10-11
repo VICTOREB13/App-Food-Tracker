@@ -8,7 +8,9 @@ import 'package:food_tracker/models/daily_goals.dart';
 import 'package:food_tracker/models/user_profile.dart';
 import 'package:food_tracker/services/database_service.dart';
 import 'package:food_tracker/services/gemini_model_service.dart';
+import 'package:food_tracker/services/home_widget_service.dart';
 import 'package:food_tracker/services/secure_storage_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FakeFlutterSecureStorage extends Fake implements FlutterSecureStorage {
   final Map<String, String> data = {};
@@ -350,6 +352,37 @@ void main() {
       // Verify Master Prompt was updated in SecureStorage
       final storedPrompt = await SecureStorageService.instance.getMasterPrompt();
       expect(storedPrompt, contains('2200 kcal/día'));
+    });
+
+    test('setLocale persists app_locale_code and synchronizes HomeWidgetService', () async {
+      SharedPreferences.setMockInitialValues({});
+      expect(controller.currentLocale, isNull);
+
+      await controller.setLocale(const Locale('en'));
+      expect(controller.currentLocale, equals(const Locale('en')));
+      expect(HomeWidgetService.instance.currentLocale, equals(const Locale('en')));
+
+      await controller.setLocale(const Locale('es'));
+      expect(controller.currentLocale, equals(const Locale('es')));
+      expect(HomeWidgetService.instance.currentLocale, equals(const Locale('es')));
+    });
+
+    test('loadLocale loads stored locale and synchronizes HomeWidgetService', () async {
+      SharedPreferences.setMockInitialValues({'app_locale_code': 'en'});
+      expect(controller.currentLocale, isNull);
+
+      await controller.loadLocale();
+      expect(controller.currentLocale, equals(const Locale('en')));
+      expect(HomeWidgetService.instance.currentLocale, equals(const Locale('en')));
+    });
+
+    test('loadLocale with no stored locale defaults HomeWidgetService to es', () async {
+      SharedPreferences.setMockInitialValues({});
+      expect(controller.currentLocale, isNull);
+
+      await controller.loadLocale();
+      expect(controller.currentLocale, isNull);
+      expect(HomeWidgetService.instance.currentLocale, equals(const Locale('es')));
     });
   });
 }

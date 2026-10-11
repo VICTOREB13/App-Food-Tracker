@@ -5,6 +5,8 @@ import '../core/interfaces/nutritional_recommendation_service_interface.dart';
 import '../models/daily_goals.dart';
 import '../models/nutritional_recommendation.dart';
 import 'database_service.dart';
+import 'recommendations/recommendation_dish_catalog.dart';
+import 'recommendations/recommendation_filter_engine.dart';
 import 'secure_storage_service.dart';
 
 /// Intelligent recommendation engine evaluating macronutrient intake and suggesting meal strategies.
@@ -159,7 +161,11 @@ class NutritionalRecommendationService implements INutritionalRecommendationServ
   }
 
   @override
-  Future<TodayRecommendationPlan> getWhatShouldIEatToday({DateTime? date}) async {
+  Future<TodayRecommendationPlan> getWhatShouldIEatToday({
+    DateTime? date,
+    String? category,
+    bool shuffle = false,
+  }) async {
     final targetDate = date ?? DateTime.now();
     final todayMeals = await _db.getMealsForDay(targetDate);
     final goals = await _resolveGoals();
@@ -188,8 +194,10 @@ class NutritionalRecommendationService implements INutritionalRecommendationServ
     } else if (!loggedTypes.contains('Cena') && hour >= 18) {
       nextMeal = 'Cena';
     } else {
-      nextMeal = 'Snack / Merienda';
+      nextMeal = 'Snack';
     }
+
+    final activeCategory = RecommendationFilterEngine.normalizeCategory(category);
 
     final advice = remProt > 30 && remFat < 15
         ? 'Te faltan ${remProt.round()}g de proteína y poco margen de grasas (${remFat.round()}g). Enfócate en proteínas magras y claras.'
@@ -197,7 +205,15 @@ class NutritionalRecommendationService implements INutritionalRecommendationServ
             ? 'Te quedan solo ${remCal.round()} kcal. Elige opciones voluminosas de baja densidad como ensaladas con proteína.'
             : 'Tienes un margen de ${remCal.round()} kcal y ${remProt.round()}g de proteína. Distribúyelos con carbohidratos complejos.';
 
-    final candidates = _generateCandidateDishes(remCal, remProt);
+    final candidates = RecommendationFilterEngine.filterAndScore(
+      catalog: RecommendationDishCatalog.dishes,
+      remainingCal: remCal,
+      remainingProt: remProt,
+      category: activeCategory,
+      preferredMealType: nextMeal,
+      shuffle: shuffle,
+      limit: 6,
+    );
 
     return TodayRecommendationPlan(
       remainingCalories: remCal,
@@ -207,65 +223,17 @@ class NutritionalRecommendationService implements INutritionalRecommendationServ
       nextMealType: nextMeal,
       generalAdvice: advice,
       recommendedOptions: candidates,
+      selectedCategory: activeCategory,
     );
   }
 
   List<RecommendedDish> _generateCandidateDishes(double targetCal, double targetProt) {
-    final catalog = [
-      const RecommendedDish(
-        id: 'rec_chicken_quinoa',
-        name: 'Pechuga de Pollo con Quinoa y Espárragos',
-        mealType: 'Almuerzo',
-        calories: 420.0,
-        protein: 44.0,
-        carbs: 38.0,
-        fat: 7.0,
-        description: 'Pechuga a la plancha aderezada con hierbas, quinoa cocida y espárragos.',
-        ingredients: ['Pechuga de pollo (160g)', 'Quinoa cocida (120g)', 'Espárragos verdes (100g)', 'Aceite de oliva (3g)'],
-        whyRecommended: 'Alta densidad proteica con mínimo contenido graso, ideal para cerrar la brecha de proteína.',
-        fitScore: 98,
-      ),
-      const RecommendedDish(
-        id: 'rec_egg_whites_spinach',
-        name: 'Omelette de Claras con Espinacas y Tostada Integral',
-        mealType: 'Cena',
-        calories: 285.0,
-        protein: 30.0,
-        carbs: 22.0,
-        fat: 5.0,
-        description: '4 claras y 1 huevo entero con espinacas baby y pan de centeno integral.',
-        ingredients: ['Claras de huevo (120g)', 'Huevo entero (1 ud)', 'Espinacas frescas (80g)', 'Pan integral (40g)'],
-        whyRecommended: 'Muy bajo en grasa (5g) y digestión ligera, perfecto para cenar y saciarte.',
-        fitScore: 94,
-      ),
-      const RecommendedDish(
-        id: 'rec_greek_yogurt_berries',
-        name: 'Bowl Proteico de Yogur Griego y Arándanos',
-        mealType: 'Snack / Merienda',
-        calories: 210.0,
-        protein: 23.0,
-        carbs: 20.0,
-        fat: 3.0,
-        description: 'Yogur griego 0% materia grasa con frutos rojos antioxidantes y canela.',
-        ingredients: ['Yogur griego desnatado (200g)', 'Arándanos frescos (70g)', 'Semillas de chía (5g)', 'Canela al gusto'],
-        whyRecommended: 'Aporte rápido de proteína sin grasas saturadas con antioxidantes.',
-        fitScore: 92,
-      ),
-      const RecommendedDish(
-        id: 'rec_tuna_salad',
-        name: 'Ensalada Mediterránea de Atún al Natural y Lentejas',
-        mealType: 'Almuerzo',
-        calories: 380.0,
-        protein: 38.0,
-        carbs: 35.0,
-        fat: 6.0,
-        description: 'Lentejas cocidas, atún al natural, tomate cherry, pepino y vinagreta suave.',
-        ingredients: ['Atún al natural (120g)', 'Lentejas cocidas (100g)', 'Tomate cherry (80g)', 'Pepino (60g)', 'Aceite de oliva (4g)'],
-        whyRecommended: 'Excelente combinación de proteína limpia y fibra saciante para control de glucemia.',
-        fitScore: 96,
-      ),
-    ];
-
-    return catalog;
+    return RecommendationFilterEngine.filterAndScore(
+      catalog: RecommendationDishCatalog.dishes,
+      remainingCal: targetCal,
+      remainingProt: targetProt,
+      category: 'Todos',
+      limit: 4,
+    );
   }
 }

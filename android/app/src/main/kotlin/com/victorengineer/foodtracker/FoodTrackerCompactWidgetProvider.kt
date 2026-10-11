@@ -22,8 +22,21 @@ class FoodTrackerCompactWidgetProvider : HomeWidgetProvider() {
                 val caloriesConsumed = widgetData.getInt("calories_consumed", 0)
                 val caloriesTarget = widgetData.getInt("calories_target", 2000)
 
+                val labelCalories = widgetData.getString("label_calories", null)
+                    ?: widgetData.getString("widget_label_calories", null)
+                    ?: context.getString(R.string.widget_label_calories)
+                val caloriesSubtitle = widgetData.getString("label_calories_subtitle", null)
+                    ?: widgetData.getString("widget_calories_subtitle", null)
+                    ?: context.getString(R.string.widget_calories_subtitle)
+                val actionAdd = widgetData.getString("label_action_add", null)
+                    ?: widgetData.getString("widget_action_add", null)
+                    ?: context.getString(R.string.widget_action_add)
+
+                setTextViewText(R.id.widget_label_calories, labelCalories)
                 setTextViewText(R.id.widget_calories_left, "$caloriesLeft")
+                setTextViewText(R.id.widget_calories_subtitle, caloriesSubtitle)
                 setTextViewText(R.id.widget_calories_summary, "$caloriesConsumed / $caloriesTarget kcal")
+                setTextViewText(R.id.widget_btn_add_text, actionAdd)
 
                 // PendingIntent to launch app into manual food entry
                 val pendingIntent = HomeWidgetLaunchIntent.getActivity(

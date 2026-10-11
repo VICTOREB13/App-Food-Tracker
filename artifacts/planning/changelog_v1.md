@@ -18,6 +18,33 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [1.4.3] - 2026-10-10
+
+La versión v1.4.3 introduce la arquitectura de localización Data-Driven para los widgets de escritorio Android de Nothing OS (inyección dinámica desde Flutter eliminando carpetas calificadoras `values-xx/` y redundancia XML), renueva sustancialmente el motor de recomendaciones nutricionales mediante catálogos modulares desacoplados con soporte de categorías y snacks prácticos/ligeros (rotación real y botón de recarga de ideas), y mejora la accesibilidad del visor/editor del Master Prompt con un disparador táctil explícito y ergonómico.
+
+### Added
+- **Localización Data-Driven en Widgets Android (Sin `values-xx/`):**
+  - Mapeo dinámico completo en `HomeWidgetStrings` exportando 28 claves con prefijos `label_*` y `widget_*` hacia los SharedPreferences de Android según el idioma activo (`es` / `en`) de `AppLocalizations`.
+  - Inyección reactiva automática en `SettingsController.loadLocale()` (arranque en frío) y `SettingsController.setLocale()` (cambio en caliente).
+  - Aumento de timeout preventivo a 4 segundos en `HomeWidgetService.saveLocaleStrings()` para persistencia masiva concurrente sin cuellos de botella.
+- **Motor de Recomendaciones Modular por Categorías y Snacks Prácticos:**
+  - Descomposición modular de catálogos en 4 submódulos estrictos (< 300 LoC): `BreakfastDishCatalog` (9 platos), `LunchDishCatalog` (9 platos), `DinnerDishCatalog` (9 platos) y `SnackDishCatalog` (11 snacks prácticos como barritas de proteína, maní, frutos secos, yogur griego, frutas frescas, semillas y edamame).
+  - Selector por categorías de comida (`CategorySelectorBar`) en la hoja `WhatToEatSheet` ("Todos", "Desayuno", "Almuerzo", "Cena", "Snack").
+  - Botón de refresco interactivo ("Recargar ideas") con rotación dinámica y ordenamiento aleatorio con desempate de fit score en `RecommendationFilterEngine`.
+- **Disparador Ergonómico de Master Prompt (`MasterPromptBentoTrigger`):**
+  - Extracción y diseño de disparador visual con botón explícito `[Ver / Configurar]` e icono `Icons.tune_rounded`, permitiendo abrir `MasterPromptBottomSheet` tanto pulsando el botón como cualquier parte de la tarjeta Bento en la pantalla de Perfil.
+
+### Changed
+- **Eliminación de Directorios `values-xx/` en Android:**
+  - Purgadas las carpetas `android/app/src/main/res/values-en/` y el archivo `lib/assets/android_widgets/strings_en.xml`. Los widgets nativos de Android resuelven sus textos desde `widgetData.getString("label_*")` conservando una única base XML en `values/strings.xml` para valores por defecto del sistema.
+- **Paridad Byte a Byte en Assets de Android:**
+  - 100% de paridad y sincronización entre los providers Kotlin y layouts XML en `android/app/src/main/...` y `lib/assets/android_widgets/`.
+- **Actualización de Versión de la Aplicación:**
+  - Incrementado a `1.4.3` en `AppConstants.appVersion` (`lib/core/constants/app_constants.dart`).
+  - Incrementado a `1.4.3+1` en `pubspec.yaml`.
+
+---
+
 ## [1.4.2] - 2026-10-10
 
 La versión v1.4.2 eleva la experiencia del usuario y la integración con el sistema operativo incorporando un conjunto completo de widgets de escritorio nativos para Android con lenguaje visual Nothing OS (matriz de puntos, indicadores monocromáticos y acentos rojos translúcidos), rediseña la gestión del Master Prompt del perfil metabólico en una hoja inferior modal dedicada con pestañas de vista previa y edición, soluciona desajustes visuales y saltos de layout en la exportación clínica añadiendo apertura y compartición directa mediante Share Sheet del sistema, y erradica inconsistencias de colorimetría y sincronización en segundo plano.

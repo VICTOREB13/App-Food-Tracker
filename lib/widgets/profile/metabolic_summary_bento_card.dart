@@ -7,7 +7,9 @@ import '../../services/metabolic_calculator.dart';
 import '../../services/secure_storage_service.dart';
 import '../../services/theme_manager.dart';
 import '../common/ve_card.dart';
+import 'master_prompt_bento_trigger.dart';
 import 'master_prompt_bottom_sheet.dart';
+import 'metabolic_stat_tile.dart';
 
 class MetabolicSummaryBentoCard extends StatefulWidget {
   final UserProfile? profile;
@@ -154,9 +156,9 @@ class _MetabolicSummaryBentoCardState extends State<MetabolicSummaryBentoCard> {
           // Two Bento Tiles: BMR & TDEE
           Row(
             children: [
-              Expanded(child: _buildStatTile(context, l10n.bmrAtRestLabel, '${profile.bmr.toStringAsFixed(0)} kcal')),
+              Expanded(child: MetabolicStatTile(label: l10n.bmrAtRestLabel, value: '${profile.bmr.toStringAsFixed(0)} kcal')),
               const SizedBox(width: 10),
-              Expanded(child: _buildStatTile(context, l10n.tdeeTotalExpenseLabel, '${profile.tdee.toStringAsFixed(0)} kcal')),
+              Expanded(child: MetabolicStatTile(label: l10n.tdeeTotalExpenseLabel, value: '${profile.tdee.toStringAsFixed(0)} kcal')),
             ],
           ),
           const SizedBox(height: 14),
@@ -182,76 +184,24 @@ class _MetabolicSummaryBentoCardState extends State<MetabolicSummaryBentoCard> {
           // Macro Breakdown 3 Cards
           Row(
             children: [
-              Expanded(child: _buildMacroBadge(l10n.protein, profile.targetProtein, protCals, AppColors.protein)),
+              Expanded(child: MetabolicMacroBadge(label: l10n.protein, grams: profile.targetProtein, calories: protCals, color: AppColors.protein)),
               const SizedBox(width: 8),
-              Expanded(child: _buildMacroBadge(l10n.carbs, profile.targetCarbs, carbCals, AppColors.carbs)),
+              Expanded(child: MetabolicMacroBadge(label: l10n.carbs, grams: profile.targetCarbs, calories: carbCals, color: AppColors.carbs)),
               const SizedBox(width: 8),
-              Expanded(child: _buildMacroBadge(l10n.fat, profile.targetFat, fatCals, AppColors.fat)),
+              Expanded(child: MetabolicMacroBadge(label: l10n.fat, grams: profile.targetFat, calories: fatCals, color: AppColors.fat)),
             ],
           ),
           // Master Prompt Section
           const SizedBox(height: 14),
           const Divider(),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  const Icon(Icons.psychology_outlined, size: 18, color: AppColors.primaryLight),
-                  const SizedBox(width: 6),
-                  Text(
-                    l10n.multimodalMasterPrompt,
-                    style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primaryLight),
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.copy_rounded, size: 18, color: AppColors.primaryLight),
-                    tooltip: l10n.shareReportAction,
-                    padding: const EdgeInsets.all(4),
-                    constraints: const BoxConstraints(),
-                    onPressed: _copyPrompt,
-                  ),
-                  const SizedBox(width: 12),
-                  IconButton(
-                    icon: const Icon(Icons.open_in_full_rounded, size: 18, color: AppColors.primaryLight),
-                    tooltip: l10n.edit,
-                    padding: const EdgeInsets.all(4),
-                    constraints: const BoxConstraints(),
-                    onPressed: _openPromptBottomSheet,
-                  ),
-                ],
-              ),
-            ],
+          const SizedBox(height: 10),
+          MasterPromptBentoTrigger(
+            onTap: _openPromptBottomSheet,
+            onCopy: _copyPrompt,
           ),
         ],
       ),
     );
   }
-
-  Widget _buildStatTile(BuildContext context, String label, String value) => Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(color: AppColors.surfaceSubtle(context), borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.border(context))),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(label, style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary(context))),
-          const SizedBox(height: 4),
-          Text(value, style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary(context))),
-        ]),
-      );
-
-  Widget _buildMacroBadge(String label, double grams, double calories, Color color) => Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(color: color.withValues(alpha: 0.10), borderRadius: BorderRadius.circular(8), border: Border.all(color: color.withValues(alpha: 0.30))),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w600, color: color)),
-          const SizedBox(height: 4),
-          Text('${grams.toStringAsFixed(0)}g', style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary(context))),
-          Text('${calories.toStringAsFixed(0)} kcal', style: GoogleFonts.inter(fontSize: 9.5, color: AppColors.textMuted(context))),
-        ]),
-      );
 }
 

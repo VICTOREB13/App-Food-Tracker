@@ -18,6 +18,24 @@ class FoodTrackerActionsWidgetProvider : HomeWidgetProvider() {
     ) {
         appWidgetIds.forEach { widgetId ->
             val views = RemoteViews(context.packageName, R.layout.food_tracker_widget_actions).apply {
+                val scanFoodText = widgetData.getString("label_action_scan_food", null)
+                    ?: widgetData.getString("widget_action_scan_food", null)
+                    ?: context.getString(R.string.widget_action_scan_food)
+                val barcodeText = widgetData.getString("label_action_barcode", null)
+                    ?: widgetData.getString("widget_action_barcode", null)
+                    ?: context.getString(R.string.widget_action_barcode)
+                val quickMealText = widgetData.getString("label_action_quick_meal", null)
+                    ?: widgetData.getString("widget_action_quick_meal", null)
+                    ?: context.getString(R.string.widget_action_quick_meal)
+                val waterText = widgetData.getString("label_action_water", null)
+                    ?: widgetData.getString("widget_action_water", null)
+                    ?: context.getString(R.string.widget_action_water)
+
+                setTextViewText(R.id.widget_action_scan_food_text, scanFoodText)
+                setTextViewText(R.id.widget_action_barcode_text, barcodeText)
+                setTextViewText(R.id.widget_action_quick_meal_text, quickMealText)
+                setTextViewText(R.id.widget_action_water_text, waterText)
+
                 // Deep link 1: Camera AI
                 val scanFoodIntent = HomeWidgetLaunchIntent.getActivity(
                     context,

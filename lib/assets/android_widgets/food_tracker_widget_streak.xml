@@ -10,9 +10,10 @@
 
     <!-- Header / Tracking Nothing OS -->
     <TextView
+        android:id="@+id/widget_streak_header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="RACHA ACTIVA"
+        android:text="@string/widget_streak_header"
         android:textSize="9sp"
         android:textStyle="bold"
         android:letterSpacing="0.12"
@@ -24,7 +25,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:text="🔥 1 DÍA"
+        android:text="🔥 0"
         android:textSize="22sp"
         android:textStyle="bold"
         android:textColor="@color/widget_text_primary" />
@@ -35,7 +36,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
-        android:text="HÁBITOS DIARIOS"
+        android:text="@string/widget_streak_subtitle"
         android:textSize="8sp"
         android:textStyle="bold"
         android:letterSpacing="0.1"
@@ -105,7 +106,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Consistencia Semanal"
+        android:text="@string/widget_streak_status"
         android:textSize="9sp"
         android:textColor="@color/widget_text_muted" />
 

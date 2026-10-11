@@ -61,5 +61,11 @@ abstract class AppLocalizationsEsDashboard extends AppLocalizationsEsCore {
   @override String errorRegisteringMeal(String error) => 'Error al registrar comida: $error';
   @override String suggestionsForNextMeal(String mealType) => 'Sugerencias para tu próxima comida: $mealType';
   @override String get quickWaterMealName => 'Agua (+250 ml)';
+  @override String get refreshIdeasAction => 'Recargar ideas';
+  @override String get categoryAll => 'Todos';
+  @override String get practicalSnackHint => 'Opciones prácticas, ligeras y sencillas para picar';
+  @override String get viewEditPromptAction => 'Ver / Configurar';
+  @override String get viewEditPromptSubtitle => 'Toca para ver o personalizar el prompt';
+  @override String get copyPromptAction => 'Copiar Master Prompt';
 }
 

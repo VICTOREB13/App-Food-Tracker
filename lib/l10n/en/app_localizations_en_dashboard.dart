@@ -61,5 +61,11 @@ abstract class AppLocalizationsEnDashboard extends AppLocalizationsEnCore {
   @override String errorRegisteringMeal(String error) => 'Error logging meal: $error';
   @override String suggestionsForNextMeal(String mealType) => 'Suggestions for your next meal: $mealType';
   @override String get quickWaterMealName => 'Water (+250 ml)';
+  @override String get refreshIdeasAction => 'Refresh ideas';
+  @override String get categoryAll => 'All';
+  @override String get practicalSnackHint => 'Practical, light, and convenient snack options';
+  @override String get viewEditPromptAction => 'View / Configure';
+  @override String get viewEditPromptSubtitle => 'Tap to view or customize prompt';
+  @override String get copyPromptAction => 'Copy Master Prompt';
 }
 

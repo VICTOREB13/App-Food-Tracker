@@ -34,10 +34,11 @@
                 android:textSize="18sp" />
 
             <TextView
+                android:id="@+id/widget_action_scan_food_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="CÁMARA IA"
+                android:text="@string/widget_action_scan_food"
                 android:textSize="8sp"
                 android:textStyle="bold"
                 android:letterSpacing="0.06"
@@ -63,10 +64,11 @@
                 android:textSize="18sp" />
 
             <TextView
+                android:id="@+id/widget_action_barcode_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="BARRAS"
+                android:text="@string/widget_action_barcode"
                 android:textSize="8sp"
                 android:textStyle="bold"
                 android:letterSpacing="0.06"
@@ -101,10 +103,11 @@
                 android:textSize="18sp" />
 
             <TextView
+                android:id="@+id/widget_action_quick_meal_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="RÁPIDA"
+                android:text="@string/widget_action_quick_meal"
                 android:textSize="8sp"
                 android:textStyle="bold"
                 android:letterSpacing="0.06"
@@ -130,10 +133,11 @@
                 android:textSize="18sp" />
 
             <TextView
+                android:id="@+id/widget_action_water_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="+250ML"
+                android:text="@string/widget_action_water"
                 android:textSize="8sp"
                 android:textStyle="bold"
                 android:letterSpacing="0.06"

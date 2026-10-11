@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:io' show Platform;
+import 'dart:ui' show Locale;
 import 'package:flutter/foundation.dart';
 import 'package:home_widget/home_widget.dart';
+import 'home_widget_strings.dart';
 
 /// Handler callback for deep links triggered from home widgets.
 typedef HomeWidgetDeepLinkHandler = void Function(Uri uri);
@@ -21,12 +23,21 @@ class HomeWidgetService {
   HomeWidgetDeepLinkHandler? _deepLinkHandler;
   StreamSubscription<Uri?>? _widgetClickedSubscription;
   bool _isInitialized = false;
+  Locale _currentLocale = const Locale('es');
+
+  /// Active locale currently utilized for widget string generation.
+  Locale get currentLocale => _currentLocale;
+
+  /// Updates active locale in memory.
+  void setActiveLocale(Locale locale) {
+    _currentLocale = locale;
+  }
 
   /// Whether the host platform supports Android/iOS native home widgets.
   static bool get isPlatformSupported =>
       !kIsWeb && (Platform.isAndroid || Platform.isIOS);
 
-  /// Initializes deep link listeners and registers app group id.
+  /// Initializes deep link listeners, app group id, and syncs initial localized strings.
   Future<void> init({HomeWidgetDeepLinkHandler? onDeepLink}) async {
     if (onDeepLink != null) {
       _deepLinkHandler = onDeepLink;
@@ -50,6 +61,15 @@ class HomeWidgetService {
     } catch (e) {
       debugPrint('HomeWidgetService: Failed to set app group id: $e');
     }
+
+    try {
+      final savedLocale = await HomeWidget.getWidgetData<String>('app_locale_code');
+      if (savedLocale != null && savedLocale.isNotEmpty) {
+        _currentLocale = Locale(savedLocale);
+      }
+    } catch (_) {}
+    await saveLocaleStrings();
+    await updateWidgets();
 
     try {
       final initialUri = await HomeWidget.initiallyLaunchedFromHomeWidget().timeout(
@@ -94,6 +114,30 @@ class HomeWidgetService {
     }
   }
 
+  /// Persists localized string resources to SharedPreferences for Android widgets.
+  Future<void> saveLocaleStrings([Locale? locale]) async {
+    if (!isPlatformSupported) return;
+    if (locale != null) {
+      _currentLocale = locale;
+    }
+    final strings = HomeWidgetStrings.fromLocale(_currentLocale);
+    try {
+      final futures = strings.toMap().entries.map(
+        (e) => HomeWidget.saveWidgetData<String>(e.key, e.value),
+      );
+      await Future.wait(futures).timeout(const Duration(seconds: 4));
+    } catch (e) {
+      debugPrint('HomeWidgetService: Failed saving widget locale strings: $e');
+    }
+  }
+
+  /// Re-syncs all native widgets with active locale strings and updates their UI.
+  Future<void> syncAllWidgetsWithLocale(Locale locale) async {
+    setActiveLocale(locale);
+    await saveLocaleStrings(locale);
+    await updateWidgets();
+  }
+
   /// Saves macro & calorie summary values into native widget storage.
   Future<void> saveSummaryData({
     required int caloriesConsumed,
@@ -134,6 +178,7 @@ class HomeWidgetService {
   }) async {
     if (!isPlatformSupported) return;
     try {
+      await saveLocaleStrings();
       await Future.wait([
         HomeWidget.saveWidgetData<bool>('fasting_active', isActive),
         HomeWidget.saveWidgetData<String>('fasting_time_formatted', timeFormatted),
@@ -189,6 +234,7 @@ class HomeWidgetService {
     final fConsumed = consumedFat.round();
     final fLeft = (targetFat - consumedFat).round().clamp(0, 9999);
 
+    await saveLocaleStrings();
     await saveSummaryData(
       caloriesConsumed: cConsumed,
       caloriesTarget: cTarget,
