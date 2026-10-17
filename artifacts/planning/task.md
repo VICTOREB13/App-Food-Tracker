@@ -11,6 +11,14 @@ tags: [proyecto, tasks, checklist, v1-4-3, data-driven-widgets, recommendations-
 
 > **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.4.3. Cada tarea completada se marca con `[x]`.
 
+## 🌟 Iteración v1.4.4: Integración de Identidad de Marca Oficial Victor Engineer
+
+### 🧭 1. Brand-Architect & Frontend-UI
+- [x] (Brand-Architect) Normalizar y extraer activos canónicos vectoriales oficiales (`ve-isotipo-red.svg`, `ve-isotipo-white.svg`, `ve-isotipo-dark.svg`).
+- [x] (Frontend-UI) Refactorizar `VeLogo` (`lib/widgets/common/ve_logo.dart`) solucionando el problema de contraste (isotipo blanco sobre contenedor carmesí y modo transparente).
+- [x] (Frontend-UI) Actualizar asset vectorial `lib/assets/images/icon.svg` y regenerar `app_icon.png` (fondo `#131210` e isotipo `#EF4444`) junto con mipmaps Android.
+- [x] (Frontend-UI) Migrar tokens de color corporativo de `0xFFDC2626` a `0xFFEF4444` en `theme_manager.dart` y recursos nativos.
+
 ---
 
 ## 🌟 Iteración v1.4.3: Localización Data-Driven en Widgets Android (Sin values-xx/), Motor de Recomendaciones con Catálogos Modulares y Snacks Prácticos, y Disparador Ergonómico de Master Prompt

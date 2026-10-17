@@ -1,13 +1,13 @@
 ---
 tipo: design_system
 proyecto: App_Food_Tracker
-version: v1.3.0
+version: v1.4.4
 estado: activo
-fecha: 2026-10-05
-tags: [proyecto, design-system, ui-ux, bento-grid, tokens, l10n, fasting-bento, microinteractions, in-app-updater, v1-3-0]
+fecha: 2026-10-17
+tags: [proyecto, design-system, ui-ux, bento-grid, tokens, l10n, fasting-bento, microinteractions, in-app-updater, v1-4-4]
 ---
 
-# 🎨 Especificación de Diseño: Victor Engineer - Food Tracker (v1.3.0)
+# 🎨 Especificación de Diseño: Victor Engineer - Food Tracker (v1.4.4)
 
 Documento maestro de interfaz de usuario (UI), experiencia de usuario (UX), sistema de tokens visuales y animaciones fluidas para la aplicación móvil y de escritorio **Victor Engineer - Food Tracker**.
 
@@ -18,7 +18,7 @@ Documento maestro de interfaz de usuario (UI), experiencia de usuario (UX), sist
 1. **Local-First & Cero Latencia:** Toda la navegación, lectura de historial y visualización de macros es inmediata (< 16 ms / 60-120 fps) mediante SQLite en modo WAL. La conectividad solo se usa durante la llamada de visión a Gemini Flash o al consultar la API de códigos de barras.
 2. **Claridad Visual Bento-Grid:** Densidad balanceada con tarjetas squircle (radio uniforme de 20 px), contraste suave y micro-indicadores visuales circulares (anillos de progreso).
 3. **Animaciones con Física Orgánica:** Transiciones elásticas (`Curves.easeOutBack`) inspiradas en microinteracciones táctiles modernas, acompañadas de respuesta háptica (`HapticFeedback.lightImpact`).
-4. **Identidad de Marca Victor Engineer:** Integración de los modos *Obsidian Zinc* (oscuro por defecto) y *Crisp Zinc* (claro), manteniendo el acento carmesí corporativo `#DC2626` complementado con una paleta funcional para macronutrientes.
+4. **Identidad de Marca Victor Engineer:** Integración de los modos *Obsidian Zinc* (oscuro por defecto) y *Crisp Zinc* (claro), manteniendo el acento carmesí corporativo `#EF4444` complementado con una paleta funcional para macronutrientes.
 5. **Cero Deprecaciones y API Moderna:** Migración absoluta de `.withOpacity(...)` a `.withValues(alpha: ...)`.
 
 ---
@@ -34,8 +34,8 @@ Documento maestro de interfaz de usuario (UI), experiencia de usuario (UX), sist
 * **Bordes y Divisores:** `#27272A` (Zinc 800, 1px con opacidad sutil)
 * **Texto Principal:** `#FAFAFA` (Zinc 50)
 * **Texto Secundario / Muted:** `#A1A1AA` (Zinc 400)
-* **Acento Primario (Victor Engineer):** `#DC2626` (Carmesí)
-* **Acento Hover / Activo:** `#EF4444` (Rojo 500)
+* **Acento Primario (Victor Engineer):** `#EF4444` (Carmesí Oficial)
+* **Acento Hover / Activo:** `#F87171` (Rojo 400)
 
 #### Tema Claro — Crisp Zinc
 * **Background Primario:** `#FAFAFA` (Zinc 50)
@@ -44,7 +44,7 @@ Documento maestro de interfaz de usuario (UI), experiencia de usuario (UX), sist
 * **Bordes y Divisores:** `#E4E4E7` (Zinc 200)
 * **Texto Principal:** `#09090B` (Zinc 950)
 * **Texto Secundario / Muted:** `#71717A` (Zinc 500)
-* **Acento Primario (Victor Engineer):** `#DC2626`
+* **Acento Primario (Victor Engineer):** `#EF4444`
 
 #### Paleta Semántica de Macronutrientes y Salud
 * **Calorías / Energía (Flame):** `#F97316` (Naranja fuego) / Contenedor: `#F973161A`
@@ -56,8 +56,12 @@ Documento maestro de interfaz de usuario (UI), experiencia de usuario (UX), sist
 
 ---
 
-### 2.2. Tipografía (Google Fonts)
+### 2.2. Tipografía y Marca
 
+* **Identidad de Marca & Logotipo (`Satoshi`):**
+  * Tipografía geométrica sans-serif moderna utilizada exclusivamente en el imagotipo y logotipo oficial "Victor Engineer".
+  * Pesos Canónicos: Bold (700) y Black (900) con tracking óptico negativo sutil (-0.02em).
+  * En Flutter se renderiza vectorialmente a través de `VeLogo` (`lib/widgets/common/ve_logo.dart`) mediante curvas Bézier canónicas y trazados SVG embebidos sin dependencias de fuentes externas del sistema operativo.
 * **Display & Métricas Numéricas (`Outfit`):**
   * Números calóricos principales: `Outfit`, Bold (700), 38–44 sp, `tabularFigures`.
   * Títulos de sección: `Outfit`, SemiBold (600), 18–22 sp.
@@ -119,7 +123,7 @@ Documento maestro de interfaz de usuario (UI), experiencia de usuario (UX), sist
 
 ## ⚡ 4. Speed-Dial Flotante y Coreografía de Microinteracciones
 
-1. **Estado Cerrado:** Botón circular con icono `+` y acento carmesí `#DC2626`.
+1. **Estado Cerrado:** Botón circular con icono `+` y acento carmesí `#EF4444`.
 2. **Apertura:** Rotación de 45° a cruz `✕` en 280 ms con `Curves.fastOutSlowIn`.
 3. **Despliegue del Grid:** Panel squircle con interpolación combinada de escala (`0.85 -> 1.0`) y rebote elástico `Curves.easeOutBack`.
 4. **Acciones 2x3:**

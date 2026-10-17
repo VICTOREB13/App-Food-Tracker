@@ -18,6 +18,19 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [1.4.4] - 2026-10-17
+
+### Fix: Logotipo Oficial Victor Engineer
+- **Identidad de Marca & Isotipo Canónico**:
+  - Refactorización de `VeLogo` (`lib/widgets/common/ve_logo.dart`) integrando el Isotipo oficial SVG canónico.
+  - Corrección de contraste: isotipo blanco sobre contenedor carmesí `AppColors.primary` y soporte de modo sin fondo (`isTransparent: true`) con isotipo carmesí para evitar que el logo desaparezca sobre fondos rojos.
+  - Actualización del asset vectorial `lib/assets/images/icon.svg` con el Isotipo oficial canónico.
+  - Generación de icono de aplicación maestro `app_icon.png` con fondo carbón `#131210` e isotipo `#EF4444`, y sincronización de mipmaps de Android (`ic_launcher.png`).
+- **Migración Cromática**:
+  - Actualización de los tokens de color primario corporativo de `0xFFDC2626` al carmesí oficial `#EF4444` (`primary`, `primaryLight`, `crimson`, `calories`, `secondaryContainer`, `colorScheme.primary`) en `lib/services/theme_manager.dart` y en `colors.xml` nativos de Android.
+
+---
+
 ## [1.4.3] - 2026-10-10
 
 La versión v1.4.3 introduce la arquitectura de localización Data-Driven para los widgets de escritorio Android de Nothing OS (inyección dinámica desde Flutter eliminando carpetas calificadoras `values-xx/` y redundancia XML), renueva sustancialmente el motor de recomendaciones nutricionales mediante catálogos modulares desacoplados con soporte de categorías y snacks prácticos/ligeros (rotación real y botón de recarga de ideas), y mejora la accesibilidad del visor/editor del Master Prompt con un disparador táctil explícito y ergonómico.

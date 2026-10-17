@@ -77,12 +77,12 @@ class AppColors {
   static Color textMuted(BuildContext context) =>
       isDark(context) ? const Color(0xFF71717A) : const Color(0xFFA1A1AA);
 
-  static const Color primary = Color(0xFFDC2626);
+  static const Color primary = Color(0xFFEF4444);
   static const Color primaryLight = Color(0xFFEF4444);
   static const Color primaryDark = Color(0xFF991B1B);
-  static const Color crimson = Color(0xFFDC2626);
+  static const Color crimson = Color(0xFFEF4444);
 
-  static const Color calories = Color(0xFFDC2626);
+  static const Color calories = Color(0xFFEF4444);
   static const Color caloriesFlame = Color(0xFFF97316);
   static const Color protein = Color(0xFF10B981);
   static const Color proteinCoral = Color(0xFFEF4444);
@@ -105,9 +105,9 @@ class AppTheme {
       brightness: Brightness.dark,
       scaffoldBackgroundColor: const Color(0xFF09090B),
       colorScheme: const ColorScheme.dark(
-        primary: Color(0xFFDC2626),
+        primary: Color(0xFFEF4444),
         secondary: Color(0xFF10B981),
-        secondaryContainer: Color(0x26DC2626),
+        secondaryContainer: Color(0x26EF4444),
         surface: Color(0xFF121215),
         error: Color(0xFFEF4444),
         onPrimary: Colors.white,
@@ -115,8 +115,8 @@ class AppTheme {
       ),
       chipTheme: ChipThemeData(
         backgroundColor: Colors.transparent,
-        selectedColor: const Color(0x26DC2626),
-        secondarySelectedColor: const Color(0x26DC2626),
+        selectedColor: const Color(0x26EF4444),
+        secondarySelectedColor: const Color(0x26EF4444),
         side: const BorderSide(color: Color(0xFF27272A)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         labelStyle: GoogleFonts.inter(fontSize: 12),
@@ -157,7 +157,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Color(0xFFDC2626), width: 1.5),
+          borderSide: const BorderSide(color: Color(0xFFEF4444), width: 1.5),
         ),
       ),
       snackBarTheme: SnackBarThemeData(
@@ -187,18 +187,18 @@ class AppTheme {
       brightness: Brightness.light,
       scaffoldBackgroundColor: const Color(0xFFFAFAFA),
       colorScheme: const ColorScheme.light(
-        primary: Color(0xFFDC2626),
+        primary: Color(0xFFEF4444),
         secondary: Color(0xFF10B981),
-        secondaryContainer: Color(0x26DC2626),
+        secondaryContainer: Color(0x26EF4444),
         surface: Color(0xFFFFFFFF),
-        error: Color(0xFFDC2626),
+        error: Color(0xFFEF4444),
         onPrimary: Colors.white,
         onSurface: Color(0xFF09090B),
       ),
       chipTheme: ChipThemeData(
         backgroundColor: Colors.transparent,
-        selectedColor: const Color(0x26DC2626),
-        secondarySelectedColor: const Color(0x26DC2626),
+        selectedColor: const Color(0x26EF4444),
+        secondarySelectedColor: const Color(0x26EF4444),
         side: const BorderSide(color: Color(0xFFE4E4E7)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         labelStyle: GoogleFonts.inter(fontSize: 12),
@@ -239,7 +239,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Color(0xFFDC2626), width: 1.5),
+          borderSide: const BorderSide(color: Color(0xFFEF4444), width: 1.5),
         ),
       ),
       snackBarTheme: SnackBarThemeData(
