@@ -1,15 +1,36 @@
 ---
 tipo: task_list
 proyecto: App_Food_Tracker
-iteracion: v1.4.3
+iteracion: v1.4.5
 estado: completado
-fecha: 2026-10-10
-tags: [proyecto, tasks, checklist, v1-4-3, data-driven-widgets, recommendations-engine, snacks-catalog, master-prompt-trigger]
+fecha: 2026-10-31
+tags: [proyecto, tasks, checklist, v1-4-5, archify, v9-architecture]
 ---
 
-# 📋 Checklist Maestro de Tareas de Agentes (v1.4.3)
+# 📋 Checklist Maestro de Tareas de Agentes (v1.4.5)
 
-> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.4.3. Cada tarea completada se marca con `[x]`.
+> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.4.5. Cada tarea completada se marca con `[x]`.
+
+## 🌟 Iteración v1.4.5: Arquitectura Archify v3.2, Normalización V9 de Artefactos y Exclusión de Metodología
+
+### 🧭 1. Project-Planner & Software-Architect
+- [x] (Project-Planner) Auditar y actualizar modelo de arquitectura Archify a v3.2 (`architecture_diagram.json` y `architecture_diagram.head.architecture.json`).
+- [x] (Project-Planner) Generar comparativa visual nativa de arquitectura (`architecture_diagram_diff.html`) y validar 28/28 comprobaciones.
+- [x] (Project-Planner) Compilar y entregar versión final showcase del diagrama de arquitectura (`architecture_diagram.html`) con 0 errores de composición y diagnóstico.
+- [x] (Project-Planner) Normalizar artefactos vivos en `artifacts/architecture/` erradicando `version` y `fecha` volátiles en favor de SSoT perpetuo.
+
+### 🛡️ 2. Systems-Auditor & Backend-Architect
+- [x] (Backend-Architect) Sincronizar contratos SDD en `api_spec.md` con rutas del código fuente (`GET /api/resource`).
+- [x] (Systems-Auditor) Auditar paridad SDD mediante `bun run lint:contracts` (0 faltantes, 0 huérfanos).
+- [x] (Systems-Auditor) Auditar presupuestos FIFO en heurísticas aprendidas (`learned_heuristics.md` <= 30 líneas y <= 10 reglas).
+- [x] (Systems-Auditor) Validar los 9 artefactos del proyecto con `bun run test:artifacts`.
+
+### 🌐 3. DevOps-Engineer & Systems-Auditor
+- [x] (DevOps-Engineer) Excluir metodología interna (.agents, AGENTS.md, Master Prompt.md, package.json, etc.) de Git via `.gitignore`.
+- [x] (DevOps-Engineer) Desindexar `.agents/` y `AGENTS.md` del tracking de Git (`git rm --cached`).
+- [x] (Systems-Auditor) Normalizar fin de línea y verificar paridad integral de artefactos antes de release v1.4.5.
+
+---
 
 ## 🌟 Iteración v1.4.4: Integración de Identidad de Marca Oficial Victor Engineer
 

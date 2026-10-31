@@ -3,7 +3,7 @@ tipo: changelog
 proyecto: App_Food_Tracker
 version: v1
 estado: activo
-fecha: 2026-10-07
+fecha: 2026-10-31
 tags: [proyecto, changelog, versiones]
 ---
 
@@ -18,7 +18,25 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [1.4.5] - 2026-10-31
+
+### Architecture & Localization Standardization
+- **Archify Architecture Model v3.2 & Visual Diff**:
+  - Actualización del diagrama de arquitectura Archify a la versión 1.4.5 con verificación showcase (0 errores de composición y diagnóstico).
+  - Modelado de nuevos componentes: `ClinicalExport` (PDF/Excel), `Recommendations` (déficit y catálogos), `In-App Updater` y `GitHub Releases OTA`.
+  - Generación de comparativa visual nativa de diff arquitectónico (`architecture_diagram_diff.html`).
+- **Normalización de Artefactos V9 (Harness³)**:
+  - Política de Artefactos Vivos perpetuos en `artifacts/architecture/`: eliminación de versión y fecha volátiles en frontmatters.
+  - Sincronización estricta de contratos SDD en `api_spec.md` con 100% de paridad (`bun run lint:contracts`).
+  - Validación automatizada canónica de 9 artefactos y 6 heurísticas FIFO (`bun run validate`).
+- **Exclusión de Metodología de Git**:
+  - Blindaje y exclusión de `.agents/`, `AGENTS.md` y tooling interno del repositorio Git via `.gitignore`.
+  - Preservación íntegra de artefactos vivos y sincronización continua con Obsidian Vault.
+
+---
+
 ## [1.4.4] - 2026-10-17
+
 
 ### Fix: Logotipo Oficial Victor Engineer
 - **Identidad de Marca & Isotipo Canónico**:

@@ -1,16 +1,16 @@
 ---
 tipo: audit_report
 proyecto: App_Food_Tracker
-iteracion: v1.4.3
+iteracion: v1.4.5
 veredicto: PASS
 estado: activo
-fecha: 2026-10-10
-tags: [proyecto, audit, quality-gate, v1-4-3, data-driven-widgets, recommendations-engine, snacks-catalog, master-prompt-trigger, loc-strict]
+fecha: 2026-10-31
+tags: [proyecto, audit, quality-gate, v1-4-5, archify, v9-architecture, sdd]
 ---
 
-# 🛡️ Reporte de Auditoría Integral y Quality Gate (v1.4.3)
+# 🛡️ Reporte de Auditoría Integral y Quality Gate (v1.4.5)
 
-> **Systems-Auditor (Quality Gatekeeper):** Este documento contiene los resultados de la inspección técnica exhaustiva, auditoría de tipado y sintaxis, verificación de suites de pruebas automatizadas, auditoría modular de líneas de código (LoC < 300) y certificación de integridad técnica para la versión **v1.4.3** (Localización Data-Driven en Widgets Android sin `values-xx/`, Motor de Recomendaciones Modular con Snacks Prácticos y Disparador Ergonómico de Master Prompt) del proyecto **Victor Engineer - Food Tracker**.
+> **Systems-Auditor (Quality Gatekeeper):** Este documento certifica los resultados de la inspección técnica exhaustiva, auditoría de contratos SDD, validación de diagramas Archify v3.2, exclusión de metodología de Git y cumplimiento de la Arquitectura V9 (Harness³, SDD + TDD + ODD) para la versión **v1.4.5** del proyecto **Victor Engineer - Food Tracker**.
 
 ---
 
@@ -20,15 +20,13 @@ tags: [proyecto, audit, quality-gate, v1-4-3, data-driven-widgets, recommendatio
 =====================================================
           QUALITY GATE VERDICT: STATUS: PASS
 =====================================================
- [✓] Regla de Oro Arquitectónica (< 300 LoC): 100% de archivos en lib/ cumplen el límite (0 >= 300).
- [✓] Localización Data-Driven en Android: Cero carpetas values-xx/ en Android; inyección dinámica desde SharedPreferences.
- [✓] Paridad Byte a Byte: 100% de coincidencia entre providers/layouts de Android y lib/assets/android_widgets/.
- [✓] Sincronización Reactiva de Widgets: loadLocale() y setLocale() sincronizan inmediatamente los 5 widgets nativos.
- [✓] Motor de Recomendaciones Modular: 38 platos divididos en 4 catálogos modulares (Desayuno, Almuerzo, Cena, Snack).
- [✓] Snacks Prácticos y Ligeros: 11 opciones portables (barras de proteína, maní, frutos secos, yogur griego, etc.).
- [✓] Rotación Dinámica y Filtros: CategorySelectorBar ("Todos", "Desayuno", "Almuerzo", "Cena", "Snack") y botón "Recargar ideas".
- [✓] Disparador Ergonómico de Master Prompt: MasterPromptBentoTrigger con botón [Ver / Configurar] y área táctil completa.
- [✓] Versionado Canónico Sincronizado: AppConstants.appVersion = '1.4.3' y pubspec.yaml = 1.4.3+1.
+ [✓] Archify v3.2 Model & Visual Diff: 28/28 checks PASSED en compare architecture; 0 errores en finalize showcase.
+ [✓] Paridad de Contratos SDD (lint_contracts.ts): 1 contrato en spec, 1 en código, 0 faltantes, 0 huérfanos.
+ [✓] Auditoría de Artefactos V9: 9/9 artefactos vivos y deltas en conformidad estricta de esquemas YAML.
+ [✓] Presupuesto FIFO de Heurísticas: 6/6 archivos learned_heuristics.md conformes (<30 líneas, <10 reglas).
+ [✓] Exclusión de Metodología: .agents, AGENTS.md y tooling interno protegidos y excluidos de Git.
+ [✓] Clean Monolith (< 300 LoC): 100% de archivos en lib/ cumplen el límite de diseño.
+ [✓] Versionado Canónico: AppConstants.appVersion = '1.4.5' y pubspec.yaml = 1.4.5+1.
 =====================================================
 ```
 
@@ -37,35 +35,29 @@ tags: [proyecto, audit, quality-gate, v1-4-3, data-driven-widgets, recommendatio
 
 ---
 
-## 🔬 2. Auditoría Modular de Líneas de Código (`lib/` < 300 LoC)
+## 🔬 2. Auditoría de Artefactos V9 y Política Vivo vs. Delta
 
-- **Total archivos auditados en el repositorio (`lib/`):** 100% de archivos `.dart`.
-- **Violaciones detectadas (`LoC >= 300`):** **0 archivos** (Cero tolerancia satisfecha).
-- **Métricas exactas de archivos creados y modificados en v1.4.3:**
-  - `lib/controllers/settings_controller.dart`: 288 LoC (`< 300` ✓)
-  - `lib/core/constants/app_constants.dart`: 6 LoC (`< 300` ✓)
-  - `lib/services/home_widget_strings.dart`: 165 LoC (`< 300` ✓) [NUEVO]
-  - `lib/services/home_widget_service.dart`: 261 LoC (`< 300` ✓)
-  - `lib/services/recommendations/breakfast_dish_catalog.dart`: 137 LoC (`< 300` ✓) [NUEVO]
-  - `lib/services/recommendations/lunch_dish_catalog.dart`: 137 LoC (`< 300` ✓) [NUEVO]
-  - `lib/services/recommendations/dinner_dish_catalog.dart`: 137 LoC (`< 300` ✓) [NUEVO]
-  - `lib/services/recommendations/snack_dish_catalog.dart`: 163 LoC (`< 300` ✓) [NUEVO]
-  - `lib/services/recommendations/recommendation_dish_catalog.dart`: 80 LoC (`< 300` ✓) [NUEVO]
-  - `lib/services/recommendations/recommendation_filter_engine.dart`: 97 LoC (`< 300` ✓) [NUEVO]
-  - `lib/services/recommendations/recommendation_scoring_engine.dart`: 105 LoC (`< 300` ✓) [NUEVO]
-  - `lib/widgets/profile/master_prompt_bento_trigger.dart`: 140 LoC (`< 300` ✓) [NUEVO]
-  - `lib/widgets/profile/metabolic_stat_tile.dart`: 74 LoC (`< 300` ✓) [NUEVO]
-  - `lib/widgets/profile/metabolic_summary_bento_card.dart`: 207 LoC (`< 300` ✓)
-  - `lib/widgets/recommendations/category_selector_bar.dart`: 95 LoC (`< 300` ✓) [NUEVO]
-  - `lib/widgets/recommendations/recommendation_budget_summary.dart`: 115 LoC (`< 300` ✓) [NUEVO]
-  - `lib/widgets/recommendations/recommendation_dish_card.dart`: 142 LoC (`< 300` ✓) [NUEVO]
-  - `lib/widgets/recommendations/recommendation_sheet_header.dart`: 68 LoC (`< 300` ✓) [NUEVO]
-  - `lib/widgets/recommendations/what_to_eat_sheet.dart`: 144 LoC (`< 300` ✓)
+- **Artefactos Vivos Perpetuos (`artifacts/architecture/`):**
+  - `architecture.md`, `abstractions.md`, `api_spec.md`, `design_system.md` normalizados sin `version` ni `fecha` volátiles.
+  - Wikilinks limpios con prefijo `[[PRJ_App_Food_Tracker_...]]` sin esquemas `file:///`.
+- **Deltas de Ciclo:**
+  - `project_overview.md`, `implementation_plan.md`, `task.md`, `changelog_v1.md`, `audit_report.md` con fecha ISO obligatoria (`2026-10-31`).
+  - Plan v1.5.0 en `artifacts/planning/implementation_plan.md` preservado intacto.
 
 ---
 
-## 📱 3. Auditoría de Android Widgets y Data-Driven Architecture
+## 🌐 3. Auditoría de Exclusión de Metodología de Git
 
-- **Eliminación de `values-xx/`:** Confirmada la supresión de `android/app/src/main/res/values-en/` y `lib/assets/android_widgets/strings_en.xml`.
-- **Inyección SharedPreferences:** Todas las etiquetas consumidas por `RemoteViews` en Android se extraen con `widgetData.getString("label_*")` o `widgetData.getString("widget_*")` suministradas por Flutter.
-- **Paridad de Archivos:** Comparación byte a byte de los 5 providers Kotlin y los layouts XML entre `android/app/src/main/` y `lib/assets/android_widgets/`: **100% idénticos**.
+- **Desindexación de Metodología:** Directorio `.agents/` y archivo `AGENTS.md` desindexados del tracking de Git preservando su integridad en disco local.
+- **Configuración .gitignore:** Ignorados explícitamente `AGENTS.md`, `Master Prompt.md`, `package.json`, `bunfig.toml`, `.github/workflows/harness-ci.yml`.
+- **Higiene de Workflows:** Flujo de sincronización de artefactos a Obsidian (`sync-docs.yml`) verificado y workflow local `harness-ci.yml` descartado de la publicación.
+
+---
+
+## 🏗️ 4. Auditoría de Diagramas Archify (v3.2)
+
+- **Diagrama Base:** `artifacts/architecture/src/architecture_diagram.base.architecture.json` (v1.4.1).
+- **Diagrama Final:** `artifacts/architecture/src/architecture_diagram.json` (v1.4.5).
+- **Visual Diff Generado:** `artifacts/architecture/architecture_diagram_diff.html` (28/28 checks passed).
+- **Showcase Final Generado:** `artifacts/architecture/architecture_diagram.html` (calidad showcase validada).
+

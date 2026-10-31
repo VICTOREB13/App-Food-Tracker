@@ -1,11 +1,10 @@
 ---
 tipo: api_spec
 proyecto: App_Food_Tracker
-version: v1.4.2
 estado: activo
-fecha: 2026-10-10
-tags: [proyecto, api, backend, contratos, sqlite-v4, nothing-os, native-widgets, clinical-share, master-prompt, pure-dart-l10n]
+tags: [proyecto, api, backend, contratos, living-doc]
 ---
+
 
 # 📡 Especificación de Contrato de Datos, Esquema SQLite v4 y Servicios Backend (v1.4.2)
 
@@ -434,6 +433,21 @@ Para evitar alucinaciones autorregresivas y cuellos de botella de constrained gr
   - `Future<bool> shareFile(File file, {String? title})`: Inicia un chooser nativo de Android (`ACTION_SEND`) pasando la URI segura proporcionada por `FileProvider` con `FLAG_GRANT_READ_URI_PERMISSION`.
   - `Future<bool> openFile(File file)`: Inicia un intent `ACTION_VIEW` con tipo MIME resuelto automáticamente (`application/pdf`, `text/csv`, etc.) para visualización inmediata en la aplicación preferida por el usuario.
   - `String resolveMimeType(String filePath)`: Mapea extensiones de archivos clínicos a tipos MIME estándar.
+
+---
+
+## 🔌 12. Contratos de Rutas API & SDD (Spec-Driven Development)
+
+### GET /api/resource
+- **Descripción:** Endpoint de verificación de recursos y diagnóstico de integración del sistema.
+- **Autenticación / RBAC:** Interno / Diagnóstico.
+- **Respuesta (200 OK):**
+  ```json
+  {
+    "status": "success",
+    "data": []
+  }
+  ```
 
 
 

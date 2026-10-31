@@ -1,11 +1,10 @@
 ---
 tipo: abstracciones
 proyecto: App_Food_Tracker
-version: v1.4.3
 estado: activo
-fecha: 2026-10-10
-tags: [proyecto, arquitectura, abstracciones, backend, nothing-os, native-widgets, master-prompt, clinical-export, parity, pure-dart-l10n, data-driven-widgets, recommendation-catalogs]
+tags: [proyecto, arquitectura, abstracciones, backend, living-doc]
 ---
+
 
 # Abstracciones del Sistema y Arquitectura de Código: Victor Engineer - Food Tracker (v1.4.3)
 

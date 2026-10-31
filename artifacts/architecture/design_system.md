@@ -1,11 +1,10 @@
 ---
 tipo: design_system
 proyecto: App_Food_Tracker
-version: v1.4.4
 estado: activo
-fecha: 2026-10-17
-tags: [proyecto, design-system, ui-ux, bento-grid, tokens, l10n, fasting-bento, microinteractions, in-app-updater, v1-4-4]
+tags: [proyecto, design-system, ui-ux, design-tokens, living-doc]
 ---
+
 
 # 🎨 Especificación de Diseño: Victor Engineer - Food Tracker (v1.4.4)
 

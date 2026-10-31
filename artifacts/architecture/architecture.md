@@ -1,13 +1,12 @@
 ---
 tipo: arquitectura
 proyecto: App_Food_Tracker
-version: v1.4.3
 estado: activo
-fecha: 2026-10-10
 stack_principal: [Flutter, SQLite WAL v4, Google Gemini API, USDA FoodData Central, Open Food Facts, FlutterSecureStorage, GetIt, Flutter Localizations, HomeWidget, BackupNormalizer, NutritionalRecommendationService, GitHubReleasesUpdateService, MethodChannelAppInstaller, GeminiResilienceHelper, NotificationService, ClinicalPdfExportService, ClinicalShareService, DataDrivenHomeWidgets, ModularRecommendationCatalogs]
 diagrama_html: PRJ_App_Food_Tracker_architecture_diagram.html
-tags: [proyecto, arquitectura, tech-stack, archify, local-first, get-it, l10n, result-pattern, android-widgets, nothing-os, sqlite-v4, recommendations, saf-backup, auto-repair, in-app-updater, microinteractions, android-16, gemini-vision-precision, timeout-resilience, atomic-image-persistence, i18n-native, gemini-streaming, resumable-downloads, http-206, 16k-tokens, thinking-level-medium, dynamic-pacing, local-notifications, socket-resilience, privacy-storage, clinical-pdf, clinical-share, master-prompt, pure-dart-l10n, zero-fallbacks, data-driven-widgets, snacks-catalog]
+tags: [proyecto, arquitectura, tech-stack, archify, living-doc]
 ---
+
 
 # 🏗️ Arquitectura del Sistema: Victor Engineer - Food Tracker (v1.4.3)
 

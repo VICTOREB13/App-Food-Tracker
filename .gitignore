@@ -54,3 +54,29 @@ test_apks/
 # Temporary user screenshots & reference media
 Screenshot*.jpg
 *.mp4
+
+# Antigravity CLI & Metodologia Interna
+/_workspace/
+/.archify/
+/.agents/
+/scripts/
+/src/
+*.telemetry.db
+AGENTS.md
+Master Prompt.md
+package.json
+bunfig.toml
+.github/workflows/harness-ci.yml
+x18n.config.ts
+
+# Node / Bun
+/node_modules/
+
+# Archify temporary receipts
+*.delivery.json
+*.finalize.json
+*.finalize-summary.json
+*.browser-check.json
+*.receipt.json
+
+
