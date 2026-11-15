@@ -23,6 +23,10 @@ class BackupService {
   Future<List<File>> listAvailableBackups({String? customDirectoryPath}) =>
       DataBackupController.instance.listAvailableBackups(customDirectoryPath: customDirectoryPath);
 
+  /// Backwards compatibility alias for listAvailableBackups.
+  Future<List<File>> listBackups({String? customDirectoryPath}) =>
+      listAvailableBackups(customDirectoryPath: customDirectoryPath);
+
   /// Inspects a backup file and returns metadata preview map.
   Future<Map<String, dynamic>> inspectBackupFile(File file) async {
     final meta = await DataBackupController.instance.inspectBackupFile(file);
@@ -32,6 +36,10 @@ class BackupService {
   /// Restores database content directly from a physical `.json` file.
   Future<Map<String, int>> importFromFile(File file) =>
       DataBackupController.instance.restoreBackup(file: file);
+
+  /// Backwards compatibility alias for importFromFile.
+  Future<Map<String, int>> importBackupFromFile(File file) =>
+      importFromFile(file);
 
   /// Restores database content from raw JSON string with SQLite transaction guarantees.
   Future<Map<String, int>> importFromJsonString(String jsonContent) =>

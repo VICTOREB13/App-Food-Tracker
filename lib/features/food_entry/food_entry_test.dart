@@ -1,14 +1,9 @@
-import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/core/errors/failures.dart';
 import 'package:food_tracker/core/errors/result.dart';
 import 'package:food_tracker/core/interfaces/daos_interfaces.dart';
 import 'package:food_tracker/core/interfaces/dishware_dao_interface.dart';
 import 'package:food_tracker/core/interfaces/meal_template_dao_interface.dart';
-import 'package:food_tracker/core/ports/ai_vision_port.dart';
-import 'package:food_tracker/core/ports/nutrition_catalog_port.dart';
-import 'package:food_tracker/features/pantry_inventory/models/pantry_item.dart';
-import 'package:food_tracker/core/models/usda_food_item.dart';
 import 'food_entry.dart';
 
 class _FakeMealDao implements IMealDao {

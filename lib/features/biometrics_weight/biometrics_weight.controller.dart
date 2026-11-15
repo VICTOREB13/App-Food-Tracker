@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:food_tracker/core/di/service_locator.dart';
 import 'package:food_tracker/core/interfaces/daos_interfaces.dart';
 import 'package:food_tracker/core/ports/database_port.dart';
-import 'package:food_tracker/features/settings_profile/models/user_profile.dart';
 import 'package:food_tracker/core/database/database_service.dart';
 import 'package:food_tracker/features/biometrics_weight/services/metabolic_calculator.dart';
 import 'package:food_tracker/core/services/storage/secure_storage_service.dart';

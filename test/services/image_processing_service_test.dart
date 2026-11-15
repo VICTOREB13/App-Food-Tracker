@@ -496,7 +496,7 @@ void main() {
         mealType: 'Breakfast',
       );
       expect(june30Breakfasts.length, equals(2));
-      expect(june30Breakfasts.map((e) => e!.fileName).toList(), equals(['2026_06_30_B_01.jpg', '2026_06_30_B_02.jpg']));
+      expect(june30Breakfasts.map((e) => e.fileName).toList(), equals(['2026_06_30_B_01.jpg', '2026_06_30_B_02.jpg']));
 
       // Test listMealImages on real directory
       final listDir = Directory(p.join(tempTestDir.path, 'list_test'));

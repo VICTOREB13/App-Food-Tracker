@@ -4,9 +4,11 @@ import 'package:food_tracker/core/di/service_locator.dart';
 import 'package:food_tracker/core/interfaces/daos_interfaces.dart';
 import 'package:food_tracker/core/interfaces/dishware_dao_interface.dart';
 import 'package:food_tracker/core/interfaces/meal_template_dao_interface.dart';
+import 'package:food_tracker/core/models/usda_food_item.dart';
 import 'package:food_tracker/core/ports/ai_vision_port.dart';
 import 'package:food_tracker/core/ports/database_port.dart';
 import 'package:food_tracker/core/ports/nutrition_catalog_port.dart';
+import 'package:food_tracker/core/services/platform/home_widget_service.dart';
 import 'food_entry.model.dart';
 
 /// State management controller for the Food Entry vertical slice (< 300 LoC budget).

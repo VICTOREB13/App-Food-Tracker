@@ -14,8 +14,6 @@ import 'package:food_tracker/core/services/storage/secure_storage_service.dart';
 import 'package:food_tracker/core/services/platform/notification_service.dart';
 import 'package:food_tracker/features/food_entry/widgets/meal_analysis_pacing.dart';
 
-import 'package:food_tracker/core/models/analysis_task.dart';
-
 /// Background task orchestrator managing meal photo optimization, AI analysis, and retries.
 class AnalysisQueueService extends ChangeNotifier {
   static final AnalysisQueueService instance = AnalysisQueueService._();

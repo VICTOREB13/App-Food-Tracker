@@ -10,6 +10,7 @@ import 'package:food_tracker/core/ports/database_port.dart';
 import 'package:food_tracker/core/ports/secure_storage_port.dart';
 import 'package:food_tracker/core/services/platform/home_widget_service.dart';
 import 'package:food_tracker/core/services/storage/secure_storage_service.dart';
+import 'package:food_tracker/core/utils/streak_calculator.dart';
 import 'package:food_tracker/features/biometrics_weight/biometrics_weight.dart';
 import 'package:food_tracker/features/fasting_tracker/fasting_tracker.dart';
 import 'package:food_tracker/features/food_entry/models/meal.dart';

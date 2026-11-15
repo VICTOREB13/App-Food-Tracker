@@ -202,7 +202,7 @@ class SettingsProfileController extends ChangeNotifier {
         savedSelection: _state.selectedGeminiModel,
       );
       String? sel = _state.selectedGeminiModel;
-      if (sel == null || !_state.availableGeminiModels.any((m) => m?.name == sel)) sel = eff;
+      if (sel == null || !_state.availableGeminiModels.any((m) => m.name == sel)) sel = eff;
       _state = _state.copyWith(isLoadingModels: false, selectedGeminiModel: sel);
       notifyListeners();
     }
@@ -251,8 +251,8 @@ class SettingsProfileController extends ChangeNotifier {
     notifyListeners();
     try {
       if (_dbPort != null) {
-        await _dbPort!.executeVacuum();
-        _state = _state.copyWith(dbStats: await _dbPort!.getDatabaseStats());
+        await _dbPort.executeVacuum();
+        _state = _state.copyWith(dbStats: await _dbPort.getDatabaseStats());
       } else {
         await DatabaseService.instance.executeVacuum();
         _state = _state.copyWith(dbStats: await DatabaseService.instance.getDatabaseStats());
@@ -281,13 +281,13 @@ class SettingsProfileController extends ChangeNotifier {
   }
 
   Future<List<File>> listBackups({String? customDirectoryPath}) async =>
-      BackupService.instance.listBackups(customDirectoryPath: customDirectoryPath);
+      BackupService.instance.listAvailableBackups(customDirectoryPath: customDirectoryPath);
 
   Future<Map<String, int>> importBackup(String jsonContent) =>
       _runWithBackupSync(() => BackupService.instance.importFromJsonString(jsonContent));
 
   Future<Map<String, int>> importBackupFromFile(File file) =>
-      _runWithBackupSync(() => BackupService.instance.importBackupFromFile(file));
+      _runWithBackupSync(() => BackupService.instance.importFromFile(file));
 
   void notifyProfileUpdated() {
     loadProfile();
