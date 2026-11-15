@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:food_tracker/core/database/database_service.dart';
 import 'package:food_tracker/core/di/service_locator.dart';
 import 'package:food_tracker/core/interfaces/daos_interfaces.dart';
 import 'package:food_tracker/core/interfaces/dishware_dao_interface.dart';
@@ -6,17 +7,14 @@ import 'package:food_tracker/core/interfaces/meal_template_dao_interface.dart';
 import 'package:food_tracker/core/ports/ai_vision_port.dart';
 import 'package:food_tracker/core/ports/database_port.dart';
 import 'package:food_tracker/core/ports/nutrition_catalog_port.dart';
-import 'package:food_tracker/core/models/usda_food_item.dart';
-import 'package:food_tracker/core/database/database_service.dart';
-import 'package:food_tracker/core/services/platform/home_widget_service.dart';
 import 'food_entry.model.dart';
 
-/// State management controller for the Food Entry & Meal Management slice.
-/// Orchestrates AI vision, nutrition lookup, dishware calibration, and meal DAOs (<300 LoC).
+/// State management controller for the Food Entry vertical slice (< 300 LoC budget).
 class FoodEntryController extends ChangeNotifier {
   static FoodEntryController instance = FoodEntryController();
 
-    final IAiVisionPort? _aiVision;
+  final IDatabasePort? _dbPort;
+  final IAiVisionPort? _aiVision;
   final INutritionCatalogPort? _nutrition;
   final IMealDao _mealDao;
   final IDishwareDao _dishwareDao;
@@ -25,12 +23,31 @@ class FoodEntryController extends ChangeNotifier {
   FoodEntryState _state = FoodEntryState.initial;
 
   FoodEntryController({
-        IAiVisionPort? aiVisionPort,
+    IDatabasePort? databasePort,
+    IAiVisionPort? aiVisionPort,
     INutritionCatalogPort? nutritionCatalogPort,
     IMealDao? mealDao,
     IDishwareDao? dishwareDao,
     IMealTemplateDao? mealTemplateDao,
-  })  :   @visibleForTesting
+  })  : _dbPort = databasePort ?? (getIt.isRegistered<IDatabasePort>() ? getIt<IDatabasePort>() : null),
+        _aiVision = aiVisionPort ?? (getIt.isRegistered<IAiVisionPort>() ? getIt<IAiVisionPort>() : null),
+        _nutrition = nutritionCatalogPort ??
+            (getIt.isRegistered<INutritionCatalogPort>() ? getIt<INutritionCatalogPort>() : null),
+        _mealDao = mealDao ??
+            (databasePort?.mealDao ??
+                (getIt.isRegistered<IMealDao>() ? getIt<IMealDao>() : DatabaseService.instance.mealDao)),
+        _dishwareDao = dishwareDao ??
+            (databasePort?.dishwareDao ??
+                (getIt.isRegistered<IDishwareDao>()
+                    ? getIt<IDishwareDao>()
+                    : DatabaseService.instance.dishwareDao)),
+        _templateDao = mealTemplateDao ??
+            (databasePort?.mealTemplateDao ??
+                (getIt.isRegistered<IMealTemplateDao>()
+                    ? getIt<IMealTemplateDao>()
+                    : DatabaseService.instance.mealTemplateDao));
+
+  @visibleForTesting
   static void setMockInstance(FoodEntryController mock) => instance = mock;
 
   @visibleForTesting
@@ -44,6 +61,7 @@ class FoodEntryController extends ChangeNotifier {
   List<CalibratedDishware> get dishwareList => _state.dishwareList;
   CalibratedDishware? get defaultDishware => _state.defaultDishware;
   List<MealTemplate> get templates => _state.templates;
+  IDatabasePort? get dbPort => _dbPort;
   double get totalCalories => _state.totalCalories;
   double get totalProtein => _state.totalProtein;
   double get totalCarbs => _state.totalCarbs;

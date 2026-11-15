@@ -9,10 +9,6 @@ import 'package:food_tracker/features/biometrics_weight/models/weight_log.dart';
 import '../errors/failures.dart';
 import '../errors/result.dart';
 import '../interfaces/daos_interfaces.dart';
-import '../interfaces/dishware_dao_interface.dart';
-import '../interfaces/fasting_dao_interface.dart';
-import '../interfaces/meal_template_dao_interface.dart';
-
 /// Hexagonal port defining local persistence, database lifecycle, and domain DAOs.
 abstract interface class IDatabasePort {
   /// Raw database handle for transactional and low-level operations.

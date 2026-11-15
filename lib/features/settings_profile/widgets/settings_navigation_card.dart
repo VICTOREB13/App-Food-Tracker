@@ -113,7 +113,7 @@ class SettingsNavigationCard extends StatelessWidget {
             ),
             Icon(
               Icons.chevron_right_rounded,
-              color: AppColors.textTertiary(context),
+              color: AppColors.textMuted(context),
               size: 20,
             ),
           ],

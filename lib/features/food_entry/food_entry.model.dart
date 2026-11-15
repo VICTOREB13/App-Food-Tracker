@@ -1,9 +1,21 @@
 import 'package:flutter/foundation.dart';
+import 'package:food_tracker/features/food_entry/models/calibrated_dishware.dart';
+import 'package:food_tracker/features/food_entry/models/food_item.dart';
+import 'package:food_tracker/features/food_entry/models/meal.dart';
+import 'package:food_tracker/features/food_entry/models/meal_analysis_result.dart';
+import 'package:food_tracker/features/food_entry/models/meal_template.dart';
+import 'package:food_tracker/features/food_entry/models/meal_decomposer.dart';
+import 'package:food_tracker/features/food_entry/models/meal_image_file_info.dart';
+import 'package:food_tracker/features/food_entry/models/food_search_suggestion.dart';
+
 export 'package:food_tracker/features/food_entry/models/calibrated_dishware.dart';
 export 'package:food_tracker/features/food_entry/models/food_item.dart';
 export 'package:food_tracker/features/food_entry/models/meal.dart';
 export 'package:food_tracker/features/food_entry/models/meal_analysis_result.dart';
 export 'package:food_tracker/features/food_entry/models/meal_template.dart';
+export 'package:food_tracker/features/food_entry/models/meal_decomposer.dart';
+export 'package:food_tracker/features/food_entry/models/meal_image_file_info.dart';
+export 'package:food_tracker/features/food_entry/models/food_search_suggestion.dart';
 
 /// Semantic alias for food items within a meal slice.
 typedef MealItem = FoodItem;

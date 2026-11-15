@@ -1,3 +1,4 @@
+import 'package:food_tracker/features/pantry_inventory/models/pantry_item.dart';
 import 'package:flutter/foundation.dart';
 import 'package:food_tracker/l10n/app_localizations.dart';
 export 'package:food_tracker/features/pantry_inventory/models/pantry_item.dart';

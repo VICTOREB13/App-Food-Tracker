@@ -6,10 +6,6 @@ import 'package:food_tracker/core/services/theme/theme_manager.dart';
 import 'package:food_tracker/core/ui/components/ve_app_bar.dart';
 import 'package:food_tracker/core/ui/components/ve_card.dart';
 import 'package:food_tracker/features/dashboard/widgets/quick_meal_dialog.dart';
-import 'food_entry.controller.dart';
-import 'food_entry.model.dart';
-import 'meal_detail.view.dart';
-
 /// Hub view for Food Entry and Meal Management under Vertical Slice Architecture (<300 LoC).
 class FoodEntryView extends StatefulWidget {
   const FoodEntryView({super.key});

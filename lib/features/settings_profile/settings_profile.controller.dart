@@ -33,14 +33,9 @@ class SettingsProfileController extends ChangeNotifier {
     IUserProfileDao? userProfileDao,
     GeminiModelService? geminiModelService,
     ThemeManager? themeManager,
-  })  : _secureStorage = secureStoragePort ??
-            (getIt.isRegistered<ISecureStoragePort>()
-                ? getIt<ISecureStoragePort>()
-                : EncryptedStorageAdapter(service: SecureStorageService.instance)),
+  })  : _secureStorage = secureStoragePort ?? (getIt.isRegistered<ISecureStoragePort>() ? getIt<ISecureStoragePort>() : EncryptedStorageAdapter(service: SecureStorageService.instance)),
         _dbPort = databasePort ?? (getIt.isRegistered<IDatabasePort>() ? getIt<IDatabasePort>() : null),
-        _userProfileDao = userProfileDao ??
-            (databasePort?.userProfileDao ??
-                (getIt.isRegistered<IUserProfileDao>() ? getIt<IUserProfileDao>() : DatabaseService.instance.userProfileDao)),
+        _userProfileDao = userProfileDao ?? (databasePort?.userProfileDao ?? (getIt.isRegistered<IUserProfileDao>() ? getIt<IUserProfileDao>() : DatabaseService.instance.userProfileDao)),
         _geminiModelService = geminiModelService ?? GeminiModelService.instance,
         _themeManager = themeManager ?? ThemeManager.instance;
 
@@ -49,22 +44,16 @@ class SettingsProfileController extends ChangeNotifier {
   @visibleForTesting void setGeminiModelServiceForTesting(GeminiModelService s) => _geminiModelService = s;
 
   SettingsProfileState get state => _state;
-  UserProfile? get profile => _state.profile;
-  String? get geminiApiKey => _state.geminiApiKey;
-  bool get hasApiKey => _state.hasApiKey;
+  UserProfile? get profile => _state.profile; String? get geminiApiKey => _state.geminiApiKey;
+  bool get hasApiKey => _state.hasApiKey; bool get hasUsdaApiKey => _state.hasUsdaApiKey;
   String? get selectedGeminiModel => _state.selectedGeminiModel;
   String? get usdaApiKey => _state.usdaApiKey;
-  bool get hasUsdaApiKey => _state.hasUsdaApiKey;
   List<GeminiModelInfo> get availableGeminiModels => _state.availableGeminiModels;
-  bool get isLoadingModels => _state.isLoadingModels;
-  bool get isOnlineModels => _state.isOnlineModels;
+  bool get isLoadingModels => _state.isLoadingModels; bool get isOnlineModels => _state.isOnlineModels;
   DailyGoals get dailyGoals => _state.dailyGoals;
   Map<String, dynamic> get dbStats => _state.dbStats;
-  bool get isLoading => _state.isLoading;
-  bool get isSaving => _state.isSaving;
-  StorageMode get storageMode => _state.storageMode;
-  Locale? get currentLocale => _state.locale;
-  ThemeMode get themeMode => _state.themeMode;
+  bool get isLoading => _state.isLoading; bool get isSaving => _state.isSaving;
+  StorageMode get storageMode => _state.storageMode; Locale? get currentLocale => _state.locale; ThemeMode get themeMode => _state.themeMode;
 
   Future<void> init() async {
     _state = _state.copyWith(isLoading: true);
@@ -213,7 +202,7 @@ class SettingsProfileController extends ChangeNotifier {
         savedSelection: _state.selectedGeminiModel,
       );
       String? sel = _state.selectedGeminiModel;
-      if (sel == null || !_state.availableGeminiModels.any((m) => m.name == sel)) sel = eff;
+      if (sel == null || !_state.availableGeminiModels.any((m) => m?.name == sel)) sel = eff;
       _state = _state.copyWith(isLoadingModels: false, selectedGeminiModel: sel);
       notifyListeners();
     }
@@ -275,14 +264,13 @@ class SettingsProfileController extends ChangeNotifier {
   }
 
   Future<String> exportBackup() async => BackupService.instance.exportToJsonString();
-  Future<File> exportBackupToFile({String? customDirectoryPath}) async =>
-      BackupService.instance.exportToJsonFile(customDirectoryPath: customDirectoryPath);
+  Future<File> exportBackupToFile({String? customDirectoryPath}) => BackupService.instance.exportToJsonFile(customDirectoryPath: customDirectoryPath);
 
-  Future<Map<String, int>> importBackup(String jsonContent) async {
+  Future<T> _runWithBackupSync<T>(Future<T> Function() action) async {
     _state = _state.copyWith(isLoading: true);
     notifyListeners();
     try {
-      final res = await BackupService.instance.importFromJsonString(jsonContent);
+      final res = await action();
       final stats = await (_dbPort?.getDatabaseStats() ?? DatabaseService.instance.getDatabaseStats());
       _state = _state.copyWith(dbStats: stats);
       return res;
@@ -291,6 +279,15 @@ class SettingsProfileController extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<List<File>> listBackups({String? customDirectoryPath}) async =>
+      BackupService.instance.listBackups(customDirectoryPath: customDirectoryPath);
+
+  Future<Map<String, int>> importBackup(String jsonContent) =>
+      _runWithBackupSync(() => BackupService.instance.importFromJsonString(jsonContent));
+
+  Future<Map<String, int>> importBackupFromFile(File file) =>
+      _runWithBackupSync(() => BackupService.instance.importBackupFromFile(file));
 
   void notifyProfileUpdated() {
     loadProfile();

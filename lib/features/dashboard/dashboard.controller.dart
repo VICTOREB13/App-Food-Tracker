@@ -1,23 +1,22 @@
-import 'package:flutter/material.dart';
-import 'package:food_tracker/core/utils/streak_calculator.dart';
+import 'package:flutter/foundation.dart';
 import 'package:food_tracker/core/adapters/encrypted_storage_adapter.dart';
 import 'package:food_tracker/core/adapters/home_widget_sync_adapter.dart';
+import 'package:food_tracker/core/database/database_service.dart';
 import 'package:food_tracker/core/di/service_locator.dart';
 import 'package:food_tracker/core/interfaces/database_service_interface.dart';
+import 'package:food_tracker/core/models/daily_goals.dart';
 import 'package:food_tracker/core/ports/app_widget_sync_port.dart';
 import 'package:food_tracker/core/ports/database_port.dart';
 import 'package:food_tracker/core/ports/secure_storage_port.dart';
-import 'package:food_tracker/features/biometrics_weight/biometrics_weight.dart';
-import 'package:food_tracker/features/fasting_tracker/fasting_tracker.dart';
-import 'package:food_tracker/core/models/daily_goals.dart';
-import 'package:food_tracker/features/food_entry/models/meal.dart';
-import 'package:food_tracker/core/database/database_service.dart';
 import 'package:food_tracker/core/services/platform/home_widget_service.dart';
 import 'package:food_tracker/core/services/storage/secure_storage_service.dart';
+import 'package:food_tracker/features/biometrics_weight/biometrics_weight.dart';
+import 'package:food_tracker/features/fasting_tracker/fasting_tracker.dart';
+import 'package:food_tracker/features/food_entry/models/meal.dart';
 import 'dashboard.model.dart';
 
-/// Micro-MVC controller for the Dashboard vertical slice.
-/// Orchestrates daily intake, macro targets, streak tracking, native widget sync,
+/// State management controller for the primary Dashboard view.
+/// Coordinates meal timeline, caloric balance, macronutrient targets,
 /// and integrations across biometrics and fasting slices.
 class DashboardController extends ChangeNotifier {
   static DashboardController instance = DashboardController();
@@ -29,7 +28,8 @@ class DashboardController extends ChangeNotifier {
   static void resetInstance() => instance = DashboardController();
 
   final IDatabaseService _db;
-    final ISecureStoragePort _secureStorage;
+  final IDatabasePort? _dbPort;
+  final ISecureStoragePort _secureStorage;
   final IAppWidgetSyncPort _widgetSync;
   final BiometricsWeightController _biometrics;
   final FastingTrackerController _fasting;
@@ -38,13 +38,30 @@ class DashboardController extends ChangeNotifier {
 
   DashboardController({
     IDatabaseService? databaseService,
-        ISecureStoragePort? secureStoragePort,
+    IDatabasePort? databasePort,
+    ISecureStoragePort? secureStoragePort,
     IAppWidgetSyncPort? appWidgetSyncPort,
     BiometricsWeightController? biometricsController,
     FastingTrackerController? fastingController,
     DateTime? initialDate,
   })  : _db = databaseService ?? DatabaseService.instance,
-          DashboardState get state => _state;
+        _dbPort = databasePort ??
+            (getIt.isRegistered<IDatabasePort>() ? getIt<IDatabasePort>() : null),
+        _secureStorage = secureStoragePort ??
+            (getIt.isRegistered<ISecureStoragePort>()
+                ? getIt<ISecureStoragePort>()
+                : EncryptedStorageAdapter(service: SecureStorageService.instance)),
+        _widgetSync = appWidgetSyncPort ??
+            (getIt.isRegistered<IAppWidgetSyncPort>()
+                ? getIt<IAppWidgetSyncPort>()
+                : HomeWidgetSyncAdapter(service: HomeWidgetService.instance)),
+        _biometrics = biometricsController ?? BiometricsWeightController.instance,
+        _fasting = fastingController ?? FastingTrackerController.instance,
+        _state = initialDate != null
+            ? DashboardState(selectedDate: initialDate)
+            : DashboardState.initial;
+
+  DashboardState get state => _state;
   DateTime get selectedDate => _state.selectedDate;
   DailyCaloricBudget get budget => _state.budget;
   MacroBreakdown get macros => _state.macros;
@@ -55,6 +72,7 @@ class DashboardController extends ChangeNotifier {
   bool get isLoading => _state.isLoading;
   DailyGoals get dailyGoals => _state.goals;
   double get totalCalories => _state.budget.consumedCalories;
+  IDatabasePort? get dbPort => _dbPort;
   double get totalProtein => _state.macros.protein;
   double get totalCarbs => _state.macros.carbs;
   double get totalFat => _state.macros.fat;

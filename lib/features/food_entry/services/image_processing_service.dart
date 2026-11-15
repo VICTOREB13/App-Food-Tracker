@@ -1,3 +1,4 @@
+import 'package:food_tracker/features/food_entry/models/meal_image_file_info.dart';
 export 'package:food_tracker/features/food_entry/models/meal_image_file_info.dart';
 import 'dart:io';
 import 'dart:isolate';

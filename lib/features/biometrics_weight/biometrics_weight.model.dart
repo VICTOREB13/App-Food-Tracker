@@ -1,3 +1,4 @@
+import 'package:food_tracker/features/biometrics_weight/models/weight_log.dart';
 import 'package:flutter/foundation.dart';
 export 'package:food_tracker/features/biometrics_weight/models/weight_log.dart';
 
