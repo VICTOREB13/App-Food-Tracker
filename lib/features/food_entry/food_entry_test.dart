@@ -30,7 +30,7 @@ class _FakeMealDao implements IMealDao {
   @override Future<int> clearMealImagePath(String id) async => 1;
   @override Future<List<Meal>> getMealsOlderThanWithImages(DateTime cutoff) async => [];
   @override Future<Result<int, DatabaseFailure>> upsertMealResult(Meal m) async => const Result.ok(1);
-  @override Future<Result<Meal?, DatabaseFailure>> getMealByIdResult(String id) async => Result.ok(null);
+  @override Future<Result<Meal?, DatabaseFailure>> getMealByIdResult(String id) async => const Result.ok(null);
   @override Future<Result<List<Meal>, DatabaseFailure>> getMealsForDayResult(DateTime d) async => Result.ok(_meals);
   @override Future<Result<List<Meal>, DatabaseFailure>> getMealsByRangeResult(DateTime s, DateTime e) async => Result.ok(_meals);
 }
@@ -52,7 +52,7 @@ class _FakeDishwareDao implements IDishwareDao {
   @override Future<void> setDefaultDishware(String id) async { _defaultId = id; }
   @override Future<Result<int, DatabaseFailure>> insertDishwareResult(CalibratedDishware d) async => const Result.ok(1);
   @override Future<Result<List<CalibratedDishware>, DatabaseFailure>> getAllDishwareResult() async => Result.ok(_items);
-  @override Future<Result<CalibratedDishware?, DatabaseFailure>> getDefaultDishwareResult() async => Result.ok(null);
+  @override Future<Result<CalibratedDishware?, DatabaseFailure>> getDefaultDishwareResult() async => const Result.ok(null);
 }
 
 class _FakeMealTemplateDao implements IMealTemplateDao {

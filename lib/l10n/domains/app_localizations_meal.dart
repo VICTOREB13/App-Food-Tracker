@@ -123,6 +123,7 @@ abstract class AppLocalizationsMeal extends AppLocalizationsDashboard {
   String get scanMealPhotoSubtitle;
   String get scanBarcodeTitle;
   String get scanBarcodeSubtitle;
+  @override
   String get quickMealTitle;
   String get quickMealSubtitle;
   String get manualMealTitle;
