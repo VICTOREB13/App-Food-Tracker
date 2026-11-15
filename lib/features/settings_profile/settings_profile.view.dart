@@ -17,8 +17,6 @@ import 'package:food_tracker/features/settings_profile/widgets/settings_navigati
 import 'package:food_tracker/features/settings_profile/widgets/storage_mode_card.dart';
 import 'package:food_tracker/features/settings_profile/widgets/usda_api_key_card.dart';
 import 'settings_profile.controller.dart';
-import 'user_profile.view.dart';
-
 export 'user_profile.view.dart';
 
 /// Primary settings view in the Settings & Profile vertical slice.

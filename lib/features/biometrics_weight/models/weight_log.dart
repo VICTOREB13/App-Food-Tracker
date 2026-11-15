@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
-import 'model_sanitizer.dart';
+import 'package:food_tracker/core/models/model_sanitizer.dart';
 
 @immutable
 class WeightLog {

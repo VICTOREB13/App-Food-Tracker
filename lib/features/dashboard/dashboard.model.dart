@@ -2,8 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:food_tracker/core/models/daily_goals.dart';
 import 'package:food_tracker/features/food_entry/models/meal.dart';
 
-import 'package:food_tracker/core/models/daily_goals.dart';
-import 'package:food_tracker/features/food_entry/models/meal.dart';
 
 /// Breakdown of macronutrient intake and targets.
 @immutable

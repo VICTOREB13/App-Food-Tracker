@@ -1,7 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:food_tracker/features/fasting_tracker/models/fasting_log.dart';
-
-import 'package:food_tracker/features/fasting_tracker/models/fasting_log.dart';
+export 'package:food_tracker/features/fasting_tracker/models/fasting_log.dart';
 
 /// Predefined fasting protocols and schedule distributions.
 enum FastingProtocol {

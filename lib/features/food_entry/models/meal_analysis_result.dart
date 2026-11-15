@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'dart:math' as math;
-import 'food_item.dart';
-import 'json_repair_helper.dart';
+import 'package:food_tracker/features/food_entry/models/food_item.dart';
+import 'package:food_tracker/core/models/json_repair_helper.dart';
 import 'meal_decomposer.dart';
-import 'model_sanitizer.dart';
+import 'package:food_tracker/core/models/model_sanitizer.dart';
 
-export 'json_repair_helper.dart';
+export 'package:food_tracker/core/models/json_repair_helper.dart';
 export 'meal_decomposer.dart';
 
 class MealAnalysisResult {

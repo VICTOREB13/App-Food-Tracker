@@ -1,3 +1,4 @@
+export 'package:food_tracker/core/models/analysis_task.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';

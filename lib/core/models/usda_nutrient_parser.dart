@@ -1,4 +1,4 @@
-import 'model_sanitizer.dart';
+import 'package:food_tracker/core/models/model_sanitizer.dart';
 
 /// Robust nutrient parser for USDA FoodData Central payloads.
 /// Supports both flat (`nutrientId`, `value`) and nested (`nutrient.id`, `amount`) schemas.

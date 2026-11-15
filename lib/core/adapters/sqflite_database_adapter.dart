@@ -10,9 +10,6 @@ import 'package:food_tracker/core/database/database_service.dart';
 import '../errors/failures.dart';
 import '../errors/result.dart';
 import '../interfaces/daos_interfaces.dart';
-import '../interfaces/dishware_dao_interface.dart';
-import '../interfaces/fasting_dao_interface.dart';
-import '../interfaces/meal_template_dao_interface.dart';
 import '../ports/database_port.dart';
 
 /// Sqflite implementation adapter for the [IDatabasePort] hexagonal contract.

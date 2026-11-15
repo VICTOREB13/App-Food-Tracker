@@ -1,8 +1,8 @@
 import 'package:food_tracker/features/pantry_inventory/models/pantry_item.dart';
 import 'package:food_tracker/core/models/usda_food_item.dart';
-import 'package:food_tracker/features/food_entry/services/barcode_lookup_service.dart' show BarcodeLookupResult, BarcodeSource;
+import 'package:food_tracker/features/food_entry/services/barcode_lookup_service.dart' show BarcodeLookupResult;
 
-export 'package:food_tracker/features/food_entry/services/barcode_lookup_service.dart' show BarcodeLookupResult, BarcodeSource;
+export 'package:food_tracker/features/food_entry/services/barcode_lookup_service.dart' show BarcodeLookupResult;
 
 /// Hexagonal port for external nutritional catalogs and barcode lookup providers.
 abstract interface class INutritionCatalogPort {

@@ -21,7 +21,7 @@ class GeminiAiVisionAdapter implements IAiVisionPort {
     String? overrideModel,
     String? overrideMasterPrompt,
   }) async {
-    if (_providedService != null) return _providedService!;
+    if (_providedService != null) return _providedService;
 
     final apiKey = await _storage.getGeminiApiKey();
     if (apiKey == null || apiKey.trim().isEmpty) {

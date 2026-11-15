@@ -1,8 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:food_tracker/l10n/app_localizations.dart';
-import 'package:food_tracker/features/pantry_inventory/models/pantry_item.dart';
-
-import 'package:food_tracker/features/pantry_inventory/models/pantry_item.dart';
+export 'package:food_tracker/features/pantry_inventory/models/pantry_item.dart';
 
 /// Predefined pantry item categories.
 enum PantryCategory {

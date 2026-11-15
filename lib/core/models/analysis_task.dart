@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 import 'package:uuid/uuid.dart';
-import 'meal.dart';
+import 'package:food_tracker/features/food_entry/models/meal.dart';
 
 enum AnalysisStatus { queued, processing, completed, failed }
 

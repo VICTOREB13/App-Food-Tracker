@@ -29,8 +29,7 @@ class DashboardController extends ChangeNotifier {
   static void resetInstance() => instance = DashboardController();
 
   final IDatabaseService _db;
-  final IDatabasePort? _dbPort;
-  final ISecureStoragePort _secureStorage;
+    final ISecureStoragePort _secureStorage;
   final IAppWidgetSyncPort _widgetSync;
   final BiometricsWeightController _biometrics;
   final FastingTrackerController _fasting;
@@ -39,30 +38,13 @@ class DashboardController extends ChangeNotifier {
 
   DashboardController({
     IDatabaseService? databaseService,
-    IDatabasePort? databasePort,
-    ISecureStoragePort? secureStoragePort,
+        ISecureStoragePort? secureStoragePort,
     IAppWidgetSyncPort? appWidgetSyncPort,
     BiometricsWeightController? biometricsController,
     FastingTrackerController? fastingController,
     DateTime? initialDate,
   })  : _db = databaseService ?? DatabaseService.instance,
-        _dbPort = databasePort ??
-            (getIt.isRegistered<IDatabasePort>() ? getIt<IDatabasePort>() : null),
-        _secureStorage = secureStoragePort ??
-            (getIt.isRegistered<ISecureStoragePort>()
-                ? getIt<ISecureStoragePort>()
-                : EncryptedStorageAdapter(service: SecureStorageService.instance)),
-        _widgetSync = appWidgetSyncPort ??
-            (getIt.isRegistered<IAppWidgetSyncPort>()
-                ? getIt<IAppWidgetSyncPort>()
-                : HomeWidgetSyncAdapter(service: HomeWidgetService.instance)),
-        _biometrics = biometricsController ?? BiometricsWeightController.instance,
-        _fasting = fastingController ?? FastingTrackerController.instance,
-        _state = initialDate != null
-            ? DashboardState(selectedDate: initialDate)
-            : DashboardState.initial;
-
-  DashboardState get state => _state;
+          DashboardState get state => _state;
   DateTime get selectedDate => _state.selectedDate;
   DailyCaloricBudget get budget => _state.budget;
   MacroBreakdown get macros => _state.macros;

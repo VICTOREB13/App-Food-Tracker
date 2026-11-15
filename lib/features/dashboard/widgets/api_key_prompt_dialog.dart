@@ -20,7 +20,7 @@ void showApiKeyPromptDialog(BuildContext context) {
         ElevatedButton(
           onPressed: () {
             Navigator.of(ctx).pop();
-            Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SettingsScreen()));
+            Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SettingsProfileView()));
           },
           style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
           child: Text(l10n.goToSettings),

@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'model_sanitizer.dart';
+import 'package:food_tracker/core/models/model_sanitizer.dart';
 
 @immutable
 class DailyGoals {

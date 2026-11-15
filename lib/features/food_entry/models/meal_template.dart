@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:uuid/uuid.dart';
-import 'food_item.dart';
-import 'model_sanitizer.dart';
+import 'package:food_tracker/features/food_entry/models/food_item.dart';
+import 'package:food_tracker/core/models/model_sanitizer.dart';
 
 /// Immutable model representing a reusable meal template with items and micronutrients.
 class MealTemplate {

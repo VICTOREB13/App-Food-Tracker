@@ -1,3 +1,4 @@
+import 'package:food_tracker/core/adapters/sqflite_database_adapter.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
@@ -28,9 +29,7 @@ class DataBackupController extends ChangeNotifier {
 
   DataBackupController({IDatabasePort? databasePort})
       : _db = databasePort ??
-            (getIt.isRegistered<IDatabasePort>()
-                ? getIt<IDatabasePort>()
-                : DatabaseService.instance);
+            (getIt.isRegistered<IDatabasePort>() ? getIt<IDatabasePort>() : SqfliteDatabaseAdapter(databaseService: DatabaseService.instance));
 
   @visibleForTesting
   static void setMockInstance(DataBackupController mock) => instance = mock;

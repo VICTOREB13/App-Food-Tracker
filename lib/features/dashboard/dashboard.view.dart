@@ -169,14 +169,14 @@ class _DashboardViewState extends State<DashboardView> {
     ).recalculateFromItems([foodItem]);
 
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => MealDetailScreen(initialMeal: meal)),
+      MaterialPageRoute(builder: (_) => MealDetailView(initialMeal: meal)),
     );
   }
 
   void _openManualEntry({String? defaultType}) {
     final type = defaultType ?? ImageProcessingService.inferMealTypeByTime(_controller.selectedDate);
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => MealDetailScreen(defaultMealType: type)),
+      MaterialPageRoute(builder: (_) => MealDetailView(defaultMealType: type)),
     );
   }
 
@@ -244,7 +244,7 @@ class _DashboardViewState extends State<DashboardView> {
           MaterialPageRoute(builder: (_) => const MetricsScreen()),
         ),
         onSettingsTap: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const SettingsScreen()),
+          MaterialPageRoute(builder: (_) => const SettingsProfileView()),
         ),
       ),
       floatingActionButton: DashboardFabMenu(
@@ -270,11 +270,11 @@ class _DashboardViewState extends State<DashboardView> {
               onNextDay: _controller.goToNextDay,
               onToday: _controller.goToToday,
               onMealTap: (meal) => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => MealDetailScreen(initialMeal: meal)),
+                MaterialPageRoute(builder: (_) => MealDetailView(initialMeal: meal)),
               ),
               onAddMeal: (type) => _openManualEntry(defaultType: type),
               onOpenMeal: (meal) => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => MealDetailScreen(initialMeal: meal)),
+                MaterialPageRoute(builder: (_) => MealDetailView(initialMeal: meal)),
               ),
             ),
           ],

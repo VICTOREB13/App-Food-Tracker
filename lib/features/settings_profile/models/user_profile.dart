@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'daily_goals.dart';
-import 'model_sanitizer.dart';
-import 'weight_log.dart';
+import 'package:food_tracker/core/models/daily_goals.dart';
+import 'package:food_tracker/core/models/model_sanitizer.dart';
+import 'package:food_tracker/features/biometrics_weight/models/weight_log.dart';
 
 @immutable
 class UserProfile {

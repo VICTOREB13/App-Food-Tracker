@@ -261,9 +261,13 @@ class SettingsProfileController extends ChangeNotifier {
     _state = _state.copyWith(isLoading: true);
     notifyListeners();
     try {
-      final db = _dbPort ?? DatabaseService.instance;
-      await db.executeVacuum();
-      _state = _state.copyWith(dbStats: await db.getDatabaseStats());
+      if (_dbPort != null) {
+        await _dbPort!.executeVacuum();
+        _state = _state.copyWith(dbStats: await _dbPort!.getDatabaseStats());
+      } else {
+        await DatabaseService.instance.executeVacuum();
+        _state = _state.copyWith(dbStats: await DatabaseService.instance.getDatabaseStats());
+      }
     } finally {
       _state = _state.copyWith(isLoading: false);
       notifyListeners();

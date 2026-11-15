@@ -106,7 +106,6 @@ class HomeWidgetService {
   }
 
   /// Dispatches recognized widget deep links to the registered handler.
-  @visibleForTesting
   void handleDeepLink(Uri uri) {
     debugPrint('HomeWidgetService: Received deep link: $uri');
     if (uri.scheme == 'foodtracker') {

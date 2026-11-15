@@ -1,5 +1,5 @@
-import 'food_item.dart';
-import 'model_sanitizer.dart';
+import 'package:food_tracker/features/food_entry/models/food_item.dart';
+import 'package:food_tracker/core/models/model_sanitizer.dart';
 
 /// Helper to decompose composite meal descriptions into discrete FoodItem components
 /// with realistic volumetric weights and macronutrient proportions.

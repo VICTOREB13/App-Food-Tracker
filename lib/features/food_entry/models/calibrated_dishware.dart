@@ -1,5 +1,5 @@
 import 'package:uuid/uuid.dart';
-import 'model_sanitizer.dart';
+import 'package:food_tracker/core/models/model_sanitizer.dart';
 
 /// Immutable model representing calibrated dishware for computer-vision reference sizing.
 class CalibratedDishware {

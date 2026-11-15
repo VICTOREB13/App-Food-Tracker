@@ -1,7 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:food_tracker/features/biometrics_weight/models/weight_log.dart';
-
-import 'package:food_tracker/features/biometrics_weight/models/weight_log.dart';
+export 'package:food_tracker/features/biometrics_weight/models/weight_log.dart';
 
 /// Predefined time filtering intervals for weight analytics.
 enum WeightFilterRange {

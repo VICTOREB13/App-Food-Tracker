@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:food_tracker/l10n/app_localizations.dart';
 import 'package:food_tracker/features/food_entry/food_entry.dart';
-import 'package:food_tracker/features/settings_profile/settings_profile.dart';
 import 'package:food_tracker/features/pantry_inventory/pantry_inventory.dart';
 import 'package:food_tracker/features/settings_profile/settings_profile.dart';
 import 'package:food_tracker/core/services/theme/theme_manager.dart';
@@ -24,7 +23,7 @@ class SettingsNavigationCard extends StatelessWidget {
             title: l10n.navProfileTitle,
             subtitle: l10n.navProfileSubtitle,
             onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const UserProfileScreen()),
+              MaterialPageRoute(builder: (_) => const UserProfileView()),
             ),
           ),
           Divider(color: AppColors.border(context), height: 1),
@@ -46,7 +45,7 @@ class SettingsNavigationCard extends StatelessWidget {
             title: l10n.navPantryTitle,
             subtitle: l10n.navPantrySubtitle,
             onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const PantryScreen()),
+              MaterialPageRoute(builder: (_) => const PantryInventoryView()),
             ),
           ),
           Divider(color: AppColors.border(context), height: 1),
@@ -57,7 +56,7 @@ class SettingsNavigationCard extends StatelessWidget {
             title: l10n.navOnboardingTitle,
             subtitle: l10n.navOnboardingSubtitle,
             onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+              MaterialPageRoute(builder: (_) => const OnboardingView()),
             ),
           ),
         ],
@@ -73,13 +72,53 @@ class SettingsNavigationCard extends StatelessWidget {
     required String subtitle,
     required VoidCallback onTap,
   }) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: iconColor),
-      title: Text(title, style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 14)),
-      subtitle: Text(subtitle, style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary(context))),
-      trailing: const Icon(Icons.chevron_right, size: 20),
+    return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: iconColor, size: 20),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary(context),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12,
+                      color: AppColors.textSecondary(context),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textTertiary(context),
+              size: 20,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

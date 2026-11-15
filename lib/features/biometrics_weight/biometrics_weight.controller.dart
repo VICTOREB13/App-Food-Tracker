@@ -1,3 +1,4 @@
+import 'package:food_tracker/features/biometrics_weight/models/weight_log.dart';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:food_tracker/core/di/service_locator.dart';

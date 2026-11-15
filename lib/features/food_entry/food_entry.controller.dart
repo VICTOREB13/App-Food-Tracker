@@ -16,8 +16,7 @@ import 'food_entry.model.dart';
 class FoodEntryController extends ChangeNotifier {
   static FoodEntryController instance = FoodEntryController();
 
-  final IDatabasePort? _dbPort;
-  final IAiVisionPort? _aiVision;
+    final IAiVisionPort? _aiVision;
   final INutritionCatalogPort? _nutrition;
   final IMealDao _mealDao;
   final IDishwareDao _dishwareDao;
@@ -26,31 +25,12 @@ class FoodEntryController extends ChangeNotifier {
   FoodEntryState _state = FoodEntryState.initial;
 
   FoodEntryController({
-    IDatabasePort? databasePort,
-    IAiVisionPort? aiVisionPort,
+        IAiVisionPort? aiVisionPort,
     INutritionCatalogPort? nutritionCatalogPort,
     IMealDao? mealDao,
     IDishwareDao? dishwareDao,
     IMealTemplateDao? mealTemplateDao,
-  })  : _dbPort = databasePort ?? (getIt.isRegistered<IDatabasePort>() ? getIt<IDatabasePort>() : null),
-        _aiVision = aiVisionPort ?? (getIt.isRegistered<IAiVisionPort>() ? getIt<IAiVisionPort>() : null),
-        _nutrition = nutritionCatalogPort ??
-            (getIt.isRegistered<INutritionCatalogPort>() ? getIt<INutritionCatalogPort>() : null),
-        _mealDao = mealDao ??
-            (databasePort?.mealDao ??
-                (getIt.isRegistered<IMealDao>() ? getIt<IMealDao>() : DatabaseService.instance.mealDao)),
-        _dishwareDao = dishwareDao ??
-            (databasePort?.dishwareDao ??
-                (getIt.isRegistered<IDishwareDao>()
-                    ? getIt<IDishwareDao>()
-                    : DatabaseService.instance.dishwareDao)),
-        _templateDao = mealTemplateDao ??
-            (databasePort?.mealTemplateDao ??
-                (getIt.isRegistered<IMealTemplateDao>()
-                    ? getIt<IMealTemplateDao>()
-                    : DatabaseService.instance.mealTemplateDao));
-
-  @visibleForTesting
+  })  :   @visibleForTesting
   static void setMockInstance(FoodEntryController mock) => instance = mock;
 
   @visibleForTesting

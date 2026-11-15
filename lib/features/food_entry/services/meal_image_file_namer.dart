@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:food_tracker/features/food_entry/models/meal_image_file_info.dart';
 
-import 'package:food_tracker/features/food_entry/models/meal_image_file_info.dart';
 
 /// Helper handling file nomenclature, parsing, and directory querying for meal images.
 class MealImageFileNamer {

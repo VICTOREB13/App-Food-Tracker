@@ -1,3 +1,4 @@
+import 'package:food_tracker/features/settings_profile/settings_profile.controller.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'biometrics_weight.controller.dart';
@@ -129,7 +130,7 @@ class _MetricsScreenState extends State<MetricsScreen> {
                     child: CalorieComplianceBentoCard(
                       meals: _rangeMeals,
                       days: _selectedDays,
-                      goals: _mealController.dailyGoals,
+                      goals: SettingsProfileController.instance.dailyGoals,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -147,14 +148,14 @@ class _MetricsScreenState extends State<MetricsScreen> {
             // 4. Macro distribution bento card
             MacroDistributionBentoCard(
               meals: _rangeMeals,
-              goals: _mealController.dailyGoals,
+              goals: SettingsProfileController.instance.dailyGoals,
             ),
             const SizedBox(height: 14),
 
             // 5. Weekly nutritional digest card
             WeeklyDigestCard(
               meals: _rangeMeals,
-              goals: _mealController.dailyGoals,
+              goals: SettingsProfileController.instance.dailyGoals,
             ),
             const SizedBox(height: 14),
 

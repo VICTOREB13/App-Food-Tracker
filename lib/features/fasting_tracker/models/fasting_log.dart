@@ -1,5 +1,5 @@
 import 'package:uuid/uuid.dart';
-import 'model_sanitizer.dart';
+import 'package:food_tracker/core/models/model_sanitizer.dart';
 
 /// Immutable model representing an intermittent fasting session log.
 class FastingLog {

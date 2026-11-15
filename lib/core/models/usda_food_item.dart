@@ -1,6 +1,6 @@
-import 'food_item.dart';
-import 'model_sanitizer.dart';
-import 'pantry_item.dart';
+import 'package:food_tracker/features/food_entry/models/food_item.dart';
+import 'package:food_tracker/core/models/model_sanitizer.dart';
+import 'package:food_tracker/features/pantry_inventory/models/pantry_item.dart';
 import 'usda_nutrient_parser.dart';
 
 export 'usda_nutrient_parser.dart';

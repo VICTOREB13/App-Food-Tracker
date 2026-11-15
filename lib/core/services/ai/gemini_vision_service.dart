@@ -9,7 +9,6 @@ import 'package:food_tracker/core/services/ai/gemini_model_service.dart';
 import 'package:food_tracker/core/services/ai/gemini_resilience_helper.dart';
 import 'package:food_tracker/features/food_entry/services/image_processing_service.dart';
 
-import 'package:food_tracker/features/food_entry/models/meal_analysis_result.dart';
 
 class GeminiVisionService implements IVisionModelProvider {
   final String apiKey;
