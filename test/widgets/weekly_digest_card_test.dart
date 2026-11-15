@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/models/daily_goals.dart';
-import 'package:food_tracker/models/meal.dart';
-import 'package:food_tracker/widgets/metrics/weekly_digest_card.dart';
+import 'package:food_tracker/core/models/daily_goals.dart';
+import 'package:food_tracker/features/food_entry/models/meal.dart';
+import 'package:food_tracker/features/biometrics_weight/widgets/weekly_digest_card.dart';
 
 void main() {
   group('WeeklyDigestCard Widget Tests', () {

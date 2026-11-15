@@ -6,9 +6,9 @@ tags: [proyecto, api, backend, contratos, living-doc]
 ---
 
 
-# 📡 Especificación de Contrato de Datos, Esquema SQLite v4 y Servicios Backend (v1.4.2)
+# 📡 Especificación de Contrato de Datos, Esquema SQLite v4, Puertos & Adaptadores y Servicios Backend (v1.4.6)
 
-> **Backend-Architect:** Este artefacto define formalmente el esquema relacional de base de datos local SQLite v4, los índices B-Tree de cobertura, los modelos de dominio inmutables (Sentinel), los contratos de servicios internos (DAOs, Service Locator, Result Pattern, BackupNormalizer con auto-reparación, NotificationService, ClinicalPdfExportService, ClinicalShareService, Pure Dart AppLocalizations) y externos (Dynamic Gemini API con Streaming, Fallback Unario, IVisionModelProvider, 16k Tokens, Thinking Level MEDIUM, Descargas Resumibles HTTP 206 en GitHub Releases, HomeWidget Nothing OS Providers, USDA FoodData Central, Open Food Facts y Calculadora Metabólica).
+> **Backend-Architect:** Este artefacto define formalmente el esquema relacional de base de datos local SQLite v4, los índices B-Tree de cobertura, los modelos de dominio inmutables (Sentinel), los contratos de Puertos & Adaptadores Hexagonales (`DatabasePort`, `AiVisionPort`, `NutritionCatalogPort`, `SecureStoragePort`, `AppWidgetSyncPort`), los contratos de servicios internos (DAOs, Service Locator, Result Pattern, BackupNormalizer con auto-reparación, NotificationService, ClinicalPdfExportService, ClinicalShareService, Pure Dart AppLocalizations) y externos (Dynamic Gemini API con Streaming, Fallback Unario, IVisionModelProvider, 16k Tokens, Thinking Level MEDIUM, Descargas Resumibles HTTP 206 en GitHub Releases, HomeWidget Nothing OS Providers, USDA FoodData Central, Open Food Facts y Calculadora Metabólica).
 
 ---
 

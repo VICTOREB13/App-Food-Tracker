@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/core/interfaces/app_installer_service_interface.dart';
 import 'package:food_tracker/core/interfaces/app_update_service_interface.dart';
-import 'package:food_tracker/models/github_release_model.dart';
-import 'package:food_tracker/widgets/settings/in_app_update_dialog.dart';
+import 'package:food_tracker/core/models/github_release_model.dart';
+import 'package:food_tracker/features/settings_profile/widgets/in_app_update_dialog.dart';
 import 'package:http/http.dart' as http;
 
 class _MockUpdateService implements IAppUpdateService {

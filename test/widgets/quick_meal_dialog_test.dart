@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/models/meal.dart';
-import 'package:food_tracker/widgets/dashboard/quick_meal_dialog.dart';
+import 'package:food_tracker/features/food_entry/models/meal.dart';
+import 'package:food_tracker/features/dashboard/widgets/quick_meal_dialog.dart';
 
 void main() {
   group('QuickMealDialog Widget Tests', () {

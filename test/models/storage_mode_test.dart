@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/models/storage_mode.dart';
+import 'package:food_tracker/core/models/storage_mode.dart';
 
 void main() {
   group('StorageMode Tests', () {

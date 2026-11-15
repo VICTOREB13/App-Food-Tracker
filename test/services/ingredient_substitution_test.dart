@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/services/gemini_resilience_helper.dart';
+import 'package:food_tracker/core/services/ai/gemini_resilience_helper.dart';
 
 void main() {
   group('Ingredient Substitution Prompt Tests', () {

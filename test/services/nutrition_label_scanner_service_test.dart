@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/services/nutrition_label_scanner_service.dart';
+import 'package:food_tracker/core/services/nutrition/nutrition_label_scanner_service.dart';
 
 void main() {
   group('NutritionLabelScannerService JSON Parsing Tests', () {

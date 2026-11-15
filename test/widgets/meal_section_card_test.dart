@@ -1,7 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/models/meal.dart';
-import 'package:food_tracker/widgets/dashboard/meal_section_card.dart';
+import 'package:food_tracker/features/food_entry/models/meal.dart';
+import 'package:food_tracker/features/dashboard/widgets/meal_section_card.dart';
 
 void main() {
   group('MealSectionCard Widget Tests', () {

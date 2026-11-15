@@ -1,0 +1,261 @@
+import 'dart:async';
+import 'dart:io' show Platform;
+import 'dart:ui' show Locale;
+import 'package:flutter/foundation.dart';
+import 'package:home_widget/home_widget.dart';
+import 'package:food_tracker/core/services/platform/home_widget_strings.dart';
+
+/// Handler callback for deep links triggered from home widgets.
+typedef HomeWidgetDeepLinkHandler = void Function(Uri uri);
+
+/// Service orchestrating data synchronization and interaction with Android Native Home Widgets.
+class HomeWidgetService {
+  static final HomeWidgetService instance = HomeWidgetService._();
+  HomeWidgetService._();
+
+  static const String appGroupId = 'group.com.victorengineer.foodtracker';
+  static const String compactWidgetProvider = 'FoodTrackerCompactWidgetProvider';
+  static const String wideWidgetProvider = 'FoodTrackerWideWidgetProvider';
+  static const String streakWidgetProvider = 'FoodTrackerStreakWidgetProvider';
+  static const String actionsWidgetProvider = 'FoodTrackerActionsWidgetProvider';
+  static const String fastingWidgetProvider = 'FoodTrackerFastingWidgetProvider';
+
+  HomeWidgetDeepLinkHandler? _deepLinkHandler;
+  StreamSubscription<Uri?>? _widgetClickedSubscription;
+  bool _isInitialized = false;
+  Locale _currentLocale = const Locale('es');
+
+  /// Active locale currently utilized for widget string generation.
+  Locale get currentLocale => _currentLocale;
+
+  /// Updates active locale in memory.
+  void setActiveLocale(Locale locale) {
+    _currentLocale = locale;
+  }
+
+  /// Whether the host platform supports Android/iOS native home widgets.
+  static bool get isPlatformSupported =>
+      !kIsWeb && (Platform.isAndroid || Platform.isIOS);
+
+  /// Initializes deep link listeners, app group id, and syncs initial localized strings.
+  Future<void> init({HomeWidgetDeepLinkHandler? onDeepLink}) async {
+    if (onDeepLink != null) {
+      _deepLinkHandler = onDeepLink;
+    }
+
+    if (_isInitialized) return;
+    _isInitialized = true;
+
+    if (!isPlatformSupported) {
+      return;
+    }
+
+    try {
+      await HomeWidget.setAppGroupId(appGroupId).timeout(
+        const Duration(seconds: 2),
+        onTimeout: () {
+          debugPrint('HomeWidget setAppGroupId timeout');
+          return null;
+        },
+      );
+    } catch (e) {
+      debugPrint('HomeWidgetService: Failed to set app group id: $e');
+    }
+
+    try {
+      final savedLocale = await HomeWidget.getWidgetData<String>('app_locale_code');
+      if (savedLocale != null && savedLocale.isNotEmpty) {
+        _currentLocale = Locale(savedLocale);
+      }
+    } catch (_) {}
+    await saveLocaleStrings();
+    await updateWidgets();
+
+    try {
+      final initialUri = await HomeWidget.initiallyLaunchedFromHomeWidget().timeout(
+        const Duration(seconds: 2),
+        onTimeout: () => null,
+      );
+      if (initialUri != null) {
+        handleDeepLink(initialUri);
+      }
+    } catch (e) {
+      debugPrint('HomeWidgetService: Error checking initial launch uri: $e');
+    }
+
+    _widgetClickedSubscription?.cancel();
+    try {
+      _widgetClickedSubscription = HomeWidget.widgetClicked.listen(
+        (Uri? uri) {
+          if (uri != null) {
+            handleDeepLink(uri);
+          }
+        },
+        onError: (dynamic error) {
+          debugPrint('HomeWidgetService: Widget clicked listener error: $error');
+        },
+      );
+    } catch (e) {
+      debugPrint('HomeWidgetService: Failed to subscribe to widget clicked: $e');
+    }
+  }
+
+  /// Sets or updates the active deep link callback.
+  void setDeepLinkHandler(HomeWidgetDeepLinkHandler handler) {
+    _deepLinkHandler = handler;
+  }
+
+  /// Dispatches recognized widget deep links to the registered handler.
+  @visibleForTesting
+  void handleDeepLink(Uri uri) {
+    debugPrint('HomeWidgetService: Received deep link: $uri');
+    if (uri.scheme == 'foodtracker') {
+      _deepLinkHandler?.call(uri);
+    }
+  }
+
+  /// Persists localized string resources to SharedPreferences for Android widgets.
+  Future<void> saveLocaleStrings([Locale? locale]) async {
+    if (!isPlatformSupported) return;
+    if (locale != null) {
+      _currentLocale = locale;
+    }
+    final strings = HomeWidgetStrings.fromLocale(_currentLocale);
+    try {
+      final futures = strings.toMap().entries.map(
+        (e) => HomeWidget.saveWidgetData<String>(e.key, e.value),
+      );
+      await Future.wait(futures).timeout(const Duration(seconds: 4));
+    } catch (e) {
+      debugPrint('HomeWidgetService: Failed saving widget locale strings: $e');
+    }
+  }
+
+  /// Re-syncs all native widgets with active locale strings and updates their UI.
+  Future<void> syncAllWidgetsWithLocale(Locale locale) async {
+    setActiveLocale(locale);
+    await saveLocaleStrings(locale);
+    await updateWidgets();
+  }
+
+  /// Saves macro & calorie summary values into native widget storage.
+  Future<void> saveSummaryData({
+    required int caloriesConsumed,
+    required int caloriesTarget,
+    required int caloriesLeft,
+    required int proteinConsumed,
+    required int proteinLeft,
+    required int carbsConsumed,
+    required int carbsLeft,
+    required int fatConsumed,
+    required int fatLeft,
+    int streakCount = 0,
+  }) async {
+    if (!isPlatformSupported) return;
+    try {
+      await Future.wait([
+        HomeWidget.saveWidgetData<int>('calories_consumed', caloriesConsumed),
+        HomeWidget.saveWidgetData<int>('calories_target', caloriesTarget),
+        HomeWidget.saveWidgetData<int>('calories_left', caloriesLeft),
+        HomeWidget.saveWidgetData<int>('protein_consumed', proteinConsumed),
+        HomeWidget.saveWidgetData<int>('protein_left', proteinLeft),
+        HomeWidget.saveWidgetData<int>('carbs_consumed', carbsConsumed),
+        HomeWidget.saveWidgetData<int>('carbs_left', carbsLeft),
+        HomeWidget.saveWidgetData<int>('fat_consumed', fatConsumed),
+        HomeWidget.saveWidgetData<int>('fat_left', fatLeft),
+        HomeWidget.saveWidgetData<int>('streak_count', streakCount),
+      ]).timeout(const Duration(seconds: 2));
+    } catch (e) {
+      debugPrint('HomeWidgetService: Failed saving widget data: $e');
+    }
+  }
+
+  /// Synchronizes fasting state and timing into native widget storage.
+  Future<void> updateFastingData({
+    required bool isActive,
+    required String timeFormatted,
+    required int targetHours,
+  }) async {
+    if (!isPlatformSupported) return;
+    try {
+      await saveLocaleStrings();
+      await Future.wait([
+        HomeWidget.saveWidgetData<bool>('fasting_active', isActive),
+        HomeWidget.saveWidgetData<String>('fasting_time_formatted', timeFormatted),
+        HomeWidget.saveWidgetData<int>('fasting_target_hours', targetHours),
+      ]).timeout(const Duration(seconds: 2));
+      await HomeWidget.updateWidget(
+        name: fastingWidgetProvider,
+        androidName: fastingWidgetProvider,
+      ).timeout(const Duration(seconds: 2));
+    } catch (e) {
+      debugPrint('HomeWidgetService: Failed updating fasting widget: $e');
+    }
+  }
+
+  /// Notifies the Android widget subsystem to re-render all Nothing OS widgets.
+  Future<void> updateWidgets() async {
+    if (!isPlatformSupported) return;
+    try {
+      await Future.wait([
+        HomeWidget.updateWidget(name: compactWidgetProvider, androidName: compactWidgetProvider),
+        HomeWidget.updateWidget(name: wideWidgetProvider, androidName: wideWidgetProvider),
+        HomeWidget.updateWidget(name: streakWidgetProvider, androidName: streakWidgetProvider),
+        HomeWidget.updateWidget(name: actionsWidgetProvider, androidName: actionsWidgetProvider),
+        HomeWidget.updateWidget(name: fastingWidgetProvider, androidName: fastingWidgetProvider),
+      ]).timeout(const Duration(seconds: 2));
+    } catch (e) {
+      debugPrint('HomeWidgetService: Failed updating native widgets: $e');
+    }
+  }
+
+  /// Calculates rounded totals and syncs both data and UI for native widgets.
+  Future<void> updateFromDailyTotals({
+    required double consumedCalories,
+    required double targetCalories,
+    required double consumedProtein,
+    required double targetProtein,
+    required double consumedCarbs,
+    required double targetCarbs,
+    required double consumedFat,
+    required double targetFat,
+    int streakCount = 0,
+  }) async {
+    final cConsumed = consumedCalories.round();
+    final cTarget = targetCalories.round();
+    final cLeft = (targetCalories - consumedCalories).round().clamp(0, 99999);
+
+    final pConsumed = consumedProtein.round();
+    final pLeft = (targetProtein - consumedProtein).round().clamp(0, 9999);
+
+    final carbConsumed = consumedCarbs.round();
+    final carbLeft = (targetCarbs - consumedCarbs).round().clamp(0, 9999);
+
+    final fConsumed = consumedFat.round();
+    final fLeft = (targetFat - consumedFat).round().clamp(0, 9999);
+
+    await saveLocaleStrings();
+    await saveSummaryData(
+      caloriesConsumed: cConsumed,
+      caloriesTarget: cTarget,
+      caloriesLeft: cLeft,
+      proteinConsumed: pConsumed,
+      proteinLeft: pLeft,
+      carbsConsumed: carbConsumed,
+      carbsLeft: carbLeft,
+      fatConsumed: fConsumed,
+      fatLeft: fLeft,
+      streakCount: streakCount,
+    );
+
+    await updateWidgets();
+  }
+
+  /// Disposes background subscriptions.
+  void dispose() {
+    _widgetClickedSubscription?.cancel();
+    _widgetClickedSubscription = null;
+    _deepLinkHandler = null;
+    _isInitialized = false;
+  }
+}

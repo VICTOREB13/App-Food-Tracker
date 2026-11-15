@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/models/meal_analysis_result.dart';
+import 'package:food_tracker/features/food_entry/models/meal_analysis_result.dart';
 
 void main() {
   group('Gemini Vision Self-Validation Parsing Tests', () {

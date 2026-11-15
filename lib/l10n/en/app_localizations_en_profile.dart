@@ -105,4 +105,5 @@ abstract class AppLocalizationsEnProfile extends AppLocalizationsEnMetrics {
   @override String get stepsUnit => 'steps';
   @override String get bmrAtRestLabel => 'BMR (At rest)';
   @override String get tdeeTotalExpenseLabel => 'TDEE (Total expenditure)';
+  @override String get mifflinStJeorSubtitle => 'Mifflin-St Jeor & Master Prompt';
 }

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/models/user_profile.dart';
-import 'package:food_tracker/services/metabolic_calculator.dart';
+import 'package:food_tracker/features/settings_profile/models/user_profile.dart';
+import 'package:food_tracker/features/biometrics_weight/services/metabolic_calculator.dart';
 
 void main() {
   group('MetabolicCalculator Adversarial - Mifflin-St Jeor Divergence & Boundaries', () {

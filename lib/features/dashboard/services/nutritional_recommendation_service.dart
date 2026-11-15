@@ -1,0 +1,239 @@
+import 'dart:math';
+import 'package:flutter/foundation.dart';
+import 'package:food_tracker/core/interfaces/database_service_interface.dart';
+import 'package:food_tracker/core/interfaces/nutritional_recommendation_service_interface.dart';
+import 'package:food_tracker/core/models/daily_goals.dart';
+import 'package:food_tracker/core/models/nutritional_recommendation.dart';
+import 'package:food_tracker/core/database/database_service.dart';
+import 'package:food_tracker/features/dashboard/services/recommendations/recommendation_dish_catalog.dart';
+import 'package:food_tracker/features/dashboard/services/recommendations/recommendation_filter_engine.dart';
+import 'package:food_tracker/core/services/storage/secure_storage_service.dart';
+
+/// Intelligent recommendation engine evaluating macronutrient intake and suggesting meal strategies.
+class NutritionalRecommendationService implements INutritionalRecommendationService {
+  static NutritionalRecommendationService? _mockInstance;
+  static final NutritionalRecommendationService _defaultInstance =
+      NutritionalRecommendationService();
+
+  static NutritionalRecommendationService get instance =>
+      _mockInstance ?? _defaultInstance;
+
+  @visibleForTesting
+  static void setMockInstance(NutritionalRecommendationService? mock) =>
+      _mockInstance = mock;
+
+  final IDatabaseService? _dbOverride;
+  final SecureStorageService? _storageOverride;
+
+  IDatabaseService get _db => _dbOverride ?? DatabaseService.instance;
+  SecureStorageService get _storage => _storageOverride ?? SecureStorageService.instance;
+
+  NutritionalRecommendationService({
+    IDatabaseService? databaseService,
+    SecureStorageService? storageService,
+  })  : _dbOverride = databaseService,
+        _storageOverride = storageService;
+
+  Future<DailyGoals> _resolveGoals() async {
+    try {
+      final profile = await _db.getUserProfile();
+      if (profile != null) {
+        return DailyGoals(
+          calories: profile.targetCalories,
+          protein: profile.targetProtein,
+          carbs: profile.targetCarbs,
+          fat: profile.targetFat,
+        );
+      }
+      return await _storage.getDailyGoals();
+    } catch (_) {}
+    return const DailyGoals();
+  }
+
+  @override
+  Future<NutritionalAnalysisReport> analyzeHistory({int days = 7}) async {
+    final now = DateTime.now();
+    final start = DateTime(now.year, now.month, now.day).subtract(Duration(days: days));
+    final end = DateTime(now.year, now.month, now.day, 23, 59, 59);
+
+    final meals = await _db.getMealsByRange(start, end);
+    final goals = await _resolveGoals();
+
+    final datesLogged = <String>{};
+    double sumCal = 0, sumProt = 0, sumCarbs = 0, sumFat = 0;
+
+    for (final m in meals) {
+      datesLogged.add(m.date.toIso8601String().substring(0, 10));
+      sumCal += m.calories;
+      sumProt += m.protein;
+      sumCarbs += m.carbs;
+      sumFat += m.fat;
+    }
+
+    final divisor = max(1, datesLogged.isNotEmpty ? datesLogged.length : days);
+    final avgCal = sumCal / divisor;
+    final avgProt = sumProt / divisor;
+    final avgCarbs = sumCarbs / divisor;
+    final avgFat = sumFat / divisor;
+
+    final fatDelta = avgFat - goals.fat;
+    final protDelta = avgProt - goals.protein;
+    final carbsDelta = avgCarbs - goals.carbs;
+    final calDelta = avgCal - goals.calories;
+
+    final fatDiag = fatDelta > 5
+        ? 'Tu consumo de grasas supera tu meta en +${fatDelta.toStringAsFixed(1)}g/día. Reducir aceites de freír y salsas ultraprocesadas facilitará tu déficit.'
+        : fatDelta < -15
+            ? 'Ingesta de grasas baja (-${(-fatDelta).toStringAsFixed(1)}g/día). Añade grasas monoinsaturadas (aguacate, aceite de oliva, frutos secos) para salud hormonal.'
+            : 'Consumo de grasas perfectamente balanceado con tu meta diaria.';
+
+    final protDiag = protDelta < -10
+        ? 'Déficit proteico de ${(-protDelta).toStringAsFixed(1)}g/día frente a tu meta (${goals.protein.round()}g). Aumentar fuentes magras preservará tu masa muscular.'
+        : protDelta > 15
+            ? 'Excelente aporte proteico (+${protDelta.toStringAsFixed(1)}g/día), ideal para saciedad y recuperación muscular.'
+            : 'Aporte de proteínas dentro del rango óptimo para tus requerimientos.';
+
+    final carbsDiag = carbsDelta > 20
+        ? 'Carbohidratos por encima de la meta (+${carbsDelta.toStringAsFixed(1)}g). Modera azúcares añadidos y opta por carbohidratos complejos altos en fibra.'
+        : carbsDelta < -25
+            ? 'Consumo de carbohidratos bajo (-${(-carbsDelta).toStringAsFixed(1)}g). Asegura suficiente energía para tu actividad física diaria.'
+            : 'Balance de carbohidratos adecuado para mantener energía constante.';
+
+    final calDiag = calDelta.abs() < 100
+        ? 'Balance calórico en punto exacto: promedio de ${avgCal.round()} kcal frente a meta de ${goals.calories.round()} kcal.'
+        : calDelta > 0
+            ? 'Superávit calórico promedio de +${calDelta.round()} kcal/día respecto a tu presupuesto metabólico.'
+            : 'Déficit calórico promedio de -${(-calDelta).round()} kcal/día.';
+
+    final fatSwaps = [
+      const FoodSwapSuggestion(
+        originalFood: 'Carnes grasas o frituras',
+        substituteFood: 'Pechuga de pollo, pavo o lomo de atún a la plancha',
+        rationale: 'Reduce hasta 14g de grasa saturada y aporta 35g de proteína magra.',
+        fatSavedGrams: 14.0,
+        proteinGainedGrams: 10.0,
+      ),
+      const FoodSwapSuggestion(
+        originalFood: 'Salsas cremosas y mayonesa',
+        substituteFood: 'Yogur griego natural con especias, mostaza Dijon o limón',
+        rationale: 'Ahorro de ~10g de grasa por porción manteniendo textura y sabor.',
+        fatSavedGrams: 10.0,
+        proteinGainedGrams: 4.0,
+      ),
+    ];
+
+    final protSwaps = [
+      const FoodSwapSuggestion(
+        originalFood: 'Snacks procesados o bollería',
+        substituteFood: 'Queso fresco batido / requesón con un puñado de nueces',
+        rationale: 'Añade 20g de proteína de absorción lenta y grasas cardioprotectoras.',
+        fatSavedGrams: 5.0,
+        proteinGainedGrams: 18.0,
+      ),
+      const FoodSwapSuggestion(
+        originalFood: 'Huevos enteros en exceso',
+        substituteFood: '1 huevo entero + 3 claras pasteurizadas',
+        rationale: 'Maximiza el volumen proteico (20g) eliminando 10g de grasa saturada.',
+        fatSavedGrams: 10.0,
+        proteinGainedGrams: 8.0,
+      ),
+    ];
+
+    return NutritionalAnalysisReport(
+      daysAnalyzed: days,
+      mealsLogged: meals.length,
+      averageDailyCalories: avgCal,
+      averageDailyProtein: avgProt,
+      averageDailyCarbs: avgCarbs,
+      averageDailyFat: avgFat,
+      targetCalories: goals.calories,
+      targetProtein: goals.protein,
+      targetCarbs: goals.carbs,
+      targetFat: goals.fat,
+      fatDiagnosis: fatDiag,
+      proteinDiagnosis: protDiag,
+      carbsDiagnosis: carbsDiag,
+      calorieDiagnosis: calDiag,
+      fatReductionSwaps: fatSwaps,
+      proteinIncreaseSuggestions: protSwaps,
+      suggestedPlates: _generateCandidateDishes(goals.calories * 0.35, goals.protein * 0.35),
+    );
+  }
+
+  @override
+  Future<TodayRecommendationPlan> getWhatShouldIEatToday({
+    DateTime? date,
+    String? category,
+    bool shuffle = false,
+  }) async {
+    final targetDate = date ?? DateTime.now();
+    final todayMeals = await _db.getMealsForDay(targetDate);
+    final goals = await _resolveGoals();
+
+    double cUsed = 0, pUsed = 0, carbUsed = 0, fUsed = 0;
+    for (final m in todayMeals) {
+      cUsed += m.calories;
+      pUsed += m.protein;
+      carbUsed += m.carbs;
+      fUsed += m.fat;
+    }
+
+    final remCal = max(0.0, goals.calories - cUsed);
+    final remProt = max(0.0, goals.protein - pUsed);
+    final remCarbs = max(0.0, goals.carbs - carbUsed);
+    final remFat = max(0.0, goals.fat - fUsed);
+
+    // Determine logical next meal type
+    final hour = DateTime.now().hour;
+    final loggedTypes = todayMeals.map((m) => m.mealType).toSet();
+    final String nextMeal;
+    if (!loggedTypes.contains('Desayuno') && hour < 11) {
+      nextMeal = 'Desayuno';
+    } else if (!loggedTypes.contains('Almuerzo') && hour < 16) {
+      nextMeal = 'Almuerzo';
+    } else if (!loggedTypes.contains('Cena') && hour >= 18) {
+      nextMeal = 'Cena';
+    } else {
+      nextMeal = 'Snack';
+    }
+
+    final activeCategory = RecommendationFilterEngine.normalizeCategory(category);
+
+    final advice = remProt > 30 && remFat < 15
+        ? 'Te faltan ${remProt.round()}g de proteína y poco margen de grasas (${remFat.round()}g). Enfócate en proteínas magras y claras.'
+        : remCal < 350
+            ? 'Te quedan solo ${remCal.round()} kcal. Elige opciones voluminosas de baja densidad como ensaladas con proteína.'
+            : 'Tienes un margen de ${remCal.round()} kcal y ${remProt.round()}g de proteína. Distribúyelos con carbohidratos complejos.';
+
+    final candidates = RecommendationFilterEngine.filterAndScore(
+      catalog: RecommendationDishCatalog.dishes,
+      remainingCal: remCal,
+      remainingProt: remProt,
+      category: activeCategory,
+      preferredMealType: nextMeal,
+      shuffle: shuffle,
+      limit: 6,
+    );
+
+    return TodayRecommendationPlan(
+      remainingCalories: remCal,
+      remainingProtein: remProt,
+      remainingCarbs: remCarbs,
+      remainingFat: remFat,
+      nextMealType: nextMeal,
+      generalAdvice: advice,
+      recommendedOptions: candidates,
+      selectedCategory: activeCategory,
+    );
+  }
+
+  List<RecommendedDish> _generateCandidateDishes(double targetCal, double targetProt) {
+    return RecommendationFilterEngine.filterAndScore(
+      catalog: RecommendationDishCatalog.dishes,
+      remainingCal: targetCal,
+      remainingProt: targetProt,
+      category: 'Todos',
+      limit: 4,
+    );
+  }
+}

@@ -67,5 +67,7 @@ abstract class AppLocalizationsEsDashboard extends AppLocalizationsEsCore {
   @override String get viewEditPromptAction => 'Ver / Configurar';
   @override String get viewEditPromptSubtitle => 'Toca para ver o personalizar el prompt';
   @override String get copyPromptAction => 'Copiar Master Prompt';
+  @override String get dashboardTitle => 'Food Tracker';
+  @override String get dashboardSubtitle => 'Victor Engineer';
 }
 

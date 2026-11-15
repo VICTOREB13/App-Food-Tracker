@@ -67,5 +67,7 @@ abstract class AppLocalizationsEnDashboard extends AppLocalizationsEnCore {
   @override String get viewEditPromptAction => 'View / Configure';
   @override String get viewEditPromptSubtitle => 'Tap to view or customize prompt';
   @override String get copyPromptAction => 'Copy Master Prompt';
+  @override String get dashboardTitle => 'Food Tracker';
+  @override String get dashboardSubtitle => 'Victor Engineer';
 }
 

@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/models/pantry_item.dart';
-import 'package:food_tracker/services/daos/database_schema.dart';
-import 'package:food_tracker/services/daos/pantry_dao.dart';
-import 'package:food_tracker/services/gemini_resilience_helper.dart';
-import 'package:food_tracker/services/gemini_vision_service.dart';
+import 'package:food_tracker/features/pantry_inventory/models/pantry_item.dart';
+import 'package:food_tracker/core/database/daos/database_schema.dart';
+import 'package:food_tracker/core/database/daos/pantry_dao.dart';
+import 'package:food_tracker/core/services/ai/gemini_resilience_helper.dart';
+import 'package:food_tracker/core/services/ai/gemini_vision_service.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {

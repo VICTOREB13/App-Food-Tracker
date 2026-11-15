@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/widgets/meal_detail/meal_micronutrient_chips_row.dart';
+import 'package:food_tracker/features/food_entry/widgets/meal_micronutrient_chips_row.dart';
 
 void main() {
   testWidgets('MealMicronutrientChipsRow renders nothing when all zero', (tester) async {

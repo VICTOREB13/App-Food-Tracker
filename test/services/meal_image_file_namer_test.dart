@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/services/meal_image_file_namer.dart';
+import 'package:food_tracker/features/food_entry/services/meal_image_file_namer.dart';
 
 void main() {
   group('MealImageFileNamer Unit Tests', () {

@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:food_tracker/models/gemini_model_info.dart';
-import 'package:food_tracker/services/gemini_model_service.dart';
+import 'package:food_tracker/core/models/gemini_model_info.dart';
+import 'package:food_tracker/core/services/ai/gemini_model_service.dart';
 
 const String mockSuccessResponseJson = '''
 {

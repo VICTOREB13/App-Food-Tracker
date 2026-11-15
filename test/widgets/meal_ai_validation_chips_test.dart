@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/services/theme_manager.dart';
-import 'package:food_tracker/widgets/meal_detail/meal_ai_validation_chips.dart';
+import 'package:food_tracker/core/services/theme/theme_manager.dart';
+import 'package:food_tracker/features/food_entry/widgets/meal_ai_validation_chips.dart';
 
 void main() {
   Widget buildTestableWidget(Widget child) {

@@ -3,7 +3,7 @@ tipo: changelog
 proyecto: App_Food_Tracker
 version: v1
 estado: activo
-fecha: 2026-10-31
+fecha: 2026-11-15
 tags: [proyecto, changelog, versiones]
 ---
 
@@ -18,6 +18,30 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [1.4.6] - 2026-11-15
+
+### Architectural Overhaul: Modular Monolith, VSA, Micro-MVC & Pragmatic Hexagonal
+- **Eradication of Legacy Horizontal Layers**:
+  - Complete elimination of horizontal folders `lib/screens/`, `lib/controllers/`, `lib/widgets/`, `lib/models/`, and `lib/services/`.
+  - Canonical 3-tier directory topology established: `lib/core/`, `lib/features/`, and `lib/l10n/`.
+- **Vertical Slice Architecture (VSA) & Micro-MVC**:
+  - 7 fully self-contained slices implemented in `lib/features/`: `biometrics_weight`, `dashboard`, `data_backup`, `fasting_tracker`, `food_entry`, `pantry_inventory`, and `settings_profile`.
+  - Internal Micro-MVC structure per slice: `<slice>.view.dart`, `<slice>.controller.dart`, `<slice>.model.dart`, slice-specific widgets, and co-located `<slice>.test.dart` suites.
+- **Pragmatic Hexagonal Architecture (Ports & Adapters)**:
+  - 5 Abstract Ports in `lib/core/ports/`: `DatabasePort`, `AiVisionPort`, `NutritionCatalogPort`, `SecureStoragePort`, `AppWidgetSyncPort`.
+  - 5 Concrete Adapters in `lib/core/adapters/`: `SqfliteDatabaseAdapter`, `GeminiAiVisionAdapter`, `NutritionCatalogAdapter`, `EncryptedStorageAdapter`, `HomeWidgetSyncAdapter`.
+  - Registered and managed through `lib/core/di/service_locator.dart`.
+- **Infrastructure & Domain Services Relocation**:
+  - Relocated SQLite database service and 7 DAOs into `lib/core/database/`.
+  - Categorized low-level engines into `lib/core/services/` (`ai/`, `nutrition/`, `platform/`, `storage/`, `export/`, `theme/`).
+  - Co-located domain-specific logic into `lib/features/<slice>/services/`.
+- **Strict Codebase Health & Quality Gate**:
+  - 100% of the 250 Dart files in `lib/` strictly comply with `< 300 LoC`.
+  - Zero broken imports across all 250 files and unit tests.
+  - SDD Contract Parity verified with 0 missing contracts and 0 orphaned endpoints.
+
+---
+
 ## [1.4.5] - 2026-10-31
 
 ### Architecture & Localization Standardization
@@ -28,7 +52,7 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 - **Normalización de Artefactos V9 (Harness³)**:
   - Política de Artefactos Vivos perpetuos en `artifacts/architecture/`: eliminación de versión y fecha volátiles en frontmatters.
   - Sincronización estricta de contratos SDD en `api_spec.md` con 100% de paridad (`bun run lint:contracts`).
-  - Validación automatizada canónica de 9 artefactos y 6 heurísticas FIFO (`bun run validate`).
+  - Validación automatizada canónica de 9 artefactos y 7 heurísticas FIFO (`bun run validate`).
 - **Exclusión de Metodología de Git**:
   - Blindaje y exclusión de `.agents/`, `AGENTS.md` y tooling interno del repositorio Git via `.gitignore`.
   - Preservación íntegra de artefactos vivos y sincronización continua con Obsidian Vault.

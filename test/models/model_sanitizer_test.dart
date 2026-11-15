@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/models/model_sanitizer.dart';
+import 'package:food_tracker/core/models/model_sanitizer.dart';
 
 void main() {
   group('ModelSanitizer Unit Tests', () {

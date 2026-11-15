@@ -2,15 +2,16 @@
 tipo: arquitectura
 proyecto: App_Food_Tracker
 estado: activo
+stack_pack: stack-mobile
 stack_principal: [Flutter, SQLite WAL v4, Google Gemini API, USDA FoodData Central, Open Food Facts, FlutterSecureStorage, GetIt, Flutter Localizations, HomeWidget, BackupNormalizer, NutritionalRecommendationService, GitHubReleasesUpdateService, MethodChannelAppInstaller, GeminiResilienceHelper, NotificationService, ClinicalPdfExportService, ClinicalShareService, DataDrivenHomeWidgets, ModularRecommendationCatalogs]
 diagrama_html: PRJ_App_Food_Tracker_architecture_diagram.html
 tags: [proyecto, arquitectura, tech-stack, archify, living-doc]
 ---
 
 
-# 🏗️ Arquitectura del Sistema: Victor Engineer - Food Tracker (v1.4.3)
+# 🏗️ Arquitectura del Sistema: Victor Engineer - Food Tracker (v1.4.6)
 
-> **Mesa de Control & Backend-Architect:** Este documento establece los componentes fundamentales, el Tech Stack tecnológico, las decisiones arquitectónicas estructurales y el flujo de datos integral de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.4.3` (Localización Data-Driven en Widgets Android sin `values-xx/`, Catálogos Modulares de Recomendaciones con Snacks Prácticos y Disparador Ergonómico de Master Prompt).
+> **Mesa de Control & Backend-Architect:** Este documento establece los componentes fundamentales, el Tech Stack tecnológico, las decisiones arquitectónicas estructurales y el flujo de datos integral de la aplicación **Victor Engineer - Food Tracker** en su versión `v1.4.6` (Consolidación Definitiva: Monolito Modular, Vertical Slice Architecture en 7 dominios, Micro-MVC interno y Arquitectura Hexagonal Pragmática con Puertos y Adaptadores).
 
 ---
 
@@ -258,6 +259,22 @@ El diagrama interactivo de componentes, límites de seguridad, widgets nativos d
 - **Disparador Ergonómico de Master Prompt (`MasterPromptBentoTrigger`):**
   - Extracción modular (< 300 LoC) con botón explícito `[Ver / Configurar]` e icono `Icons.tune_rounded`, permitiendo abrir `MasterPromptBottomSheet` tanto pulsando el botón como cualquier parte de la tarjeta Bento.
 - **Versión Canónica:** `AppConstants.appVersion = '1.4.3'` y `pubspec.yaml version: 1.4.3+1`.
+
+### 3.19. Consolidación Arquitectónica Definitiva: Monolito Modular + VSA + Micro-MVC + Hexagonal Pragmática (v1.4.6)
+- **Topología Canónica de 3 Conceptos Maestros:**
+  - Erradicación total de las carpetas horizontales legadas: `lib/screens/`, `lib/controllers/`, `lib/widgets/`, `lib/models/` y `lib/services/`.
+  - Estructuración limpia en 3 conceptos maestros:
+    1. `lib/core/`: Puertos abstractos (`ports/`), adaptadores de infraestructura (`adapters/`), motor de base de datos y DAOs SQLite WAL (`database/`), servicios técnicos compartidos (`services/` para ai, nutrition, platform, storage, export, theme), DTOs transversales (`models/`), primitivas de UI (`ui/components/`), inyección de dependencias (`di/service_locator.dart`), errores y constantes.
+    2. `lib/features/`: 7 rebanadas verticales autosuficientes (`biometrics_weight`, `dashboard`, `data_backup`, `fasting_tracker`, `food_entry`, `pantry_inventory`, `settings_profile`), cada una implementando Micro-MVC interno (Vista, Controlador, Modelo, Servicios de Dominio, Widgets y Tests TDD co-localizados).
+    3. `lib/l10n/`: Localización bilingüe (ES / EN) 100% Pure Dart modularizada por dominios.
+- **Arquitectura Hexagonal Pragmática (Puertos y Adaptadores en Periferia I/O):**
+  - Puertos abstractos en `lib/core/ports/`: `DatabasePort`, `AiVisionPort`, `NutritionCatalogPort`, `SecureStoragePort` y `AppWidgetSyncPort`.
+  - Adaptadores concretos en `lib/core/adapters/`: `SqfliteDatabaseAdapter`, `GeminiAiVisionAdapter`, `NutritionCatalogAdapter`, `EncryptedStorageAdapter` y `HomeWidgetSyncAdapter`.
+  - Inyección en `lib/core/di/service_locator.dart` permitiendo tests unitarios aislados y reemplazo de infraestructura con cero impacto en el dominio.
+- **Auditoría Estricta de Líneas de Código (< 300 LoC):**
+  - 250 archivos Dart en `lib/`, 100% conformes con el presupuesto estricto de menos de 300 líneas de código.
+- **Versión Canónica:** `AppConstants.appVersion = '1.4.6'` y `pubspec.yaml version: 1.4.6+1`.
+
 
 
 

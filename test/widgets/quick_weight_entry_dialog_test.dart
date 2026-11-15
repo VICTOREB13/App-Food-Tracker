@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/controllers/meal_controller.dart';
-import 'package:food_tracker/services/database_service.dart';
-import 'package:food_tracker/widgets/metrics/quick_weight_entry_dialog.dart';
+import 'package:food_tracker/features/food_entry/food_entry.dart';
+import 'package:food_tracker/core/database/database_service.dart';
+import 'package:food_tracker/features/biometrics_weight/widgets/quick_weight_entry_dialog.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {

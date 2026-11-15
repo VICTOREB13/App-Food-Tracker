@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/models/food_item.dart';
-import 'package:food_tracker/widgets/meal_detail/food_item_editor_dialog.dart';
+import 'package:food_tracker/features/food_entry/models/food_item.dart';
+import 'package:food_tracker/features/food_entry/widgets/food_item_editor_dialog.dart';
 
 void main() {
   group('FoodItemEditorDialog Widget Tests', () {

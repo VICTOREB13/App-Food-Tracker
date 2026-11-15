@@ -51,5 +51,11 @@ abstract class AppLocalizationsEsMetrics extends AppLocalizationsEsMeal {
   @override String get viewLess => 'Ver menos';
   @override String viewAllCount(String count) => 'Ver todos ($count)';
   @override String get noWeightLogsInRange => 'Sin registros de peso en este rango';
+
+  @override String get movingAverage7dLabel => 'Promedio 7d';
+  @override String get adjustedBodyWeightLabel => 'Peso ajustado (ABW)';
+  @override String get bmiLabel => 'IMC';
+  @override String get quickAdjustLabel => 'Ajuste rápido';
+  @override String get quickLogWeight => 'Registrar peso';
 }
 

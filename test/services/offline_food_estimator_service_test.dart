@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/services/offline_food_estimator_service.dart';
+import 'package:food_tracker/features/food_entry/services/offline_food_estimator_service.dart';
 
 void main() {
   late OfflineFoodEstimatorService estimator;

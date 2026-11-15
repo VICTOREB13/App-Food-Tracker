@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/services/backup_normalizer.dart';
+import 'package:food_tracker/features/data_backup/services/backup_normalizer.dart';
 
 void main() {
   group('BackupNormalizer Tests', () {

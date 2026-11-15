@@ -2,9 +2,9 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:food_tracker/models/user_profile.dart';
-import 'package:food_tracker/models/weight_log.dart';
-import 'package:food_tracker/services/database_service.dart';
+import 'package:food_tracker/features/settings_profile/models/user_profile.dart';
+import 'package:food_tracker/features/biometrics_weight/models/weight_log.dart';
+import 'package:food_tracker/core/database/database_service.dart';
 
 void main() {
   setUpAll(() {

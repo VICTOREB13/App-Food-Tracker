@@ -51,5 +51,11 @@ abstract class AppLocalizationsMetrics extends AppLocalizationsMeal {
   String get viewLess;
   String viewAllCount(String count);
   String get noWeightLogsInRange;
+
+  String get movingAverage7dLabel;
+  String get adjustedBodyWeightLabel;
+  String get bmiLabel;
+  String get quickAdjustLabel;
+  String get quickLogWeight;
 }
 

@@ -1,5 +1,5 @@
 import 'dart:typed_data';
-import '../../models/pantry_item.dart';
+import 'package:food_tracker/features/pantry_inventory/models/pantry_item.dart';
 
 /// Contract for OCR Nutrition Facts Label scanning service.
 abstract interface class INutritionLabelScannerService {

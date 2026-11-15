@@ -3,9 +3,9 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
-import 'package:food_tracker/models/github_release_model.dart';
-import 'package:food_tracker/services/app_update_service.dart';
-import 'package:food_tracker/services/app_installer_service.dart';
+import 'package:food_tracker/core/models/github_release_model.dart';
+import 'package:food_tracker/core/services/platform/app_update_service.dart';
+import 'package:food_tracker/core/services/platform/app_installer_service.dart';
 
 /// Lightweight mock HTTP client for deterministic unit testing.
 class MockHttpClient extends http.BaseClient {

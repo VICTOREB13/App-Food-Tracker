@@ -76,6 +76,10 @@ abstract class AppLocalizationsEsSettings extends AppLocalizationsEsProfile {
   @override String get importBackupJsonInstruction => 'Selecciona tu archivo JSON de respaldo con un toque desde Descargas, Drive o almacenamiento interno.';
   @override String get restoreContentLabel => 'Contenido a restaurar:';
   @override String get restoreDataAction => 'Restaurar Datos';
+  @override String previewMealsCount(String count) => '• $count comidas registradas';
+  @override String get previewUserProfileIncluded => '• Perfil de usuario incluido';
+  @override String get previewUserProfileNotIncluded => '• Sin perfil de usuario';
+  @override String get invalidBackupFormatError => 'El archivo de respaldo no tiene el formato JSON esperado.';
   @override String get languageSelectorTitle => 'IDIOMA / LANGUAGE';
   @override String get languageSelectorSubtitle => 'Selecciona el idioma de la aplicación en tiempo real.';
   @override String get selectGeminiModelTitle => 'Seleccionar Modelo Gemini';

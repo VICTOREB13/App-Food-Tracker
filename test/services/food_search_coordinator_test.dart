@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/services/food_search_coordinator.dart';
+import 'package:food_tracker/features/food_entry/services/food_search_coordinator.dart';
 
 void main() {
   group('FoodSearchCoordinator Tests', () {

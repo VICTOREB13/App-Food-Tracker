@@ -1,4 +1,4 @@
-import '../../models/fasting_log.dart';
+import 'package:food_tracker/features/fasting_tracker/models/fasting_log.dart';
 import '../errors/failures.dart';
 import '../errors/result.dart';
 

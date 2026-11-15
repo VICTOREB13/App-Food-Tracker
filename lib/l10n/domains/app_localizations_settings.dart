@@ -76,6 +76,10 @@ abstract class AppLocalizationsSettings extends AppLocalizationsProfile {
   String get importBackupJsonInstruction;
   String get restoreContentLabel;
   String get restoreDataAction;
+  String previewMealsCount(String count);
+  String get previewUserProfileIncluded;
+  String get previewUserProfileNotIncluded;
+  String get invalidBackupFormatError;
   String get languageSelectorTitle;
   String get languageSelectorSubtitle;
   String get selectGeminiModelTitle;

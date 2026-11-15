@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/widgets/dashboard/week_calendar_strip.dart';
+import 'package:food_tracker/features/dashboard/widgets/week_calendar_strip.dart';
 
 void main() {
   group('WeekCalendarStrip Widget Tests', () {

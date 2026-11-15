@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/core/interfaces/notification_service_interface.dart';
-import 'package:food_tracker/services/notification_service.dart';
+import 'package:food_tracker/core/services/platform/notification_service.dart';
 
 class _FakeNotificationService implements INotificationService {
   bool initialized = false;

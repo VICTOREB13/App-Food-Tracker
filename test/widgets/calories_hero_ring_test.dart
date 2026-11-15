@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/widgets/dashboard/calories_hero_ring.dart';
-import 'package:food_tracker/widgets/dashboard/macro_bento_card.dart';
+import 'package:food_tracker/features/dashboard/widgets/calories_hero_ring.dart';
+import 'package:food_tracker/features/dashboard/widgets/macro_bento_card.dart';
 
 void main() {
   group('CaloriesHeroRing and MacroBentoCard Widget Tests', () {

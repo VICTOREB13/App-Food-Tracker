@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/services/gemini_resilience_helper.dart';
-import 'package:food_tracker/services/gemini_vision_service.dart';
+import 'package:food_tracker/core/services/ai/gemini_resilience_helper.dart';
+import 'package:food_tracker/core/services/ai/gemini_vision_service.dart';
 
 void main() {
   group('Gemini Multimodal Speech and Video Frames Prompt Tests', () {

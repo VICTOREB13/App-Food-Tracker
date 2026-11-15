@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/widgets/dashboard/dashboard_fab_menu.dart';
+import 'package:food_tracker/features/dashboard/widgets/dashboard_fab_menu.dart';
 
 void main() {
   group('DashboardFabMenu Widget Tests', () {

@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/models/meal_analysis_result.dart';
-import 'package:food_tracker/services/gemini_resilience_helper.dart';
+import 'package:food_tracker/features/food_entry/models/meal_analysis_result.dart';
+import 'package:food_tracker/core/services/ai/gemini_resilience_helper.dart';
 
 void main() {
   group('GeminiResilienceHelper Tests', () {

@@ -1,4 +1,4 @@
-import '../../models/meal_template.dart';
+import 'package:food_tracker/features/food_entry/models/meal_template.dart';
 import '../errors/failures.dart';
 import '../errors/result.dart';
 

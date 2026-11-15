@@ -2,12 +2,12 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:food_tracker/models/pantry_item.dart';
-import 'package:food_tracker/models/usda_food_item.dart';
-import 'package:food_tracker/services/barcode_lookup_service.dart';
-import 'package:food_tracker/services/open_food_facts_service.dart';
-import 'package:food_tracker/services/secure_storage_service.dart';
-import 'package:food_tracker/services/usda_food_data_service.dart';
+import 'package:food_tracker/features/pantry_inventory/models/pantry_item.dart';
+import 'package:food_tracker/core/models/usda_food_item.dart';
+import 'package:food_tracker/features/food_entry/services/barcode_lookup_service.dart';
+import 'package:food_tracker/core/services/nutrition/open_food_facts_service.dart';
+import 'package:food_tracker/core/services/storage/secure_storage_service.dart';
+import 'package:food_tracker/core/services/nutrition/usda_food_data_service.dart';
 
 class MockSecureStorageService extends Fake implements SecureStorageService {
   String? usdaKey = 'VALID_TEST_KEY';

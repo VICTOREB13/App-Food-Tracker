@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/widgets/common/ve_animated_counter.dart';
+import 'package:food_tracker/core/ui/components/ve_animated_counter.dart';
 
 void main() {
   group('VeAnimatedCounter Widget Tests', () {

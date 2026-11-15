@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/widgets/dashboard/voice_meal_recording_dialog.dart';
+import 'package:food_tracker/features/dashboard/widgets/voice_meal_recording_dialog.dart';
 
 void main() {
   testWidgets('showVoiceMealRecordingDialog renders recording dialog and allows text entry', (tester) async {

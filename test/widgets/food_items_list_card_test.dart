@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/models/food_item.dart';
-import 'package:food_tracker/widgets/common/macro_indicator_chip.dart';
-import 'package:food_tracker/widgets/meal_detail/food_items_list_card.dart';
+import 'package:food_tracker/features/food_entry/models/food_item.dart';
+import 'package:food_tracker/core/ui/components/macro_indicator_chip.dart';
+import 'package:food_tracker/features/food_entry/widgets/food_items_list_card.dart';
 
 void main() {
   group('FoodItemsListCard Widget Tests', () {

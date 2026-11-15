@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/controllers/meal_controller.dart';
-import 'package:food_tracker/models/food_item.dart';
-import 'package:food_tracker/models/meal.dart';
+import 'package:food_tracker/features/food_entry/food_entry.dart';
+import 'package:food_tracker/features/food_entry/models/food_item.dart';
+import 'package:food_tracker/features/food_entry/models/meal.dart';
 
 void main() {
   group('Meal Model Tests', () {

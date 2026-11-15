@@ -1,7 +1,7 @@
-import '../../models/meal.dart';
-import '../../models/pantry_item.dart';
-import '../../models/user_profile.dart';
-import '../../models/weight_log.dart';
+import 'package:food_tracker/features/food_entry/models/meal.dart';
+import 'package:food_tracker/features/pantry_inventory/models/pantry_item.dart';
+import 'package:food_tracker/features/settings_profile/models/user_profile.dart';
+import 'package:food_tracker/features/biometrics_weight/models/weight_log.dart';
 import '../errors/failures.dart';
 import '../errors/result.dart';
 

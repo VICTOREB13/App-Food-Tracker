@@ -1,20 +1,20 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/controllers/meal_controller.dart';
-import 'package:food_tracker/controllers/settings_controller.dart';
+import 'package:food_tracker/features/food_entry/food_entry.dart';
+import 'package:food_tracker/features/settings_profile/settings_profile.dart';
 import 'package:food_tracker/core/di/service_locator.dart';
 import 'package:food_tracker/core/interfaces/daos_interfaces.dart';
 import 'package:food_tracker/core/interfaces/database_service_interface.dart';
 import 'package:food_tracker/core/interfaces/image_processing_service_interface.dart';
-import 'package:food_tracker/services/analysis_queue_service.dart';
-import 'package:food_tracker/services/backup_service.dart';
-import 'package:food_tracker/services/daos/dishware_dao.dart';
-import 'package:food_tracker/services/daos/fasting_dao.dart';
-import 'package:food_tracker/services/daos/meal_template_dao.dart';
-import 'package:food_tracker/services/database_service.dart';
-import 'package:food_tracker/services/gemini_vision_service.dart';
-import 'package:food_tracker/services/image_processing_service.dart';
-import 'package:food_tracker/services/secure_storage_service.dart';
-import 'package:food_tracker/services/theme_manager.dart';
+import 'package:food_tracker/features/food_entry/services/analysis_queue_service.dart';
+import 'package:food_tracker/features/data_backup/services/backup_service.dart';
+import 'package:food_tracker/core/database/daos/dishware_dao.dart';
+import 'package:food_tracker/core/database/daos/fasting_dao.dart';
+import 'package:food_tracker/core/database/daos/meal_template_dao.dart';
+import 'package:food_tracker/core/database/database_service.dart';
+import 'package:food_tracker/core/services/ai/gemini_vision_service.dart';
+import 'package:food_tracker/features/food_entry/services/image_processing_service.dart';
+import 'package:food_tracker/core/services/storage/secure_storage_service.dart';
+import 'package:food_tracker/core/services/theme/theme_manager.dart';
 
 void main() {
   setUp(() async {

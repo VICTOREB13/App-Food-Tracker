@@ -76,6 +76,10 @@ abstract class AppLocalizationsEnSettings extends AppLocalizationsEnProfile {
   @override String get importBackupJsonInstruction => 'Select your JSON backup file with one tap from Downloads, Drive, or internal storage.';
   @override String get restoreContentLabel => 'Content to restore:';
   @override String get restoreDataAction => 'Restore Data';
+  @override String previewMealsCount(String count) => '• $count logged meals';
+  @override String get previewUserProfileIncluded => '• User profile included';
+  @override String get previewUserProfileNotIncluded => '• No user profile';
+  @override String get invalidBackupFormatError => 'The backup file does not have the expected JSON format.';
   @override String get languageSelectorTitle => 'IDIOMA / LANGUAGE';
   @override String get languageSelectorSubtitle => 'Select the application language in real time.';
   @override String get selectGeminiModelTitle => 'Select Gemini Model';

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/core/interfaces/nutritional_recommendation_service_interface.dart';
-import 'package:food_tracker/models/nutritional_recommendation.dart';
-import 'package:food_tracker/widgets/recommendations/recommendation_diagnostic_card.dart';
-import 'package:food_tracker/widgets/recommendations/what_to_eat_sheet.dart';
+import 'package:food_tracker/core/models/nutritional_recommendation.dart';
+import 'package:food_tracker/features/dashboard/widgets/recommendations/recommendation_diagnostic_card.dart';
+import 'package:food_tracker/features/dashboard/widgets/recommendations/what_to_eat_sheet.dart';
 
 void main() {
   group('Recommendation Widgets UI Tests', () {

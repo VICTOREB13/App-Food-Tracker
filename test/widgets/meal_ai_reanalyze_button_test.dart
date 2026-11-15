@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/widgets/common/ve_loading_ring.dart';
-import 'package:food_tracker/widgets/meal_detail/meal_ai_reanalyze_button.dart';
+import 'package:food_tracker/core/ui/components/ve_loading_ring.dart';
+import 'package:food_tracker/features/food_entry/widgets/meal_ai_reanalyze_button.dart';
 
 void main() {
   group('MealAiReanalyzeButton Widget Tests', () {

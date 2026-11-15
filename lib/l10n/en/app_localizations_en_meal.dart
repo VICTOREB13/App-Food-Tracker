@@ -114,4 +114,26 @@ abstract class AppLocalizationsEnMeal extends AppLocalizationsEnDashboard {
 
   @override String get fatControlTitle => 'Fat Control';
   @override String fitScoreLabel(String score) => '$score% Fit';
+
+  @override String get foodEntryTitle => 'Food Entry';
+  @override String get foodEntrySubtitle => 'Choose your logging method';
+  @override String get scanMealPhotoTitle => 'Scan Meal with AI';
+  @override String get scanMealPhotoSubtitle => 'Volumetric & macro analysis with Gemini';
+  @override String get scanBarcodeTitle => 'Scan Barcode';
+  @override String get scanBarcodeSubtitle => 'USDA & OpenFoodFacts catalog lookup';
+  @override String get quickMealTitle => 'Quick Meal';
+  @override String get quickMealSubtitle => 'Direct entry of calories & macros';
+  @override String get manualMealTitle => 'Detailed Manual Entry';
+  @override String get manualMealSubtitle => 'Ingredient-by-ingredient breakdown';
+  @override String get dishwareReferenceTitle => 'Calibrated Dishware';
+  @override String get dishwareReferenceSubtitle => 'Metric plate reference for AI';
+  @override String get quickWaterAdded => 'Glass of water logged';
+  @override String get todayLoggedMeals => 'Meals logged today';
+
+  @override String get pantryExpiringSoon => 'Expiring soon';
+  @override String get pantryExpired => 'Expired';
+  @override String get pantryFresh => 'Fresh';
+  @override String get pantryLowStock => 'Low stock';
+  @override String get pantrySearchHint => 'Search pantry or brand...';
+  @override String pantryMacroSummary(String calories, String protein, String carbs, String fat) => '$calories kcal • P: ${protein}g • C: ${carbs}g • F: ${fat}g';
 }

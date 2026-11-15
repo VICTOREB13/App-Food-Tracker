@@ -1,6 +1,6 @@
 import 'dart:typed_data';
-import '../../models/food_item.dart';
-import '../../models/meal_analysis_result.dart';
+import 'package:food_tracker/features/food_entry/models/food_item.dart';
+import 'package:food_tracker/features/food_entry/models/meal_analysis_result.dart';
 
 /// Contract for AI Vision models analyzing meal images, speech, and video frames.
 /// Enables seamless plug-and-play decoupling for Gemini, OpenRouter, and future LLM providers.

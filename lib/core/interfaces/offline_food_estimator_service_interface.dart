@@ -1,4 +1,4 @@
-import '../../models/food_item.dart';
+import 'package:food_tracker/features/food_entry/models/food_item.dart';
 
 /// Contract for the Zero-Tokens local food estimator service.
 abstract interface class IOfflineFoodEstimatorService {

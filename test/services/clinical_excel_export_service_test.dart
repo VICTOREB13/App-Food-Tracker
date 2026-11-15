@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/models/food_item.dart';
-import 'package:food_tracker/models/meal.dart';
-import 'package:food_tracker/services/clinical_excel_export_service.dart';
+import 'package:food_tracker/features/food_entry/models/food_item.dart';
+import 'package:food_tracker/features/food_entry/models/meal.dart';
+import 'package:food_tracker/core/services/export/clinical_excel_export_service.dart';
 
 void main() {
   group('ClinicalExcelExportService CSV Generation Tests', () {

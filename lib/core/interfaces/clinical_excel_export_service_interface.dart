@@ -1,5 +1,5 @@
 import 'dart:io';
-import '../../models/meal.dart';
+import 'package:food_tracker/features/food_entry/models/meal.dart';
 
 /// Contract for Clinical Tabular Excel/CSV Export Service.
 abstract interface class IClinicalExcelExportService {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/widgets/common/ve_bounceable.dart';
+import 'package:food_tracker/core/ui/components/ve_bounceable.dart';
 
 void main() {
   group('VeBounceable Widget Tests', () {

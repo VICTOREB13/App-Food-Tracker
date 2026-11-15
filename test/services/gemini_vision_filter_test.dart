@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/services/gemini_vision_filter.dart';
+import 'package:food_tracker/core/services/ai/gemini_vision_filter.dart';
 
 void main() {
   group('GeminiVisionFilter Unit Tests', () {

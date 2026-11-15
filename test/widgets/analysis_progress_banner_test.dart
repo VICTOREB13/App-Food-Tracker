@@ -2,10 +2,10 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/l10n/app_localizations.dart';
-import 'package:food_tracker/models/meal.dart';
-import 'package:food_tracker/services/analysis_queue_service.dart';
-import 'package:food_tracker/widgets/common/ve_loading_ring.dart';
-import 'package:food_tracker/widgets/dashboard/analysis_progress_banner.dart';
+import 'package:food_tracker/features/food_entry/models/meal.dart';
+import 'package:food_tracker/features/food_entry/services/analysis_queue_service.dart';
+import 'package:food_tracker/core/ui/components/ve_loading_ring.dart';
+import 'package:food_tracker/features/dashboard/widgets/analysis_progress_banner.dart';
 
 void main() {
   group('AnalysisProgressBanner Widget Tests', () {

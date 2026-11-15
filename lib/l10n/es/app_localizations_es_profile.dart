@@ -105,4 +105,5 @@ abstract class AppLocalizationsEsProfile extends AppLocalizationsEsMetrics {
   @override String get stepsUnit => 'pasos';
   @override String get bmrAtRestLabel => 'TMB (En reposo)';
   @override String get tdeeTotalExpenseLabel => 'TDEE (Gasto total)';
+  @override String get mifflinStJeorSubtitle => 'Mifflin-St Jeor & Prompt Maestro';
 }

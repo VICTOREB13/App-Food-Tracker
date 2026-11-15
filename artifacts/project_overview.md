@@ -1,13 +1,13 @@
 ---
 tipo: overview
 proyecto: App_Food_Tracker
-version: v1.4.5
+version: v1.4.6
 estado: activo
-fecha: 2026-10-31
-tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid, get-it, l10n, result-pattern, android-widgets, sqlite-v4, recommendations, saf-backup, auto-repair, in-app-updater, microinteractions, gemini-streaming, decoupled-cot, queue-resilience, multi-task, native-tiling, 16k-tokens, thinking-level-medium, dynamic-pacing, background-notifications, socket-resilience, privacy-storage, clinical-pdf, l10n-domains, zero-fallbacks, nothing-os-widgets, master-prompt-modal, share-sheet, data-driven-widgets, modular-recommendation-catalogs]
+fecha: 2026-11-15
+tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid, get-it, l10n, result-pattern, android-widgets, sqlite-v4, recommendations, saf-backup, auto-repair, in-app-updater, microinteractions, gemini-streaming, decoupled-cot, queue-resilience, multi-task, native-tiling, 16k-tokens, thinking-level-medium, dynamic-pacing, background-notifications, socket-resilience, privacy-storage, clinical-pdf, l10n-domains, zero-fallbacks, nothing-os-widgets, master-prompt-modal, share-sheet, data-driven-widgets, modular-recommendation-catalogs, modular-monolith, vertical-slice, mvc, hexagonal]
 ---
 
-# 🚀 Visión General del Proyecto: Victor Engineer - Food Tracker (v1.4.5)
+# 🚀 Visión General del Proyecto: Victor Engineer - Food Tracker (v1.4.6)
 
 > **Mesa de Control (Project-Planner):** Este documento centraliza la visión del producto, capacidades técnicas, directrices de arquitectura y el índice de navegación interconectado de todos los artefactos del proyecto según la metodología de Prototipado Evolutivo y estándares Obsidian.
 
@@ -155,7 +155,7 @@ tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid, get-it, 
 
 ## 🗺️ 2. Índice Oficial de Artefactos del Proyecto
 
-Todos los enlaces internos siguen estrictamente el estándar de Obsidian con el prefijo oficial del proyecto `[[PRJ_App_Food_Tracker_{artefacto}|Alias]]`:
+Todos los enlaces internos siguen estrictamente el estándar de Obsidian con el prefijo oficial del proyecto `[[PRJ_App_Food_Tracker_<artefacto>|<Alias>]]`:
 
 - **Arquitectura:** [[PRJ_App_Food_Tracker_architecture|Arquitectura del Sistema]]
 - **Diagrama Interactivo:** [[PRJ_App_Food_Tracker_architecture_diagram.html|Diagrama HTML (Archify)]]

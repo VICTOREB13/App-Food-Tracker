@@ -1,0 +1,192 @@
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:food_tracker/features/food_entry/food_entry.dart';
+import 'package:food_tracker/features/food_entry/models/food_item.dart';
+import 'package:food_tracker/features/food_entry/models/meal.dart';
+import 'package:food_tracker/core/services/ai/gemini_vision_service.dart';
+import 'package:food_tracker/features/food_entry/services/image_processing_service.dart';
+import 'package:food_tracker/core/services/storage/secure_storage_service.dart';
+import 'package:food_tracker/core/services/theme/theme_manager.dart';
+import 'package:food_tracker/l10n/app_localizations.dart';
+import 'package:food_tracker/core/ui/components/confirmation_dialog.dart';
+
+Future<bool> confirmAndDeleteMeal(BuildContext context, Meal meal) async {
+  final l10n = AppLocalizations.of(context);
+  final confirmed = await showVeConfirmationDialog(
+    context,
+    title: l10n.deleteMealConfirmTitle,
+    message: l10n.deleteMealConfirmMessage,
+    confirmLabel: l10n.delete,
+    isDestructive: true,
+  );
+
+  if (confirmed != true) return false;
+  try {
+    await MealController.instance.deleteMeal(meal);
+    return true;
+  } catch (e) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.deleteMealError('$e')),
+          backgroundColor: AppColors.primary,
+        ),
+      );
+    }
+    return false;
+  }
+}
+
+Future<bool> saveMealEntry({
+  required BuildContext context,
+  required Meal? initialMeal,
+  required String name,
+  required String mealType,
+  required DateTime date,
+  required String? imagePath,
+  required double calories,
+  required double protein,
+  required double carbs,
+  required double fat,
+  required String? notes,
+  required List<FoodItem> items,
+  String? aiBreakdownJson,
+}) async {
+  final l10n = AppLocalizations.of(context);
+  if (name.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.pleaseEnterDishName)),
+    );
+    return false;
+  }
+
+  try {
+    String? effectiveImagePath = imagePath;
+    if (effectiveImagePath != null && effectiveImagePath.trim().isNotEmpty) {
+      final bool mealTypeChanged = initialMeal == null || initialMeal.mealType != mealType;
+      if (mealTypeChanged) {
+        try {
+          effectiveImagePath = await ImageProcessingService.instance.renameMealImage(
+            currentPath: effectiveImagePath,
+            newMealType: mealType,
+            date: date,
+          );
+        } catch (_) {}
+      }
+    }
+
+    final effectiveJson = aiBreakdownJson ?? initialMeal?.aiBreakdownJson;
+    final baseMeal = (initialMeal ?? Meal(name: name, mealType: mealType, date: date)).copyWith(
+      name: name,
+      mealType: mealType,
+      date: date,
+      imagePath: effectiveImagePath,
+      calories: calories,
+      protein: protein,
+      carbs: carbs,
+      fat: fat,
+      notes: notes,
+      aiBreakdownJson: effectiveJson,
+    );
+
+    final updated = items.isNotEmpty
+        ? baseMeal.recalculateFromItems(items)
+        : baseMeal.copyWith(aiBreakdownJson: null);
+    await MealController.instance.upsertMeal(updated);
+    return true;
+  } catch (e) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.saveMealError('$e')),
+          backgroundColor: AppColors.primary,
+        ),
+      );
+    }
+    return false;
+  }
+}
+
+Future<MealAnalysisResult?> reanalyzeMealWithAi({
+  required BuildContext context,
+  required String? imagePath,
+  required String currentDishName,
+  required String currentNotes,
+  required List<FoodItem> currentItems,
+}) async {
+  if (imagePath == null) return null;
+  final l10n = AppLocalizations.of(context);
+  final file = File(imagePath);
+  if (!file.existsSync()) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.imageFileNotFoundError)),
+      );
+    }
+    return null;
+  }
+
+  final apiKey = await SecureStorageService.instance.getGeminiApiKey();
+  if (apiKey == null || apiKey.trim().isEmpty) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.configureGeminiKeyInProfile),
+          backgroundColor: AppColors.primary,
+        ),
+      );
+    }
+    return null;
+  }
+
+  try {
+    final selectedModel = await SecureStorageService.instance.getSelectedGeminiModel();
+    final masterPrompt = await SecureStorageService.instance.getMasterPrompt();
+    final gemini = GeminiVisionService(
+      apiKey: apiKey,
+      modelName: selectedModel ?? GeminiVisionService.defaultModel,
+      masterPrompt: masterPrompt,
+    );
+
+    final bytes = await file.readAsBytes();
+    final itemsSummary = currentItems.isNotEmpty
+        ? currentItems.map((e) => '${e.name}: ${e.estimatedGrams.toStringAsFixed(0)}g').join(', ')
+        : 'sin ingredientes';
+
+    final String? userContext;
+    if (currentDishName.isEmpty && currentItems.isEmpty) {
+      userContext = currentNotes.isNotEmpty
+          ? 'Notas/Indicaciones del comensal: "$currentNotes"'
+          : null;
+    } else {
+      userContext = 'El comensal corrigió ingredientes del plato: '
+          'Plato: "$currentDishName", Notas/Indicaciones: "$currentNotes", Ingredientes actuales: $itemsSummary. '
+          'Desglosa CADA ingrediente de forma independiente con sus gramos y macronutrientes reales ajustados a las indicaciones del comensal. PROHIBIDO unificar todo en un solo ingrediente o usar 200g genéricos.';
+    }
+
+    final analysis = await gemini.analyzeMealPhoto(
+      rawImageBytes: bytes,
+      userContext: userContext,
+    );
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.mealReanalyzedSuccess),
+          backgroundColor: AppColors.success,
+        ),
+      );
+    }
+    return analysis;
+  } catch (e) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.reanalyzeMealError('$e')),
+          backgroundColor: AppColors.primary,
+        ),
+      );
+    }
+    return null;
+  }
+}

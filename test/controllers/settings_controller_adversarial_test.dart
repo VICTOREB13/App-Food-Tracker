@@ -4,12 +4,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:food_tracker/controllers/settings_controller.dart';
-import 'package:food_tracker/models/gemini_model_info.dart';
-import 'package:food_tracker/services/database_service.dart';
-import 'package:food_tracker/services/gemini_model_service.dart';
-import 'package:food_tracker/services/gemini_vision_service.dart';
-import 'package:food_tracker/services/secure_storage_service.dart';
+import 'package:food_tracker/features/settings_profile/settings_profile.dart';
+import 'package:food_tracker/core/models/gemini_model_info.dart';
+import 'package:food_tracker/core/database/database_service.dart';
+import 'package:food_tracker/core/services/ai/gemini_model_service.dart';
+import 'package:food_tracker/core/services/ai/gemini_vision_service.dart';
+import 'package:food_tracker/core/services/storage/secure_storage_service.dart';
 
 class AdversarialFakeStorage extends Fake implements FlutterSecureStorage {
   final Map<String, String> data = {};

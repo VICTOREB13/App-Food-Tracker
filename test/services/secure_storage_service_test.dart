@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:food_tracker/models/daily_goals.dart';
-import 'package:food_tracker/services/secure_storage_service.dart';
+import 'package:food_tracker/core/models/daily_goals.dart';
+import 'package:food_tracker/core/services/storage/secure_storage_service.dart';
 
 class FakeFlutterSecureStorage extends Fake implements FlutterSecureStorage {
   final Map<String, String> _data = {};

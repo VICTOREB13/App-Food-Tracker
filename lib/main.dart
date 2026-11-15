@@ -3,16 +3,16 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
-import 'controllers/settings_controller.dart';
+import 'features/settings_profile/settings_profile.dart';
 import 'core/di/service_locator.dart';
 import 'l10n/app_localizations.dart';
-import 'screens/dashboard_screen.dart';
-import 'screens/onboarding_screen.dart';
-import 'services/analysis_queue_service.dart';
-import 'services/database_service.dart';
-import 'services/secure_storage_service.dart';
-import 'services/theme_manager.dart';
-import 'services/notification_service.dart';
+import 'features/dashboard/dashboard.dart';
+
+import 'package:food_tracker/features/food_entry/services/analysis_queue_service.dart';
+import 'package:food_tracker/core/database/database_service.dart';
+import 'package:food_tracker/core/services/storage/secure_storage_service.dart';
+import 'package:food_tracker/core/services/theme/theme_manager.dart';
+import 'package:food_tracker/core/services/platform/notification_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -70,7 +70,7 @@ Future<void> _initializeBackgroundServices() async {
   }
 
   try {
-    await SettingsController.instance.loadLocale().timeout(
+    await SettingsProfileController.instance.loadLocale().timeout(
       const Duration(seconds: 2),
       onTimeout: () => debugPrint('Locale load timeout warning'),
     );
@@ -155,9 +155,9 @@ class _NutriTrackerAppState extends State<NutriTrackerApp> {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: Listenable.merge([ThemeManager.instance, SettingsController.instance]),
+      listenable: Listenable.merge([ThemeManager.instance, SettingsProfileController.instance]),
       builder: (context, _) {
-        final ctrlLocale = SettingsController.instance.currentLocale;
+        final ctrlLocale = SettingsProfileController.instance.currentLocale;
         final targetLocale = widget.locale ?? ctrlLocale;
         Locale? effectiveLocale;
         if (targetLocale != null) {
@@ -190,8 +190,8 @@ class _NutriTrackerAppState extends State<NutriTrackerApp> {
           home: AnimatedSwitcher(
             duration: const Duration(milliseconds: 250),
             child: _hasCompletedOnboarding
-                ? const DashboardScreen(key: ValueKey('dashboard'))
-                : OnboardingScreen(
+                ? const DashboardView(key: ValueKey('dashboard'))
+                : OnboardingView(
                     key: const ValueKey('onboarding'),
                     onCompleted: () {
                       if (mounted) {

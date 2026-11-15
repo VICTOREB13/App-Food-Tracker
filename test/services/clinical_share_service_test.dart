@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/services/clinical_share_service.dart';
+import 'package:food_tracker/core/services/export/clinical_share_service.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

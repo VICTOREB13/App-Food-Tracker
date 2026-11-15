@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/l10n/app_localizations.dart';
-import 'package:food_tracker/widgets/meal_detail/meal_analysis_pacing.dart';
+import 'package:food_tracker/features/food_entry/widgets/meal_analysis_pacing.dart';
 
 void main() {
   group('MealAnalysisPacing Tests', () {

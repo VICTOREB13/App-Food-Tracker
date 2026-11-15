@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/core/interfaces/database_service_interface.dart';
-import 'package:food_tracker/models/food_item.dart';
-import 'package:food_tracker/models/meal.dart';
-import 'package:food_tracker/services/clinical_pdf_export_service.dart';
+import 'package:food_tracker/features/food_entry/models/food_item.dart';
+import 'package:food_tracker/features/food_entry/models/meal.dart';
+import 'package:food_tracker/core/services/export/clinical_pdf_export_service.dart';
 
 class _FakeDatabaseService implements IDatabaseService {
   final List<Meal> meals;

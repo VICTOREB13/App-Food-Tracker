@@ -1,14 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/models/meal.dart';
-import 'package:food_tracker/models/pantry_item.dart';
-import 'package:food_tracker/models/user_profile.dart';
-import 'package:food_tracker/models/weight_log.dart';
-import 'package:food_tracker/services/daos/database_schema.dart';
-import 'package:food_tracker/services/daos/meal_dao.dart';
-import 'package:food_tracker/services/daos/pantry_dao.dart';
-import 'package:food_tracker/services/daos/user_profile_dao.dart';
-import 'package:food_tracker/services/daos/weight_log_dao.dart';
-import 'package:food_tracker/services/database_service.dart';
+import 'package:food_tracker/features/food_entry/models/meal.dart';
+import 'package:food_tracker/features/pantry_inventory/models/pantry_item.dart';
+import 'package:food_tracker/features/settings_profile/models/user_profile.dart';
+import 'package:food_tracker/features/biometrics_weight/models/weight_log.dart';
+import 'package:food_tracker/core/database/daos/database_schema.dart';
+import 'package:food_tracker/core/database/daos/meal_dao.dart';
+import 'package:food_tracker/core/database/daos/pantry_dao.dart';
+import 'package:food_tracker/core/database/daos/user_profile_dao.dart';
+import 'package:food_tracker/core/database/daos/weight_log_dao.dart';
+import 'package:food_tracker/core/database/database_service.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {

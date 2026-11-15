@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/models/weight_log.dart';
-import 'package:food_tracker/widgets/metrics/weight_line_chart_painter.dart';
+import 'package:food_tracker/features/biometrics_weight/models/weight_log.dart';
+import 'package:food_tracker/features/biometrics_weight/widgets/weight_line_chart_painter.dart';
 
 void main() {
   group('WeightLineChartPainter Tests', () {

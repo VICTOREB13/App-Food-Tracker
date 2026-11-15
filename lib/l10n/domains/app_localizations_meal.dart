@@ -116,6 +116,28 @@ abstract class AppLocalizationsMeal extends AppLocalizationsDashboard {
 
   String get fatControlTitle;
   String fitScoreLabel(String score);
+
+  String get foodEntryTitle;
+  String get foodEntrySubtitle;
+  String get scanMealPhotoTitle;
+  String get scanMealPhotoSubtitle;
+  String get scanBarcodeTitle;
+  String get scanBarcodeSubtitle;
+  String get quickMealTitle;
+  String get quickMealSubtitle;
+  String get manualMealTitle;
+  String get manualMealSubtitle;
+  String get dishwareReferenceTitle;
+  String get dishwareReferenceSubtitle;
+  String get quickWaterAdded;
+  String get todayLoggedMeals;
+
+  String get pantryExpiringSoon;
+  String get pantryExpired;
+  String get pantryFresh;
+  String get pantryLowStock;
+  String get pantrySearchHint;
+  String pantryMacroSummary(String calories, String protein, String carbs, String fat);
 }
 
 /// Extension to localize invariant meal keys ('Desayuno', 'Almuerzo', 'Cena', 'Snack', 'Otro')

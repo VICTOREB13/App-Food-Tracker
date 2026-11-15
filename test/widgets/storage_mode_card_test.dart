@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/controllers/settings_controller.dart';
+import 'package:food_tracker/features/settings_profile/settings_profile.dart';
 import 'package:food_tracker/l10n/app_localizations.dart';
-import 'package:food_tracker/models/storage_mode.dart';
-import 'package:food_tracker/services/secure_storage_service.dart';
-import 'package:food_tracker/widgets/settings/storage_mode_card.dart';
+import 'package:food_tracker/core/models/storage_mode.dart';
+import 'package:food_tracker/core/services/storage/secure_storage_service.dart';
+import 'package:food_tracker/features/settings_profile/widgets/storage_mode_card.dart';
 
 class _FakeFlutterSecureStorage extends Fake implements FlutterSecureStorage {
   final Map<String, String> data = {};

@@ -105,4 +105,5 @@ abstract class AppLocalizationsProfile extends AppLocalizationsMetrics {
   String get stepsUnit;
   String get bmrAtRestLabel;
   String get tdeeTotalExpenseLabel;
+  String get mifflinStJeorSubtitle;
 }

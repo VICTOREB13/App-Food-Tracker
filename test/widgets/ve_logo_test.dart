@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/widgets/common/ve_logo.dart';
-import 'package:food_tracker/widgets/dashboard/streak_badge.dart';
+import 'package:food_tracker/core/ui/components/ve_logo.dart';
+import 'package:food_tracker/features/dashboard/widgets/streak_badge.dart';
 
 void main() {
   group('VeLogo and StreakBadge Widget Tests', () {

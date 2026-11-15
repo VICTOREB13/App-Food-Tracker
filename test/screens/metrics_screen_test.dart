@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/controllers/meal_controller.dart';
-import 'package:food_tracker/models/meal.dart';
-import 'package:food_tracker/models/weight_log.dart';
-import 'package:food_tracker/screens/metrics_screen.dart';
-import 'package:food_tracker/services/database_service.dart';
-import 'package:food_tracker/widgets/metrics/calorie_compliance_bento_card.dart';
-import 'package:food_tracker/widgets/metrics/macro_distribution_bento_card.dart';
-import 'package:food_tracker/widgets/metrics/quick_weight_entry_dialog.dart';
-import 'package:food_tracker/widgets/metrics/streak_compliance_bento_card.dart';
-import 'package:food_tracker/widgets/metrics/weight_history_bento_card.dart';
-import 'package:food_tracker/widgets/metrics/weight_trend_bento_card.dart';
+import 'package:food_tracker/features/food_entry/food_entry.dart';
+import 'package:food_tracker/features/food_entry/models/meal.dart';
+import 'package:food_tracker/features/biometrics_weight/models/weight_log.dart';
+import 'package:food_tracker/features/biometrics_weight/biometrics_weight.dart';
+import 'package:food_tracker/core/database/database_service.dart';
+import 'package:food_tracker/features/biometrics_weight/widgets/calorie_compliance_bento_card.dart';
+import 'package:food_tracker/features/biometrics_weight/widgets/macro_distribution_bento_card.dart';
+import 'package:food_tracker/features/biometrics_weight/widgets/quick_weight_entry_dialog.dart';
+import 'package:food_tracker/features/biometrics_weight/widgets/streak_compliance_bento_card.dart';
+import 'package:food_tracker/features/biometrics_weight/widgets/weight_history_bento_card.dart';
+import 'package:food_tracker/features/biometrics_weight/widgets/weight_trend_bento_card.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 

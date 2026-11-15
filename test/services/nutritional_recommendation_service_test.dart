@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:food_tracker/models/meal.dart';
-import 'package:food_tracker/models/user_profile.dart';
-import 'package:food_tracker/services/daos/database_schema.dart';
-import 'package:food_tracker/services/database_service.dart';
-import 'package:food_tracker/services/nutritional_recommendation_service.dart';
+import 'package:food_tracker/features/food_entry/models/meal.dart';
+import 'package:food_tracker/features/settings_profile/models/user_profile.dart';
+import 'package:food_tracker/core/database/daos/database_schema.dart';
+import 'package:food_tracker/core/database/database_service.dart';
+import 'package:food_tracker/features/dashboard/services/nutritional_recommendation_service.dart';
 
 void main() {
   setUpAll(() {

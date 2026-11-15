@@ -1,15 +1,39 @@
 ---
 tipo: task_list
 proyecto: App_Food_Tracker
-iteracion: v1.4.5
+iteracion: v1.4.6
 estado: completado
-fecha: 2026-10-31
-tags: [proyecto, tasks, checklist, v1-4-5, archify, v9-architecture]
+fecha: 2026-11-15
+tags: [proyecto, tasks, checklist, v1-4-6, modular-monolith, vertical-slice, mvc, hexagonal]
 ---
 
-# 📋 Checklist Maestro de Tareas de Agentes (v1.4.5)
+# 📋 Checklist Maestro de Tareas de Agentes (v1.4.6)
 
-> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.4.5. Cada tarea completada se marca con `[x]`.
+> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.4.6. Cada tarea completada se marca con `[x]`.
+
+## 🌟 Iteración v1.4.6: Monolito Modular, Vertical Slice Architecture, Micro-MVC y Hexagonal Pragmática
+
+### 🧭 1. Project-Planner & Software-Architect
+- [x] (Software-Architect) Diseñar e implementar los 5 Puertos abstractos (`lib/core/ports/`) y 5 Adaptadores (`lib/core/adapters/`).
+- [x] (Software-Architect) Diseñar e implementar las 7 Rebanadas Verticales en `lib/features/` bajo arquitectura VSA y Micro-MVC.
+- [x] (Software-Architect) Consolidar la Opción B: Erradicar carpetas horizontales legadas (`screens/`, `controllers/`, `widgets/`, `models/`).
+- [x] (Software-Architect) Reubicar canónicamente los 33 servicios de `lib/services/` entre `lib/core/` y `lib/features/<slice>/services/`.
+- [x] (Project-Planner) Actualizar documentos vivos y deltas de arquitectura (`architecture.md`, `abstractions.md`, `api_spec.md`, `audit_report.md`, `changelog_v1.md`, `project_overview.md`).
+
+### 🛡️ 2. Systems-Auditor & Quality-Gate
+- [x] (Systems-Auditor) Auditar paridad SDD mediante `bun run lint:contracts` (0 faltantes, 0 huérfanos).
+- [x] (Systems-Auditor) Auditar que el 100% de los 250 archivos Dart en `lib/` cumplan estrictamente `< 300 LoC`.
+- [x] (Systems-Auditor) Verificar que no existan imports rotos en `lib/` ni en `test/`.
+- [x] (Systems-Auditor) Ejecutar `bun test` y certificar Quality Gate PASS.
+- [x] (Systems-Auditor) Validar los 9 artefactos del proyecto y 7 heurísticas FIFO con `bun run validate`.
+
+### 🌐 3. DevOps-Engineer & Release-Pipeline
+- [x] (DevOps-Engineer) Incrementar versión canónica a `v1.4.6` en `pubspec.yaml` y `app_constants.dart`.
+- [x] (DevOps-Engineer) Generar sección de versión `[1.4.6]` en `changelog_v1.md`.
+- [x] (DevOps-Engineer) Crear commit semántico de release y tag anotado `v1.4.6`.
+- [x] (DevOps-Engineer) Ejecutar git push hacia el repositorio remoto y monitorear GitHub Actions.
+
+---
 
 ## 🌟 Iteración v1.4.5: Arquitectura Archify v3.2, Normalización V9 de Artefactos y Exclusión de Metodología
 

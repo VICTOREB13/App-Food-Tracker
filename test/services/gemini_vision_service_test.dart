@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/services/gemini_vision_service.dart';
+import 'package:food_tracker/core/services/ai/gemini_vision_service.dart';
 
 void main() {
   group('GeminiVisionService Model, Timeout and System Instruction Tests', () {

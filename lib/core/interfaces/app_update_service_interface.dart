@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import '../../models/github_release_model.dart';
+import 'package:food_tracker/core/models/github_release_model.dart';
 
 /// Progress callback for binary APK downloads.
 /// [ratio] is between 0.0 and 1.0 (or 0.0 if total length is unknown).

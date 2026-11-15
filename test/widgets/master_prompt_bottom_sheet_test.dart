@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/l10n/app_localizations.dart';
-import 'package:food_tracker/models/user_profile.dart';
-import 'package:food_tracker/widgets/profile/master_prompt_bottom_sheet.dart';
+import 'package:food_tracker/features/settings_profile/models/user_profile.dart';
+import 'package:food_tracker/features/settings_profile/widgets/profile/master_prompt_bottom_sheet.dart';
 
 void main() {
   testWidgets('MasterPromptBottomSheet renders tabs, preview, and editor', (tester) async {

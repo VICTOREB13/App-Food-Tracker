@@ -1,5 +1,5 @@
 ﻿import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/models/pantry_item.dart';
+import 'package:food_tracker/features/pantry_inventory/models/pantry_item.dart';
 
 void main() {
   group('PantryItem Model Tests', () {

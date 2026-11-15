@@ -114,4 +114,26 @@ abstract class AppLocalizationsEsMeal extends AppLocalizationsEsDashboard {
 
   @override String get fatControlTitle => 'Control de Grasas';
   @override String fitScoreLabel(String score) => '$score% Ajuste';
+
+  @override String get foodEntryTitle => 'Registro de Comidas';
+  @override String get foodEntrySubtitle => 'Elige tu método de registro';
+  @override String get scanMealPhotoTitle => 'Escanear Plato con IA';
+  @override String get scanMealPhotoSubtitle => 'Análisis volumétrico y macros con Gemini';
+  @override String get scanBarcodeTitle => 'Escanear Código de Barras';
+  @override String get scanBarcodeSubtitle => 'Consulta USDA y OpenFoodFacts';
+  @override String get quickMealTitle => 'Registro Rápido';
+  @override String get quickMealSubtitle => 'Ingreso directo de calorías y macros';
+  @override String get manualMealTitle => 'Creación Manual Detallada';
+  @override String get manualMealSubtitle => 'Desglose ingrediente por ingrediente';
+  @override String get dishwareReferenceTitle => 'Vajilla Calibrada';
+  @override String get dishwareReferenceSubtitle => 'Referencia métrica de plato para IA';
+  @override String get quickWaterAdded => 'Vaso de agua registrado';
+  @override String get todayLoggedMeals => 'Comidas registradas hoy';
+
+  @override String get pantryExpiringSoon => 'Caduca pronto';
+  @override String get pantryExpired => 'Caducado';
+  @override String get pantryFresh => 'Fresco';
+  @override String get pantryLowStock => 'Stock bajo';
+  @override String get pantrySearchHint => 'Buscar en despensa o marca...';
+  @override String pantryMacroSummary(String calories, String protein, String carbs, String fat) => '$calories kcal • P: ${protein}g • C: ${carbs}g • G: ${fat}g';
 }

@@ -42,8 +42,15 @@ lib/
 ├── controllers/          # Controladores de Estado Reactivo con Inyección por Constructor
 │   ├── meal_controller.dart
 │   ├── settings_controller.dart
-│   ├── fasting_controller.dart
+│   ├── fasting_controller.dart   # Legacy bridge hacia features/fasting_tracker/
 │   └── streak_calculator.dart
+├── features/             # Vertical Slice Architecture (VSA) Canónicas (< 300 LoC)
+│   └── fasting_tracker/  # Rebanada Vertical Canónica de Ayuno Intermitente
+│       ├── fasting_tracker.dart            # Fachada de Re-exportación Limpia
+│       ├── fasting_tracker.model.dart      # FastingLog, FastingProtocol, KetosisPhase, FastingState (Sentinel)
+│       ├── fasting_tracker.controller.dart # FastingTrackerController (ChangeNotifier, Port/DAO, Ticker)
+│       ├── fasting_tracker.view.dart       # FastingTrackerView (Bento Card, Micro-MVC)
+│       └── fasting_tracker_test.dart       # Suite TDD Co-localizada
 ├── core/                 # Infraestructura Transversal y Contratos
 │   ├── di/
 │   │   └── service_locator.dart
@@ -174,7 +181,7 @@ lib/
 ## ⚙️ Clases Núcleo y Servicios de Negocio
 
 ### 1. `DatabaseService`
-- **Ubicación:** `lib/services/database_service.dart`
+- **Ubicación:** `lib/core/database/database_service.dart`
 - **Responsabilidad:** Orquestador central de SQLite v3 (modo WAL, sincronización NORMAL, llaves foráneas ON). Delega en DAOs atómicos (`MealDao`, `WeightLogDao`, `UserProfileDao`, `PantryDao`, `DishwareDao`, `MealTemplateDao`, `FastingDao`).
 - **Métodos Clave:**
   - `database: Future<Database>`: Inicialización perezosa con lock defensivo `_initFuture`.
@@ -182,7 +189,7 @@ lib/
   - `getMealsByRange(DateTime start, DateTime end): Future<List<Meal>>`: Consulta indexada B-Tree sin N+1.
 
 ### 2. `GeminiVisionService`
-- **Ubicación:** `lib/services/gemini_vision_service.dart`
+- **Ubicación:** `lib/core/services/ai/gemini_vision_service.dart`
 - **Responsabilidad:** Cliente de visión multimodal con Google Generative AI SDK, temperatura 0.2, timeout defensivo de 35s y prompt enriquecido.
 - **Métodos Clave:**
   - `analyzeMealImage(Uint8List imageBytes, ...): Future<MealAnalysisResult>`: Inferencia visual con inyección de escala métrica de vajilla y contexto de despensa.
@@ -191,25 +198,25 @@ lib/
   - `reanalyzeMealWithAi(Meal meal, String prompt): Future<MealAnalysisResult>`: Ajuste interactivo y sustitución de ingredientes.
 
 ### 3. `GeminiModelService`
-- **Ubicación:** `lib/services/gemini_model_service.dart`
+- **Ubicación:** `lib/core/services/ai/gemini_model_service.dart`
 - **Responsabilidad:** Descubrimiento dinámico de modelos de IA vía `GET https://generativelanguage.googleapis.com/v1beta/models`.
 - **Métodos Clave:**
   - `getAvailableModels({bool forceRefresh}): Future<List<GeminiModelInfo>>`: Consulta en vivo filtrando por generación estructurada y visión, con catálogo offline fallback resiliente.
 
 ### 4. `UsdaFoodDataService`
-- **Ubicación:** `lib/services/usda_food_data_service.dart`
+- **Ubicación:** `lib/core/services/nutrition/usda_food_data_service.dart`
 - **Responsabilidad:** Cliente HTTP para USDA FoodData Central API (`https://api.nal.usda.gov/fdc/v1`).
 - **Métodos Clave:**
   - `lookupBarcode(String barcode): Future<UsdaFoodItem?>`: Búsqueda GTIN normalizada a 14 dígitos (`padLeft(14, '0')`), normalización energética ($kJ \rightarrow kcal$) y rate limiting deslizante (1.000 req/h).
 
 ### 5. `BarcodeLookupService`
-- **Ubicación:** `lib/services/barcode_lookup_service.dart`
+- **Ubicación:** `lib/features/food_entry/services/barcode_lookup_service.dart`
 - **Responsabilidad:** Cascada híbrida de resolución de códigos de barras (USDA FoodData Central $\rightarrow$ Open Food Facts v2).
 - **Métodos Clave:**
   - `lookup(String barcode): Future<BarcodeLookupResult?>`: Despacha primero a USDA; si no hay coincidencia exacta o falla, conmuta limpiamente a Open Food Facts.
 
 ### 6. `MetabolicCalculator`
-- **Ubicación:** `lib/services/metabolic_calculator.dart`
+- **Ubicación:** `lib/features/biometrics_weight/services/metabolic_calculator.dart`
 - **Responsabilidad:** Motor biométrico clínico implementando Mifflin-St Jeor, factores de actividad y metas nutricionales.
 - **Métodos Clave:**
   - `calculateBmr(UserProfile profile): double`: TMB estandarizada por sexo biológico.
@@ -218,7 +225,7 @@ lib/
   - `generateMasterPrompt(UserProfile profile): String`: Síntesis del contexto metabólico para el prompt de Gemini.
 
 ### 7. `SecureStorageService`
-- **Ubicación:** `lib/services/secure_storage_service.dart`
+- **Ubicación:** `lib/core/services/storage/secure_storage_service.dart`
 - **Responsabilidad:** Custodia de claves privadas y configuraciones sensibles con hardware seguro (`flutter_secure_storage`).
 - **Métodos Clave:**
   - `getGeminiApiKey() / setGeminiApiKey(key)`: Lectura/escritura segura de clave Gemini.
@@ -226,28 +233,28 @@ lib/
   - `getDailyGoals() / setDailyGoals(goals)`: Persistencia segura de metas nutricionales.
 
 ### 8. `BackupService`
-- **Ubicación:** `lib/services/backup_service.dart`
+- **Ubicación:** `lib/features/data_backup/services/backup_service.dart`
 - **Responsabilidad:** Exportación e importación completa de la base de datos en JSON estructurado para copias de seguridad locales.
 - **Métodos Clave:**
   - `exportToJsonString(): Future<String>`: Serialización transaccional de comidas, despensa, pesos y perfil.
   - `importFromJsonString(String jsonContent): Future<Map<String, int>>`: Restauración determinista con `ConflictAlgorithm.replace`.
 
 ### 9. `ImageProcessingService`
-- **Ubicación:** `lib/services/image_processing_service.dart`
+- **Ubicación:** `lib/features/food_entry/services/image_processing_service.dart`
 - **Responsabilidad:** Pipeline de preprocesamiento, escalado y compresión de capturas fotográficas.
 - **Métodos Clave:**
   - `compressAndResizeAsync(Uint8List imageBytes, ...): Future<Uint8List>`: Compresión en Isolate secundario a 1024x1024 px, JPEG 85%.
   - `saveMealImage(Uint8List imageBytes, ...): Future<String>`: Almacenamiento físico seguro con nombres normalizados.
 
 ### 10. `HomeWidgetService`
-- **Ubicación:** `lib/services/home_widget_service.dart`
+- **Ubicación:** `lib/core/services/platform/home_widget_service.dart`
 - **Responsabilidad:** Sincronización bidireccional entre estado reactivo y AppWidgets nativos de Android (2x2 y 4x2).
 - **Métodos Clave:**
   - `updateWidgetData(...)`: Actualización atómica en SharedPreferences y recarga de RemoteViews.
   - `handleWidgetLaunch(Uri uri)`: Manejo de deep links (`foodtracker://scan_food`, `foodtracker://scan_barcode`).
 
 ### 11. `AnalysisQueueService`
-- **Ubicación:** `lib/services/analysis_queue_service.dart`
+- **Ubicación:** `lib/features/food_entry/services/analysis_queue_service.dart`
 - **Responsabilidad:** Cola asíncrona no bloqueante con persistencia SQLite y preservación física garantizada de imágenes.
 - **Métodos Clave:**
   - `enqueueTask(imagePath, ...)`: Encolado en milisegundo 0 antes de compresión, disparando `notifyListeners()`.
@@ -255,15 +262,15 @@ lib/
   - `createManualMealFromFailedTask(taskId)`: Creación manual sin pérdida de foto.
 
 ### 12. `OfflineFoodEstimatorService`
-- **Ubicación:** `lib/services/offline_food_estimator_service.dart`
+- **Ubicación:** `lib/features/food_entry/services/offline_food_estimator_service.dart`
 - **Responsabilidad:** Estimador local determinista con catálogo de 50+ alimentos normalizados por 100g para autocompletado instantáneo (<5ms, 0 tokens).
 
 ### 13. `GeminiResilienceHelper`
-- **Ubicación:** `lib/services/gemini_resilience_helper.dart`
+- **Ubicación:** `lib/core/services/ai/gemini_resilience_helper.dart`
 - **Responsabilidad:** Resiliencia de red con reintentos exponenciales, jitter y cascada automática de modelos.
 
 ### 14. `BackupNormalizer`
-- **Ubicación:** `lib/services/backup_normalizer.dart`
+- **Ubicación:** `lib/features/data_backup/services/backup_normalizer.dart`
 - **Responsabilidad:** Normalización adaptativa de esquemas legados (v1.0.4 y anteriores) y auto-reparación de respaldos incompletos.
 - **Métodos Clave:**
   - `normalize(String jsonString): Future<Map<String, dynamic>>`: Procesa en `Isolate.run`, detecta formatos de arrays planos, traduce claves en español y devuelve el mapa canónico.
@@ -281,7 +288,7 @@ lib/
   - `parseIsoDateTimeSafe(String? raw): DateTime`: Parsing determinista con fallback a fecha actual ante strings inválidos.
 
 ### 2. `MetabolicCalculator` (Fórmulas Clínicas Puras)
-- **Módulo:** `lib/services/metabolic_calculator.dart`
+- **Módulo:** `lib/features/biometrics_weight/services/metabolic_calculator.dart`
 - **Lógica Pura:**
   - Fórmula Mifflin-St Jeor: $TMB_{m} = 10 \times peso + 6.25 \times altura - 5 \times edad + 5$ (Varones), $- 161$ (Mujeres).
   - Peso Corporal Ajustado ($ABW$): $ABW = IBW + 0.4 \times (TBW - IBW)$ para usuarios con $IMC \ge 30$.
@@ -489,13 +496,13 @@ Para garantizar la estricta mantenibilidad del monolito modular sin romper compa
 
 ### 9.1. Capa de Dominio Metabólico
 - **`MacroDistribution` (`lib/models/macro_distribution.dart` - 21 LoC):** Modelo inmutable de reparto de macronutrientes en gramos y calorías derivadas.
-- **`MetabolicPromptGenerator` (`lib/services/metabolic_prompt_generator.dart` - 90 LoC):** Síntesis del Master Prompt Markdown para Gemini Vision con formatters clínicos de TDEE y objetivos.
-- **`MetabolicCalculator` (`lib/services/metabolic_calculator.dart` - 257 LoC):** Reducido de 450 LoC; conserva exclusivamente la lógica clínica pura de Mifflin-St Jeor, BMR, TDEE, y persistencia/sincronización.
+- **`MetabolicPromptGenerator` (`lib/features/biometrics_weight/services/metabolic_prompt_generator.dart` - 90 LoC):** Síntesis del Master Prompt Markdown para Gemini Vision con formatters clínicos de TDEE y objetivos.
+- **`MetabolicCalculator` (`lib/features/biometrics_weight/services/metabolic_calculator.dart` - 257 LoC):** Reducido de 450 LoC; conserva exclusivamente la lógica clínica pura de Mifflin-St Jeor, BMR, TDEE, y persistencia/sincronización.
 
 ### 9.2. Capa de IA y Catálogo Nutricional
 - **`GeminiApiException` (`lib/core/errors/gemini_api_exception.dart` - 16 LoC):** Excepción tipada para respuestas HTTP erróneas de la API de Google Gemini.
-- **`GeminiVisionFilter` (`lib/services/gemini_vision_filter.dart` - 127 LoC):** Filtrado estricto multimodal (`isVisionCapableModel`), lista de exclusión de modelos experimentales/banana, fallback models y ranking de recomendación.
-- **`GeminiModelService` (`lib/services/gemini_model_service.dart` - 156 LoC):** Reducido de 352 LoC; orquesta consultas remotas y delegación al filtro.
+- **`GeminiVisionFilter` (`lib/core/services/ai/gemini_vision_filter.dart` - 127 LoC):** Filtrado estricto multimodal (`isVisionCapableModel`), lista de exclusión de modelos experimentales/banana, fallback models y ranking de recomendación.
+- **`GeminiModelService` (`lib/core/services/ai/gemini_model_service.dart` - 156 LoC):** Reducido de 352 LoC; orquesta consultas remotas y delegación al filtro.
 - **`UsdaNutrientParser` (`lib/models/usda_nutrient_parser.dart` - 71 LoC):** Parser de IDs de nutrientes USDA (1008, 1003, 1004, 1005), conversión de kJ a kcal y navegación anidada defensiva.
 - **`UsdaFoodItem` (`lib/models/usda_food_item.dart` - 235 LoC):** Reducido de 344 LoC; entidad inmutable de alimentos FDC.
 
@@ -527,7 +534,7 @@ Para garantizar la estricta mantenibilidad del monolito modular sin romper compa
 - **Función:** `String toLocalizedMealType(BuildContext context)` mapea las claves invariantes persistidas en SQLite ('Desayuno', 'Almuerzo', 'Cena', 'Snack', 'Otro') a las cadenas tipadas de `AppLocalizations.of(context)` ('Breakfast', 'Lunch', 'Dinner', 'Snack', 'Other') sin alterar nunca la base de datos relacional.
 
 ### 10.3. Inversión Causal de Schema y Prompt en `GeminiResilienceHelper`
-- **Ubicación:** `lib/services/gemini_resilience_helper.dart` (292 LoC).
+- **Ubicación:** `lib/core/services/ai/gemini_resilience_helper.dart` (292 LoC).
 - **Estructura Causal:** Inversión estricta del flujo autorregresivo del LLM. Obliga al token de inferencia a predecir dimensiones físicas tridimensionales, volumen y densidad antes de generar gramos o macronutrientes, eliminando la adivinación previa de masa.
 
 ---
@@ -535,7 +542,7 @@ Para garantizar la estricta mantenibilidad del monolito modular sin romper compa
 ## ⚡ 11. Abstracciones y Mejoras de Resiliencia Introducidas en v1.3.2
 
 ### 11.1. Streaming Continuo en `GeminiVisionService` contra Desconexiones NAT
-- **Ubicación:** `lib/services/gemini_vision_service.dart` (295 LoC).
+- **Ubicación:** `lib/core/services/ai/gemini_vision_service.dart` (295 LoC).
 - **Abstracción de Streaming:**
   ```dart
   // Reemplazo de model.generateContent por flujo streaming acumulativo:
@@ -566,7 +573,7 @@ Para garantizar la estricta mantenibilidad del monolito modular sin romper compa
 - **Nivel de Pensamiento (Thinking Level):** Configuración estandarizada a `MEDIUM` para `gemini-3.8-flash` y modelos Pro, omitida estrictamente en modelos Lite (`gemini-3.5-flash-lite`) para evitar `HTTP 400 INVALID_ARGUMENT`.
 
 ### 11.2. Cascada Moderna y Resiliencia en `GeminiResilienceHelper`
-- **Ubicación:** `lib/services/gemini_resilience_helper.dart` (292 LoC).
+- **Ubicación:** `lib/core/services/ai/gemini_resilience_helper.dart` (292 LoC).
 - **Modelo de Respaldo:** Sustitución del modelo legado por `fallbackModel = 'gemini-2.5-flash'`.
 - **Estrategia de Backoff Escalonado:** Reintentos con retardos `[Duration(seconds: 2), Duration(seconds: 5), Duration(seconds: 10)]` y jitter aleatorio de hasta 500 ms.
 - **Clasificación de Errores Transitorios (`isRetriableError`):**
@@ -575,7 +582,7 @@ Para garantizar la estricta mantenibilidad del monolito modular sin romper compa
   - Detección de payloads vacíos o terminados abruptamente.
 
 ### 11.3. Descargas Resumibles (HTTP 206 & Range) en `AppUpdateService`
-- **Ubicación:** `lib/services/app_update_service.dart` (226 LoC).
+- **Ubicación:** `lib/core/services/platform/app_update_service.dart` (226 LoC).
 - **Mecanismo de Reanudación de Descarga:**
   ```dart
   final partFile = File('$destinationPath.part');
@@ -633,7 +640,7 @@ Para garantizar la estricta mantenibilidad del monolito modular sin romper compa
 ## ⚡ 13. Abstracciones de Inferencia 16k, Thinking Level MEDIUM y Pacing Fluido (v1.3.4)
 
 ### 13.1. Calibración de Inteligencia en Modelos (`GeminiModelService` & `GeminiVisionService`)
-- **Ubicación:** `lib/services/gemini_model_service.dart` (185 LoC) y `lib/services/gemini_vision_service.dart` (270 LoC).
+- **Ubicación:** `lib/core/services/ai/gemini_model_service.dart` (185 LoC) y `lib/core/services/ai/gemini_vision_service.dart` (270 LoC).
 - **Constantes y Resolutores:**
   - `defaultThinkingLevel = 'MEDIUM'`.
   - `resolveThinkingLevel(modelName)`: Retorna `'MEDIUM'` para Gemini 3 y variantes Pro; `null` para Lite o modelos no reasoning.
@@ -641,7 +648,7 @@ Para garantizar la estricta mantenibilidad del monolito modular sin romper compa
 - **Ventana de Generación:** `maxOutputTokens: 16384` en `GenerationConfig`, garantizando holgura completa para pensamiento latente y estructuración JSON sin riesgo de `finishReason: MAX_TOKENS`.
 
 ### 13.2. Pacing Continuo en Memoria a 60 FPS (`AnalysisQueueService` & `AnalysisProgressBanner`)
-- **Ubicación:** `lib/services/analysis_queue_service.dart` (251 LoC) y `lib/widgets/dashboard/analysis_progress_banner.dart` (271 LoC).
+- **Ubicación:** `lib/features/food_entry/services/analysis_queue_service.dart` (251 LoC) y `lib/widgets/dashboard/analysis_progress_banner.dart` (271 LoC).
 - **Patrón Cero Contención SQLite:**
   - Durante `analyzeMealPhoto`, un `Timer.periodic(const Duration(milliseconds: 500))` en memoria incrementa suavemente el progreso de 0.45 a 0.90 con `MealAnalysisPacing.nextProgress(task.progress)`.
   - Notifica a la interfaz gráfica vía `notifyListeners()` asegurando 60 FPS continuos sin escrituras a disco SQLite en cada tick.
@@ -686,7 +693,7 @@ Para garantizar la estricta mantenibilidad del monolito modular sin romper compa
 ## 📱 15. Abstracciones de Widgets Nativos Nothing OS, Master Prompt Modal y Exportación Clínica (v1.4.2)
 
 ### 15.1. Proveedores y Sincronización de Widgets Nativos (`HomeWidgetService`)
-- **Ubicación:** `lib/services/home_widget_service.dart` (192 LoC) y `android/app/src/main/kotlin/com/victorengineer/foodtracker/`.
+- **Ubicación:** `lib/core/services/platform/home_widget_service.dart` (192 LoC) y `android/app/src/main/kotlin/com/victorengineer/foodtracker/`.
 - **Proveedores Registrados (AppWidgetProvider):**
   - `FoodTrackerCompactWidgetProvider` (2x2): Medidor heroico circular monocromático Nothing OS (`widget_circle_gauge.xml`) que proyecta calorías restantes y porcentaje de meta.
   - `FoodTrackerWideWidgetProvider` (4x2): Resumen expandido de macronutrientes con paridad de color (#10B981, #F59E0B, #0EA5E9).
@@ -698,7 +705,7 @@ Para garantizar la estricta mantenibilidad del monolito modular sin romper compa
   - `FastingController._syncWidgetFasting()` envía el estado de ayuno activo (`isFasting`, `elapsedHours`, `targetHours`, `fastingStartTime`) mediante `HomeWidgetService.instance.updateFastingData()`.
 
 ### 15.2. Servicio de Compartición e Intents de Archivos (`ClinicalShareService`)
-- **Ubicación:** `lib/services/clinical_share_service.dart` (90 LoC) y `MainActivity.kt`.
+- **Ubicación:** `lib/core/services/export/clinical_share_service.dart` (90 LoC) y `MainActivity.kt`.
 - **Canal de Plataforma:** `com.victorengineer.foodtracker/app_installer`
 - **Operaciones:**
   - `shareFile(File file, {String? title})`: Despacha un intent `ACTION_SEND` envuelto en `Intent.createChooser` en Android para compartir reportes clínicos generados (CSV/PDF) mediante WhatsApp, Telegram, correo o almacenamiento en nube. Proporciona fallback a apertura en plataformas de escritorio.
@@ -719,7 +726,7 @@ Para garantizar la estricta mantenibilidad del monolito modular sin romper compa
 ## 🍱 16. Abstracciones de Localización Data-Driven en Widgets Android y Catálogos Modulares de Recomendaciones (v1.4.3)
 
 ### 16.1. Localización Data-Driven de Widgets Nativos (`HomeWidgetStrings`)
-- **Ubicación:** `lib/services/home_widget_strings.dart` (165 LoC).
+- **Ubicación:** `lib/core/services/platform/home_widget_strings.dart` (165 LoC).
 - **Responsabilidad:** Puente de datos que serializa las cadenas localizadas de la aplicación Flutter (`AppLocalizations`) a un diccionario clave-valor almacenado en los `SharedPreferences` compartidos de Android.
 - **Claves Exportadas:** Mapeo exhaustivo con prefijos dobles `label_*` y `widget_*` (28 claves por idioma: `label_calories`, `label_protein`, `label_action_add`, `label_streak_header`, `label_fasting_status_active`, etc.).
 - **Consumo en Android:**
@@ -730,8 +737,8 @@ Para garantizar la estricta mantenibilidad del monolito modular sin romper compa
   - `SettingsController.setLocale()` desencadena `HomeWidgetService.syncAllWidgetsWithLocale()`, actualizando los widgets nativos en tiempo real al cambiar entre Español e Inglés.
   - Timeout preventivo ampliado a 4 segundos en `HomeWidgetService.saveLocaleStrings()` para persistencia masiva concurrente de las 50 claves sin riesgo de cancelación prematura.
 
-### 16.2. Arquitectura de Catálogos Modulares de Recomendaciones (`lib/services/recommendations/`)
-- **Ubicación:** `lib/services/recommendations/` (< 300 LoC por archivo).
+### 16.2. Arquitectura de Catálogos Modulares de Recomendaciones (`lib/features/dashboard/services/recommendations/`)
+- **Ubicación:** `lib/features/dashboard/services/recommendations/` (< 300 LoC por archivo).
 - **Submódulos Especializados:**
   - `BreakfastDishCatalog`: Catálogo de 9 opciones balanceadas de desayuno (Huevos revueltos, Avena con proteína, Tostadas de aguacate, etc.).
   - `LunchDishCatalog`: Catálogo de 9 opciones completas de almuerzo (Pechuga a la plancha, Salmón con quinoa, Bowl de atún, etc.).
@@ -747,6 +754,23 @@ Para garantizar la estricta mantenibilidad del monolito modular sin romper compa
 - **Interacción:**
   - Disparador visual con botón prominente `[Ver / Configurar]` e icono `Icons.tune_rounded`.
   - Detección de toque unificada mediante `InkWell`: tanto el botón explícito como el contenedor Bento completo despachan `MasterPromptBottomSheet.show(context, ...)`.
+
+---
+
+## 🍰 17. Rebanadas Verticales Canónicas (Vertical Slice Architecture - VSA)
+
+### 17.1. Rebanada: `fasting_tracker`
+- **Ubicación:** `lib/features/fasting_tracker/` (< 300 LoC por archivo).
+- **Estructura Micro-MVC:**
+  - `fasting_tracker.dart`: Fachada de exportación unificada del slice.
+  - `fasting_tracker.model.dart`: Entidad `FastingLog`, enums `FastingProtocol` (circadian, fourteenTen, sixteenEight, eighteenSix, twentyFour, custom) y `KetosisPhase` (anabolic, glycogenDepletion, ketosis, deepKetosis), y estado inmutable `FastingState` con patrón sentinel.
+  - `fasting_tracker.controller.dart`: `FastingTrackerController` (ChangeNotifier) orquestando temporizadores, cálculo de fases fisiológicas de cetosis, ratio de progreso y persistencia a través de `IDatabasePort` o `IFastingDao`.
+  - `fasting_tracker.view.dart`: `FastingTrackerView` refactorizado desde `FastingWindowBentoCard` con micro-animaciones, anillo de progreso `VeLoadingRing`, selector de protocolos y directiva anti-slop.
+  - `fasting_tracker_test.dart`: Suite TDD co-localizada validando cálculo de fases de cetosis, ratios de cumplimiento, inmutabilidad sentinel y transiciones de estado.
+- **Puente de Compatibilidad Retrospectiva:**
+  - `lib/controllers/fasting_controller.dart`: Subclase y re-exportación transparente hacia `FastingTrackerController`.
+  - `lib/widgets/dashboard/fasting_window_bento_card.dart`: Subclase y re-exportación transparente hacia `FastingTrackerView`.
+
 
 
 

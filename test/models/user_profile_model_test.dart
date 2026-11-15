@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/models/user_profile.dart';
+import 'package:food_tracker/features/settings_profile/models/user_profile.dart';
 
 void main() {
   group('UserProfile Model Tests', () {

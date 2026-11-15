@@ -1,11 +1,11 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:food_tracker/controllers/settings_controller.dart';
-import 'package:food_tracker/models/user_profile.dart';
-import 'package:food_tracker/services/database_service.dart';
-import 'package:food_tracker/services/metabolic_calculator.dart';
-import 'package:food_tracker/services/secure_storage_service.dart';
+import 'package:food_tracker/features/settings_profile/settings_profile.dart';
+import 'package:food_tracker/features/settings_profile/models/user_profile.dart';
+import 'package:food_tracker/core/database/database_service.dart';
+import 'package:food_tracker/features/biometrics_weight/services/metabolic_calculator.dart';
+import 'package:food_tracker/core/services/storage/secure_storage_service.dart';
 
 class FakeFlutterSecureStorage extends Fake implements FlutterSecureStorage {
   final Map<String, String> _data = {};

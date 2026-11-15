@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/controllers/settings_controller.dart';
-import 'package:food_tracker/widgets/settings/language_selector_card.dart';
+import 'package:food_tracker/features/settings_profile/settings_profile.dart';
+import 'package:food_tracker/features/settings_profile/widgets/language_selector_card.dart';
 
 void main() {
   group('LanguageSelectorCard Widget Tests', () {

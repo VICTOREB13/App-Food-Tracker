@@ -1,4 +1,4 @@
-import '../../models/calibrated_dishware.dart';
+import 'package:food_tracker/features/food_entry/models/calibrated_dishware.dart';
 import '../errors/failures.dart';
 import '../errors/result.dart';
 

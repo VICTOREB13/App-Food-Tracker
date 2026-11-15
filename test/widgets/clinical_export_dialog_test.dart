@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/l10n/app_localizations.dart';
-import 'package:food_tracker/widgets/metrics/clinical_export_dialog.dart';
+import 'package:food_tracker/features/biometrics_weight/widgets/clinical_export_dialog.dart';
 
 void main() {
   testWidgets('showClinicalExportDialog renders dialog with range choices', (tester) async {

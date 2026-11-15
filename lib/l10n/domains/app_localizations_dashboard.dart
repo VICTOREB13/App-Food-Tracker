@@ -67,5 +67,7 @@ abstract class AppLocalizationsDashboard extends AppLocalizationsCore {
   String get viewEditPromptAction;
   String get viewEditPromptSubtitle;
   String get copyPromptAction;
+  String get dashboardTitle;
+  String get dashboardSubtitle;
 }
 

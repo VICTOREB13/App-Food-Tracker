@@ -1,4 +1,4 @@
-import '../../models/nutritional_recommendation.dart';
+import 'package:food_tracker/core/models/nutritional_recommendation.dart';
 
 /// Contract for nutritional analysis and intelligent meal recommendation services.
 abstract class INutritionalRecommendationService {

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/models/weight_log.dart';
+import 'package:food_tracker/features/biometrics_weight/models/weight_log.dart';
 
 void main() {
   group('WeightLog Model Tests', () {

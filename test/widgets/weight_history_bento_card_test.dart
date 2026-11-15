@@ -1,7 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/models/weight_log.dart';
-import 'package:food_tracker/widgets/metrics/weight_history_bento_card.dart';
+import 'package:food_tracker/features/biometrics_weight/models/weight_log.dart';
+import 'package:food_tracker/features/biometrics_weight/widgets/weight_history_bento_card.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 void main() {

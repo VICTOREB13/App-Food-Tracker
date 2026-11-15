@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:food_tracker/models/daily_goals.dart';
-import 'package:food_tracker/services/theme_manager.dart';
-import 'package:food_tracker/widgets/dashboard/daily_calorie_summary_card.dart';
+import 'package:food_tracker/core/models/daily_goals.dart';
+import 'package:food_tracker/core/services/theme/theme_manager.dart';
+import 'package:food_tracker/features/dashboard/widgets/daily_calorie_summary_card.dart';
 
 void main() {
   testWidgets('DailyCalorieSummaryCard muestra calorias y macros correctamente', (tester) async {

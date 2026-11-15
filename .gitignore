@@ -54,6 +54,7 @@ test_apks/
 # Temporary user screenshots & reference media
 Screenshot*.jpg
 *.mp4
+Diseño/
 
 # Antigravity CLI & Metodologia Interna
 /_workspace/

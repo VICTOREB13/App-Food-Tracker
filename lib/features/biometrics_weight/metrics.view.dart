@@ -1,0 +1,228 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'biometrics_weight.controller.dart';
+import 'package:food_tracker/l10n/app_localizations.dart';
+import 'package:food_tracker/features/food_entry/models/meal.dart';
+import 'package:food_tracker/core/database/database_service.dart';
+import 'package:food_tracker/core/services/theme/theme_manager.dart';
+import 'package:food_tracker/core/ui/components/ve_app_bar.dart';
+import 'package:food_tracker/features/biometrics_weight/widgets/calorie_compliance_bento_card.dart';
+import 'package:food_tracker/features/biometrics_weight/widgets/clinical_export_dialog.dart';
+import 'package:food_tracker/features/biometrics_weight/widgets/macro_distribution_bento_card.dart';
+import 'package:food_tracker/features/biometrics_weight/widgets/quick_weight_entry_dialog.dart';
+import 'package:food_tracker/features/biometrics_weight/widgets/streak_compliance_bento_card.dart';
+import 'package:food_tracker/features/biometrics_weight/widgets/weight_history_bento_card.dart';
+import 'package:food_tracker/features/biometrics_weight/widgets/weight_trend_bento_card.dart';
+import 'package:food_tracker/features/biometrics_weight/widgets/weekly_digest_card.dart';
+
+/// Dedicated screen with Bento Grid for historical analytics and progress tracking.
+class MetricsScreen extends StatefulWidget {
+  const MetricsScreen({super.key});
+
+  @override
+  State<MetricsScreen> createState() => _MetricsScreenState();
+}
+
+class _MetricsScreenState extends State<MetricsScreen> {
+  final BiometricsWeightController _mealController = BiometricsWeightController.instance;
+  int _selectedDays = 30;
+  List<Meal> _rangeMeals = [];
+
+  static const List<int> _availableRanges = [7, 30, 90, 0];
+
+  @override
+  void initState() {
+    super.initState();
+    _mealController.addListener(_onControllerChange);
+    _loadData();
+  }
+
+  @override
+  void dispose() {
+    _mealController.removeListener(_onControllerChange);
+    super.dispose();
+  }
+
+  void _onControllerChange() {
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _loadData() async {
+    try {
+      await _mealController.loadWeightLogs(days: _selectedDays);
+      List<Meal> meals;
+      if (_selectedDays == 0) {
+        meals = await DatabaseService.instance.getAllMeals();
+      } else {
+        final now = DateTime.now();
+        final cutoff = now.subtract(Duration(days: _selectedDays));
+        meals = await DatabaseService.instance.getMealsByRange(cutoff, now);
+      }
+      if (mounted) {
+        setState(() {
+          _rangeMeals = meals;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _rangeMeals = []);
+      }
+    }
+  }
+
+  Future<void> _onSelectRange(int days) async {
+    if (_selectedDays == days) return;
+    setState(() => _selectedDays = days);
+    await _loadData();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Scaffold(
+      appBar: VeAppBar(
+        title: l10n.metricsAndProgress,
+        subtitle: l10n.localFirstAnalytics,
+        showVeBadge: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.file_download_outlined, color: AppColors.primary),
+            tooltip: l10n.exportClinicalReportTooltip,
+            onPressed: () => showClinicalExportDialog(context),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => showQuickWeightEntryDialog(
+          context,
+          initialWeight: _mealController.currentWeight,
+        ),
+        backgroundColor: AppColors.primary,
+        icon: const Icon(Icons.monitor_weight_outlined, color: Colors.white),
+        label: Text(
+          l10n.recordWeight,
+          style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white),
+        ),
+      ),
+      body: RefreshIndicator(
+        onRefresh: _loadData,
+        color: AppColors.primary,
+        child: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          children: [
+            // 1. Time range filter
+            _buildRangeSelector(),
+            const SizedBox(height: 14),
+
+            // 2. Weight trend chart bento card
+            WeightTrendBentoCard(
+              logs: _mealController.weightLogs,
+            ),
+            const SizedBox(height: 14),
+
+            // 3. Bento row: Calorie compliance & Streak compliance
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: CalorieComplianceBentoCard(
+                      meals: _rangeMeals,
+                      days: _selectedDays,
+                      goals: _mealController.dailyGoals,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: StreakComplianceBentoCard(
+                      meals: _rangeMeals,
+                      days: _selectedDays,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+
+            // 4. Macro distribution bento card
+            MacroDistributionBentoCard(
+              meals: _rangeMeals,
+              goals: _mealController.dailyGoals,
+            ),
+            const SizedBox(height: 14),
+
+            // 5. Weekly nutritional digest card
+            WeeklyDigestCard(
+              meals: _rangeMeals,
+              goals: _mealController.dailyGoals,
+            ),
+            const SizedBox(height: 14),
+
+            // 6. Weight history bento card with notes
+            WeightHistoryBentoCard(
+              logs: _mealController.weightLogs,
+            ),
+            const SizedBox(height: 80),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRangeSelector() {
+    final l10n = AppLocalizations.of(context);
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          Text(
+            l10n.periodLabel,
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.8,
+              color: AppColors.textSecondary(context),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Row(
+            children: _availableRanges.map((days) {
+              final isSelected = _selectedDays == days;
+              final label = days == 0 ? l10n.allTimeHistorical : l10n.periodDays(days.toString());
+              return Padding(
+                padding: const EdgeInsets.only(left: 6),
+                child: ChoiceChip(
+                  label: Text(label),
+                  selected: isSelected,
+                  onSelected: (_) => _onSelectRange(days),
+                  labelStyle: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                    color: isSelected
+                        ? Colors.white
+                        : AppColors.textSecondary(context),
+                  ),
+                  selectedColor: AppColors.primary,
+                  backgroundColor: AppColors.surface(context),
+                  side: BorderSide(
+                    color: isSelected
+                        ? AppColors.primary
+                        : AppColors.border(context),
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  showCheckmark: false,
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Canonical VSA alias for MetricsScreen
+typedef MetricsView = MetricsScreen;

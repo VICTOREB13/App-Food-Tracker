@@ -51,5 +51,11 @@ abstract class AppLocalizationsEnMetrics extends AppLocalizationsEnMeal {
   @override String get viewLess => 'View less';
   @override String viewAllCount(String count) => 'View all ($count)';
   @override String get noWeightLogsInRange => 'No weight logs in this range';
+
+  @override String get movingAverage7dLabel => '7d Avg';
+  @override String get adjustedBodyWeightLabel => 'Adjusted Weight (ABW)';
+  @override String get bmiLabel => 'BMI';
+  @override String get quickAdjustLabel => 'Quick Adjust';
+  @override String get quickLogWeight => 'Log Weight';
 }
 
