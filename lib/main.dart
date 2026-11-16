@@ -173,7 +173,6 @@ class _NutriTrackerAppState extends State<NutriTrackerApp> {
           themeMode: ThemeManager.instance.themeMode,
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
-          builder: (context, child) => MaterialUiCompatibilityBridge(child: child!),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           locale: effectiveLocale,

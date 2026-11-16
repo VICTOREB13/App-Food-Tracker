@@ -1,4 +1,3 @@
-import 'package:food_tracker/core/models/analysis_task.dart';
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/features/food_entry/models/meal.dart';

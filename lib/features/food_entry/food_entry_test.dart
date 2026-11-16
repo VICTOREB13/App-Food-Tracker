@@ -2,8 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/core/errors/failures.dart';
 import 'package:food_tracker/core/errors/result.dart';
 import 'package:food_tracker/core/interfaces/daos_interfaces.dart';
-import 'package:food_tracker/core/interfaces/dishware_dao_interface.dart';
-import 'package:food_tracker/core/interfaces/meal_template_dao_interface.dart';
 import 'food_entry.dart';
 
 class _FakeMealDao implements IMealDao {

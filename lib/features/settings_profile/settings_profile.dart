@@ -1,6 +1,5 @@
 import 'settings_profile.controller.dart';
 import 'settings_profile.view.dart';
-import 'user_profile.view.dart';
 import 'onboarding.view.dart';
 
 export 'settings_profile.model.dart';

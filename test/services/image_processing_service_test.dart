@@ -1,4 +1,3 @@
-import 'package:food_tracker/features/food_entry/models/meal_image_file_info.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';

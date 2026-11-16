@@ -1,4 +1,3 @@
-import 'package:food_tracker/core/models/analysis_task.dart';
 import 'dart:io';
 import 'package:material_ui/material_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
