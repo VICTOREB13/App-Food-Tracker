@@ -177,7 +177,7 @@ class GeminiModelService {
 
       final tier = GeminiVisionFilter.calculateTierRank(cleanName);
       final label = GeminiVisionFilter.calculateRecommendationLabel(cleanName);
-      final isRecommended = tier <= 2; // Only top tier: 3.8-flash and 3.1-pro
+      final isRecommended = tier <= 3 && !cleanName.contains('lite');
 
       filtered.add(GeminiModelInfo.fromGoogleJson(
         item,
