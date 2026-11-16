@@ -8,7 +8,7 @@ export 'package:food_tracker/core/models/daily_goals.dart';
 export 'package:food_tracker/core/models/gemini_model_info.dart';
 export 'package:food_tracker/core/models/storage_mode.dart';
 export 'package:food_tracker/features/settings_profile/models/user_profile.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 /// Immutable state container for the Settings & Profile vertical slice.
 /// Implements the Immutable Sentinel Pattern for atomic field updates and BYOK keystore management.
 @immutable

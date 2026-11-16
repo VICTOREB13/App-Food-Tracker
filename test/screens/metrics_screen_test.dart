@@ -1,8 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/features/food_entry/food_entry.dart';
-import 'package:food_tracker/features/food_entry/models/meal.dart';
-import 'package:food_tracker/features/biometrics_weight/models/weight_log.dart';
 import 'package:food_tracker/features/biometrics_weight/biometrics_weight.dart';
 import 'package:food_tracker/core/database/database_service.dart';
 import 'package:food_tracker/features/biometrics_weight/widgets/calorie_compliance_bento_card.dart';

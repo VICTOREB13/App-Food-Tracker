@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:food_tracker/features/settings_profile/settings_profile.dart';
-import 'package:food_tracker/core/models/gemini_model_info.dart';
 import 'package:food_tracker/core/database/database_service.dart';
 import 'package:food_tracker/core/services/ai/gemini_model_service.dart';
 import 'package:food_tracker/core/services/ai/gemini_vision_service.dart';

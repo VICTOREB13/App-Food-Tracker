@@ -1,5 +1,5 @@
 import 'dart:math' as math;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:food_tracker/features/biometrics_weight/models/weight_log.dart';
 import 'package:food_tracker/core/services/theme/theme_manager.dart';
 import 'weight_chart_render_utils.dart';

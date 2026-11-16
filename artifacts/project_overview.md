@@ -1,13 +1,13 @@
 ---
 tipo: overview
 proyecto: App_Food_Tracker
-version: v1.5.0
+version: v1.5.1
 estado: activo
 fecha: 2026-11-15
-tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid, get-it, l10n, result-pattern, android-widgets, sqlite-v4, recommendations, saf-backup, auto-repair, in-app-updater, microinteractions, gemini-streaming, decoupled-cot, queue-resilience, multi-task, native-tiling, 16k-tokens, thinking-level-medium, dynamic-pacing, background-notifications, socket-resilience, privacy-storage, clinical-pdf, l10n-domains, zero-fallbacks, nothing-os-widgets, master-prompt-modal, share-sheet, data-driven-widgets, modular-recommendation-catalogs, modular-monolith, vertical-slice, mvc, hexagonal, gemini-rest-client, decision-gate, context-caching]
+tags: [proyecto, overview, local-first, flutter, ai-vision, bento-grid, get-it, l10n, result-pattern, android-widgets, sqlite-v4, recommendations, saf-backup, auto-repair, in-app-updater, microinteractions, gemini-streaming, decoupled-cot, queue-resilience, multi-task, native-tiling, 16k-tokens, thinking-level-medium, dynamic-pacing, background-notifications, socket-resilience, privacy-storage, clinical-pdf, l10n-domains, zero-fallbacks, nothing-os-widgets, master-prompt-modal, share-sheet, data-driven-widgets, modular-recommendation-catalogs, modular-monolith, vertical-slice, mvc, hexagonal, gemini-rest-client, decision-gate, context-caching, material-ui, cupertino-ui]
 ---
 
-# 🚀 Visión General del Proyecto: Victor Engineer - Food Tracker (v1.5.0)
+# 🚀 Visión General del Proyecto: Victor Engineer - Food Tracker (v1.5.1)
 
 > **Mesa de Control (Project-Planner):** Este documento centraliza la visión del producto, capacidades técnicas, directrices de arquitectura y el índice de navegación interconectado de todos los artefactos del proyecto según la metodología de Prototipado Evolutivo y estándares Obsidian.
 

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/features/dashboard/widgets/calories_hero_ring.dart';
 import 'package:food_tracker/features/dashboard/widgets/macro_bento_card.dart';

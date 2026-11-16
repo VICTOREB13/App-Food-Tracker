@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:food_tracker/core/interfaces/decision_gate_service_interface.dart';
 import 'package:food_tracker/core/services/ai/gemini_rest_client.dart';

@@ -105,7 +105,7 @@ class GeminiResilienceHelper {
 
   /// Decoupled Chain-of-Thought meal analysis schema with free-form volumetric reasoning,
   /// dish name, and food items (totals are calculated deterministically on client).
-  static Schema get mealAnalysisSchema => Schema.object(
+  static const Schema mealAnalysisSchema = Schema.object(
     description: 'Desglose nutricional y volumétrico desacoplado de comida',
     requiredProperties: ['razonamiento_volumetrico', 'plato', 'items'],
     properties: {

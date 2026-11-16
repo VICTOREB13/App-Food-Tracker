@@ -5,8 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:food_tracker/features/food_entry/food_entry.dart';
 import 'package:food_tracker/core/models/analysis_task.dart';
-import 'package:food_tracker/features/food_entry/models/food_item.dart';
-import 'package:food_tracker/features/food_entry/models/meal.dart';
 import 'package:food_tracker/core/database/database_service.dart';
 import 'package:food_tracker/core/services/ai/gemini_vision_service.dart';
 import 'package:food_tracker/core/services/ai/decision_gate_service.dart';

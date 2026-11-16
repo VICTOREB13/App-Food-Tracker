@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Smooth animated rolling counter widget using [TweenAnimationBuilder].
 class VeAnimatedCounter extends StatelessWidget {

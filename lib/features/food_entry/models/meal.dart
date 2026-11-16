@@ -233,7 +233,6 @@ class Meal {
       'plato': name,
       'items': newItems.map((e) => e.toJson()).toList(),
       'totales': {
-        'calorias': effectiveCal,
         'calorias': effectiveCal, 'proteina_g': effectiveProt, 'carbohidratos_g': effectiveCarbs,
         'grasas_g': effectiveFat, 'fibra_g': effectiveFiber, 'sodio_mg': effectiveSodium, 'azucar_g': effectiveSugar,
       },

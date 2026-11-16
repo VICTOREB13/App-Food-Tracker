@@ -3,7 +3,6 @@ import 'package:food_tracker/features/fasting_tracker/fasting_tracker.dart';
 import 'package:food_tracker/core/errors/failures.dart';
 import 'package:food_tracker/core/errors/result.dart';
 import 'package:food_tracker/core/interfaces/fasting_dao_interface.dart';
-import 'package:food_tracker/features/fasting_tracker/models/fasting_log.dart';
 
 class FakeFastingDao implements IFastingDao {
   FastingLog? activeLog;

@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'features/settings_profile/settings_profile.dart';
@@ -173,6 +173,7 @@ class _NutriTrackerAppState extends State<NutriTrackerApp> {
           themeMode: ThemeManager.instance.themeMode,
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
+          builder: (context, child) => MaterialUiCompatibilityBridge(child: child!),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           locale: effectiveLocale,

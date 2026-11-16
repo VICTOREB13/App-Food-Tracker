@@ -1,10 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/features/fasting_tracker/fasting_tracker.dart';
 import 'package:food_tracker/core/errors/failures.dart';
 import 'package:food_tracker/core/errors/result.dart';
 import 'package:food_tracker/core/interfaces/fasting_dao_interface.dart';
-import 'package:food_tracker/features/fasting_tracker/models/fasting_log.dart';
 import 'package:food_tracker/features/dashboard/widgets/fasting_window_bento_card.dart';
 
 class _MockFastingDao implements IFastingDao {

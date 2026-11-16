@@ -1,15 +1,41 @@
 ---
 tipo: task_list
 proyecto: App_Food_Tracker
-iteracion: v1.5.0
+iteracion: v1.5.1
 estado: activo
 fecha: 2026-11-15
-tags: [proyecto, tasks, checklist, v1-5-0, inference-engine, rest-client, decision-gate, context-caching, quality-gate]
+tags: [proyecto, tasks, checklist, v1-5-1, material-ui, cupertino-ui, quality-gate, linter-cleanup]
 ---
 
-# 📋 Checklist Maestro de Tareas de Agentes (v1.5.0)
+# 📋 Checklist Maestro de Tareas de Agentes (v1.5.1)
 
-> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.5.0. Cada tarea completada se marca con `[x]`.
+> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.5.1. Cada tarea completada se marca con `[x]`.
+
+## 🌟 Iteración v1.5.1: Modernización a Material UI Oficial y Saneamiento de Quality Gate
+
+### 🧭 1. Core & Working Tree Consolidation (Swarm: `domain` & `audit`)
+- [x] (Data-Specialist) Consolidar e incorporar en commit los 7 archivos del working tree con fixes de `GeminiRestClient`, types y lints.
+- [x] (Systems-Auditor) Verificar que los 8 errores de compilación y 2 warnings queden en 0.
+
+### 🎨 2. Modernización de Sistema de Diseño UI (Swarm: `engine` & `bridge`)
+- [x] (Software-Architect) Añadir `material_ui: ^1.11.0`, `cupertino_ui: ^1.11.0` y `flutter_test: sdk: flutter` a `dependencies` en `pubspec.yaml`.
+- [x] (Software-Architect) Migrar masivamente todos los imports de `package:flutter/material.dart` a `package:material_ui/material_ui.dart`.
+- [x] (Frontend-UI) Implementar `MaterialUiCompatibilityBridge` en `lib/main.dart` envolviendo `MaterialApp`.
+- [x] (Frontend-UI) Ajustar delegados de localización en `lib/l10n/app_localizations.dart` para consumir `material_ui` y `cupertino_ui`.
+
+### 🛡️ 3. Sanitización de Linter y Paridad VSA (Swarm: `audit`)
+- [x] (Systems-Auditor) Depurar 43 imports redundantes (`unnecessary_import`).
+- [x] (Systems-Auditor) Anteponer `const` en esquemas estáticos de `gemini_resilience_helper.dart`.
+- [x] (Systems-Auditor) Asegurar `analysis_options.yaml` limpio sin directivas `ignore`.
+- [x] (Systems-Auditor) Auditar que el 100% de los archivos Dart en `lib/` sean estrictamente < 300 LoC.
+
+### 🚀 4. CI Determinista y Publicación Release v1.5.1 (Orquestador / `release-pipeline`)
+- [x] (DevOps-Engineer) Configurar channel: 'stable' en los workflows de GitHub Actions.
+- [x] (Project-Planner) Actualizar `pubspec.yaml` a `version: 1.5.1+1`.
+- [x] (Project-Planner) Registrar notas en `artifacts/planning/changelog_v1.md` y `artifacts/audit_reports/audit_report.md`.
+- [ ] (Release-Engineer) Crear commit semántico chore(release): v1.5.1, tag anotado v1.5.1 y publicar release vía gh release create (Pendiente tras validación de Quality Gate en CI).
+
+---
 
 ## 🌟 Iteración v1.5.0: Modernización del Motor de Inferencia, Cliente REST v1beta, Pre-Gate Multimodal y Resiliencia en Red Móvil
 

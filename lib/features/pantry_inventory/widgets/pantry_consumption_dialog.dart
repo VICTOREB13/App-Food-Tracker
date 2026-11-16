@@ -1,8 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:food_tracker/features/food_entry/food_entry.dart';
 import 'package:food_tracker/l10n/app_localizations.dart';
-import 'package:food_tracker/features/food_entry/models/meal.dart';
 import 'package:food_tracker/features/pantry_inventory/models/pantry_item.dart';
 import 'package:food_tracker/core/services/theme/theme_manager.dart';
 

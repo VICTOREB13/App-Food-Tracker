@@ -113,7 +113,7 @@ void main() {
         if (request.url.toString().contains('streamGenerateContent')) {
           // Socket cut / broken stream
           final controller = StreamController<List<int>>();
-          controller.addError(const http.ClientException('SSE stream interrupted'));
+          controller.addError(http.ClientException('SSE stream interrupted'));
           return http.StreamedResponse(controller.stream, 200);
         } else {
           // Unary fallback

@@ -1,11 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:uuid/uuid.dart';
 import 'package:food_tracker/features/food_entry/food_entry.dart';
 import 'package:food_tracker/core/interfaces/nutritional_recommendation_service_interface.dart';
 import 'package:food_tracker/l10n/app_localizations.dart';
-import 'package:food_tracker/features/food_entry/models/food_item.dart';
-import 'package:food_tracker/features/food_entry/models/meal.dart';
 import 'package:food_tracker/core/models/nutritional_recommendation.dart';
 import 'package:food_tracker/core/database/database_service.dart';
 import 'package:food_tracker/features/dashboard/services/nutritional_recommendation_service.dart';

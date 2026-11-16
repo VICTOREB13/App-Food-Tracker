@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/core/models/gemini_model_info.dart';
 import 'package:food_tracker/features/settings_profile/widgets/gemini_model_selector_card.dart';

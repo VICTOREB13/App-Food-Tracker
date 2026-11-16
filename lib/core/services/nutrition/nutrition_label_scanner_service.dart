@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:food_tracker/core/interfaces/nutrition_label_scanner_service_interface.dart';
 import 'package:food_tracker/features/pantry_inventory/models/pantry_item.dart';
 import 'package:food_tracker/core/services/ai/gemini_resilience_helper.dart';
+import 'package:food_tracker/core/services/ai/gemini_rest_client.dart';
 import 'package:food_tracker/features/food_entry/services/image_processing_service.dart';
 import 'package:food_tracker/core/services/storage/secure_storage_service.dart';
 
@@ -11,6 +11,7 @@ import 'package:food_tracker/core/services/storage/secure_storage_service.dart';
 class NutritionLabelScannerService implements INutritionLabelScannerService {
   final String? _apiKey;
   final SecureStorageService _secureStorage;
+  final GeminiRestClient _restClient;
 
   static NutritionLabelScannerService? _mockInstance;
   static final NutritionLabelScannerService _defaultInstance = NutritionLabelScannerService();
@@ -23,37 +24,40 @@ class NutritionLabelScannerService implements INutritionLabelScannerService {
   NutritionLabelScannerService({
     String? apiKey,
     SecureStorageService? secureStorageService,
+    GeminiRestClient? restClient,
   })  : _apiKey = apiKey,
-        _secureStorage = secureStorageService ?? SecureStorageService.instance;
+        _secureStorage = secureStorageService ?? SecureStorageService.instance,
+        _restClient = restClient ?? GeminiRestClient.instance;
 
   static const String defaultModel = 'gemini-3.8-flash';
-  static const String fallbackModel = 'gemini-2.5-flash';
+  static const String fallbackModel = 'gemini-3.6-flash';
 
-  static Schema get _labelSchema => Schema.object(
-        description: 'Extracción estructurada de etiqueta de información nutricional comercial',
-        requiredProperties: [
-          'nombre_producto',
-          'calorias',
-          'proteinas',
-          'carbohidratos',
-          'grasas',
-        ],
-        properties: {
-          'nombre_producto': Schema.string(description: 'Nombre comercial del alimento'),
-          'marca': Schema.string(description: 'Marca fabricante o comercial'),
-          'categoria': Schema.string(description: 'Categoría del alimento (ej. Granos, Lácteos, Carnes, Snacks, Bebidas)'),
-          'tamano_porcion': Schema.number(description: 'Tamaño numérico de la porción de referencia (ej. 100 o 30)'),
-          'unidad_porcion': Schema.string(description: 'Unidad de la porción (g, ml, oz, porcion)'),
-          'calorias': Schema.number(description: 'Calorías por porción en kcal'),
-          'proteinas': Schema.number(description: 'Proteínas por porción en gramos'),
-          'carbohidratos': Schema.number(description: 'Carbohidratos por porción en gramos'),
-          'grasas': Schema.number(description: 'Grasas totales por porción en gramos'),
-          'fibra': Schema.number(description: 'Fibra dietaria por porción en gramos'),
-          'sodio_mg': Schema.number(description: 'Sodio por porción en miligramos (mg)'),
-          'azucar': Schema.number(description: 'Azúcares totales por porción en gramos'),
-          'palabras_clave': Schema.string(description: 'Palabras clave de comidas o preparaciones derivadas comunes, separadas por coma (ej: arepa, masa, maiz)'),
-        },
-      );
+  static const Map<String, dynamic> _labelSchema = {
+    'type': 'object',
+    'description': 'Extracción estructurada de etiqueta de información nutricional comercial',
+    'required': [
+      'nombre_producto',
+      'calorias',
+      'proteinas',
+      'carbohidratos',
+      'grasas',
+    ],
+    'properties': {
+      'nombre_producto': {'type': 'string', 'description': 'Nombre comercial del alimento'},
+      'marca': {'type': 'string', 'description': 'Marca fabricante o comercial'},
+      'categoria': {'type': 'string', 'description': 'Categoría del alimento (ej. Granos, Lácteos, Carnes, Snacks, Bebidas)'},
+      'tamano_porcion': {'type': 'number', 'description': 'Tamaño numérico de la porción de referencia (ej. 100 o 30)'},
+      'unidad_porcion': {'type': 'string', 'description': 'Unidad de la porción (g, ml, oz, porcion)'},
+      'calorias': {'type': 'number', 'description': 'Calorías por porción en kcal'},
+      'proteinas': {'type': 'number', 'description': 'Proteínas por porción en gramos'},
+      'carbohidratos': {'type': 'number', 'description': 'Carbohidratos por porción en gramos'},
+      'grasas': {'type': 'number', 'description': 'Grasas totales por porción en gramos'},
+      'fibra': {'type': 'number', 'description': 'Fibra dietaria por porción en gramos'},
+      'sodio_mg': {'type': 'number', 'description': 'Sodio por porción en miligramos (mg)'},
+      'azucar': {'type': 'number', 'description': 'Azúcares totales por porción en gramos'},
+      'palabras_clave': {'type': 'string', 'description': 'Palabras clave de comidas o preparaciones derivadas comunes, separadas por coma'},
+    },
+  };
 
   @override
   Future<PantryItem?> scanNutritionLabel({
@@ -67,7 +71,7 @@ class NutritionLabelScannerService implements INutritionLabelScannerService {
 
     final compressedBytes = await ImageProcessingService.instance.compressAndResizeAsync(
       imageBytes,
-      targetMaxDimension: 1024,
+      targetMaxDimension: 768,
       quality: 85,
     );
 
@@ -82,34 +86,49 @@ Extrae con máxima precisión los valores por porción declarada.$brandNote
 Calcula o infiere palabras clave de preparaciones habituales derivadas para asociar en la despensa (ej. para Harina PAN: arepa, masa, empanada, bollo).
 ''';
 
-    final content = Content.multi([
-      DataPart('image/jpeg', compressedBytes),
-      TextPart(promptText),
-    ]);
+    final contents = [
+      {
+        'parts': [
+          {
+            'inlineData': {
+              'mimeType': 'image/jpeg',
+              'data': base64Encode(compressedBytes),
+            }
+          },
+          {'text': promptText},
+        ]
+      }
+    ];
+
+    final systemInstruction = {
+      'parts': [
+        {
+          'text': 'Eres un sistema OCR especializado en parsing estructurado de etiquetas de alimentos comerciales.'
+        }
+      ]
+    };
 
     return await GeminiResilienceHelper.executeWithRetry<PantryItem?>(
       primaryModel: defaultModel,
       secondaryModel: fallbackModel,
       action: (attempt, currentModel) async {
-        final model = GenerativeModel(
+        final generationConfig = GeminiRestClient.buildGenerationConfig(
           model: currentModel,
-          apiKey: apiKey,
-          systemInstruction: Content.system(
-            'Eres un sistema OCR especializado en parsing estructurado de etiquetas de alimentos comerciales.',
-          ),
-          generationConfig: GenerationConfig(
-            responseMimeType: 'application/json',
-            responseSchema: _labelSchema,
-            temperature: 0.1,
-          ),
+          temperature: 0.1,
+          responseMimeType: 'application/json',
+          responseSchema: _labelSchema,
         );
 
-        final response = await model
-            .generateContent([content])
-            .timeout(const Duration(seconds: 30));
+        final text = await _restClient.generateContent(
+          apiKey: apiKey,
+          model: currentModel,
+          contents: contents,
+          systemInstruction: systemInstruction,
+          generationConfig: generationConfig,
+          timeout: const Duration(seconds: 30),
+        );
 
-        final text = response.text;
-        if (text == null || text.trim().isEmpty) {
+        if (text.trim().isEmpty) {
           return null;
         }
 

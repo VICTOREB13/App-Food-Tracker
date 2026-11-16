@@ -1,8 +1,6 @@
 import 'dart:io';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:food_tracker/features/food_entry/food_entry.dart';
-import 'package:food_tracker/features/food_entry/models/food_item.dart';
-import 'package:food_tracker/features/food_entry/models/meal.dart';
 import 'package:food_tracker/core/services/ai/gemini_vision_service.dart';
 import 'package:food_tracker/features/food_entry/services/image_processing_service.dart';
 import 'package:food_tracker/core/services/storage/secure_storage_service.dart';

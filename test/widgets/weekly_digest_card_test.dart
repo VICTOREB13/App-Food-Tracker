@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/core/models/daily_goals.dart';
 import 'package:food_tracker/features/food_entry/models/meal.dart';

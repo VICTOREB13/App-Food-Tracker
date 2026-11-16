@@ -4,7 +4,6 @@ import 'package:food_tracker/core/interfaces/image_processing_service_interface.
 import '../biometrics_weight/biometrics_weight.dart';
 import 'food_entry.controller.dart';
 import 'food_entry.model.dart';
-import 'package:food_tracker/core/models/daily_goals.dart';
 import 'package:food_tracker/core/database/database_service.dart';
 import 'package:food_tracker/core/services/platform/home_widget_service.dart';
 import 'package:food_tracker/features/food_entry/services/image_processing_service.dart';

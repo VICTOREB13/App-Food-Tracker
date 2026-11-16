@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/features/settings_profile/settings_profile.dart';
 import 'package:food_tracker/features/settings_profile/widgets/language_selector_card.dart';

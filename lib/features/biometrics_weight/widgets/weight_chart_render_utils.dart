@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:food_tracker/features/biometrics_weight/models/weight_log.dart';
 
 /// Auxiliary canvas renderers for empty state and single log state in weight charts.

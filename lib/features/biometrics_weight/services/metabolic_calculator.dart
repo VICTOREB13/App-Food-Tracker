@@ -1,8 +1,6 @@
 import 'dart:math' as math;
 import 'package:food_tracker/features/settings_profile/settings_profile.dart';
-import 'package:food_tracker/core/models/daily_goals.dart';
 import 'package:food_tracker/core/models/macro_distribution.dart';
-import 'package:food_tracker/features/settings_profile/models/user_profile.dart';
 import 'package:food_tracker/core/database/database_service.dart';
 import 'package:food_tracker/features/biometrics_weight/services/metabolic_prompt_generator.dart';
 import 'package:food_tracker/core/services/storage/secure_storage_service.dart';

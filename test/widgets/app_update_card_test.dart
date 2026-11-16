@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/core/constants/app_constants.dart';
 import 'package:food_tracker/core/interfaces/app_installer_service_interface.dart';

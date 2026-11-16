@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:food_tracker/features/food_entry/food_entry.dart';
-import 'package:food_tracker/features/food_entry/models/meal.dart';
 import 'package:food_tracker/core/database/database_service.dart';
 
 void main() {

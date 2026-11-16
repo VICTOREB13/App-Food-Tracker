@@ -18,6 +18,31 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [1.5.1] - 2026-11-15
+
+### Material UI Modernization, Design System Unbundling & Zero-Lint Quality Gate
+- **Material UI & Cupertino UI Modernization (Flutter 3.47+ / 3.50+)**:
+  - Unbundled monolithic `package:flutter/material.dart` by migrating 141 files across `lib/` and `test/` to official standalone `package:material_ui/material_ui.dart`.
+  - Added official dependencies `material_ui: ^1.11.0` and `cupertino_ui: ^1.11.0` to `pubspec.yaml`.
+  - Implemented `MaterialUiCompatibilityBridge` wrapping `MaterialApp` in `lib/main.dart` guaranteeing transparent backward compatibility for third-party widgets (`google_fonts`, `flutter_svg`, `pdf`, `home_widget`).
+  - Updated localization delegates in `lib/l10n/app_localizations.dart` to consume `material_ui` and `cupertino_ui`.
+- **Working Tree & Core Bug Fixes**:
+  - Replaced legacy `google_generative_ai` dependency in `nutrition_label_scanner_service.dart` with native `GeminiRestClient`, unifying image processing to maximum dimension 768 px.
+  - Removed duplicate `'calorias'` key in `lib/features/food_entry/models/meal.dart`.
+  - Fixed `test/services/gemini_rest_client_test.dart` by removing invalid `const` on `http.ClientException`.
+  - Cleaned unused imports across `decision_gate_service.dart`, `decision_gate_service_interface.dart`, `service_locator.dart`, and `meal_analysis_result_test.dart`.
+- **Linter Cleanup without Suppression Hacks**:
+  - Eliminated 28 redundant imports across vertical slices and testing suites (`unnecessary_import`).
+  - Added `const` to `mealAnalysisSchema` in `lib/core/services/ai/gemini_resilience_helper.dart` (`prefer_const_constructors`).
+  - Maintained `analysis_options.yaml` 100% clean with zero `ignore` directives.
+  - Resolved `depend_on_referenced_packages` by moving `flutter_test: sdk: flutter` to `dependencies` for VSA test suites co-located under `lib/features/`.
+  - Strictly enforced `< 300 LoC` limit across 100% of Dart files in `lib/` (0 / 254 files exceeding limit).
+- **CI / CD Deterministic Release**:
+  - Configured `channel: 'stable'` across `.github/workflows/release.yml`, `ci.yml`, and `build_apk.yml` for evergreen Flutter compatibility.
+  - Version bumped to `1.5.1+1` in `pubspec.yaml` and `AppConstants.appVersion = '1.5.1'`.
+
+---
+
 ## [1.5.0] - 2026-11-15
 
 ### Inference Engine Modernization, Native REST Client & Network Resilience

@@ -17,7 +17,6 @@ import 'package:food_tracker/core/services/ai/gemini_vision_service.dart';
 import 'package:food_tracker/core/services/ai/gemini_rest_client.dart';
 import 'package:food_tracker/core/services/ai/decision_gate_service.dart';
 import 'package:food_tracker/core/services/ai/gemini_cache_service.dart';
-import 'package:food_tracker/core/interfaces/decision_gate_service_interface.dart';
 import 'package:food_tracker/features/food_entry/services/image_processing_service.dart';
 import 'package:food_tracker/core/services/nutrition/open_food_facts_service.dart';
 import 'package:food_tracker/core/services/storage/secure_storage_service.dart';

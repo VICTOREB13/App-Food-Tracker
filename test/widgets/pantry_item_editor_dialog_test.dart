@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_tracker/features/pantry_inventory/models/pantry_item.dart';
 import 'package:food_tracker/features/pantry_inventory/widgets/pantry_item_editor_dialog.dart';

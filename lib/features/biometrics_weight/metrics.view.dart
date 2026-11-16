@@ -1,5 +1,5 @@
 import 'package:food_tracker/features/settings_profile/settings_profile.controller.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'biometrics_weight.controller.dart';
 import 'package:food_tracker/l10n/app_localizations.dart';

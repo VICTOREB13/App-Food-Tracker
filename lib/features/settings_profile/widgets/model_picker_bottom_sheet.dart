@@ -1,5 +1,5 @@
 // ignore_for_file: deprecated_member_use
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:food_tracker/l10n/app_localizations.dart';
 import 'package:food_tracker/core/models/gemini_model_info.dart';

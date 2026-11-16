@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Microinteraction widget providing elastic scale feedback on tap press.
 class VeBounceable extends StatefulWidget {
