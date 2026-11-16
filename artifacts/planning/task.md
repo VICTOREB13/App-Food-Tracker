@@ -39,7 +39,7 @@ tags: [proyecto, tasks, checklist, v1-5-1, material-ui, cupertino-ui, quality-ga
 - [x] (DevOps-Engineer) Configurar channel: 'stable' en los workflows de GitHub Actions.
 - [x] (Project-Planner) Actualizar `pubspec.yaml` a `version: 1.5.1+1`.
 - [x] (Project-Planner) Registrar notas en `artifacts/planning/changelog_v1.md` y `artifacts/audit_reports/audit_report.md`.
-- [ ] (Release-Engineer) Crear commit semántico chore(release): v1.5.1, tag anotado v1.5.1 y publicar release vía gh release create (Pendiente tras validación de Quality Gate en CI).
+- [x] (Release-Engineer) Crear commit semántico chore(release): v1.5.1, tag anotado v1.5.1 y publicar release vía gh release create (Completado y publicado oficialmente en GitHub Releases).
 
 ---
 
