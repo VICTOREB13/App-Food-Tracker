@@ -48,7 +48,7 @@ class BiometricsWeightController extends ChangeNotifier {
   }
 
   BiometricsWeightState get state => _state;
-  List<WeightLog> get weightLogs => _state.logs;
+  List<WeightLog> get weightLogs => List.unmodifiable(_state.logs);
   WeightLog? get latestWeightLog => _state.latestLog;
   double? get currentWeight => _state.currentWeight;
   WeightFilterRange get filterRange => _state.filterRange;

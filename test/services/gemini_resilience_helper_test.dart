@@ -70,8 +70,8 @@ void main() {
         },
       );
 
-      expect(result, equals('ok_from_gemini-2.5-flash'));
-      expect(modelsUsed, contains('gemini-2.5-flash'));
+      expect(result, equals('ok_from_gemini-3.6-flash'));
+      expect(modelsUsed, contains('gemini-3.6-flash'));
     });
 
     test('executeWithRetry retries on FormatException and recovers with fallback model', () async {
@@ -91,9 +91,9 @@ void main() {
         },
       );
 
-      expect(result, equals('recovered_from_gemini-2.5-flash'));
+      expect(result, equals('recovered_from_gemini-3.6-flash'));
       expect(modelsUsed.length, equals(3));
-      expect(modelsUsed.last, equals('gemini-2.5-flash'));
+      expect(modelsUsed.last, equals('gemini-3.6-flash'));
     });
 
     test('buildUserPrompt appends dishware diameter metric scale when provided', () {

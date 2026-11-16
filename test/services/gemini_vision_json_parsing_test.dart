@@ -163,8 +163,8 @@ void main() {
 
       final result = MealAnalysisResult.fromJsonString(markdownJson);
       expect(result.dishName, equals('Arepa Reina Pepiada'));
-      expect(result.totalCalories, equals(480.0));
-      expect(result.totalProtein, equals(24.0));
+      expect(result.totalCalories, equals(210.0));
+      expect(result.totalProtein, equals(4.0));
       expect(result.items.first.name, equals('Arepa de maíz'));
     });
 

@@ -68,6 +68,8 @@ class DatabaseSchema {
         serving_size REAL DEFAULT 100.0,
         serving_unit TEXT DEFAULT 'g',
         package_weight REAL,
+        expiration_date TEXT,
+        stock_quantity REAL,
         fiber REAL DEFAULT 0.0,
         sodium REAL DEFAULT 0.0,
         sugar REAL DEFAULT 0.0,
@@ -217,6 +219,8 @@ class DatabaseSchema {
     }
     if (oldVersion < 4) {
       await _safeAddColumn(db, 'pantry_items', 'package_weight REAL');
+      await _safeAddColumn(db, 'pantry_items', 'expiration_date TEXT');
+      await _safeAddColumn(db, 'pantry_items', 'stock_quantity REAL');
     }
   }
 }

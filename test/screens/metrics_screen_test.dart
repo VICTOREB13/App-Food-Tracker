@@ -138,22 +138,22 @@ void main() {
       await tester.pumpAndSettle();
 
       // Default is 30 days
-      expect(MealController.instance.selectedWeightDays, equals(30));
+      expect(BiometricsWeightController.instance.selectedWeightDays, equals(30));
 
       // Switch to 7 days
       await tester.tap(find.text('7 días'));
       await tester.pumpAndSettle();
-      expect(MealController.instance.selectedWeightDays, equals(7));
+      expect(BiometricsWeightController.instance.selectedWeightDays, equals(7));
 
       // Switch to 90 days
       await tester.tap(find.text('90 días'));
       await tester.pumpAndSettle();
-      expect(MealController.instance.selectedWeightDays, equals(90));
+      expect(BiometricsWeightController.instance.selectedWeightDays, equals(90));
 
       // Switch to Histórico (0 days)
       await tester.tap(find.text('Histórico'));
       await tester.pumpAndSettle();
-      expect(MealController.instance.selectedWeightDays, equals(0));
+      expect(BiometricsWeightController.instance.selectedWeightDays, equals(0));
     });
 
     testWidgets('tapping FAB opens QuickWeightEntryDialog', (tester) async {

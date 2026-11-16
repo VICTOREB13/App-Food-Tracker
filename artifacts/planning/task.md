@@ -29,6 +29,12 @@ tags: [proyecto, tasks, checklist, v1-5-1, material-ui, cupertino-ui, quality-ga
 - [x] (Systems-Auditor) Asegurar `analysis_options.yaml` limpio sin directivas `ignore`.
 - [x] (Systems-Auditor) Auditar que el 100% de los archivos Dart en `lib/` sean estrictamente < 300 LoC.
 
+### 🧪 5. Saneamiento de Fixtures de Testing (24 Test Fixes) (Swarm: `engine`, `domain`, `bridge`, `audit`)
+- [x] (Software-Architect / `engine`) Añadir columnas `expiration_date TEXT` y `stock_quantity REAL` a `DatabaseSchema.createPantryTable` y `onUpgrade`, y retornar lista inmutable en `BiometricsWeightController.weightLogs`.
+- [x] (Data-Specialist / `domain`) Alinear `GeminiVisionService.userFriendlyErrorMessage` y fixtures de tests de Gemini (`gemini_resilience_helper_test`, `gemini_vision_json_parsing_test`, `ingredient_substitution_test`, `gemini_model_service_test`, `gemini_and_storage_adversarial_test`).
+- [x] (Frontend-UI / `bridge`) Alinear textos Plain Language en tests de widgets (`quick_meal_dialog_test`, `user_profile_screen_test`, `app_localizations_test`) y controlador en `metrics_screen_test`.
+- [x] (Systems-Auditor / `audit`) Validar `bun test`, `bun run lint:contracts`, `bun run validate`, auditar < 300 LoC y confirmar 0 violaciones.
+
 ### 🚀 4. CI Determinista y Publicación Release v1.5.1 (Orquestador / `release-pipeline`)
 - [x] (DevOps-Engineer) Configurar channel: 'stable' en los workflows de GitHub Actions.
 - [x] (Project-Planner) Actualizar `pubspec.yaml` a `version: 1.5.1+1`.

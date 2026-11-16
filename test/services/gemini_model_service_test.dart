@@ -117,13 +117,13 @@ void main() {
       expect(models[0].name, equals('gemini-4-hydrogem'));
       expect(models[0].recommendationLabel, equals('Next-Gen'));
 
-      // 2. gemini-3.8-flash (rank 2, recommended default)
-      expect(models[1].name, equals('gemini-3.8-flash'));
-      expect(models[1].isRecommended, isTrue);
+      // 2. gemini-3.6-flash (rank 2, Fast)
+      expect(models[1].name, equals('gemini-3.6-flash'));
       expect(models[1].recommendationLabel, equals('Fast'));
 
-      // 3. gemini-3.6-flash (rank 2, Fast)
-      expect(models[2].name, equals('gemini-3.6-flash'));
+      // 3. gemini-3.8-flash (rank 2, recommended default)
+      expect(models[2].name, equals('gemini-3.8-flash'));
+      expect(models[2].isRecommended, isTrue);
       expect(models[2].recommendationLabel, equals('Fast'));
 
       // 4. gemini-3.1-pro (rank 3, recommended clinical)

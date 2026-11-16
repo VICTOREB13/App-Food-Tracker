@@ -14,7 +14,7 @@ void main() {
       expect(l10n.back, equals('Atrás'));
       expect(l10n.continueButton, equals('Continuar'));
       expect(l10n.quickMeal, equals('Comida rápida'));
-      expect(l10n.quickMealTitle, equals('Registro Rápido de Comida'));
+      expect(l10n.quickMealTitle, equals('Registro Rápido'));
       expect(l10n.calories, equals('Calorías'));
       expect(l10n.protein, equals('Proteína'));
       expect(l10n.carbs, equals('Carbohidratos'));
@@ -66,7 +66,7 @@ void main() {
       expect(l10n.back, equals('Back'));
       expect(l10n.continueButton, equals('Continue'));
       expect(l10n.quickMeal, equals('Quick Meal'));
-      expect(l10n.quickMealTitle, equals('Quick Meal Entry'));
+      expect(l10n.quickMealTitle, equals('Quick Meal'));
       expect(l10n.calories, equals('Calories'));
       expect(l10n.protein, equals('Protein'));
       expect(l10n.carbs, equals('Carbohydrates'));

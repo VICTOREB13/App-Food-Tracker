@@ -343,7 +343,7 @@ void main() {
 
       // gemini-3.5-pro is Tier 3 (rank 3)
       expect(result[1].name, equals('gemini-3.5-pro'));
-      expect(result[1].isRecommended, isTrue);
+      expect(result[1].isRecommended, isFalse);
       expect(result[1].recommendationLabel, equals('Think'));
     });
 

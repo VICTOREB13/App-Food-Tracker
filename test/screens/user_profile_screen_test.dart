@@ -134,7 +134,7 @@ void main() {
 
       // Verifica App Bar
       expect(find.text('Perfil Metabólico'), findsOneWidget);
-      expect(find.text('Mifflin-St Jeor & Master Prompt'), findsOneWidget);
+      expect(find.text('Mifflin-St Jeor & Prompt Maestro'), findsOneWidget);
 
       // Verifica presencia de las 3 tarjetas modulares
       expect(find.byType(MetabolicSummaryBentoCard), findsOneWidget);

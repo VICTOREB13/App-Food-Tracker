@@ -63,7 +63,7 @@ class GeminiVisionService implements IVisionModelProvider {
       return error;
     }
     if (error is TimeoutException || s.contains('timeout')) {
-      return 'El tiempo de espera de análisis se agotó. Se perdió la conexión a internet temporalmente.';
+      return 'El tiempo de espera de análisis se agotó. Se perdió la conexión a internet temporalmente. Por favor, reintenta o usa registro manual.';
     }
     if (error is SocketException || s.contains('socket') || s.contains('clientexception') || s.contains('unreachable') || s.contains('lookup')) {
       return 'Se perdió la conexión a internet. Por favor, verifica tu red e inténtalo de nuevo.';

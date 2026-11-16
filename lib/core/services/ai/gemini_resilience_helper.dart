@@ -38,8 +38,8 @@ typedef Schema = GeminiSchema;
 
 /// Helper utility managing exponential backoff, jitter, thinkingConfig, and causal schemas for Gemini Vision.
 class GeminiResilienceHelper {
-  static const String fallbackModel = 'gemini-3.5-flash-lite';
-  static const String primaryFallbackModel = 'gemini-3.6-flash';
+  static const String fallbackModel = 'gemini-3.6-flash';
+  static const String secondaryFallbackModel = 'gemini-3.5-flash-lite';
 
   static bool isRetriableError(dynamic error) {
     if (error == null) return false;
