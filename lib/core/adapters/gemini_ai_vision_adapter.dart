@@ -2,6 +2,9 @@ import 'dart:typed_data';
 import 'package:food_tracker/features/food_entry/models/food_item.dart';
 import 'package:food_tracker/features/food_entry/models/meal_analysis_result.dart';
 import 'package:food_tracker/core/services/ai/gemini_vision_service.dart';
+import 'package:food_tracker/core/services/ai/gemini_rest_client.dart';
+import 'package:food_tracker/core/services/ai/decision_gate_service.dart';
+import 'package:food_tracker/core/services/ai/gemini_cache_service.dart';
 import 'package:food_tracker/core/services/storage/secure_storage_service.dart';
 import '../interfaces/vision_model_provider_interface.dart';
 import '../ports/ai_vision_port.dart';
@@ -10,12 +13,21 @@ import '../ports/ai_vision_port.dart';
 class GeminiAiVisionAdapter implements IAiVisionPort {
   final SecureStorageService _storage;
   final IVisionModelProvider? _providedService;
+  final GeminiRestClient? _restClient;
+  final DecisionGateService? _decisionGate;
+  final GeminiCacheService? _cacheService;
 
   GeminiAiVisionAdapter({
     SecureStorageService? storage,
     IVisionModelProvider? visionModelProvider,
+    GeminiRestClient? restClient,
+    DecisionGateService? decisionGate,
+    GeminiCacheService? cacheService,
   })  : _storage = storage ?? SecureStorageService.instance,
-        _providedService = visionModelProvider;
+        _providedService = visionModelProvider,
+        _restClient = restClient,
+        _decisionGate = decisionGate,
+        _cacheService = cacheService;
 
   Future<IVisionModelProvider> _resolveProvider({
     String? overrideModel,
@@ -37,6 +49,9 @@ class GeminiAiVisionAdapter implements IAiVisionPort {
       apiKey: apiKey.trim(),
       modelName: overrideModel ?? selectedModel ?? GeminiVisionService.defaultModel,
       masterPrompt: overrideMasterPrompt ?? masterPrompt,
+      restClient: _restClient,
+      decisionGate: _decisionGate,
+      cacheService: _cacheService,
     );
   }
 

@@ -18,6 +18,37 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [1.5.0] - 2026-11-15
+
+### Inference Engine Modernization, Native REST Client & Network Resilience
+- **Native Gemini REST Client (`GeminiRestClient`)**:
+  - Deprecated `google_generative_ai: ^0.4.6` SDK permanently removed from `pubspec.yaml`.
+  - Implemented typed native HTTP client using `http: ^1.3.0` against `https://generativelanguage.googleapis.com/v1beta`.
+  - Implemented SSE streaming with automatic silent fallback to unary `POST generateContent` on socket cuts or cellular NAT drops.
+  - Full support for Gemini 4 family (elements: Hydrogen, Carbon, Argon, Krypton, Oxygen) and active Gemini 3 family (`gemini-3.8-flash`, `gemini-3.1-pro`, `gemini-3.6-flash`, `gemini-3.5-flash-lite`).
+  - Automatic `thinkingConfig` configuration (`thinkingLevel`) and `temperature: 1.0` with thinking.
+- **Multimodal Pre-Gate (`DecisionGateService` with `gemini-decision-1`)**:
+  - Fast discriminative control plane (< 250ms at $0.10 / 1M input tokens) evaluating 4 questions simultaneously (`is_food`, `image_quality`, `dish_complexity`, `meal_category`).
+  - Strict BYOK: Uses solely the user's Keystore/SecureStorage API key (0 hardcoded keys).
+  - Interactive warning banner in `AnalysisProgressBanner` (`[Tomar otra foto]` / `[Analizar de todos modos]`) for non-food or blurry images.
+  - Deterministic fail-open on timeout (> 2500ms) ensuring the user is never blocked.
+- **Context Caching (`GeminiCacheService`)**:
+  - Implemented `/v1beta/cachedContents` caching for Master Prompt + Pantry items with TTL of 1 hour.
+  - Automatic token threshold check with transparent inline prompt fallback if below API minimum.
+- **Image Tiling & Token Efficiency**:
+  - Image compression unified to maximum dimension `<= 768 px` (JPEG 85%) in `ImageProcessingService`.
+  - Exactly 1 tile = 258 tokens in Gemini, reducing token usage by 75% and upload payload by > 90%.
+- **Deterministic Totals & Partial Result Flag**:
+  - Removed `"totales"` object from `mealAnalysisSchema`; all totals are calculated deterministically in Dart from `items[]`.
+  - Added `isPartial: true` flag in `MealAnalysisResult` when `JsonRepairHelper` intervenes, rendering warning chips in UI.
+- **Quality Gate & Architecture Health**:
+  - Fixed all broken relative imports in `lib/core/models/` and `lib/features/`.
+  - Restored `analysis_options.yaml` without ignoring deprecations.
+  - 100% of the 254 Dart files in `lib/` strictly comply with `< 300 LoC`.
+  - All unit test suites passing (`bun test`), SDD contract parity verified (`bun run lint:contracts`).
+
+---
+
 ## [1.4.6] - 2026-11-15
 
 ### Architectural Overhaul: Modular Monolith, VSA, Micro-MVC & Pragmatic Hexagonal

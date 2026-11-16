@@ -63,23 +63,23 @@ const String fullApiResponse = '''
 {
   "models": [
     {
-      "name": "models/gemini-2.5-flash",
-      "displayName": "Gemini 2.5 Flash",
+      "name": "models/gemini-3.8-flash",
+      "displayName": "Gemini 3.8 Flash",
       "description": "Ultra fast model",
       "supportedGenerationMethods": ["generateContent"],
       "inputModalities": ["TEXT", "IMAGE"]
     },
     {
-      "name": "models/gemini-2.0-flash",
-      "displayName": "Gemini 2.0 Flash",
-      "description": "Stable model",
+      "name": "models/gemini-3.1-pro",
+      "displayName": "Gemini 3.1 Pro",
+      "description": "Deep reasoning model",
       "supportedGenerationMethods": ["generateContent"],
       "inputModalities": ["TEXT", "IMAGE"]
     },
     {
-      "name": "models/gemini-2.5-pro",
-      "displayName": "Gemini 2.5 Pro",
-      "description": "Deep reasoning model",
+      "name": "models/gemini-3.5-flash-lite",
+      "displayName": "Gemini 3.5 Flash Lite",
+      "description": "Lite model",
       "supportedGenerationMethods": ["generateContent"],
       "inputModalities": ["TEXT", "IMAGE"]
     }
@@ -216,9 +216,9 @@ void main() {
 
     test('3. Selection of each recommended model persists to SecureStorage and triggers notifyListeners', () async {
       const recommendedModels = [
-        'gemini-2.5-flash',
-        'gemini-2.0-flash',
-        'gemini-2.5-pro',
+        'gemini-3.8-flash',
+        'gemini-3.6-flash',
+        'gemini-3.1-pro',
       ];
 
       for (final model in recommendedModels) {
@@ -252,32 +252,32 @@ void main() {
       expect(visionService.modelName, equals('gemini-3.8-flash'));
     });
 
-    test('5. Dynamic Model Invocation: When user selects gemini-2.0-flash, effective model matches exactly', () async {
-      await SecureStorageService.instance.setSelectedGeminiModel('gemini-2.0-flash');
+    test('5. Dynamic Model Invocation: When user selects gemini-3.6-flash, effective model matches exactly', () async {
+      await SecureStorageService.instance.setSelectedGeminiModel('gemini-3.6-flash');
       final storedModel = await SecureStorageService.instance.getSelectedGeminiModel();
-      expect(storedModel, equals('gemini-2.0-flash'));
+      expect(storedModel, equals('gemini-3.6-flash'));
 
       final effectiveModel = storedModel ?? GeminiVisionService.defaultModel;
-      expect(effectiveModel, equals('gemini-2.0-flash'));
+      expect(effectiveModel, equals('gemini-3.6-flash'));
 
       final visionService = GeminiVisionService(
         apiKey: 'dummy-key',
         modelName: effectiveModel,
       );
-      expect(visionService.modelName, equals('gemini-2.0-flash'));
+      expect(visionService.modelName, equals('gemini-3.6-flash'));
     });
 
     test('6. Unrecognized saved model resolves to first recommended model in available list', () {
       const models = [
         GeminiModelInfo(
-          name: 'gemini-2.5-flash',
-          displayName: 'Gemini 2.5 Flash',
+          name: 'gemini-3.8-flash',
+          displayName: 'Gemini 3.8 Flash',
           description: '',
           isRecommended: true,
         ),
         GeminiModelInfo(
-          name: 'gemini-2.0-flash',
-          displayName: 'Gemini 2.0 Flash',
+          name: 'gemini-3.6-flash',
+          displayName: 'Gemini 3.6 Flash',
           description: '',
           isRecommended: true,
         ),
@@ -287,7 +287,7 @@ void main() {
         availableModels: models,
         savedSelection: 'gemini-obsolete-model-99',
       );
-      expect(resolved, equals('gemini-2.5-flash'));
+      expect(resolved, equals('gemini-3.8-flash'));
     });
   });
 }

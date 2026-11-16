@@ -275,6 +275,23 @@ El diagrama interactivo de componentes, límites de seguridad, widgets nativos d
   - 250 archivos Dart en `lib/`, 100% conformes con el presupuesto estricto de menos de 300 líneas de código.
 - **Versión Canónica:** `AppConstants.appVersion = '1.4.6'` y `pubspec.yaml version: 1.4.6+1`.
 
+### 3.20. Modernización del Motor de Inferencia, Cliente REST v1beta y Pre-Gate Multimodal (v1.5.0)
+- **Eliminación del SDK Deprecado y Cliente REST Nativo (`GeminiRestClient`):**
+  - Desacoplamiento total de `google_generative_ai` deprecado; implementación de `GeminiRestClient` tipado sobre `http` contra `/v1beta`.
+  - Soporte de streaming SSE con fallback unario silencioso automático ante cortes de socket en redes móviles.
+  - Soporte dinámico para la familia Gemini 4 (Hydrogen, Carbon, Argon, Krypton, Oxygen) y Gemini 3 activa (`gemini-3.8-flash`, `gemini-3.1-pro`, `gemini-3.6-flash`, `gemini-3.5-flash-lite`), con exclusión de modelos 2.x obsoletos.
+  - Configuración nativa de `thinkingConfig: { "thinkingLevel": ... }` y `temperature: 1.0` con thinking.
+- **Control Plane Multimodal (`DecisionGateService` con `gemini-decision-1`):**
+  - Pre-evaluación en <250ms a $0.10 / 1M tokens de 4 preguntas (`is_food`, `image_quality`, `dish_complexity`, `meal_category`).
+  - Strict BYOK mediante `SecureStorageService` del usuario.
+  - Advertencia interactiva en `AnalysisProgressBanner` (`[Tomar otra foto]` / `[Analizar de todos modos]`) para fotos no-comida o borrosas.
+  - Fail-open transparente ante timeouts >2500ms.
+- **Eficiencia de Tokens y Tiling Unificado a 768px:**
+  - `ImageProcessingService` limita dimensiones a `<= 768 px` (JPEG 85%), fijando 1 tile = 258 tokens (75% de ahorro en tokens de visión).
+  - Eliminación de `"totales"` en `mealAnalysisSchema`; cálculo determinista de macronutrientes en Dart.
+  - Bandera `isPartial: true` en `MealAnalysisResult` ante intervenciones de `JsonRepairHelper`.
+- **Versión Canónica:** `AppConstants.appVersion = '1.5.0'` y `pubspec.yaml version: 1.5.0+1`.
+
 
 
 

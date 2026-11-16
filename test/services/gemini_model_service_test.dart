@@ -8,12 +8,32 @@ const String mockSuccessResponseJson = '''
 {
   "models": [
     {
+      "name": "models/gemini-4-hydrogem",
+      "version": "4.0",
+      "displayName": "Gemini 4 Hydrogem",
+      "description": "Next-gen multimodal model.",
+      "inputTokenLimit": 2097152,
+      "outputTokenLimit": 16384,
+      "supportedGenerationMethods": ["generateContent", "countTokens"],
+      "inputModalities": ["TEXT", "IMAGE"]
+    },
+    {
       "name": "models/gemini-3.8-flash",
       "version": "3.8",
       "displayName": "Gemini 3.8 Flash",
       "description": "Daily fast and cost-effective vision model.",
       "inputTokenLimit": 1048576,
-      "outputTokenLimit": 8192,
+      "outputTokenLimit": 16384,
+      "supportedGenerationMethods": ["generateContent", "countTokens"],
+      "inputModalities": ["TEXT", "IMAGE"]
+    },
+    {
+      "name": "models/gemini-3.6-flash",
+      "version": "3.6",
+      "displayName": "Gemini 3.6 Flash",
+      "description": "Resilient vision model.",
+      "inputTokenLimit": 1048576,
+      "outputTokenLimit": 16384,
       "supportedGenerationMethods": ["generateContent", "countTokens"],
       "inputModalities": ["TEXT", "IMAGE"]
     },
@@ -23,18 +43,18 @@ const String mockSuccessResponseJson = '''
       "displayName": "Gemini 3.1 Pro",
       "description": "Clinical deep reasoning high-precision model.",
       "inputTokenLimit": 2097152,
-      "outputTokenLimit": 8192,
+      "outputTokenLimit": 16384,
       "supportedGenerationMethods": ["generateContent", "countTokens"],
       "inputModalities": ["TEXT", "IMAGE"]
     },
     {
-      "name": "models/gemini-2.5-flash",
-      "version": "2.5",
-      "displayName": "Gemini 2.5 Flash",
-      "description": "Multimodal model.",
+      "name": "models/gemini-3.5-flash-lite",
+      "version": "3.5",
+      "displayName": "Gemini 3.5 Flash Lite",
+      "description": "Lightweight fallback model.",
       "inputTokenLimit": 1048576,
       "outputTokenLimit": 8192,
-      "supportedGenerationMethods": ["generateContent", "countTokens"],
+      "supportedGenerationMethods": ["generateContent"],
       "inputModalities": ["TEXT", "IMAGE"]
     },
     {
@@ -42,16 +62,6 @@ const String mockSuccessResponseJson = '''
       "version": "2.0",
       "displayName": "Gemini 2.0 Flash",
       "description": "Retired legacy model.",
-      "inputTokenLimit": 1048576,
-      "outputTokenLimit": 8192,
-      "supportedGenerationMethods": ["generateContent"],
-      "inputModalities": ["TEXT", "IMAGE"]
-    },
-    {
-      "name": "models/gemini-1.5-flash",
-      "version": "1.5",
-      "displayName": "Gemini 1.5 Flash",
-      "description": "Legacy fast model.",
       "inputTokenLimit": 1048576,
       "outputTokenLimit": 8192,
       "supportedGenerationMethods": ["generateContent"],
@@ -103,28 +113,28 @@ void main() {
 
       expect(models.length, equals(5));
 
-      // 1. gemini-3.8-flash (rank 1, recommended default)
-      expect(models[0].name, equals('gemini-3.8-flash'));
-      expect(models[0].isRecommended, isTrue);
-      expect(models[0].recommendationLabel, equals('Fast'));
+      // 1. gemini-4-hydrogem (rank 1, Next-Gen)
+      expect(models[0].name, equals('gemini-4-hydrogem'));
+      expect(models[0].recommendationLabel, equals('Next-Gen'));
 
-      // 2. gemini-3.1-pro (rank 2, recommended clinical)
-      expect(models[1].name, equals('gemini-3.1-pro'));
+      // 2. gemini-3.8-flash (rank 2, recommended default)
+      expect(models[1].name, equals('gemini-3.8-flash'));
       expect(models[1].isRecommended, isTrue);
-      expect(models[1].recommendationLabel, equals('Think'));
+      expect(models[1].recommendationLabel, equals('Fast'));
 
-      // 3. gemini-2.5-flash (rank 3, not recommended)
-      expect(models[2].name, equals('gemini-2.5-flash'));
-      expect(models[2].isRecommended, isFalse);
+      // 3. gemini-3.6-flash (rank 2, Fast)
+      expect(models[2].name, equals('gemini-3.6-flash'));
+      expect(models[2].recommendationLabel, equals('Fast'));
 
-      // 4. gemini-1.5-flash (rank 5)
-      expect(models[3].name, equals('gemini-1.5-flash'));
-      expect(models[3].isRecommended, isFalse);
+      // 4. gemini-3.1-pro (rank 3, recommended clinical)
+      expect(models[3].name, equals('gemini-3.1-pro'));
+      expect(models[3].isRecommended, isTrue);
+      expect(models[3].recommendationLabel, equals('Think'));
 
-      // 5. gemini-2.0-flash (rank 10, obsolete)
-      expect(models[4].name, equals('gemini-2.0-flash'));
+      // 5. gemini-3.5-flash-lite (rank 4, Lite)
+      expect(models[4].name, equals('gemini-3.5-flash-lite'));
       expect(models[4].isRecommended, isFalse);
-      expect(models[4].recommendationLabel, equals('Obsoleto'));
+      expect(models[4].recommendationLabel, equals('Lite'));
     });
 
     test('supportsThinking and resolveThinkingBudget configure thinkingLevel MEDIUM for gemini-3 and exclude for lite', () {

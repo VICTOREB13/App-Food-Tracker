@@ -91,7 +91,7 @@ void main() {
     await DatabaseService.instance.closeForTesting();
   });
 
-  testWidgets('NutriTrackerApp boots and renders DashboardScreen without crashing', (tester) async {
+  testWidgets('NutriTrackerApp boots and renders DashboardView without crashing', (tester) async {
     await tester.pumpWidget(const NutriTrackerApp());
     await tester.pump(const Duration(milliseconds: 300));
 
@@ -120,11 +120,11 @@ void main() {
     expect(find.byType(OnboardingScreen), findsOneWidget);
   });
 
-  testWidgets('NutriTrackerApp renders DashboardScreen when hasCompletedOnboarding is true', (tester) async {
+  testWidgets('NutriTrackerApp renders DashboardView when hasCompletedOnboarding is true', (tester) async {
     await tester.pumpWidget(const NutriTrackerApp(hasCompletedOnboarding: true));
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(find.byType(DashboardScreen), findsOneWidget);
+    expect(find.byType(DashboardView), findsOneWidget);
   });
 
   testWidgets('NutriTrackerApp dynamically updates when hasCompletedOnboarding prop changes', (tester) async {
@@ -134,7 +134,7 @@ void main() {
 
     await tester.pumpWidget(const NutriTrackerApp(hasCompletedOnboarding: true));
     await tester.pump(const Duration(milliseconds: 300));
-    expect(find.byType(DashboardScreen), findsOneWidget);
+    expect(find.byType(DashboardView), findsOneWidget);
   });
 
   testWidgets('NutriTrackerApp background check transitions to OnboardingScreen when uncompleted in storage', (tester) async {
@@ -148,7 +148,7 @@ void main() {
     expect(find.byType(OnboardingScreen), findsOneWidget);
   });
 
-  testWidgets('OnboardingScreen onCompleted callback updates root app to DashboardScreen', (tester) async {
+  testWidgets('OnboardingScreen onCompleted callback updates root app to DashboardView', (tester) async {
     fakeStorage.data.remove('has_completed_onboarding');
 
     await tester.pumpWidget(const NutriTrackerApp());
@@ -162,10 +162,10 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 350));
     await tester.pump(const Duration(milliseconds: 350));
-    expect(find.byType(DashboardScreen), findsOneWidget);
+    expect(find.byType(DashboardView), findsOneWidget);
   });
 
-  testWidgets('NutriTrackerApp stays on DashboardScreen when storage is uncompleted but local profile exists', (tester) async {
+  testWidgets('NutriTrackerApp stays on DashboardView when storage is uncompleted but local profile exists', (tester) async {
     fakeStorage.data.remove('has_completed_onboarding');
     final profile = MetabolicCalculator.calculateProfile(
       name: 'Victor',
@@ -184,7 +184,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 350));
     await tester.pump(const Duration(milliseconds: 350));
 
-    expect(find.byType(DashboardScreen), findsOneWidget);
+    expect(find.byType(DashboardView), findsOneWidget);
     expect(find.byType(OnboardingScreen), findsNothing);
   });
 }

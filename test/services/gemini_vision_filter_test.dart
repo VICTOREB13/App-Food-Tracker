@@ -7,25 +7,30 @@ void main() {
       const fallbacks = GeminiVisionFilter.fallbackModels;
       expect(fallbacks.length, equals(4));
       expect(fallbacks.any((m) => m.name == 'gemini-3.8-flash'), isTrue);
+      expect(fallbacks.any((m) => m.name == 'gemini-3.6-flash'), isTrue);
       expect(fallbacks.any((m) => m.name == 'gemini-3.1-pro'), isTrue);
-      expect(fallbacks.any((m) => m.name == 'gemini-2.5-flash'), isTrue);
-      expect(fallbacks.any((m) => m.name == 'gemini-1.5-flash'), isTrue);
+      expect(fallbacks.any((m) => m.name == 'gemini-3.5-flash-lite'), isTrue);
       expect(fallbacks.any((m) => m.name == 'gemini-2.0-flash'), isFalse);
     });
 
-    test('calculateTierRank prioritizes 3.8-flash and 3.1-pro, and demotes 2.0-flash as obsolete', () {
-      expect(GeminiVisionFilter.calculateTierRank('gemini-3.8-flash'), equals(1));
-      expect(GeminiVisionFilter.calculateTierRank('gemini-3.1-pro'), equals(2));
-      expect(GeminiVisionFilter.calculateTierRank('gemini-2.5-flash'), equals(3));
-      expect(GeminiVisionFilter.calculateTierRank('gemini-2.5-pro'), equals(4));
-      expect(GeminiVisionFilter.calculateTierRank('gemini-1.5-flash'), equals(5));
-      expect(GeminiVisionFilter.calculateTierRank('gemini-2.0-flash'), equals(10));
+    test('calculateTierRank prioritizes Gemini 4, 3.8-flash and 3.1-pro, and demotes legacy families', () {
+      expect(GeminiVisionFilter.calculateTierRank('gemini-4-hydrogem'), equals(1));
+      expect(GeminiVisionFilter.calculateTierRank('gemini-3.8-flash'), equals(2));
+      expect(GeminiVisionFilter.calculateTierRank('gemini-3.6-flash'), equals(2));
+      expect(GeminiVisionFilter.calculateTierRank('gemini-3.1-pro'), equals(3));
+      expect(GeminiVisionFilter.calculateTierRank('gemini-3.5-flash-lite'), equals(4));
+      expect(GeminiVisionFilter.calculateTierRank('gemini-2.5-flash'), equals(20));
+      expect(GeminiVisionFilter.calculateTierRank('gemini-2.0-flash'), equals(20));
+      expect(GeminiVisionFilter.calculateTierRank('gemini-1.5-flash'), equals(21));
     });
 
-    test('calculateRecommendationLabel flags 2.0 models as Obsoleto and pro as Think', () {
+    test('calculateRecommendationLabel flags 2.0 models as Obsoleto, 4 as Next-Gen, and pro as Think', () {
+      expect(GeminiVisionFilter.calculateRecommendationLabel('gemini-4-hydrogem'), equals('Next-Gen'));
       expect(GeminiVisionFilter.calculateRecommendationLabel('gemini-3.8-flash'), equals('Fast'));
       expect(GeminiVisionFilter.calculateRecommendationLabel('gemini-3.1-pro'), equals('Think'));
+      expect(GeminiVisionFilter.calculateRecommendationLabel('gemini-3.5-flash-lite'), equals('Lite'));
       expect(GeminiVisionFilter.calculateRecommendationLabel('gemini-2.0-flash'), equals('Obsoleto'));
+      expect(GeminiVisionFilter.calculateRecommendationLabel('gemini-1.5-flash'), equals('Obsoleto'));
     });
 
     test('isVisionCapableModel blocks all prohibited keywords and requires flash or pro', () {

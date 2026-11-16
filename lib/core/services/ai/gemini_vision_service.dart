@@ -1,24 +1,27 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:food_tracker/features/food_entry/models/food_item.dart';
 import 'package:food_tracker/features/food_entry/models/meal_analysis_result.dart';
 import 'package:food_tracker/core/interfaces/vision_model_provider_interface.dart';
 import 'package:food_tracker/core/services/ai/gemini_model_service.dart';
 import 'package:food_tracker/core/services/ai/gemini_resilience_helper.dart';
+import 'package:food_tracker/core/services/ai/gemini_rest_client.dart';
+import 'package:food_tracker/core/services/ai/decision_gate_service.dart';
+import 'package:food_tracker/core/services/ai/gemini_cache_service.dart';
 import 'package:food_tracker/features/food_entry/services/image_processing_service.dart';
 
-
 class GeminiVisionService implements IVisionModelProvider {
-  final String apiKey;
-  final String modelName;
+  final String apiKey, modelName;
   final String? masterPrompt;
+  final GeminiRestClient _restClient;
+  final DecisionGateService _decisionGate;
+  final GeminiCacheService _cacheService;
 
   static const String defaultModel = 'gemini-3.8-flash';
   static const String clinicalModel = 'gemini-3.1-pro';
-  static const String fallbackModel = 'gemini-2.5-flash';
-
+  static const String fallbackModel = 'gemini-3.5-flash-lite';
   static const Duration defaultTimeout = Duration(seconds: 90);
   static const Duration clinicalTimeout = Duration(seconds: 120);
 
@@ -26,7 +29,6 @@ class GeminiVisionService implements IVisionModelProvider {
   static String? resolveThinkingLevel(String modelName) =>
       GeminiModelService.resolveThinkingLevel(modelName);
 
-  /// Builds a call configuration map with model and thinking level/budget
   static Map<String, dynamic> buildCallConfig({
     required String modelName, int? customThinkingBudget, String? customThinkingLevel,
   }) => GeminiModelService.buildCallConfig(
@@ -39,50 +41,49 @@ class GeminiVisionService implements IVisionModelProvider {
   static String buildSystemInstruction([String? masterPrompt, String? pantryContext]) =>
       GeminiResilienceHelper.buildSystemPrompt(masterPrompt: masterPrompt, pantryContext: pantryContext);
 
-  GeminiVisionService({required this.apiKey, this.modelName = defaultModel, this.masterPrompt});
+  GeminiVisionService({
+    required this.apiKey,
+    this.modelName = defaultModel,
+    this.masterPrompt,
+    GeminiRestClient? restClient,
+    DecisionGateService? decisionGate,
+    GeminiCacheService? cacheService,
+  })  : _restClient = restClient ?? GeminiRestClient.instance,
+        _decisionGate = decisionGate ?? DecisionGateService.instance,
+        _cacheService = cacheService ?? GeminiCacheService.instance;
 
-  /// Resolves the network timeout based on model tier and reasoning capacity (90s - 120s)
   static Duration resolveTimeout(String modelName) =>
       GeminiModelService.supportsThinking(modelName) ? clinicalTimeout : defaultTimeout;
 
   static String userFriendlyErrorMessage(dynamic error) {
     if (error == null) return 'Ocurrió un error al analizar la comida. Por favor, inténtalo nuevamente.';
     final s = error.toString().toLowerCase();
-
-    if (error is String && (s.startsWith('se perdió la conexión') ||
-        s.startsWith('tu api key') || s.startsWith('has alcanzado el límite') ||
-        s.startsWith('la ia no logró') || s.startsWith('ocurrió un error') ||
-        s.startsWith('el tiempo de espera'))) {
+    if (error is String && (s.startsWith('se perdió') || s.startsWith('tu api key') ||
+        s.startsWith('has alcanzado') || s.startsWith('la ia no') || s.startsWith('ocurrió') || s.startsWith('el tiempo'))) {
       return error;
     }
-    if (error is TimeoutException || s.contains('timeoutexception') || s.contains('timed out')) {
-      return 'El tiempo de espera de análisis se agotó (la red tardó demasiado). Se perdió la conexión a internet temporalmente. Por favor, reintenta o usa registro manual.';
+    if (error is TimeoutException || s.contains('timeout')) {
+      return 'El tiempo de espera de análisis se agotó. Se perdió la conexión a internet temporalmente.';
     }
-    if (error is SocketException || s.contains('socketexception') || s.contains('clientexception') ||
-        s.contains('unreachable') || s.contains('lookup') || s.contains('refused')) {
+    if (error is SocketException || s.contains('socket') || s.contains('clientexception') || s.contains('unreachable') || s.contains('lookup')) {
       return 'Se perdió la conexión a internet. Por favor, verifica tu red e inténtalo de nuevo.';
     }
-    if (s.contains('api key') || s.contains('permission_denied') || s.contains('unauthenticated') ||
-        s.contains('401') || s.contains('403') || (s.contains('400') && !s.contains('safety'))) {
+    if (s.contains('api key') || s.contains('permission_denied') || s.contains('401') || s.contains('403')) {
       return 'Tu API Key de Gemini no es válida o no tiene permisos suficientes. Verifícala en Ajustes.';
     }
     if (s.contains('429') || s.contains('resource_exhausted') || s.contains('quota') || s.contains('rate limit')) {
       return 'Has alcanzado el límite de solicitudes de Gemini. Por favor, espera unos segundos e inténtalo de nuevo.';
     }
-    if (s.contains('safety') || s.contains('recitation') || s.contains('blocked') ||
-        s.contains('vacía') || s.contains('empty') || s.contains('no logr') || s.contains('alimentos')) {
-      return 'La IA no logró identificar alimentos en la foto. Intenta con una toma más cercana, con mejor iluminación o ángulo superior.';
+    if (s.contains('safety') || s.contains('blocked') || s.contains('vacía') || s.contains('empty') || s.contains('no logr')) {
+      return 'La IA no logró identificar alimentos en la foto. Intenta con una toma más cercana o mejor iluminación.';
     }
     return 'Ocurrió un error al analizar la comida. Por favor, inténtalo nuevamente.';
   }
 
   Future<MealAnalysisResult> analyzeMealImage(
     Uint8List imageBytes, {
-    String? userContext,
-    String? overrideModel,
-    String? overrideMasterPrompt,
-    double? dishwareDiameterCm,
-    String? pantryContext,
+    String? userContext, String? overrideModel, String? overrideMasterPrompt,
+    double? dishwareDiameterCm, String? pantryContext,
   }) => analyzeMealPhoto(
     rawImageBytes: imageBytes, userContext: userContext, overrideModel: overrideModel,
     overrideMasterPrompt: overrideMasterPrompt, dishwareDiameterCm: dishwareDiameterCm, pantryContext: pantryContext,
@@ -95,22 +96,25 @@ class GeminiVisionService implements IVisionModelProvider {
     double? dishwareDiameterCm, String? pantryContext,
   }) async {
     try {
-      final imageBytesToSend = await _prepareImageBytes(rawImageBytes);
-      final initialModel = (overrideModel != null && overrideModel.trim().isNotEmpty)
-          ? overrideModel.trim()
-          : modelName;
+      final imageToSend = await _prepareImageBytes(rawImageBytes);
+      final initialModel = (overrideModel != null && overrideModel.trim().isNotEmpty) ? overrideModel.trim() : modelName;
 
+      final decision = await _decisionGate.evaluatePhoto(photoBytes: imageToSend, userNotes: userContext);
       final effectivePrompt = overrideMasterPrompt ?? masterPrompt;
-      final effectiveInstruction = buildSystemInstruction(effectivePrompt, pantryContext);
-      final userPromptText = GeminiResilienceHelper.buildUserPrompt(
-        userContext: userContext,
-        dishwareDiameterCm: dishwareDiameterCm,
+      final cachedName = await _cacheService.getOrCreateCachedContext(
+        model: initialModel, masterPrompt: effectivePrompt ?? '', pantryContext: pantryContext,
       );
 
+      final instruction = buildSystemInstruction(effectivePrompt, pantryContext);
+      final userPrompt = GeminiResilienceHelper.buildUserPrompt(userContext: userContext, dishwareDiameterCm: dishwareDiameterCm);
+      final parts = <Map<String, dynamic>>[
+        {'text': userPrompt},
+        {'inlineData': {'mimeType': 'image/jpeg', 'data': base64Encode(imageToSend)}},
+      ];
+
       return await _executeGenerativeContent(
-        parts: [TextPart(userPromptText), DataPart('image/jpeg', imageBytesToSend)],
-        systemInstruction: effectiveInstruction,
-        initialModel: initialModel,
+        parts: parts, systemInstruction: instruction, initialModel: initialModel,
+        thinkingLevel: decision.recommendedThinkingLevel, cachedContent: cachedName,
       );
     } catch (e) {
       throw Exception(userFriendlyErrorMessage(e));
@@ -124,28 +128,17 @@ class GeminiVisionService implements IVisionModelProvider {
     String? userNotes, double? dishwareDiameterCm, String? pantryContext, String? overrideModel,
   }) async {
     try {
-      final imageBytesToSend = await _prepareImageBytes(rawImageBytes);
-      final initialModel = (overrideModel != null && overrideModel.trim().isNotEmpty)
-          ? overrideModel.trim()
-          : modelName;
-
-      final effectiveInstruction = buildSystemInstruction(masterPrompt, pantryContext);
-      final itemsSummary = currentItems
-          .map((i) => '${i.name} (${i.estimatedGrams.toStringAsFixed(0)}g - ${i.calories.toStringAsFixed(0)} kcal)')
-          .toList();
-
-      final userPromptText = GeminiResilienceHelper.buildSubstitutionUserPrompt(
-        currentItemsSummary: itemsSummary,
-        oldIngredient: oldIngredient,
-        newIngredient: newIngredient,
-        userNotes: userNotes,
-        dishwareDiameterCm: dishwareDiameterCm,
+      final imageToSend = await _prepareImageBytes(rawImageBytes);
+      final initialModel = (overrideModel != null && overrideModel.trim().isNotEmpty) ? overrideModel.trim() : modelName;
+      final instruction = buildSystemInstruction(masterPrompt, pantryContext);
+      final summary = currentItems.map((i) => '${i.name} (${i.estimatedGrams.toStringAsFixed(0)}g)').toList();
+      final userPrompt = GeminiResilienceHelper.buildSubstitutionUserPrompt(
+        currentItemsSummary: summary, oldIngredient: oldIngredient,
+        newIngredient: newIngredient, userNotes: userNotes, dishwareDiameterCm: dishwareDiameterCm,
       );
-
       return await _executeGenerativeContent(
-        parts: [TextPart(userPromptText), DataPart('image/jpeg', imageBytesToSend)],
-        systemInstruction: effectiveInstruction,
-        initialModel: initialModel,
+        parts: [{'text': userPrompt}, {'inlineData': {'mimeType': 'image/jpeg', 'data': base64Encode(imageToSend)}}],
+        systemInstruction: instruction, initialModel: initialModel,
       );
     } catch (e) {
       throw Exception(userFriendlyErrorMessage(e));
@@ -158,17 +151,11 @@ class GeminiVisionService implements IVisionModelProvider {
     String? userNotes, String? overrideModel,
   }) async {
     try {
-      final initialModel = (overrideModel != null && overrideModel.trim().isNotEmpty)
-          ? overrideModel.trim()
-          : modelName;
-
-      final promptText = GeminiResilienceHelper.buildSpeechUserPrompt(userNotes: userNotes);
-      final effectiveInstruction = buildSystemInstruction(masterPrompt);
-
+      final initialModel = (overrideModel != null && overrideModel.trim().isNotEmpty) ? overrideModel.trim() : modelName;
+      final prompt = GeminiResilienceHelper.buildSpeechUserPrompt(userNotes: userNotes);
       return await _executeGenerativeContent(
-        parts: [TextPart(promptText), DataPart(mimeType, audioBytes)],
-        systemInstruction: effectiveInstruction,
-        initialModel: initialModel,
+        parts: [{'text': prompt}, {'inlineData': {'mimeType': mimeType, 'data': base64Encode(audioBytes)}}],
+        systemInstruction: buildSystemInstruction(masterPrompt), initialModel: initialModel,
       );
     } catch (e) {
       throw Exception(userFriendlyErrorMessage(e));
@@ -181,26 +168,17 @@ class GeminiVisionService implements IVisionModelProvider {
     double? dishwareDiameterCm, String? pantryContext, String? overrideModel,
   }) async {
     try {
-      final initialModel = (overrideModel != null && overrideModel.trim().isNotEmpty)
-          ? overrideModel.trim()
-          : modelName;
-
-      final effectiveInstruction = buildSystemInstruction(masterPrompt, pantryContext);
-      final promptText = GeminiResilienceHelper.buildVideoFramesUserPrompt(
-        framesCount: frameBytesList.length,
-        userNotes: userNotes,
-        dishwareDiameterCm: dishwareDiameterCm,
+      final initialModel = (overrideModel != null && overrideModel.trim().isNotEmpty) ? overrideModel.trim() : modelName;
+      final prompt = GeminiResilienceHelper.buildVideoFramesUserPrompt(
+        framesCount: frameBytesList.length, userNotes: userNotes, dishwareDiameterCm: dishwareDiameterCm,
       );
-
-      final preparedParts = <Part>[TextPart(promptText)];
+      final parts = <Map<String, dynamic>>[{'text': prompt}];
       for (final frame in frameBytesList) {
-        preparedParts.add(DataPart('image/jpeg', await _prepareImageBytes(frame)));
+        final prep = await _prepareImageBytes(frame);
+        parts.add({'inlineData': {'mimeType': 'image/jpeg', 'data': base64Encode(prep)}});
       }
-
       return await _executeGenerativeContent(
-        parts: preparedParts,
-        systemInstruction: effectiveInstruction,
-        initialModel: initialModel,
+        parts: parts, systemInstruction: buildSystemInstruction(masterPrompt, pantryContext), initialModel: initialModel,
       );
     } catch (e) {
       throw Exception(userFriendlyErrorMessage(e));
@@ -208,87 +186,68 @@ class GeminiVisionService implements IVisionModelProvider {
   }
 
   Future<Uint8List> _prepareImageBytes(Uint8List rawBytes) async {
-    final fastDims = _getFastDimensions(rawBytes);
-    if (fastDims == null || fastDims.$1 > 768 || fastDims.$2 > 768) {
-      return await ImageProcessingService.instance.compressAndResizeAsync(
-        rawBytes, targetMaxDimension: 768, quality: 85,
-      );
-    }
-    return rawBytes;
+    return await ImageProcessingService.instance.compressAndResizeAsync(
+      rawBytes, targetMaxDimension: 768, quality: 85,
+    );
   }
 
   Future<MealAnalysisResult> _executeGenerativeContent({
-    required List<Part> parts, required String systemInstruction, required String initialModel,
+    required List<Map<String, dynamic>> parts, required String systemInstruction,
+    required String initialModel, String? thinkingLevel, String? cachedContent,
   }) async {
-    final content = Content.multi(parts);
+    final contents = [{'role': 'user', 'parts': parts}];
+    final generationConfig = GeminiRestClient.buildGenerationConfig(
+      model: initialModel, thinkingLevel: thinkingLevel, temperature: 1.0, maxOutputTokens: 16384,
+      responseMimeType: 'application/json', responseSchema: GeminiResilienceHelper.mealAnalysisSchema.toMap(),
+    );
+    final systemMap = (cachedContent != null && cachedContent.isNotEmpty)
+        ? null
+        : {'parts': [{'text': systemInstruction}]};
 
     return await GeminiResilienceHelper.executeWithRetry<MealAnalysisResult>(
-      primaryModel: initialModel,
-      secondaryModel: fallbackModel,
+      primaryModel: initialModel, secondaryModel: initialModel,
       action: (attempt, currentModel) async {
-        final model = GenerativeModel(
-          model: currentModel,
-          apiKey: apiKey,
-          systemInstruction: Content.system(systemInstruction),
-          generationConfig: GenerationConfig(
-            responseMimeType: 'application/json',
-            responseSchema: GeminiResilienceHelper.mealAnalysisSchema,
-            temperature: 0.2,
-            maxOutputTokens: 16384,
-          ),
-        );
-
-        final timeoutDuration = resolveTimeout(currentModel);
-        String text = '';
+        final timeout = resolveTimeout(currentModel);
+        final buffer = StringBuffer();
+        bool isPartial = false;
         try {
-          final responseStream = model.generateContentStream([content]);
-          final buffer = StringBuffer();
-          await for (final chunk in responseStream.timeout(timeoutDuration)) {
-            final chunkText = chunk.text;
-            if (chunkText != null && chunkText.isNotEmpty) buffer.write(chunkText);
-          }
-          text = buffer.toString().trim();
-          if (text.isEmpty) {
-            final unaryRes = await model.generateContent([content]).timeout(timeoutDuration);
-            text = unaryRes.text?.trim() ?? '';
+          final stream = _restClient.streamGenerateContent(
+            apiKey: apiKey, model: currentModel, contents: contents,
+            systemInstruction: systemMap, generationConfig: generationConfig,
+            cachedContent: cachedContent, timeout: timeout,
+          );
+          await for (final chunk in stream.timeout(timeout)) {
+            if (chunk.isNotEmpty) buffer.write(chunk);
           }
         } catch (streamErr) {
-          debugPrint('GeminiVisionService: Stream failed ($streamErr), executing unary fallback');
-          final unaryRes = await model.generateContent([content]).timeout(timeoutDuration);
-          text = unaryRes.text?.trim() ?? '';
+          debugPrint('GeminiVisionService: SSE cut ($streamErr), fallback unary');
+          if (buffer.isEmpty) {
+            final unaryRes = await _restClient.generateContent(
+              apiKey: apiKey, model: currentModel, contents: contents,
+              systemInstruction: systemMap, generationConfig: generationConfig,
+              cachedContent: cachedContent, timeout: timeout,
+            );
+            buffer.write(unaryRes);
+          } else {
+            isPartial = true;
+          }
         }
 
+        var text = buffer.toString().trim();
+        if (text.isEmpty) {
+          text = await _restClient.generateContent(
+            apiKey: apiKey, model: currentModel, contents: contents,
+            systemInstruction: systemMap, generationConfig: generationConfig,
+            cachedContent: cachedContent, timeout: timeout,
+          );
+        }
         if (text.isEmpty) throw Exception('Gemini devolvió una respuesta vacía');
-
-        final result = MealAnalysisResult.fromJsonString(text);
+        final result = MealAnalysisResult.fromJsonString(text, isPartial: isPartial);
         if (result.items.isEmpty && result.totalCalories == 0) {
           throw FormatException('No se pudieron extraer alimentos del análisis estructurado: $text');
         }
         return result;
       },
     );
-  }
-
-  static (int, int)? _getFastDimensions(Uint8List bytes) {
-    if (bytes.length < 30) return null;
-    if (bytes[0] == 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4E && bytes[3] == 0x47) {
-      final width = (bytes[16] << 24) | (bytes[17] << 16) | (bytes[18] << 8) | bytes[19];
-      final height = (bytes[20] << 24) | (bytes[21] << 16) | (bytes[22] << 8) | bytes[23];
-      return (width, height);
-    }
-    if (bytes[0] == 0xFF && bytes[1] == 0xD8) {
-      int offset = 2;
-      while (offset + 8 < bytes.length) {
-        if (bytes[offset] != 0xFF) break;
-        final marker = bytes[offset + 1];
-        if (marker == 0xC0 || marker == 0xC1 || marker == 0xC2) {
-          final height = (bytes[offset + 5] << 8) | bytes[offset + 6];
-          final width = (bytes[offset + 7] << 8) | bytes[offset + 8];
-          return (width, height);
-        }
-        offset += 2 + ((bytes[offset + 2] << 8) | bytes[offset + 3]);
-      }
-    }
-    return null;
   }
 }

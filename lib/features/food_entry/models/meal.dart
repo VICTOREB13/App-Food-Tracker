@@ -19,20 +19,27 @@ class Meal {
   final String? notes;
   final String? aiBreakdownJson;
 
+  bool get isPartial {
+    if (aiBreakdownJson != null && aiBreakdownJson!.isNotEmpty) {
+      try {
+        final decoded = json.decode(_cleanJson(aiBreakdownJson!));
+        if (decoded is Map<String, dynamic>) {
+          return decoded['is_partial'] == true || decoded['isPartial'] == true;
+        }
+      } catch (_) {}
+    }
+    return false;
+  }
+
   static const List<String> validMealTypes = ['Desayuno', 'Almuerzo', 'Cena', 'Snack'];
   static const Object _sentinel = Object();
 
   Meal({
     String? id,
     required String name,
-    String mealType = 'Almuerzo',
-    DateTime? date,
-    String? imagePath,
+    String mealType = 'Almuerzo', DateTime? date, String? imagePath,
     num? calories, num? protein, num? carbs, num? fat,
-    num? fiber, num? sodium, num? sugar,
-    String? notes,
-    String? aiBreakdownJson,
-    List<FoodItem>? items,
+    num? fiber, num? sodium, num? sugar, String? notes, String? aiBreakdownJson, List<FoodItem>? items,
   })  : id = ModelSanitizer.truncate(id, 128, fallback: const Uuid().v4()),
         name = ModelSanitizer.truncate(name, ModelSanitizer.maxNameLength, fallback: 'Comida'),
         mealType = _sanitizeMealType(mealType),
@@ -227,26 +234,16 @@ class Meal {
       'items': newItems.map((e) => e.toJson()).toList(),
       'totales': {
         'calorias': effectiveCal,
-        'proteina_g': effectiveProt,
-        'carbohidratos_g': effectiveCarbs,
-        'grasas_g': effectiveFat,
-        'fibra_g': effectiveFiber,
-        'sodio_mg': effectiveSodium,
-        'azucar_g': effectiveSugar,
+        'calorias': effectiveCal, 'proteina_g': effectiveProt, 'carbohidratos_g': effectiveCarbs,
+        'grasas_g': effectiveFat, 'fibra_g': effectiveFiber, 'sodio_mg': effectiveSodium, 'azucar_g': effectiveSugar,
       },
       if (conf != null) 'porcentaje_certeza': conf,
       if (margin != null) 'margen_error_kcal': margin,
     });
 
     return copyWith(
-      calories: effectiveCal,
-      protein: effectiveProt,
-      carbs: effectiveCarbs,
-      fat: effectiveFat,
-      fiber: effectiveFiber,
-      sodium: effectiveSodium,
-      sugar: effectiveSugar,
-      aiBreakdownJson: newBreakdown,
+      calories: effectiveCal, protein: effectiveProt, carbs: effectiveCarbs, fat: effectiveFat,
+      fiber: effectiveFiber, sodium: effectiveSodium, sugar: effectiveSugar, aiBreakdownJson: newBreakdown,
     );
   }
 

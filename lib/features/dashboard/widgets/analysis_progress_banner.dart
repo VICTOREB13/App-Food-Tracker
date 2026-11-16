@@ -141,17 +141,27 @@ class AnalysisProgressBanner extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 3),
-                    Text(
-                      isCompleted
-                          ? '${task.resultMeal?.calories.toInt() ?? 0} kcal · ${task.resultMeal?.items.length ?? 0} ${l10n.ingredients}'
-                          : isFailed
-                              ? (task.error ?? l10n.mealAnalysisAiError)
-                              : _resolveStageMessage(context, task),
-                      style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary(context)),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            isCompleted
+                                ? '${task.resultMeal?.calories.toInt() ?? 0} kcal · ${task.resultMeal?.items.length ?? 0} ${l10n.ingredients}'
+                                : isFailed
+                                    ? (task.error ?? l10n.mealAnalysisAiError)
+                                    : _resolveStageMessage(context, task),
+                            style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary(context)),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (isCompleted && (task.isPartial || (task.resultMeal?.isPartial ?? false))) ...[
+                          const SizedBox(width: 6),
+                          const MealAnalysisPartialWarningChip(),
+                        ],
+                      ],
                     ),
-                    if (isPending) ...[
+                    if (isPending && task.status != AnalysisStatus.waitingConfirmation) ...[
                       const SizedBox(height: 6),
                       ClipRRect(
                         borderRadius: BorderRadius.circular(4),
@@ -169,6 +179,13 @@ class AnalysisProgressBanner extends StatelessWidget {
               _buildRightAction(context, task, isCompleted),
             ],
           ),
+          if (task.status == AnalysisStatus.waitingConfirmation)
+            DecisionGateWarningBanner(
+              isFood: task.decisionResult?.isFood ?? false,
+              imageQuality: task.decisionResult?.imageQuality ?? 'low',
+              onRetakePhoto: () => AnalysisQueueService.instance.dismissTask(task.id),
+              onAnalyzeAnyway: () => AnalysisQueueService.instance.confirmAndAnalyze(task.id),
+            ),
           if (isFailed) _buildFailedActions(context, task),
         ],
       ),
@@ -251,8 +268,7 @@ class AnalysisProgressBanner extends StatelessWidget {
         children: [
           TextButton.icon(
             style: TextButton.styleFrom(
-              foregroundColor: AppColors.textPrimary(context),
-              visualDensity: VisualDensity.compact,
+              foregroundColor: AppColors.textPrimary(context), visualDensity: VisualDensity.compact,
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             ),
             icon: const Icon(Icons.edit_note_rounded, size: 16),
@@ -262,10 +278,8 @@ class AnalysisProgressBanner extends StatelessWidget {
           const SizedBox(width: 8),
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              visualDensity: VisualDensity.compact,
-              elevation: 0,
+              backgroundColor: AppColors.primary, foregroundColor: Colors.white,
+              visualDensity: VisualDensity.compact, elevation: 0,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             ),

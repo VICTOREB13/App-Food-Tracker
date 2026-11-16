@@ -15,6 +15,15 @@ class GeminiVisionFilter {
       outputTokenLimit: 16384,
     ),
     GeminiModelInfo(
+      name: 'gemini-3.6-flash',
+      displayName: 'Gemini 3.6 Flash',
+      description: 'Modelo de alta velocidad y resiliencia para análisis visual.',
+      isRecommended: true,
+      recommendationLabel: 'Fast',
+      inputTokenLimit: 1048576,
+      outputTokenLimit: 16384,
+    ),
+    GeminiModelInfo(
       name: 'gemini-3.1-pro',
       displayName: 'Gemini 3.1 Pro',
       description: 'Modelo clínico de alta precisión para platos complejos y guisos densos.',
@@ -24,20 +33,11 @@ class GeminiVisionFilter {
       outputTokenLimit: 16384,
     ),
     GeminiModelInfo(
-      name: 'gemini-2.5-flash',
-      displayName: 'Gemini 2.5 Flash',
-      description: 'Modelo multimodal de alta velocidad y precisión visual.',
+      name: 'gemini-3.5-flash-lite',
+      displayName: 'Gemini 3.5 Flash Lite',
+      description: 'Modelo ligero de respaldo para máxima velocidad y bajo consumo.',
       isRecommended: false,
-      recommendationLabel: 'Fast',
-      inputTokenLimit: 1048576,
-      outputTokenLimit: 8192,
-    ),
-    GeminiModelInfo(
-      name: 'gemini-1.5-flash',
-      displayName: 'Gemini 1.5 Flash',
-      description: 'Modelo heredado rápido con amplia compatibilidad.',
-      isRecommended: false,
-      recommendationLabel: 'Fast',
+      recommendationLabel: 'Lite',
       inputTokenLimit: 1048576,
       outputTokenLimit: 8192,
     ),
@@ -50,8 +50,8 @@ class GeminiVisionFilter {
   ];
 
   /// Strict multimodal vision filtering for Google Gemini models.
-  /// Allows ONLY official multimodal Gemini Flash and Pro models, strictly rejecting
-  /// custom / fine-tuned models created in Google AI Studio, and non-vision models.
+  /// Allows Gemini 4 and Gemini 3 models with vision capabilities,
+  /// strictly rejecting legacy 1.x / 2.x models, custom fine-tuned models, and non-vision models.
   static bool isVisionCapableModel(Map<String, dynamic> model) {
     if (model.containsKey('baseModel') || model.containsKey('tunedModelSource')) {
       return false;
@@ -69,12 +69,22 @@ class GeminiVisionFilter {
 
     final cleanName = rawName.startsWith('models/') ? rawName.substring(7) : rawName;
     if (!cleanName.startsWith('gemini-')) return false;
-    if (!cleanName.contains('flash') && !cleanName.contains('pro')) return false;
+
+    // Discard deprecated families (Gemini 1.x and 2.x)
+    if (cleanName.startsWith('gemini-1.') || cleanName.startsWith('gemini-2.')) {
+      return false;
+    }
+
+    final isGemini4 = cleanName.startsWith('gemini-4');
+    final isGemini3 = cleanName.startsWith('gemini-3');
+    final hasVisionTier = cleanName.contains('flash') || cleanName.contains('pro');
+
+    if (!isGemini4 && !hasVisionTier && !isGemini3) return false;
 
     final displayName = (model['displayName'] ?? '').toString().toLowerCase();
     if (displayName.isNotEmpty) {
       if (!displayName.contains('gemini')) return false;
-      if (!displayName.contains('flash') && !displayName.contains('pro')) return false;
+      if (displayName.contains('gemini 1.') || displayName.contains('gemini 2.')) return false;
     }
 
     final description = (model['description'] ?? '').toString().toLowerCase();
@@ -99,31 +109,37 @@ class GeminiVisionFilter {
   }
 
   /// Assigns priority rank to model ID:
-  /// 1: gemini-3.8-flash / gemini-3.*-flash (Ágil diario recomendado)
-  /// 2: gemini-3.1-pro / gemini-3.*-pro (Clínico alta precisión recomendado)
-  /// 3: gemini-2.5-flash
-  /// 4: gemini-2.5-pro
-  /// 5: gemini-1.5-flash
-  /// 6: gemini-1.5-pro
-  /// 10: gemini-2.0-flash (Familia retirada / obsoleta)
+  /// 1: Gemini 4 family ('gemini-4-*')
+  /// 2: gemini-3.8-flash / gemini-3.6-flash / gemini-3.*-flash
+  /// 3: gemini-3.1-pro / gemini-3.*-pro
+  /// 4: gemini-3.5-flash-lite / flash-lite
+  /// 20: gemini-2.* (Deprecado)
+  /// 21: gemini-1.* (Deprecado)
   /// 99: All other models
   static int calculateTierRank(String modelName) {
     final lower = modelName.toLowerCase();
-    if (lower.startsWith('gemini-3.8-flash') || (lower.startsWith('gemini-3') && lower.contains('flash'))) return 1;
-    if (lower.startsWith('gemini-3.1-pro') || (lower.startsWith('gemini-3') && lower.contains('pro'))) return 2;
-    if (lower.startsWith('gemini-2.5-flash')) return 3;
-    if (lower.startsWith('gemini-2.5-pro')) return 4;
-    if (lower.startsWith('gemini-1.5-flash')) return 5;
-    if (lower.startsWith('gemini-1.5-pro')) return 6;
-    if (lower.startsWith('gemini-2.0-flash')) return 10;
-    if (lower.contains('flash-lite')) return 11;
+    if (lower.startsWith('gemini-4')) return 1;
+    if (lower.startsWith('gemini-3.8-flash') ||
+        lower.startsWith('gemini-3.6-flash') ||
+        (lower.startsWith('gemini-3') && lower.contains('flash') && !lower.contains('lite'))) {
+      return 2;
+    }
+    if (lower.startsWith('gemini-3.1-pro') ||
+        (lower.startsWith('gemini-3') && lower.contains('pro'))) {
+      return 3;
+    }
+    if (lower.contains('flash-lite')) return 4;
+    if (lower.startsWith('gemini-2.')) return 20;
+    if (lower.startsWith('gemini-1.')) return 21;
     return 99;
   }
 
-  /// Assigns compact semantic badge label displayed in UI ('Fast', 'Think', or 'Obsoleto')
+  /// Assigns compact semantic badge label displayed in UI ('Fast', 'Think', 'Lite', 'Next-Gen', or 'Obsoleto')
   static String? calculateRecommendationLabel(String modelName) {
     final lower = modelName.toLowerCase();
-    if (lower.contains('gemini-2.0')) return 'Obsoleto';
+    if (lower.contains('gemini-2') || lower.contains('gemini-1')) return 'Obsoleto';
+    if (lower.startsWith('gemini-4')) return 'Next-Gen';
+    if (lower.contains('lite')) return 'Lite';
     if (lower.contains('pro')) return 'Think';
     if (lower.contains('flash')) return 'Fast';
     return null;

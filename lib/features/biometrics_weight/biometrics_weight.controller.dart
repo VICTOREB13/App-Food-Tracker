@@ -81,11 +81,12 @@ class BiometricsWeightController extends ChangeNotifier {
       final latest = await _weightDao.getLatestWeightLog();
 
       final sorted = List<WeightLog>.from(logs)..sort((a, b) => a.date.compareTo(b.date));
+      final effectiveLatest = latest ?? (sorted.isNotEmpty ? sorted.last : null);
       final ma7 = BiometricsCalculator.calculateMovingAverage(sorted, window: 7);
 
       _state = _state.copyWith(
         logs: sorted,
-        latestLog: latest,
+        latestLog: effectiveLatest,
         movingAverage7d: ma7,
       );
 
@@ -125,8 +126,9 @@ class BiometricsWeightController extends ChangeNotifier {
       final profile = await profileDao.getUserProfile();
       if (profile == null) return;
 
-      final weightKg = _state.currentWeight ?? profile.weight;
+      final weightKg = _state.currentWeight ?? _state.latestLog?.weight ?? profile.weight;
       final heightCm = profile.height;
+      if (weightKg <= 0.0 || heightCm <= 0.0) return;
       final isFemale = profile.gender.toLowerCase() == 'female';
 
       final bmr = BiometricsCalculator.calculateBmr(

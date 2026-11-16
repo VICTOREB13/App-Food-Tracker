@@ -65,23 +65,23 @@ const String mockApiResponse = '''
 {
   "models": [
     {
-      "name": "models/gemini-2.5-flash",
-      "displayName": "Gemini 2.5 Flash",
+      "name": "models/gemini-3.8-flash",
+      "displayName": "Gemini 3.8 Flash",
       "description": "Ultra fast vision model",
       "supportedGenerationMethods": ["generateContent"],
       "inputModalities": ["TEXT", "IMAGE"]
     },
     {
-      "name": "models/gemini-2.0-flash",
-      "displayName": "Gemini 2.0 Flash",
-      "description": "Stable high speed model",
+      "name": "models/gemini-3.1-pro",
+      "displayName": "Gemini 3.1 Pro",
+      "description": "Deep reasoning model",
       "supportedGenerationMethods": ["generateContent"],
       "inputModalities": ["TEXT", "IMAGE"]
     },
     {
-      "name": "models/gemini-2.5-pro",
-      "displayName": "Gemini 2.5 Pro",
-      "description": "Deep reasoning model",
+      "name": "models/gemini-3.5-flash-lite",
+      "displayName": "Gemini 3.5 Flash Lite",
+      "description": "Lightweight model",
       "supportedGenerationMethods": ["generateContent"],
       "inputModalities": ["TEXT", "IMAGE"]
     }
@@ -173,7 +173,7 @@ void main() {
 
     test('init() with stored Gemini API key queries online models via GeminiModelService', () async {
       await fakeStorage.write(key: 'gemini_api_key', value: 'AIzaSyTest123');
-      await fakeStorage.write(key: 'gemini_selected_model', value: 'gemini-2.0-flash');
+      await fakeStorage.write(key: 'gemini_selected_model', value: 'gemini-3.8-flash');
       await fakeStorage.write(key: 'usda_api_key', value: 'USDA_KEY_456');
 
       final mockClient = MockClient((request) async {
@@ -187,10 +187,10 @@ void main() {
       expect(controller.hasApiKey, isTrue);
       expect(controller.usdaApiKey, equals('USDA_KEY_456'));
       expect(controller.hasUsdaApiKey, isTrue);
-      expect(controller.selectedGeminiModel, equals('gemini-2.0-flash'));
+      expect(controller.selectedGeminiModel, equals('gemini-3.8-flash'));
       expect(controller.isOnlineModels, isTrue);
       expect(controller.availableGeminiModels.length, equals(3));
-      expect(controller.availableGeminiModels[0].name, equals('gemini-2.5-flash'));
+      expect(controller.availableGeminiModels[0].name, equals('gemini-3.8-flash'));
     });
 
     test('saveApiKey() saves key to SecureStorage and refreshes models', () async {
@@ -229,10 +229,10 @@ void main() {
       bool notified = false;
       controller.addListener(() => notified = true);
 
-      await controller.saveSelectedGeminiModel('gemini-2.5-pro');
+      await controller.saveSelectedGeminiModel('gemini-3.1-pro');
 
-      expect(controller.selectedGeminiModel, equals('gemini-2.5-pro'));
-      expect(await SecureStorageService.instance.getSelectedGeminiModel(), equals('gemini-2.5-pro'));
+      expect(controller.selectedGeminiModel, equals('gemini-3.1-pro'));
+      expect(await SecureStorageService.instance.getSelectedGeminiModel(), equals('gemini-3.1-pro'));
       expect(notified, isTrue);
 
       // Deleting selection

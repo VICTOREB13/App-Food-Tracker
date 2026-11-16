@@ -10,7 +10,7 @@ void main() {
       expect(serviceDefault.modelName, equals('gemini-3.8-flash'));
       expect(GeminiVisionService.defaultModel, equals('gemini-3.8-flash'));
       expect(GeminiVisionService.clinicalModel, equals('gemini-3.1-pro'));
-      expect(GeminiVisionService.fallbackModel, equals('gemini-2.5-flash'));
+      expect(GeminiVisionService.fallbackModel, equals('gemini-3.5-flash-lite'));
       expect(serviceDefault.masterPrompt, isNull);
 
       final serviceCustom = GeminiVisionService(

@@ -1,8 +1,9 @@
 import 'dart:typed_data';
 import 'package:uuid/uuid.dart';
+import 'package:food_tracker/core/interfaces/decision_gate_service_interface.dart';
 import 'package:food_tracker/features/food_entry/models/meal.dart';
 
-enum AnalysisStatus { queued, processing, completed, failed }
+enum AnalysisStatus { queued, processing, waitingConfirmation, completed, failed }
 
 /// Task model representing an image analysis unit in the background queue.
 class AnalysisTask {
@@ -19,6 +20,9 @@ class AnalysisTask {
   String? error;
   Meal? resultMeal;
   final DateTime createdAt;
+  bool forceAnalyze;
+  bool isPartial;
+  DecisionGateResult? decisionResult;
 
   AnalysisTask({
     String? id,
@@ -34,11 +38,18 @@ class AnalysisTask {
     this.error,
     this.resultMeal,
     DateTime? createdAt,
+    this.forceAnalyze = false,
+    this.isPartial = false,
+    this.decisionResult,
   })  : id = id ?? const Uuid().v4(),
         createdAt = createdAt ?? DateTime.now();
 
   bool get isPending =>
-      status == AnalysisStatus.queued || status == AnalysisStatus.processing;
+      status == AnalysisStatus.queued ||
+      status == AnalysisStatus.processing ||
+      status == AnalysisStatus.waitingConfirmation;
+
+  bool get isWaitingConfirmation => status == AnalysisStatus.waitingConfirmation;
 
   Map<String, dynamic> toDbMap() => {
         'id': id,

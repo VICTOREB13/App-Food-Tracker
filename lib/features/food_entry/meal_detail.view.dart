@@ -37,6 +37,7 @@ class _MealDetailViewState extends State<MealDetailView> {
   late DateTime _date;
   String? _imagePath, _aiBreakdownJson;
   int? _confidencePercentage, _calorieErrorMargin;
+  bool _isPartial = false;
   List<FoodItem> _items = [];
   double _calories = 0.0, _protein = 0.0, _carbs = 0.0, _fat = 0.0;
   double _fiber = 0.0, _sodium = 0.0, _sugar = 0.0;
@@ -62,6 +63,7 @@ class _MealDetailViewState extends State<MealDetailView> {
       _confidencePercentage = meal.confidencePercentage;
       _calorieErrorMargin = meal.calorieErrorMargin;
       _aiBreakdownJson = meal.aiBreakdownJson;
+      _isPartial = meal.isPartial;
     }
   }
 
@@ -143,6 +145,7 @@ class _MealDetailViewState extends State<MealDetailView> {
           _confidencePercentage = analysis.confidencePercentage;
           _calorieErrorMargin = analysis.calorieErrorMargin;
           _aiBreakdownJson = analysis.rawJson;
+          _isPartial = analysis.isPartial;
         });
         if (_items.isNotEmpty) _recalculateTotals();
       }
@@ -222,11 +225,12 @@ class _MealDetailViewState extends State<MealDetailView> {
           ],
           const SizedBox(height: 16),
           MealMacroChipsRow(calories: _calories, protein: _protein, carbs: _carbs, fat: _fat),
-          if (_confidencePercentage != null || _calorieErrorMargin != null) ...[
+          if (_confidencePercentage != null || _calorieErrorMargin != null || _isPartial) ...[
             const SizedBox(height: 8),
             MealAiValidationChips(
               confidencePercentage: _confidencePercentage,
               calorieErrorMargin: _calorieErrorMargin,
+              isPartial: _isPartial,
             ),
           ],
           if (_fiber > 0 || _sodium > 0 || _sugar > 0) ...[

@@ -8,11 +8,13 @@ import 'package:food_tracker/core/services/theme/theme_manager.dart';
 class MealAiValidationChips extends StatelessWidget {
   final int? confidencePercentage;
   final int? calorieErrorMargin;
+  final bool isPartial;
 
   const MealAiValidationChips({
     super.key,
     this.confidencePercentage,
     this.calorieErrorMargin,
+    this.isPartial = false,
   });
 
   Color _resolveConfidenceColor(int percentage) {
@@ -23,7 +25,7 @@ class MealAiValidationChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (confidencePercentage == null && calorieErrorMargin == null) {
+    if (confidencePercentage == null && calorieErrorMargin == null && !isPartial) {
       return const SizedBox.shrink();
     }
 
@@ -35,6 +37,15 @@ class MealAiValidationChips extends StatelessWidget {
       runSpacing: 6,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
+        if (isPartial)
+          _buildChip(
+            context,
+            icon: Icons.warning_amber_rounded,
+            label: 'Análisis parcial',
+            tooltip: 'La respuesta se recuperó parcialmente de un corte de red.',
+            color: AppColors.caloriesFlame,
+            isDark: isDark,
+          ),
         if (confidencePercentage != null)
           _buildChip(
             context,

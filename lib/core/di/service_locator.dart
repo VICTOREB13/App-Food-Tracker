@@ -14,6 +14,10 @@ import 'package:food_tracker/core/database/daos/meal_template_dao.dart';
 import 'package:food_tracker/core/database/database_service.dart';
 import 'package:food_tracker/core/services/ai/gemini_model_service.dart';
 import 'package:food_tracker/core/services/ai/gemini_vision_service.dart';
+import 'package:food_tracker/core/services/ai/gemini_rest_client.dart';
+import 'package:food_tracker/core/services/ai/decision_gate_service.dart';
+import 'package:food_tracker/core/services/ai/gemini_cache_service.dart';
+import 'package:food_tracker/core/interfaces/decision_gate_service_interface.dart';
 import 'package:food_tracker/features/food_entry/services/image_processing_service.dart';
 import 'package:food_tracker/core/services/nutrition/open_food_facts_service.dart';
 import 'package:food_tracker/core/services/storage/secure_storage_service.dart';
@@ -85,6 +89,11 @@ void setupServiceLocator({bool isTesting = false}) {
   getIt.registerLazySingleton<ThemeManager>(() => ThemeManager.instance);
 
   // Network & AI Services
+  final restClient = GeminiRestClient.instance;
+  getIt.registerLazySingleton<GeminiRestClient>(() => restClient);
+  getIt.registerLazySingleton<IDecisionGateService>(() => DecisionGateService.instance);
+  getIt.registerLazySingleton<DecisionGateService>(() => DecisionGateService.instance);
+  getIt.registerLazySingleton<GeminiCacheService>(() => GeminiCacheService.instance);
   getIt.registerLazySingleton<GeminiModelService>(() => GeminiModelService.instance);
   getIt.registerLazySingleton<UsdaFoodDataService>(() => UsdaFoodDataService.instance);
   getIt.registerLazySingleton<BarcodeLookupService>(() => BarcodeLookupService.instance);

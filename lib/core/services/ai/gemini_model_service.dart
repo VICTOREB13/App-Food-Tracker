@@ -33,21 +33,24 @@ class GeminiModelService {
   static bool supportsThinking(String modelName) {
     final lower = modelName.toLowerCase();
     if (lower.contains('lite')) return false;
-    return lower.startsWith('gemini-3') || lower.contains('pro') || lower.contains('thinking');
+    return lower.startsWith('gemini-3') ||
+        lower.startsWith('gemini-4') ||
+        lower.contains('pro') ||
+        lower.contains('thinking');
   }
 
-  /// Resolves the thinking budget for a given model (null for Gemini 3, Lite, and non-thinking models)
+  /// Resolves the thinking budget for a given model (null for Gemini 3, Gemini 4, Lite, and non-thinking models)
   static int? resolveThinkingBudget(String modelName) {
     final lower = modelName.toLowerCase();
-    if (lower.startsWith('gemini-3') || lower.contains('lite')) return null;
+    if (lower.startsWith('gemini-3') || lower.startsWith('gemini-4') || lower.contains('lite')) return null;
     return supportsThinking(modelName) ? defaultThinkingBudget : null;
   }
 
-  /// Resolves the thinking level for a given model ('MEDIUM' for Gemini 3.8 Flash / Pro, null for Lite or non-thinking)
+  /// Resolves the thinking level for a given model ('MEDIUM' for Gemini 3.x / 4.x / Pro, null for Lite or non-thinking)
   static String? resolveThinkingLevel(String modelName) {
     final lower = modelName.toLowerCase();
     if (lower.contains('lite')) return null;
-    if (lower.startsWith('gemini-3') || lower.contains('pro')) {
+    if (lower.startsWith('gemini-3') || lower.startsWith('gemini-4') || lower.contains('pro')) {
       return defaultThinkingLevel;
     }
     return null;
@@ -65,11 +68,12 @@ class GeminiModelService {
     if (lower.contains('lite')) {
       return config;
     }
-    if (lower.startsWith('gemini-3') || lower.contains('pro')) {
+    if (lower.startsWith('gemini-3') || lower.startsWith('gemini-4') || lower.contains('pro')) {
       final level = customThinkingLevel ?? resolveThinkingLevel(modelName);
       if (level != null) {
         config['thinking_level'] = level;
         config['thinking_config'] = {'thinking_level': level};
+        config['thinkingConfig'] = {'thinkingLevel': level};
       }
       return config;
     }

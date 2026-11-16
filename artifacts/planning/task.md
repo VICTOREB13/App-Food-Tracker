@@ -1,15 +1,43 @@
 ---
 tipo: task_list
 proyecto: App_Food_Tracker
-iteracion: v1.4.6
-estado: completado
+iteracion: v1.5.0
+estado: activo
 fecha: 2026-11-15
-tags: [proyecto, tasks, checklist, v1-4-6, modular-monolith, vertical-slice, mvc, hexagonal]
+tags: [proyecto, tasks, checklist, v1-5-0, inference-engine, rest-client, decision-gate, context-caching, quality-gate]
 ---
 
-# 📋 Checklist Maestro de Tareas de Agentes (v1.4.6)
+# 📋 Checklist Maestro de Tareas de Agentes (v1.5.0)
 
-> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.4.6. Cada tarea completada se marca con `[x]`.
+> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.5.0. Cada tarea completada se marca con `[x]`.
+
+## 🌟 Iteración v1.5.0: Modernización del Motor de Inferencia, Cliente REST v1beta, Pre-Gate Multimodal y Resiliencia en Red Móvil
+
+### 🧭 1. Software-Architect & Backend-Engine (Swarm: `engine`)
+- [x] (Software-Architect) Remover `google_generative_ai: ^0.4.6` de `pubspec.yaml` y actualizar manifiesto a `version: 1.5.0+1`.
+- [x] (Software-Architect) Crear `lib/core/services/ai/gemini_rest_client.dart` (< 250 LoC) para transporte SSE y Unary contra `/v1beta`.
+- [x] (Software-Architect) Implementar `lib/core/services/ai/decision_gate_service.dart` (< 250 LoC) con `gemini-decision-1` para detección de no-comida, calidad y complejidad.
+- [x] (Software-Architect) Implementar `lib/core/services/ai/gemini_cache_service.dart` (< 200 LoC) con evaluación de umbral mínimo de tokens y fallback inline.
+- [x] (Software-Architect) Registrar los nuevos servicios en `lib/core/di/service_locator.dart`.
+
+### 🔄 2. Data & Domain Specialist (Swarm: `domain`)
+- [x] (Data-Specialist) Corregir imports de `lib/core/models/analysis_task.dart` y `usda_food_item.dart` hacia sus respectivas rebanadas en `features/`.
+- [x] (Data-Specialist) Actualizar `MealAnalysisResult` con campo `isPartial: true` y cálculo determinista de totales sin depender de objeto `totales`.
+- [x] (Data-Specialist) Actualizar `GeminiResilienceHelper.mealAnalysisSchema` eliminando `"totales"` y asegurando paridad con Gemini 3.x (`thinkingLevel`, `temperature: 1.0`).
+- [x] (Data-Specialist) Unificar `ImageProcessingService` a dimensión máxima `768x768 px` (JPEG 85%).
+- [x] (Data-Specialist) Corregir tipo `WeightLog` en `lib/features/biometrics_weight/biometrics_weight.controller.dart`.
+
+### 🔌 3. UI & Hexagonal Adapters (Swarm: `adapters`)
+- [x] (Frontend-UI) Conectar `GeminiAiVisionAdapter` (`lib/core/adapters/gemini_ai_vision_adapter.dart`) con `GeminiRestClient`, `DecisionGateService` y `GeminiCacheService`.
+- [x] (Frontend-UI) Implementar advertencia interactiva en `AnalysisProgressBanner` (`meal_analysis_pacing.dart`) para baja calidad o no-comida (`[Tomar otra foto]` / `[Analizar de todos modos]`).
+
+### 🛡️ 4. Systems-Auditor & Verifier (Swarm: `verifier`)
+- [x] (Systems-Auditor) Actualizar suites de prueba en `test/` adaptándolas a VSA/Micro-MVC (nombres de pantallas `DashboardView`, controladores).
+- [x] (Systems-Auditor) Crear tests unitarios para `GeminiRestClient`, `DecisionGateService`, `GeminiCacheService` y cálculo determinista de `MealAnalysisResult`.
+- [x] (Systems-Auditor) Ejecutar `bun test`, `bun run lint:contracts` y `bun run validate` garantizando 100% PASS.
+- [x] (Systems-Auditor) Auditar que el 100% de los archivos en `lib/` cumplan `< 300 LoC`.
+
+---
 
 ## 🌟 Iteración v1.4.6: Monolito Modular, Vertical Slice Architecture, Micro-MVC y Hexagonal Pragmática
 

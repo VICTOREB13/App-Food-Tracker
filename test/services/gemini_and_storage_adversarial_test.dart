@@ -239,8 +239,8 @@ void main() {
       {
         "models": [
           {
-            "name": "models/gemini-2.5-flash",
-            "displayName": "Gemini 2.5 Flash",
+            "name": "models/gemini-3.8-flash",
+            "displayName": "Gemini 3.8 Flash",
             "supportedGenerationMethods": ["generateContent"]
           },
           {
@@ -266,7 +266,7 @@ void main() {
       final result = service.parseModelsResponse(jsonStr);
 
       expect(result.length, equals(1));
-      expect(result.first.name, equals('gemini-2.5-flash'));
+      expect(result.first.name, equals('gemini-3.8-flash'));
     });
 
     test('1.12 Empty `inputModalities: []` falls back to name inspection heuristic', () {
@@ -274,8 +274,8 @@ void main() {
       {
         "models": [
           {
-            "name": "models/gemini-2.0-flash",
-            "displayName": "Gemini 2.0 Flash",
+            "name": "models/gemini-3.8-flash",
+            "displayName": "Gemini 3.8 Flash",
             "inputModalities": [],
             "supportedGenerationMethods": ["generateContent"]
           }
@@ -287,7 +287,7 @@ void main() {
       final result = service.parseModelsResponse(jsonStr);
 
       expect(result.length, equals(1));
-      expect(result.first.name, equals('gemini-2.0-flash'));
+      expect(result.first.name, equals('gemini-3.8-flash'));
     });
 
     test('1.13 Lowercase `inputModalities: ["text", "image"]` normalized and accepted', () {
@@ -295,8 +295,8 @@ void main() {
       {
         "models": [
           {
-            "name": "models/gemini-2.5-flash-lowercase",
-            "displayName": "Gemini 2.5 Flash Lowercase",
+            "name": "models/gemini-3.6-flash-lowercase",
+            "displayName": "Gemini 3.6 Flash Lowercase",
             "inputModalities": ["text", "image"],
             "supportedGenerationMethods": ["generateContent"]
           }
@@ -308,7 +308,7 @@ void main() {
       final result = service.parseModelsResponse(jsonStr);
 
       expect(result.length, equals(1));
-      expect(result.first.name, equals('gemini-2.5-flash-lowercase'));
+      expect(result.first.name, equals('gemini-3.6-flash-lowercase'));
     });
 
     test('1.14 Future Gemini 3.x models are correctly identified, categorized, and prioritized', () {

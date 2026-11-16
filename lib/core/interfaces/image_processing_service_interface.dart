@@ -7,13 +7,13 @@ import '../errors/result.dart';
 abstract interface class IImageProcessingService {
   Uint8List compressAndResize(
     Uint8List rawBytes, {
-    int targetMaxDimension = 1024,
+    int targetMaxDimension = 768,
     int quality = 85,
   });
 
   Future<Uint8List> compressAndResizeAsync(
     Uint8List rawBytes, {
-    int targetMaxDimension = 1024,
+    int targetMaxDimension = 768,
     int quality = 85,
   });
 
@@ -48,7 +48,7 @@ abstract interface class IImageProcessingService {
 
   Future<Result<Uint8List, ImageProcessingFailure>> compressAndResizeAsyncResult(
     Uint8List rawBytes, {
-    int targetMaxDimension = 1024,
+    int targetMaxDimension = 768,
     int quality = 85,
   });
 }

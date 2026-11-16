@@ -38,7 +38,7 @@ class ImageProcessingService implements IImageProcessingService {
   ImageProcessingService({IDatabaseService? databaseService})
       : _dbOverride = databaseService;
 
-  static const int maxDimension = 1024;
+  static const int maxDimension = 768;
   static const int jpegQuality = 85;
   static const String androidPublicPicturesPath =
       MealImageStorageResolver.androidPublicPicturesPath;

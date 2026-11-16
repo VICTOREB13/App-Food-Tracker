@@ -9,6 +9,7 @@ import 'package:food_tracker/features/food_entry/models/food_item.dart';
 import 'package:food_tracker/features/food_entry/models/meal.dart';
 import 'package:food_tracker/core/database/database_service.dart';
 import 'package:food_tracker/core/services/ai/gemini_vision_service.dart';
+import 'package:food_tracker/core/services/ai/decision_gate_service.dart';
 import 'package:food_tracker/features/food_entry/services/image_processing_service.dart';
 import 'package:food_tracker/core/services/storage/secure_storage_service.dart';
 import 'package:food_tracker/core/services/platform/notification_service.dart';
@@ -42,7 +43,6 @@ class AnalysisQueueService extends ChangeNotifier {
           stage TEXT NOT NULL DEFAULT 'En cola', error TEXT, result_meal_id TEXT, created_at TEXT NOT NULL
         )
       ''');
-
       await db.delete('analysis_queue', where: 'status = ?', whereArgs: ['completed']);
       final rows = await db.query('analysis_queue', orderBy: 'created_at DESC', limit: 20);
       _tasks.clear();
@@ -50,19 +50,13 @@ class AnalysisQueueService extends ChangeNotifier {
         final mealId = r['result_meal_id'] as String?;
         final meal = mealId != null ? await DatabaseService.instance.getMealById(mealId) : null;
         final task = AnalysisTask.fromDbMap(r, resultMeal: meal);
-
         if (task.isPending) {
-          final existing = meal ??
-              await DatabaseService.instance.getMealById(task.id) ??
-              await DatabaseService.instance.getMealByImagePath(task.imagePath);
+          final existing = meal ?? await DatabaseService.instance.getMealById(task.id) ?? await DatabaseService.instance.getMealByImagePath(task.imagePath);
           if (existing != null) {
-            task.resultMeal = existing;
-            task.status = AnalysisStatus.completed;
-            task.progress = 1.0;
-            task.stage = '¡Comida analizada y registrada!';
+            task.resultMeal = existing; task.status = AnalysisStatus.completed;
+            task.progress = 1.0; task.stage = '¡Comida analizada y registrada!';
           } else {
-            final fileExists = task.imagePath.isNotEmpty && File(task.imagePath).existsSync();
-            task.status = fileExists ? AnalysisStatus.queued : AnalysisStatus.failed;
+            task.status = (task.imagePath.isNotEmpty && File(task.imagePath).existsSync()) ? AnalysisStatus.queued : AnalysisStatus.failed;
           }
         }
         _tasks.add(task);
@@ -75,25 +69,14 @@ class AnalysisQueueService extends ChangeNotifier {
   }
 
   Future<AnalysisTask> enqueueMealAnalysis({
-    required Uint8List rawImageBytes,
-    required String mealType,
-    required DateTime date,
-    String? userContext,
-    double? dishwareDiameterCm,
-    List<FoodItem>? initialItems,
-    String? currentDishName,
+    required Uint8List rawImageBytes, required String mealType, required DateTime date,
+    String? userContext, double? dishwareDiameterCm, List<FoodItem>? initialItems, String? currentDishName,
   }) async {
     final task = AnalysisTask(
-      rawImageBytes: rawImageBytes,
-      dishwareDiameterCm: dishwareDiameterCm,
-      mealType: mealType,
-      date: date,
-      userContext: userContext,
-      status: AnalysisStatus.queued,
-      progress: 0.05,
-      stage: 'Optimizando foto...',
+      rawImageBytes: rawImageBytes, dishwareDiameterCm: dishwareDiameterCm,
+      mealType: mealType, date: date, userContext: userContext,
+      status: AnalysisStatus.queued, progress: 0.05, stage: 'Optimizando foto...',
     );
-
     _tasks.insert(0, task);
     await _persistTaskToDb(task);
     notifyListeners();
@@ -110,10 +93,7 @@ class AnalysisQueueService extends ChangeNotifier {
     _isWorkerRunning = true;
     try {
       while (true) {
-        final pending = _tasks.cast<AnalysisTask?>().lastWhere(
-              (t) => t != null && t.status == AnalysisStatus.queued,
-              orElse: () => null,
-            );
+        final pending = _tasks.cast<AnalysisTask?>().lastWhere((t) => t != null && t.status == AnalysisStatus.queued, orElse: () => null);
         if (pending == null) break;
         await _processTask(pending);
       }
@@ -123,52 +103,48 @@ class AnalysisQueueService extends ChangeNotifier {
   }
 
   Future<void> _updateProgress(AnalysisTask task, double progress, String stage) async {
-    task.progress = progress;
-    task.stage = stage;
+    task.progress = progress; task.stage = stage;
     notifyListeners();
     await _persistTaskToDb(task);
   }
 
   Future<void> _processTask(AnalysisTask task) async {
     task.status = AnalysisStatus.processing;
-
     try {
       if (task.imagePath.isEmpty && task.rawImageBytes != null) {
         await _updateProgress(task, 0.20, 'Comprimiendo imagen...');
         final compressed = await ImageProcessingService.instance.compressAndResizeAsync(task.rawImageBytes!);
-
         await _updateProgress(task, 0.35, 'Guardando foto...');
-        final savedPath = await ImageProcessingService.instance.saveMealImage(
-          compressed,
-          mealType: task.mealType,
-          date: task.date,
-        );
-        task.imagePath = savedPath;
+        task.imagePath = await ImageProcessingService.instance.saveMealImage(compressed, mealType: task.mealType, date: task.date);
         task.rawImageBytes = null;
         await _persistTaskToDb(task);
       }
-
       final apiKey = await SecureStorageService.instance.getGeminiApiKey();
-      if (apiKey == null || apiKey.trim().isEmpty) {
-        throw Exception('Configura tu API Key de Gemini en Ajustes.');
-      }
-
-      final selectedModel = await SecureStorageService.instance.getSelectedGeminiModel();
-      final masterPrompt = await SecureStorageService.instance.getMasterPrompt();
-      final effectiveModel = selectedModel ?? GeminiVisionService.defaultModel;
-
-      await _updateProgress(task, 0.45, 'Consultando $effectiveModel...');
+      if (apiKey == null || apiKey.trim().isEmpty) throw Exception('Configura tu API Key de Gemini en Ajustes.');
 
       final file = File(task.imagePath);
       if (!await file.exists()) throw Exception('No se encontró el archivo de imagen guardado.');
       final bytes = await file.readAsBytes();
 
-      final gemini = GeminiVisionService(
-        apiKey: apiKey,
-        modelName: effectiveModel,
-        masterPrompt: masterPrompt,
-      );
+      if (!task.forceAnalyze) {
+        await _updateProgress(task, 0.40, 'Evaluando imagen...');
+        final gate = await DecisionGateService.instance.evaluatePhoto(photoBytes: bytes, userNotes: task.userContext);
+        task.decisionResult = gate;
+        if (gate.shouldWarn) {
+          task.status = AnalysisStatus.waitingConfirmation;
+          task.stage = !gate.isFood ? 'No parece comida' : 'Calidad de imagen baja';
+          await _persistTaskToDb(task);
+          notifyListeners();
+          return;
+        }
+      }
 
+      final selectedModel = await SecureStorageService.instance.getSelectedGeminiModel();
+      final masterPrompt = await SecureStorageService.instance.getMasterPrompt();
+      final effectiveModel = selectedModel ?? GeminiVisionService.defaultModel;
+      await _updateProgress(task, 0.45, 'Consultando $effectiveModel...');
+
+      final gemini = GeminiVisionService(apiKey: apiKey, modelName: effectiveModel, masterPrompt: masterPrompt);
       double? diameter = task.dishwareDiameterCm;
       String? pantryCtx;
       try {
@@ -185,19 +161,15 @@ class AnalysisQueueService extends ChangeNotifier {
             notifyListeners();
           }
         });
-
         analysis = await gemini.analyzeMealPhoto(
-          rawImageBytes: bytes,
-          userContext: task.userContext,
-          dishwareDiameterCm: diameter,
-          pantryContext: (pantryCtx != null && pantryCtx.isNotEmpty) ? pantryCtx : null,
+          rawImageBytes: bytes, userContext: task.userContext,
+          dishwareDiameterCm: diameter, pantryContext: (pantryCtx != null && pantryCtx.isNotEmpty) ? pantryCtx : null,
         );
       } finally {
         pacingTimer?.cancel();
       }
 
       await _updateProgress(task, 0.90, 'Calculando macronutrientes y guardando en SQLite...');
-
       final ingredientsSummary = analysis.items.isNotEmpty
           ? 'Ingredientes: ${analysis.items.map((e) => '${e.name} (${e.estimatedGrams.toStringAsFixed(0)}g)').join(', ')}'
           : null;
@@ -215,35 +187,36 @@ class AnalysisQueueService extends ChangeNotifier {
       await FoodEntryController.instance.loadMeals();
 
       task.status = AnalysisStatus.completed;
+      task.isPartial = analysis.isPartial;
       task.resultMeal = meal;
       await _updateProgress(task, 1.0, '¡Comida analizada y registrada!');
-      await NotificationService.instance.showMealAnalysisCompleted(
-        mealName: meal.name,
-        calories: meal.calories,
-      );
+      await NotificationService.instance.showMealAnalysisCompleted(mealName: meal.name, calories: meal.calories);
     } catch (e) {
       task.status = AnalysisStatus.failed;
       task.error = GeminiVisionService.userFriendlyErrorMessage(e);
       await _updateProgress(task, task.progress, 'Error al analizar la comida');
-      await NotificationService.instance.showMealAnalysisFailed(
-        error: task.error ?? 'Error desconocido',
-      );
+      await NotificationService.instance.showMealAnalysisFailed(error: task.error ?? 'Error desconocido');
     }
+  }
+
+  Future<void> confirmAndAnalyze(String taskId) async {
+    final task = _tasks.cast<AnalysisTask?>().firstWhere((t) => t != null && t.id == taskId, orElse: () => null);
+    if (task == null) return;
+    task.forceAnalyze = true;
+    task.status = AnalysisStatus.queued;
+    await _updateProgress(task, 0.45, 'Reanudando análisis...');
+    _triggerWorker();
   }
 
   Meal? createManualMealFromFailedTask(String taskId) {
     final task = _tasks.cast<AnalysisTask?>().firstWhere((t) => t != null && t.id == taskId, orElse: () => null);
     if (task == null || task.imagePath.isEmpty) return null;
-    return Meal(
-      id: task.id, name: 'Comida sin clasificar', mealType: task.mealType,
-      date: task.date, imagePath: task.imagePath, notes: task.userContext,
-    );
+    return Meal(id: task.id, name: 'Comida sin clasificar', mealType: task.mealType, date: task.date, imagePath: task.imagePath, notes: task.userContext);
   }
 
   Future<void> retryTask(String taskId) async {
     final task = _tasks.cast<AnalysisTask?>().firstWhere((t) => t != null && t.id == taskId, orElse: () => null);
     if (task == null) return;
-
     if ((task.imagePath.isEmpty || !File(task.imagePath).existsSync()) && task.rawImageBytes == null) {
       task.status = AnalysisStatus.failed;
       task.error = 'No se encontró el archivo de imagen para reintentar.';
@@ -251,9 +224,7 @@ class AnalysisQueueService extends ChangeNotifier {
       await _persistTaskToDb(task);
       return;
     }
-
-    task.status = AnalysisStatus.queued;
-    task.error = null;
+    task.status = AnalysisStatus.queued; task.error = null;
     await _updateProgress(task, 0.05, 'En cola para reintento...');
     _triggerWorker();
   }
