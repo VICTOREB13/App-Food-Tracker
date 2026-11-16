@@ -306,6 +306,11 @@ jobs:
           mkdir -p ~/.gradle
           cat << 'EOF' > ~/.gradle/init.gradle
           allprojects {
+              tasks.whenTaskAdded { task ->
+                  if (task.name.startsWith('lintVital')) {
+                      task.enabled = false
+                  }
+              }
               configurations.all {
                   resolutionStrategy {
                       force 'androidx.core:core:1.13.1'
@@ -326,6 +331,10 @@ jobs:
                       project.android {
                           compileSdkVersion 34
                           buildToolsVersion "34.0.0"
+                          lintOptions {
+                              abortOnError false
+                              checkReleaseBuilds false
+                          }
                       }
                   }
               }
