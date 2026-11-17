@@ -24,28 +24,40 @@ class MealAiValidationChips extends StatelessWidget {
   });
 
   Color _resolveConfidenceColor(int percentage) {
-    if (percentage >= 85) return AppColors.success;
-    if (percentage >= 70) return AppColors.carbs;
+    if (percentage >= 85) {
+      return AppColors.success;
+    }
+    if (percentage >= 70) {
+      return AppColors.carbs;
+    }
     return AppColors.caloriesFlame;
   }
 
   String _formatTelemetry() {
     final raw = (modelUsed ?? '').replaceAll('models/', '');
-    String name = raw;
-    if (raw.toLowerCase().contains('hydrogen')) name = 'Gemini 4 Hydrogen';
-    else if (raw.toLowerCase().contains('carbon')) name = 'Gemini 4 Carbon';
-    else if (raw.toLowerCase().contains('argon')) name = 'Gemini 4 Argon';
-    else if (raw.toLowerCase().contains('3.8-flash')) name = 'Gemini 3.8 Flash';
-    else if (raw.toLowerCase().contains('3.1-pro')) name = 'Gemini 3.1 Pro';
-    else if (raw.toLowerCase().contains('3.6-flash')) name = 'Gemini 3.6 Flash';
-    else if (raw.toLowerCase().contains('3.5-flash-lite')) name = 'Gemini 3.5 Flash-Lite';
-    else if (raw.toLowerCase().contains('2.5-flash')) name = 'Gemini 2.5 Flash';
-    else if (raw.isNotEmpty) name = raw.replaceAll('gemini-', 'Gemini ').replaceAll('-', ' ');
+    if (raw.isEmpty) {
+      return '';
+    }
 
-    if (isFallback) return 'Fallback: $name';
+    final knownNames = <String, String>{
+      'gemini-2.5-flash': 'Gemini 2.5 Flash',
+      'gemini-2.5-pro': 'Gemini 2.5 Pro',
+      'gemini-3.5-flash-lite': 'Gemini 3.5 Flash-Lite',
+      'gemini-3.6-flash': 'Gemini 3.6 Flash',
+      'gemini-3.1-pro': 'Gemini 3.1 Pro',
+      'gemini-3.8-flash': 'Gemini 3.8 Flash',
+    };
+
+    final name = knownNames[raw.toLowerCase()] ??
+        raw.split('-').map((p) => p.isEmpty ? '' : '${p[0].toUpperCase()}${p.substring(1)}').join(' ');
+
+    if (isFallback) {
+      return 'Fallback: $name';
+    }
     if (thinkingLevel != null && thinkingLevel != 'OFF') {
       final effort = (thinkingLevel == 'HIGH' || thinkingLevel == 'XHIGH')
-          ? 'Alto' : (thinkingLevel == 'LOW' ? 'Bajo' : 'Medio');
+          ? 'Alto'
+          : (thinkingLevel == 'LOW' ? 'Bajo' : 'Medio');
       return '$name · Esfuerzo: $effort';
     }
     return name;

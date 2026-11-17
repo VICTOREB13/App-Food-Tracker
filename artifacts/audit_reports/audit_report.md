@@ -60,6 +60,13 @@ tags: [proyecto, audit, quality-gate, v1-5-2, voice-mode, bento-typography, imag
   - `MasterPromptBottomSheet` adaptado a la arquitectura visual Dark Bento con resumen modular de metas metabólicas y editor con copiado.
   - `ModelPickerBottomSheet` y `GeminiModelSelectorCard` incorporan selector de razonamiento ('OFF', 'LOW', 'MEDIUM', 'HIGH', 'XHIGH') y visualizador de contexto activo.
 
+- **Saneamiento Exhaustivo de Linter (Zero-Warning en CI):**
+  - Depuración de import no usado de `google_fonts` en `meal_detail.view.dart`.
+  - Refactorización de la cascada de 10 `else if` en `_formatTelemetry` hacia formateador algorítmico declarativo con llaves `{ ... }` canónicas en `meal_ai_validation_chips.dart`.
+  - Erradicación de `Radio<String>` deprecado en Flutter 3.50+ en favor de indicador táctil no deprecado `Icon(isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked)` en `model_picker_bottom_sheet.dart`.
+  - Aplicación estricta de llaves `{ ... }` (`curly_braces_in_flow_control_structures`) en `gemini_model_selector_card.dart` y `model_picker_bottom_sheet.dart`.
+  - Verificación absoluta de cero directivas `// ignore` en todo el repositorio.
+
 ---
 
 ## 📐 3. Auditoría de Presupuesto LoC y Artefactos

@@ -50,8 +50,12 @@ class _GeminiModelSelectorCardState extends State<GeminiModelSelectorCard> {
     final tokens = await SecureStorageService.instance.getMaxOutputTokens();
     if (mounted) {
       setState(() {
-        if (level != null && _thinkingLevels.contains(level)) _thinkingLevel = level;
-        if (tokens != null) _maxOutputTokens = tokens;
+        if (level != null && _thinkingLevels.contains(level)) {
+          _thinkingLevel = level;
+        }
+        if (tokens != null) {
+          _maxOutputTokens = tokens;
+        }
       });
     }
   }
@@ -67,18 +71,30 @@ class _GeminiModelSelectorCardState extends State<GeminiModelSelectorCard> {
   }
 
   Color _getBadgeColor(String? label) {
-    if (label == null) return AppColors.primary;
+    if (label == null) {
+      return AppColors.primary;
+    }
     final lower = label.toLowerCase();
-    if (lower.contains('think') || lower.contains('pro')) return AppColors.primary;
-    if (lower.contains('fast') || lower.contains('flash')) return AppColors.protein;
+    if (lower.contains('think') || lower.contains('pro')) {
+      return AppColors.primary;
+    }
+    if (lower.contains('fast') || lower.contains('flash')) {
+      return AppColors.protein;
+    }
     return AppColors.carbs;
   }
 
   String? _resolveBadgeLabel(GeminiModelInfo model) {
     final lower = model.name.toLowerCase();
-    if (lower.contains('pro')) return 'Think';
-    if (lower.contains('flash')) return 'Fast';
-    if (model.recommendationLabel != null && model.recommendationLabel!.isNotEmpty) return model.recommendationLabel;
+    if (lower.contains('pro')) {
+      return 'Think';
+    }
+    if (lower.contains('flash')) {
+      return 'Fast';
+    }
+    if (model.recommendationLabel != null && model.recommendationLabel!.isNotEmpty) {
+      return model.recommendationLabel;
+    }
     return null;
   }
 
@@ -146,7 +162,9 @@ class _GeminiModelSelectorCardState extends State<GeminiModelSelectorCard> {
           InkWell(
             onTap: () async {
               final selected = await ModelPickerBottomSheet.show(context, currentModel: effectiveSelected, models: effectiveList);
-              if (selected != null && widget.onSelectModel != null) widget.onSelectModel!(selected);
+              if (selected != null && widget.onSelectModel != null) {
+                widget.onSelectModel!(selected);
+              }
             },
             borderRadius: BorderRadius.circular(10),
             child: Container(
@@ -224,7 +242,9 @@ class _GeminiModelSelectorCardState extends State<GeminiModelSelectorCard> {
             child: OutlinedButton.icon(
               onPressed: () async {
                 final selected = await ModelPickerBottomSheet.show(context, currentModel: effectiveSelected, models: effectiveList);
-                if (selected != null && widget.onSelectModel != null) widget.onSelectModel!(selected);
+                if (selected != null && widget.onSelectModel != null) {
+                  widget.onSelectModel!(selected);
+                }
               },
               style: OutlinedButton.styleFrom(
                 side: BorderSide(color: AppColors.border(context)), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

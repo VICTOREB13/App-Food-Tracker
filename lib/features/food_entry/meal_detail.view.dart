@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:material_ui/material_ui.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:food_tracker/l10n/app_localizations.dart';
 import 'package:food_tracker/features/food_entry/services/image_processing_service.dart';
 import 'package:food_tracker/core/services/storage/secure_storage_service.dart';
@@ -37,16 +36,11 @@ class _MealDetailViewState extends State<MealDetailView> {
   late final TextEditingController _nameController, _notesController;
   late String _mealType;
   late DateTime _date;
-  String? _imagePath, _aiBreakdownJson;
+  String? _imagePath, _aiBreakdownJson, _modelUsed, _thinkingLevel;
   int? _confidencePercentage, _calorieErrorMargin;
-  bool _isPartial = false;
-  String? _modelUsed;
-  bool _isFallback = false;
-  String? _thinkingLevel;
+  bool _isPartial = false, _isFallback = false, _isSaving = false, _isReanalyzing = false;
   List<FoodItem> _items = [];
-  double _calories = 0.0, _protein = 0.0, _carbs = 0.0, _fat = 0.0;
-  double _fiber = 0.0, _sodium = 0.0, _sugar = 0.0;
-  bool _isSaving = false, _isReanalyzing = false;
+  double _calories = 0.0, _protein = 0.0, _carbs = 0.0, _fat = 0.0, _fiber = 0.0, _sodium = 0.0, _sugar = 0.0;
   String? _analysisStage;
   double? _analysisProgress;
   Timer? _progressTimer;
@@ -96,7 +90,10 @@ class _MealDetailViewState extends State<MealDetailView> {
     _analysisProgress = MealAnalysisPacing.initialProgress;
     _analysisStage = MealAnalysisPacing.getStageMessage(_analysisProgress!, l10n);
     _progressTimer = Timer.periodic(const Duration(milliseconds: 500), (t) {
-      if (!mounted || !_isReanalyzing) return t.cancel();
+      if (!mounted || !_isReanalyzing) {
+        t.cancel();
+        return;
+      }
       final cur = _analysisProgress ?? MealAnalysisPacing.initialProgress;
       final next = MealAnalysisPacing.nextProgress(cur);
       final currentL10n = AppLocalizations.of(context);
@@ -122,7 +119,9 @@ class _MealDetailViewState extends State<MealDetailView> {
   }
 
   Future<void> _reanalyzeWithAi() async {
-    if (_isSaving || _imagePath == null) return;
+    if (_isSaving || _imagePath == null) {
+      return;
+    }
     setState(() => _isReanalyzing = true);
     _startAnalysisProgress();
     try {
@@ -136,7 +135,9 @@ class _MealDetailViewState extends State<MealDetailView> {
         final l10n = AppLocalizations.of(context);
         setState(() { _analysisProgress = 1.0; _analysisStage = l10n.analysisStageComplete; });
         await Future.delayed(const Duration(milliseconds: 350));
-        if (!mounted) return;
+        if (!mounted) {
+          return;
+        }
         setState(() {
           if (_nameController.text.trim().isEmpty && analysis.dishName.isNotEmpty) {
             _nameController.text = analysis.dishName;
@@ -156,16 +157,26 @@ class _MealDetailViewState extends State<MealDetailView> {
           _isFallback = analysis.isFallback;
           _thinkingLevel = analysis.thinkingLevel;
         });
-        if (_items.isNotEmpty) _recalculateTotals();
+        if (_items.isNotEmpty) {
+          _recalculateTotals();
+        }
       }
     } finally {
       _progressTimer?.cancel();
-      if (mounted) setState(() { _isReanalyzing = false; _analysisStage = null; _analysisProgress = null; });
+      if (mounted) {
+        setState(() {
+          _isReanalyzing = false;
+          _analysisStage = null;
+          _analysisProgress = null;
+        });
+      }
     }
   }
 
   Future<void> _saveMeal() async {
-    if (_isSaving || _isReanalyzing) return;
+    if (_isSaving || _isReanalyzing) {
+      return;
+    }
     final notes = _notesController.text.trim();
     setState(() => _isSaving = true);
     final saved = await saveMealEntry(
@@ -175,8 +186,12 @@ class _MealDetailViewState extends State<MealDetailView> {
       carbs: _carbs, fat: _fat, notes: notes.isNotEmpty ? notes : null,
       items: _items, aiBreakdownJson: _aiBreakdownJson,
     );
-    if (mounted) setState(() => _isSaving = false);
-    if (saved && mounted) Navigator.of(context).pop();
+    if (mounted) {
+      setState(() => _isSaving = false);
+    }
+    if (saved && mounted) {
+      Navigator.of(context).pop();
+    }
   }
 
   Future<void> _deleteMeal() async {
@@ -188,14 +203,20 @@ class _MealDetailViewState extends State<MealDetailView> {
 
   Future<void> _addItem() async {
     final newItem = await showFoodItemEditorDialog(context);
-    if (newItem != null) { setState(() => _items.add(newItem)); _recalculateTotals(); }
+    if (newItem != null) {
+      setState(() => _items.add(newItem));
+      _recalculateTotals();
+    }
   }
 
   Future<void> _editItem(FoodItem item) async {
     final edited = await showFoodItemEditorDialog(context, initialItem: item);
     if (edited != null) {
       final idx = _items.indexWhere((e) => e.id == item.id);
-      if (idx != -1) { setState(() => _items[idx] = edited); _recalculateTotals(); }
+      if (idx != -1) {
+        setState(() => _items[idx] = edited);
+        _recalculateTotals();
+      }
     }
   }
 
@@ -205,7 +226,9 @@ class _MealDetailViewState extends State<MealDetailView> {
   }
 
   void _parseTelemetryFromJson(String? raw) {
-    if (raw == null || raw.isEmpty) return;
+    if (raw == null || raw.isEmpty) {
+      return;
+    }
     try {
       final d = json.decode(raw);
       if (d is Map<String, dynamic>) {
@@ -240,39 +263,29 @@ class _MealDetailViewState extends State<MealDetailView> {
             imagePath: _imagePath, dishName: _nameController.text, onPickImage: _pickImage,
             isAnalyzing: _isReanalyzing, analysisStage: _analysisStage, analysisProgress: _analysisProgress,
           ),
-          if (_imagePath != null) ...[
-            const SizedBox(height: 10),
-            MealAiReanalyzeButton(isReanalyzing: _isReanalyzing, onPressed: _reanalyzeWithAi),
-          ],
+          if (_imagePath != null)
+            Padding(padding: const EdgeInsets.only(top: 10), child: MealAiReanalyzeButton(isReanalyzing: _isReanalyzing, onPressed: _reanalyzeWithAi)),
           const SizedBox(height: 16),
           MealMacroChipsRow(calories: _calories, protein: _protein, carbs: _carbs, fat: _fat),
-          if (_confidencePercentage != null || _calorieErrorMargin != null || _isPartial || (_modelUsed != null && _modelUsed!.isNotEmpty)) ...[
-            const SizedBox(height: 8),
-            MealAiValidationChips(
-              confidencePercentage: _confidencePercentage,
-              calorieErrorMargin: _calorieErrorMargin,
-              isPartial: _isPartial,
-              modelUsed: _modelUsed,
-              isFallback: _isFallback,
-              thinkingLevel: _thinkingLevel,
-            ),
-          ],
-          if (_fiber > 0 || _sodium > 0 || _sugar > 0) ...[
-            const SizedBox(height: 8),
-            MealMicronutrientChipsRow(fiber: _fiber, sodium: _sodium, sugar: _sugar),
-          ],
+          const SizedBox(height: 8),
+          MealAiValidationChips(
+            confidencePercentage: _confidencePercentage, calorieErrorMargin: _calorieErrorMargin,
+            isPartial: _isPartial, modelUsed: _modelUsed, isFallback: _isFallback, thinkingLevel: _thinkingLevel,
+          ),
+          if (_fiber > 0 || _sodium > 0 || _sugar > 0)
+            Padding(padding: const EdgeInsets.only(top: 8), child: MealMicronutrientChipsRow(fiber: _fiber, sodium: _sodium, sugar: _sugar)),
           const SizedBox(height: 16),
           MealFormFields(
             nameController: _nameController, notesController: _notesController,
             mealType: _mealType,
             onMealTypeChanged: (val) {
-              if (val != null && val != _mealType) setState(() => _mealType = val);
+              if (val != null && val != _mealType) {
+                setState(() => _mealType = val);
+              }
             },
           ),
           const SizedBox(height: 16),
-          FoodItemsListCard(
-            items: _items, onAddItem: _addItem, onEditItem: _editItem, onDeleteItem: _deleteItem,
-          ),
+          FoodItemsListCard(items: _items, onAddItem: _addItem, onEditItem: _editItem, onDeleteItem: _deleteItem),
           const SizedBox(height: 24),
           MealSaveButton(isSaving: _isSaving, isEditing: isEditing, onSave: _saveMeal),
           const SizedBox(height: 24),

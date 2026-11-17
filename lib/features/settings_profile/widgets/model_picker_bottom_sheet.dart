@@ -51,8 +51,12 @@ class _ModelPickerBottomSheetState extends State<ModelPickerBottomSheet> {
     return widget.models.where((model) {
       final nameLower = model.name.toLowerCase();
       final displayLower = model.displayName.toLowerCase();
-      if (_selectedFilter == 'flash' && !nameLower.contains('flash')) return false;
-      if (_selectedFilter == 'pro' && !nameLower.contains('pro')) return false;
+      if (_selectedFilter == 'flash' && !nameLower.contains('flash')) {
+        return false;
+      }
+      if (_selectedFilter == 'pro' && !nameLower.contains('pro')) {
+        return false;
+      }
       if (_searchQuery.isNotEmpty) {
         return nameLower.contains(_searchQuery) || displayLower.contains(_searchQuery);
       }
@@ -66,15 +70,23 @@ class _ModelPickerBottomSheetState extends State<ModelPickerBottomSheet> {
 
   Color _badgeColor(String label) {
     final lower = label.toLowerCase();
-    if (lower.contains('think') || lower.contains('pro')) return AppColors.primary;
-    if (lower.contains('fast') || lower.contains('flash')) return AppColors.protein;
+    if (lower.contains('think') || lower.contains('pro')) {
+      return AppColors.primary;
+    }
+    if (lower.contains('fast') || lower.contains('flash')) {
+      return AppColors.protein;
+    }
     return AppColors.carbs;
   }
 
   String _resolveBadgeLabel(GeminiModelInfo model) {
     final lower = model.name.toLowerCase();
-    if (lower.contains('pro')) return 'Think';
-    if (lower.contains('flash')) return 'Fast';
+    if (lower.contains('pro')) {
+      return 'Think';
+    }
+    if (lower.contains('flash')) {
+      return 'Fast';
+    }
     if (model.recommendationLabel != null && model.recommendationLabel!.isNotEmpty) {
       return model.recommendationLabel!;
     }
@@ -192,18 +204,14 @@ class _ModelPickerBottomSheetState extends State<ModelPickerBottomSheet> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Radio<String>(
-                              value: model.name,
-                              groupValue: _selectedModel,
-                              activeColor: AppColors.primary,
-                              onChanged: (val) {
-                                if (val != null) {
-                                  setState(() => _selectedModel = val);
-                                  Navigator.of(context).pop(val);
-                                }
-                              },
+                            Padding(
+                              padding: const EdgeInsets.only(top: 2, right: 8),
+                              child: Icon(
+                                isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                                color: isSelected ? AppColors.primary : AppColors.textMuted(context),
+                                size: 20,
+                              ),
                             ),
-                            const SizedBox(width: 6),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
