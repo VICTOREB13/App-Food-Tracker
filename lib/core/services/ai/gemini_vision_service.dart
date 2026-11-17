@@ -162,6 +162,28 @@ class GeminiVisionService implements IVisionModelProvider {
     }
   }
 
+  /// Direct text inference without multimodal fake audio payloads.
+  Future<MealAnalysisResult> analyzeMealText({
+    required String textPrompt,
+    String? overrideModel,
+    String? thinkingLevel,
+  }) async {
+    try {
+      final initialModel = (overrideModel != null && overrideModel.trim().isNotEmpty)
+          ? overrideModel.trim()
+          : modelName;
+      final prompt = GeminiResilienceHelper.buildSpeechUserPrompt(userNotes: textPrompt);
+      return await _executeGenerativeContent(
+        parts: [{'text': prompt}],
+        systemInstruction: buildSystemInstruction(masterPrompt),
+        initialModel: initialModel,
+        thinkingLevel: thinkingLevel,
+      );
+    } catch (e) {
+      throw Exception(userFriendlyErrorMessage(e));
+    }
+  }
+
   @override
   Future<MealAnalysisResult> analyzeVideoFramesMeal({
     required List<Uint8List> frameBytesList, String? userNotes,
@@ -242,7 +264,13 @@ class GeminiVisionService implements IVisionModelProvider {
           );
         }
         if (text.isEmpty) throw Exception('Gemini devolvió una respuesta vacía');
-        final result = MealAnalysisResult.fromJsonString(text, isPartial: isPartial);
+        final result = MealAnalysisResult.fromJsonString(
+          text,
+          isPartial: isPartial,
+          modelUsed: currentModel,
+          isFallback: currentModel != initialModel,
+          thinkingLevel: thinkingLevel,
+        );
         if (result.items.isEmpty && result.totalCalories == 0) {
           throw FormatException('No se pudieron extraer alimentos del análisis estructurado: $text');
         }

@@ -198,5 +198,26 @@ void main() {
       expect(result.totalCarbs, equals(3.0));
       expect(result.totalFat, equals(3.5));
     });
+
+    test('serializes and deserializes modelUsed, isFallback, and thinkingLevel', () {
+      const jsonStr = '''
+      {
+        "plato": "Tazón de Avena",
+        "items": [],
+        "model_used": "gemini-4-hydrogen",
+        "is_fallback": true,
+        "thinking_level": "HIGH"
+      }
+      ''';
+      final result = MealAnalysisResult.fromJsonString(jsonStr);
+      expect(result.modelUsed, equals('gemini-4-hydrogen'));
+      expect(result.isFallback, isTrue);
+      expect(result.thinkingLevel, equals('HIGH'));
+
+      final map = result.toMap();
+      expect(map['model_used'], equals('gemini-4-hydrogen'));
+      expect(map['is_fallback'], isTrue);
+      expect(map['thinking_level'], equals('HIGH'));
+    });
   });
 }

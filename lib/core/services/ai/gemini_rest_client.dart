@@ -18,7 +18,17 @@ class GeminiRestClient {
         'x-goog-api-key': apiKey.trim(),
       };
 
+  /// Supported canonical thinking levels for Gemini reasoning models.
+  static const Set<String> validThinkingLevels = {
+    'OFF',
+    'LOW',
+    'MEDIUM',
+    'HIGH',
+    'XHIGH',
+  };
+
   /// Builds standard generation config with Gemini 3.x/4.x thinking config support.
+  /// If [thinkingLevel] is 'OFF', thinkingConfig is strictly omitted.
   static Map<String, dynamic> buildGenerationConfig({
     required String model,
     String? thinkingLevel,
@@ -33,6 +43,10 @@ class GeminiRestClient {
       'responseMimeType': responseMimeType,
     };
     if (responseSchema != null) config['responseSchema'] = responseSchema;
+
+    final normalized = thinkingLevel?.toUpperCase().trim();
+    if (normalized == 'OFF') return config;
+
     final lower = model.toLowerCase();
     final isReasoning = !lower.contains('lite') &&
         (lower.startsWith('gemini-3') ||
@@ -40,7 +54,10 @@ class GeminiRestClient {
             lower.contains('pro') ||
             lower.contains('thinking'));
     if (isReasoning) {
-      config['thinkingConfig'] = {'thinkingLevel': thinkingLevel ?? 'MEDIUM'};
+      final level = (normalized != null && validThinkingLevels.contains(normalized))
+          ? normalized
+          : 'MEDIUM';
+      config['thinkingConfig'] = {'thinkingLevel': level};
     }
     return config;
   }
@@ -53,12 +70,19 @@ class GeminiRestClient {
     Map<String, dynamic>? systemInstruction,
     Map<String, dynamic>? generationConfig,
     String? cachedContent,
+    String? thinkingLevel,
+    int maxOutputTokens = 16384,
     Duration timeout = const Duration(seconds: 90),
   }) async {
     final uri = Uri.parse('$baseUrl/models/$model:generateContent');
     final payload = <String, dynamic>{
       'contents': contents,
-      'generationConfig': generationConfig ?? buildGenerationConfig(model: model),
+      'generationConfig': generationConfig ??
+          buildGenerationConfig(
+            model: model,
+            thinkingLevel: thinkingLevel,
+            maxOutputTokens: maxOutputTokens,
+          ),
       if (systemInstruction != null) 'systemInstruction': systemInstruction,
       if (cachedContent != null && cachedContent.isNotEmpty) 'cachedContent': cachedContent,
     };
@@ -90,12 +114,19 @@ class GeminiRestClient {
     Map<String, dynamic>? systemInstruction,
     Map<String, dynamic>? generationConfig,
     String? cachedContent,
+    String? thinkingLevel,
+    int maxOutputTokens = 16384,
     Duration timeout = const Duration(seconds: 90),
   }) async* {
     final uri = Uri.parse('$baseUrl/models/$model:streamGenerateContent?alt=sse');
     final payload = <String, dynamic>{
       'contents': contents,
-      'generationConfig': generationConfig ?? buildGenerationConfig(model: model),
+      'generationConfig': generationConfig ??
+          buildGenerationConfig(
+            model: model,
+            thinkingLevel: thinkingLevel,
+            maxOutputTokens: maxOutputTokens,
+          ),
       if (systemInstruction != null) 'systemInstruction': systemInstruction,
       if (cachedContent != null && cachedContent.isNotEmpty) 'cachedContent': cachedContent,
     };
@@ -141,6 +172,8 @@ class GeminiRestClient {
         systemInstruction: systemInstruction,
         generationConfig: generationConfig,
         cachedContent: cachedContent,
+        thinkingLevel: thinkingLevel,
+        maxOutputTokens: maxOutputTokens,
         timeout: timeout,
       );
     }

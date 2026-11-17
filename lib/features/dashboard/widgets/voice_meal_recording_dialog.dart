@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:material_ui/material_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:food_tracker/features/food_entry/food_entry.dart';
@@ -35,10 +34,16 @@ class _VoiceMealRecordingDialogState extends State<_VoiceMealRecordingDialog> {
   void _toggleRecording() {
     setState(() {
       _isRecording = !_isRecording;
-      if (_isRecording && _textCtrl.text.isEmpty) {
-        _textCtrl.text = AppLocalizations.of(context).dishNameHint;
-      }
     });
+    if (_isRecording) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).listeningTapToStop),
+          duration: const Duration(seconds: 2),
+          backgroundColor: AppColors.primary,
+        ),
+      );
+    }
   }
 
   Future<void> _processAudioOrText() async {
@@ -54,12 +59,7 @@ class _VoiceMealRecordingDialogState extends State<_VoiceMealRecordingDialog> {
       }
 
       final service = GeminiVisionService(apiKey: apiKey);
-      // Process speech meal with mock/sampled audio bytes and text context
-      final dummyAudioBytes = Uint8List.fromList(text.codeUnits);
-      final analysis = await service.analyzeSpeechMeal(
-        audioBytes: dummyAudioBytes,
-        userNotes: text,
-      );
+      final analysis = await service.analyzeMealText(textPrompt: text);
 
       final meal = Meal(
         name: analysis.dishName,

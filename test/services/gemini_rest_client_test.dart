@@ -25,6 +25,18 @@ void main() {
 
       final configLite = GeminiRestClient.buildGenerationConfig(model: 'gemini-3.5-flash-lite');
       expect(configLite.containsKey('thinkingConfig'), isFalse);
+
+      final configOff = GeminiRestClient.buildGenerationConfig(
+        model: 'gemini-3.8-flash',
+        thinkingLevel: 'OFF',
+      );
+      expect(configOff.containsKey('thinkingConfig'), isFalse);
+
+      final configCustomTokens = GeminiRestClient.buildGenerationConfig(
+        model: 'gemini-3.8-flash',
+        maxOutputTokens: 8192,
+      );
+      expect(configCustomTokens['maxOutputTokens'], equals(8192));
     });
 
     test('generateContent sends valid headers and extracts candidate text', () async {

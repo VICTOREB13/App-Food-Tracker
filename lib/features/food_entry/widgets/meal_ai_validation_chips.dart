@@ -9,12 +9,18 @@ class MealAiValidationChips extends StatelessWidget {
   final int? confidencePercentage;
   final int? calorieErrorMargin;
   final bool isPartial;
+  final String? modelUsed;
+  final bool isFallback;
+  final String? thinkingLevel;
 
   const MealAiValidationChips({
     super.key,
     this.confidencePercentage,
     this.calorieErrorMargin,
     this.isPartial = false,
+    this.modelUsed,
+    this.isFallback = false,
+    this.thinkingLevel,
   });
 
   Color _resolveConfidenceColor(int percentage) {
@@ -23,9 +29,32 @@ class MealAiValidationChips extends StatelessWidget {
     return AppColors.caloriesFlame;
   }
 
+  String _formatTelemetry() {
+    final raw = (modelUsed ?? '').replaceAll('models/', '');
+    String name = raw;
+    if (raw.toLowerCase().contains('hydrogen')) name = 'Gemini 4 Hydrogen';
+    else if (raw.toLowerCase().contains('carbon')) name = 'Gemini 4 Carbon';
+    else if (raw.toLowerCase().contains('argon')) name = 'Gemini 4 Argon';
+    else if (raw.toLowerCase().contains('3.8-flash')) name = 'Gemini 3.8 Flash';
+    else if (raw.toLowerCase().contains('3.1-pro')) name = 'Gemini 3.1 Pro';
+    else if (raw.toLowerCase().contains('3.6-flash')) name = 'Gemini 3.6 Flash';
+    else if (raw.toLowerCase().contains('3.5-flash-lite')) name = 'Gemini 3.5 Flash-Lite';
+    else if (raw.toLowerCase().contains('2.5-flash')) name = 'Gemini 2.5 Flash';
+    else if (raw.isNotEmpty) name = raw.replaceAll('gemini-', 'Gemini ').replaceAll('-', ' ');
+
+    if (isFallback) return 'Fallback: $name';
+    if (thinkingLevel != null && thinkingLevel != 'OFF') {
+      final effort = (thinkingLevel == 'HIGH' || thinkingLevel == 'XHIGH')
+          ? 'Alto' : (thinkingLevel == 'LOW' ? 'Bajo' : 'Medio');
+      return '$name · Esfuerzo: $effort';
+    }
+    return name;
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (confidencePercentage == null && calorieErrorMargin == null && !isPartial) {
+    final hasTelemetry = modelUsed != null && modelUsed!.isNotEmpty;
+    if (confidencePercentage == null && calorieErrorMargin == null && !isPartial && !hasTelemetry) {
       return const SizedBox.shrink();
     }
 
@@ -37,6 +66,15 @@ class MealAiValidationChips extends StatelessWidget {
       runSpacing: 6,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
+        if (hasTelemetry)
+          _buildChip(
+            context,
+            icon: isFallback ? Icons.alt_route_rounded : Icons.auto_awesome,
+            label: _formatTelemetry(),
+            tooltip: isFallback ? 'Modelo de reserva ejecutado por corte de red' : 'Modelo de inferencia activo',
+            color: isFallback ? AppColors.caloriesFlame : AppColors.primary,
+            isDark: isDark,
+          ),
         if (isPartial)
           _buildChip(
             context,

@@ -42,6 +42,8 @@ class SecureStorageService {
   // Storage key constants
   static const String _geminiApiKeyKey = 'gemini_api_key';
   static const String _geminiSelectedModelKey = 'gemini_selected_model';
+  static const String _geminiThinkingLevelKey = 'gemini_thinking_level';
+  static const String _geminiMaxOutputTokensKey = 'gemini_max_output_tokens';
   static const String _usdaApiKeyKey = 'usda_api_key';
   static const String _hasCompletedOnboardingKey = 'has_completed_onboarding';
   static const String _masterPromptKey = 'user_master_prompt';
@@ -92,6 +94,16 @@ class SecureStorageService {
 
   Future<void> setSelectedGeminiModel(String model) =>
       _safeWrite(_geminiSelectedModelKey, model.trim());
+
+  // --- Gemini Thinking Level & Max Output Tokens ---
+  Future<String?> getThinkingLevel() => _safeRead(_geminiThinkingLevelKey);
+  Future<void> setThinkingLevel(String level) => _safeWrite(_geminiThinkingLevelKey, level.trim());
+
+  Future<int?> getMaxOutputTokens() async {
+    final str = await _safeRead(_geminiMaxOutputTokensKey);
+    return str != null ? int.tryParse(str) : null;
+  }
+  Future<void> setMaxOutputTokens(int tokens) => _safeWrite(_geminiMaxOutputTokensKey, tokens.toString());
 
   Future<void> deleteSelectedGeminiModel() => _safeDelete(_geminiSelectedModelKey);
 

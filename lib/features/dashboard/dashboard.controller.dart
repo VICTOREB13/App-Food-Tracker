@@ -94,6 +94,15 @@ class DashboardController extends ChangeNotifier {
     ]);
   }
 
+  Future<void> loadDashboardData() async {
+    await refreshGoals();
+    await Future.wait([
+      loadMeals(),
+      refreshStreak(),
+      refreshWeight(),
+    ]);
+  }
+
   Future<void> refreshGoals() async {
     try {
       final goals = await _secureStorage.getDailyGoals();

@@ -1,4 +1,3 @@
-// ignore_for_file: deprecated_member_use
 import 'package:material_ui/material_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:food_tracker/l10n/app_localizations.dart';
@@ -89,7 +88,6 @@ class _ModelPickerBottomSheetState extends State<ModelPickerBottomSheet> {
 
     return Column(
       children: [
-        // Handle bar
         const SizedBox(height: 10),
         Center(
           child: Container(
@@ -99,8 +97,6 @@ class _ModelPickerBottomSheetState extends State<ModelPickerBottomSheet> {
           ),
         ),
         const SizedBox(height: 12),
-
-        // Header Title
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 18),
           child: Row(
@@ -110,22 +106,13 @@ class _ModelPickerBottomSheetState extends State<ModelPickerBottomSheet> {
               Expanded(
                 child: Text(
                   l10n.selectGeminiModelTitle,
-                  style: GoogleFonts.outfit(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary(context),
-                  ),
+                  style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary(context)),
                 ),
               ),
-              IconButton(
-                icon: const Icon(Icons.close, size: 20),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
+              IconButton(icon: const Icon(Icons.close, size: 20), onPressed: () => Navigator.of(context).pop()),
             ],
           ),
         ),
-
-        // Search Bar
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
           child: TextField(
@@ -154,8 +141,6 @@ class _ModelPickerBottomSheetState extends State<ModelPickerBottomSheet> {
             ),
           ),
         ),
-
-        // Filter Chips Row
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -171,8 +156,6 @@ class _ModelPickerBottomSheetState extends State<ModelPickerBottomSheet> {
         ),
         const SizedBox(height: 8),
         const Divider(height: 1),
-
-        // Models List
         Expanded(
           child: filtered.isEmpty
               ? Center(
@@ -190,6 +173,8 @@ class _ModelPickerBottomSheetState extends State<ModelPickerBottomSheet> {
                     final isSelected = model.name == _selectedModel;
                     final badge = _resolveBadgeLabel(model);
                     final badgeCol = _badgeColor(badge);
+                    final inputLimit = model.inputTokenLimit > 0 ? model.inputTokenLimit : 1048576;
+                    final contextRatio = (2100 / inputLimit).clamp(0.001, 1.0);
 
                     return InkWell(
                       onTap: () {
@@ -247,14 +232,24 @@ class _ModelPickerBottomSheetState extends State<ModelPickerBottomSheet> {
                                   const SizedBox(height: 6),
                                   Row(
                                     children: [
-                                      Icon(Icons.input, size: 12, color: AppColors.textMuted(context)),
+                                      const Icon(Icons.input, size: 12, color: AppColors.primary),
                                       const SizedBox(width: 4),
-                                      Text(l10n.inputTokensCount(_formatTokens(model.inputTokenLimit)), style: GoogleFonts.inter(fontSize: 10, color: AppColors.textMuted(context))),
+                                      Text('~2.1k / ${_formatTokens(inputLimit)}', style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.primary)),
                                       const SizedBox(width: 12),
                                       Icon(Icons.output, size: 12, color: AppColors.textMuted(context)),
                                       const SizedBox(width: 4),
                                       Text(l10n.outputTokensCount(_formatTokens(model.outputTokenLimit)), style: GoogleFonts.inter(fontSize: 10, color: AppColors.textMuted(context))),
                                     ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(2),
+                                    child: LinearProgressIndicator(
+                                      value: contextRatio,
+                                      minHeight: 2,
+                                      backgroundColor: AppColors.border(context),
+                                      valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -272,21 +267,14 @@ class _ModelPickerBottomSheetState extends State<ModelPickerBottomSheet> {
 
   Widget _buildFilterChip(String filterKey, String label) {
     final isSelected = _selectedFilter == filterKey;
-
     return ChoiceChip(
       label: Text(label),
       selected: isSelected,
       onSelected: (_) => setState(() => _selectedFilter = filterKey),
       selectedColor: AppColors.primary,
       backgroundColor: AppColors.surfaceSubtle(context),
-      labelStyle: GoogleFonts.inter(
-        fontSize: 12,
-        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-        color: isSelected ? Colors.white : AppColors.textSecondary(context),
-      ),
-      side: BorderSide(
-        color: isSelected ? AppColors.primary : AppColors.border(context),
-      ),
+      labelStyle: GoogleFonts.inter(fontSize: 12, fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500, color: isSelected ? Colors.white : AppColors.textSecondary(context)),
+      side: BorderSide(color: isSelected ? AppColors.primary : AppColors.border(context)),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       showCheckmark: false,
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:food_tracker/features/food_entry/food_entry.dart';
+import 'package:food_tracker/features/dashboard/dashboard.controller.dart';
 import 'package:food_tracker/core/models/analysis_task.dart';
 import 'package:food_tracker/core/database/database_service.dart';
 import 'package:food_tracker/core/services/ai/gemini_vision_service.dart';
@@ -189,11 +190,19 @@ class AnalysisQueueService extends ChangeNotifier {
       task.resultMeal = meal;
       await _updateProgress(task, 1.0, '¡Comida analizada y registrada!');
       await NotificationService.instance.showMealAnalysisCompleted(mealName: meal.name, calories: meal.calories);
+      try {
+        await DashboardController.instance.loadDashboardData();
+        await FoodEntryController.instance.loadMeals();
+      } catch (_) {}
     } catch (e) {
       task.status = AnalysisStatus.failed;
       task.error = GeminiVisionService.userFriendlyErrorMessage(e);
       await _updateProgress(task, task.progress, 'Error al analizar la comida');
       await NotificationService.instance.showMealAnalysisFailed(error: task.error ?? 'Error desconocido');
+      try {
+        await DashboardController.instance.loadDashboardData();
+        await FoodEntryController.instance.loadMeals();
+      } catch (_) {}
     }
   }
 

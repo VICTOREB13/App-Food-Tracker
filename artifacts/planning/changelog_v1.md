@@ -18,6 +18,36 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [1.5.2] - 2026-11-16
+
+### Voice Mode, Bento Typography, Image Persistence, Telemetry & Thinking Levels
+- **Voice Mode & Text-Based Meal Analysis**:
+  - Implemented `GeminiVisionService.analyzeMealText` and `GeminiRestClient.generateContent` for direct textual meal inference with structured JSON schema.
+  - Eliminated `dummyAudioBytes` and fake MP3 payloads in `VoiceMealRecordingDialog`, resolving error 400 Bad Request on text descriptions.
+  - Provided dual ingestion path supporting text descriptions and real microphone input.
+- **Bento Typography & Syllable Overflow Prevention**:
+  - Wrapped macro labels in `MacroBentoCard` and `MealDetailView` with `FittedBox(fit: BoxFit.scaleDown, alignment: Alignment.centerLeft, child: Text(..., maxLines: 1))`.
+  - Prevented awkward hyphenation/word-splitting of "Carbohydrates" / "Carbohidratos" across narrow mobile screen resolutions.
+- **Permanent Image Storage & Link Resilience**:
+  - Routed photo persistence prioritarily to `getApplicationDocumentsDirectory()` (`appDocDir.path/Pictures/FoodTracker/images/`).
+  - Deprecated `Directory.systemTemp` as primary fallback to prevent Android OS cache clearance during background app suspension.
+- **Reactive Dashboard Auto-Refresh**:
+  - Linked `AnalysisQueueService` with `DashboardController.instance.loadDashboardData()` and `FoodEntryController.instance.loadMeals()` on `completed` and `failed` task events.
+  - Auto-refreshes daily calorie summaries, macro gauges, and meal timeline immediately upon AI completion without manual pull-to-refresh.
+- **Master Prompt Dark Bento Redesign**:
+  - Redesigned `MasterPromptBottomSheet` to match the Dark Bento visual hierarchy of the model picker.
+  - Structured into modular Bento cards for Biometrics, Energy Expenditure (BMR/TDEE), Calorie Budget, and Macronutrients with thematic chips, tabs (Bento Summary vs. Editor), and one-tap clipboard copy.
+- **Inference Telemetry & Model Transparency**:
+  - Added `modelUsed`, `isFallback`, and `thinkingLevel` fields to `MealAnalysisResult` and persisted them in `ai_breakdown_json`.
+  - Rendered informative telemetry badges in `MealDetailView` and meal cards (`Gemini 4 Hydrogen · Esfuerzo: Medio` or `Fallback: Gemini 2.5 Flash · Esfuerzo: Bajo`).
+- **User-Configurable Reasoning Effort & Context Budget**:
+  - Added thinking level selector chips (`OFF`, `LOW`, `MEDIUM`, `HIGH`, `XHIGH`) in AI model settings, strictly avoiding "CLINICAL" and using single clear "OFF" action.
+  - Added generation token limit selector (`4k`, `8k`, `16k` max output tokens).
+  - Dynamic reactive context window meter displaying active payload (~2.1k / 1024k tokens = 0.2%).
+  - Guaranteed user's own API key usage for `DecisionGateService` (`gemini-decision-1`).
+
+---
+
 ## [1.5.1] - 2026-11-15
 
 ### Material UI Modernization, Design System Unbundling & Zero-Lint Quality Gate

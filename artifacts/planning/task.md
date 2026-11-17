@@ -1,15 +1,69 @@
 ---
 tipo: task_list
 proyecto: App_Food_Tracker
-iteracion: v1.5.1
+iteracion: v1.5.2
 estado: activo
-fecha: 2026-11-15
-tags: [proyecto, tasks, checklist, v1-5-1, material-ui, cupertino-ui, quality-gate, linter-cleanup]
+fecha: 2026-11-16
+tags: [proyecto, tasks, checklist, v1-5-2, voice-mode, bento-typography, image-persistence, reactive-dashboard, master-prompt, context-window, thinking-levels, inference-telemetry]
 ---
 
-# 📋 Checklist Maestro de Tareas de Agentes (v1.5.1)
+# 📋 Checklist Maestro de Tareas de Agentes (v1.5.2)
 
-> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.5.1. Cada tarea completada se marca con `[x]`.
+> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.5.2. Cada tarea completada se marca con `[x]`.
+
+## 🌟 Iteración v1.5.2: Audio & Voice Mode, Tipografía Bento, Persistencia de Fotos, Estado Reactivo, Telemetría de Modelo y Niveles de Razonamiento
+
+### 🎙️ 1. Restauración del Modo Voice / Audio y Análisis por Texto (Swarm: `engine`)
+- [x] (Software-Architect / `engine`) Implementar método `analyzeMealText(String description)` en `GeminiVisionService` / `GeminiRestClient` para procesar inferencia de texto sin audio simulado.
+- [x] (Software-Architect / `engine`) Reparar `VoiceMealRecordingDialog`: bifurcar flujo para enviar texto directo si hay descripción escrita, y capturar audio real si se activa grabación.
+- [x] (Software-Architect / `engine`) Co-localizar suite TDD `test/features/dashboard/voice_meal_recording_dialog_test.dart` validando ambos flujos sin error 400.
+
+### 📐 2. Tipografía Bento y Auto-Escalado de Macros (Swarm: `bridge`)
+- [x] (Frontend-UI / `bridge`) Envolver etiqueta de macro en `FittedBox` con `maxLines: 1` en `MacroBentoCard` (`lib/features/dashboard/widgets/macro_bento_card.dart`).
+- [x] (Frontend-UI / `bridge`) Aplicar auto-escalado o etiqueta corta ("Carbs"/"Carbos") en `MealDetailView` (`lib/features/food_entry/meal_detail.view.dart`).
+- [x] (Frontend-UI / `bridge`) Verificar legibilidad en resoluciones móviles estándar y angostas (320px - 414px).
+
+### 💾 3. Persistencia de Fotos y Enlaces en Almacenamiento Permanente (Swarm: `domain`)
+- [x] (Data-Specialist / `domain`) Actualizar `MealImageStorageResolver` para almacenar permanentemente en `getApplicationDocumentsDirectory()` (`appDocDir.path/Pictures/FoodTracker/images/`).
+- [x] (Data-Specialist / `domain`) Erradicar el fallback primario a `Directory.systemTemp` en el guardado de comidas.
+- [x] (Data-Specialist / `domain`) Validar resiliencia de rutas de imagen ante esperas prolongadas y reinicios de la aplicación.
+
+### 🔄 4. Auto-Refresco Reactivo del Dashboard tras Análisis AI (Swarm: `domain`)
+- [x] (Data-Specialist / `domain`) Enlazar `AnalysisQueueService` con `DashboardController.instance.loadDashboardData()` en transiciones de estado `completed` y `failed`.
+- [x] (Data-Specialist / `domain`) Notificar a listeners de `FoodEntryController` y `DashboardController` para actualización instantánea de calorías y lista de comidas.
+
+### 🍱 5. Rediseño Dark Bento del Modal de Master Prompt (Swarm: `bridge`)
+- [x] (Frontend-UI / `bridge`) Rediseñar `MasterPromptBottomSheet` (`lib/features/settings_profile/widgets/profile/master_prompt_bottom_sheet.dart`) al estilo Dark Bento.
+- [x] (Frontend-UI / `bridge`) Incorporar mini-tarjetas modulares para Biometría, TDEE, Presupuesto Calórico y Macros con chips temáticos.
+- [x] (Frontend-UI / `bridge`) Añadir selector de pestañas (Resumen Bento vs. Editor) y botón de copiado al portapapeles.
+- [x] (Frontend-UI / `bridge`) Asegurar que el archivo y componentes auxiliares permanezcan estrictamente < 300 LoC.
+
+### 🎛️ 6. Ventana de Contexto Dinámica y Reactiva (Swarm: `engine`)
+- [x] (Software-Architect / `engine`) Implementar calculador liviano de métricas de contexto (`ContextMetricsCalculator`) calculando tokens de System Prompt, Despensa, Imagen (768px) y Notas.
+- [x] (Frontend-UI / `bridge`) Actualizar `GeminiModelSelectorCard` y `ModelPickerBottomSheet` para mostrar `Uso: ~2.1k / 1024k tokens (0.2%)` con modal/tooltip de desglose.
+
+### 🔍 7. Telemetría de Inferencia en JSON y Badge de Modelo en UI (Swarm: `engine` & `bridge`)
+- [x] (Software-Architect / `engine`) Registrar `model_used`, `is_fallback` y `thinking_level` en `MealAnalysisResult` y en `ai_breakdown_json` de `Meal`.
+- [x] (Frontend-UI / `bridge`) Renderizar badge informativo en `MealDetailView` y tarjeta de comida indicando el modelo real usado y el nivel de esfuerzo (`Gemini 4 Hydrogen · Esfuerzo: Medio` o `Fallback: Gemini 2.5 Flash`).
+
+### ⚙️ 8. Personalización de Nivel de Pensamiento y Presupuesto de Tokens (Swarm: `bridge` & `engine`)
+- [x] (Frontend-UI / `bridge`) Incorporar selector de nivel de pensamiento (`OFF`, `LOW`, `MEDIUM`, `HIGH`, `XHIGH`) y selector de tokens de salida (`4k`, `8k`, `16k`) en Ajustes de Modelo IA.
+- [x] (Software-Architect / `engine`) Persistir preferencias del usuario e inyectarlas dinámicamente en `GeminiRestClient.buildGenerationConfig()`.
+- [x] (Software-Architect / `engine`) Garantizar y documentar que `DecisionGateService` (`gemini-decision-1`) utiliza la API Key del usuario.
+
+### 🛡️ 9. Quality Gate y Linter (Swarm: `audit`)
+- [x] (Systems-Auditor / `audit`) Verificar 100% de tests en verde (`flutter test` y `bun test`).
+- [x] (Systems-Auditor / `audit`) Auditar `flutter analyze` confirmando 0 issues, 0 warnings y 0 deprecaciones.
+- [x] (Systems-Auditor / `audit`) Auditar presupuesto de líneas de código (< 300 LoC por archivo en `lib/`).
+- [x] (Systems-Auditor / `audit`) Emitir reporte `artifacts/audit_reports/audit_report.md` con veredicto `PASS`.
+
+### 🚀 10. Pipeline de Release v1.5.2 (Orquestador / `release-pipeline`)
+- [x] (Release-Engineer) Actualizar `pubspec.yaml` a `version: 1.5.2+1`.
+- [x] (Release-Engineer) Registrar entradas en `artifacts/planning/changelog_v1.md`.
+- [x] (Release-Engineer) Compilar notas de versión en `RELEASE_NOTES.md`.
+- [x] (Release-Engineer) Crear commit semántico `chore(release): v1.5.2`, tag anotado `v1.5.2` y publicar release vía `gh release create`.
+
+---
 
 ## 🌟 Iteración v1.5.1: Modernización a Material UI Oficial y Saneamiento de Quality Gate
 

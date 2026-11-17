@@ -85,12 +85,16 @@ class MealMacroChipsRow extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text(
-            label,
-            style: GoogleFonts.inter(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: color,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              label,
+              maxLines: 1,
+              style: GoogleFonts.inter(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
             ),
           ),
           const SizedBox(height: 2),

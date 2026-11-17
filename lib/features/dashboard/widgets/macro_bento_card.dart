@@ -57,12 +57,17 @@ class MacroBentoCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          Text(
-            label,
-            style: GoogleFonts.inter(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textSecondary(context),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              label,
+              maxLines: 1,
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary(context),
+              ),
             ),
           ),
           const SizedBox(height: 2),

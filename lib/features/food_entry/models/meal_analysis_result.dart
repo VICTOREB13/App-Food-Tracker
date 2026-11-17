@@ -17,6 +17,9 @@ class MealAnalysisResult {
   final int? confidencePercentage;
   final int? calorieErrorMargin;
   final bool isPartial;
+  final String? modelUsed;
+  final bool isFallback;
+  final String? thinkingLevel;
 
   const MealAnalysisResult({
     required this.dishName, required this.items,
@@ -25,6 +28,9 @@ class MealAnalysisResult {
     this.totalFiber = 0.0, this.totalSodium = 0.0, this.totalSugar = 0.0,
     required this.rawJson, this.confidencePercentage, this.calorieErrorMargin,
     this.isPartial = false,
+    this.modelUsed,
+    this.isFallback = false,
+    this.thinkingLevel,
   });
 
   static List<String> extractComponents(String text) => MealDecomposer.extractComponents(text);
@@ -34,7 +40,13 @@ class MealAnalysisResult {
   ) => MealDecomposer.decomposeCompositeFood(componentNames, cal, prot, carbs, fat);
   static String repairTruncatedJson(String raw) => JsonRepairHelper.repair(raw);
 
-  factory MealAnalysisResult.fromJsonString(String jsonStr, {bool isPartial = false}) {
+  factory MealAnalysisResult.fromJsonString(
+    String jsonStr, {
+    bool isPartial = false,
+    String? modelUsed,
+    bool isFallback = false,
+    String? thinkingLevel,
+  }) {
     var cleaned = jsonStr.trim();
     final jsonFenceMatch = RegExp(r'```(?:json)?\s*([\s\S]*?)\s*```').firstMatch(cleaned);
     if (jsonFenceMatch != null) {
@@ -58,6 +70,9 @@ class MealAnalysisResult {
     }
     final String dish = (data['plato'] ?? data['nombre'] ?? data['dish'] ?? data['name'] ?? 'Comida Analizada').toString();
     final bool partial = isPartial || data['is_partial'] == true || data['isPartial'] == true;
+    final String? effectiveModel = (data['model_used'] ?? data['modelUsed'] ?? modelUsed)?.toString();
+    final bool effectiveFallback = data['is_fallback'] == true || data['isFallback'] == true || isFallback;
+    final String? effectiveThinking = (data['thinking_level'] ?? data['thinkingLevel'] ?? thinkingLevel)?.toString();
 
     final List<FoodItem> parsedItems = [];
     final dynamic itemsList = data['items'] ?? data['ingredientes'] ?? data['alimentos'] ??
@@ -200,6 +215,8 @@ class MealAnalysisResult {
       totalSugar: ModelSanitizer.clampDouble(sugar),
       rawJson: cleaned, confidencePercentage: confidence,
       calorieErrorMargin: errorMargin, isPartial: partial,
+      modelUsed: effectiveModel, isFallback: effectiveFallback,
+      thinkingLevel: effectiveThinking,
     );
   }
 
@@ -213,6 +230,9 @@ class MealAnalysisResult {
     if (confidencePercentage != null) 'porcentaje_certeza': confidencePercentage,
     if (calorieErrorMargin != null) 'margen_error_kcal': calorieErrorMargin,
     'is_partial': isPartial,
+    if (modelUsed != null) 'model_used': modelUsed,
+    'is_fallback': isFallback,
+    if (thinkingLevel != null) 'thinking_level': thinkingLevel,
     'rawJson': rawJson,
   };
 
@@ -222,6 +242,7 @@ class MealAnalysisResult {
     String? dishName, List<FoodItem>? items, double? totalCalories, double? totalProtein,
     double? totalCarbs, double? totalFat, double? totalFiber, double? totalSodium, double? totalSugar,
     String? rawJson, int? confidencePercentage, int? calorieErrorMargin, bool? isPartial,
+    String? modelUsed, bool? isFallback, String? thinkingLevel,
   }) => MealAnalysisResult(
     dishName: dishName ?? this.dishName, items: items ?? this.items,
     totalCalories: totalCalories ?? this.totalCalories, totalProtein: totalProtein ?? this.totalProtein,
@@ -231,5 +252,8 @@ class MealAnalysisResult {
     confidencePercentage: confidencePercentage ?? this.confidencePercentage,
     calorieErrorMargin: calorieErrorMargin ?? this.calorieErrorMargin,
     isPartial: isPartial ?? this.isPartial,
+    modelUsed: modelUsed ?? this.modelUsed,
+    isFallback: isFallback ?? this.isFallback,
+    thinkingLevel: thinkingLevel ?? this.thinkingLevel,
   );
 }

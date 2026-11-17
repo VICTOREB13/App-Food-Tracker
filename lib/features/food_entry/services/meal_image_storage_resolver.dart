@@ -15,6 +15,11 @@ class MealImageStorageResolver {
     final candidateDirs = <Directory>[];
     if (customDirectory != null) candidateDirs.add(customDirectory);
 
+    try {
+      final appDir = await getApplicationDocumentsDirectory();
+      candidateDirs.add(Directory(p.join(appDir.path, 'Pictures', 'FoodTracker', 'images')));
+    } catch (_) {}
+
     if (storageMode == StorageMode.public && Platform.isAndroid) {
       candidateDirs.add(Directory(androidPublicPicturesPath));
       try {
@@ -31,14 +36,11 @@ class MealImageStorageResolver {
       } catch (_) {}
     }
 
-    try {
-      final appDir = await getApplicationDocumentsDirectory();
-      candidateDirs.add(Directory(p.join(appDir.path, 'Pictures', 'FoodTracker', 'images')));
-    } catch (_) {}
-
-    candidateDirs.add(
-      Directory(p.join(Directory.systemTemp.path, 'Pictures', 'FoodTracker', 'images')),
-    );
+    if (candidateDirs.isEmpty) {
+      candidateDirs.add(
+        Directory(p.join(Directory.systemTemp.path, 'Pictures', 'FoodTracker', 'images')),
+      );
+    }
 
     return candidateDirs;
   }

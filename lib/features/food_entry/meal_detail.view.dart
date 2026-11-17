@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:material_ui/material_ui.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:food_tracker/l10n/app_localizations.dart';
 import 'package:food_tracker/features/food_entry/services/image_processing_service.dart';
 import 'package:food_tracker/core/services/storage/secure_storage_service.dart';
@@ -38,6 +40,9 @@ class _MealDetailViewState extends State<MealDetailView> {
   String? _imagePath, _aiBreakdownJson;
   int? _confidencePercentage, _calorieErrorMargin;
   bool _isPartial = false;
+  String? _modelUsed;
+  bool _isFallback = false;
+  String? _thinkingLevel;
   List<FoodItem> _items = [];
   double _calories = 0.0, _protein = 0.0, _carbs = 0.0, _fat = 0.0;
   double _fiber = 0.0, _sodium = 0.0, _sugar = 0.0;
@@ -64,6 +69,7 @@ class _MealDetailViewState extends State<MealDetailView> {
       _calorieErrorMargin = meal.calorieErrorMargin;
       _aiBreakdownJson = meal.aiBreakdownJson;
       _isPartial = meal.isPartial;
+      _parseTelemetryFromJson(meal.aiBreakdownJson);
     }
   }
 
@@ -146,6 +152,9 @@ class _MealDetailViewState extends State<MealDetailView> {
           _calorieErrorMargin = analysis.calorieErrorMargin;
           _aiBreakdownJson = analysis.rawJson;
           _isPartial = analysis.isPartial;
+          _modelUsed = analysis.modelUsed;
+          _isFallback = analysis.isFallback;
+          _thinkingLevel = analysis.thinkingLevel;
         });
         if (_items.isNotEmpty) _recalculateTotals();
       }
@@ -195,6 +204,18 @@ class _MealDetailViewState extends State<MealDetailView> {
     _recalculateTotals();
   }
 
+  void _parseTelemetryFromJson(String? raw) {
+    if (raw == null || raw.isEmpty) return;
+    try {
+      final d = json.decode(raw);
+      if (d is Map<String, dynamic>) {
+        _modelUsed = d['model_used']?.toString() ?? d['modelUsed']?.toString();
+        _isFallback = d['is_fallback'] == true || d['isFallback'] == true;
+        _thinkingLevel = d['thinking_level']?.toString() ?? d['thinkingLevel']?.toString();
+      }
+    } catch (_) {}
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -225,12 +246,15 @@ class _MealDetailViewState extends State<MealDetailView> {
           ],
           const SizedBox(height: 16),
           MealMacroChipsRow(calories: _calories, protein: _protein, carbs: _carbs, fat: _fat),
-          if (_confidencePercentage != null || _calorieErrorMargin != null || _isPartial) ...[
+          if (_confidencePercentage != null || _calorieErrorMargin != null || _isPartial || (_modelUsed != null && _modelUsed!.isNotEmpty)) ...[
             const SizedBox(height: 8),
             MealAiValidationChips(
               confidencePercentage: _confidencePercentage,
               calorieErrorMargin: _calorieErrorMargin,
               isPartial: _isPartial,
+              modelUsed: _modelUsed,
+              isFallback: _isFallback,
+              thinkingLevel: _thinkingLevel,
             ),
           ],
           if (_fiber > 0 || _sodium > 0 || _sugar > 0) ...[
