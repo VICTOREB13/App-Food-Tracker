@@ -1,9 +1,54 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:food_tracker/core/models/gemini_model_info.dart';
+import 'package:food_tracker/core/services/storage/secure_storage_service.dart';
 import 'package:food_tracker/features/settings_profile/widgets/gemini_model_selector_card.dart';
 
+class _FakeSecureStorage extends Fake implements FlutterSecureStorage {
+  final Map<String, String> data = {};
+
+  @override
+  Future<String?> read({
+    required String key,
+    AppleOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    AppleOptions? mOptions,
+    WindowsOptions? wOptions,
+  }) async => data[key];
+
+  @override
+  Future<void> write({
+    required String key,
+    required String? value,
+    AppleOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    AppleOptions? mOptions,
+    WindowsOptions? wOptions,
+  }) async {
+    if (value != null) {
+      data[key] = value;
+    } else {
+      data.remove(key);
+    }
+  }
+}
+
 void main() {
+  setUp(() {
+    SecureStorageService.setMockInstance(
+      SecureStorageService.withStorage(_FakeSecureStorage()),
+    );
+  });
+
+  tearDown(() {
+    SecureStorageService.resetInstance();
+  });
+
   const sampleModels = [
     GeminiModelInfo(
       name: 'gemini-2.5-flash',
@@ -186,4 +231,3 @@ void main() {
     });
   });
 }
-

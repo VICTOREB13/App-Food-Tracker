@@ -51,21 +51,21 @@ void main() {
     await tester.tap(find.text('Open Sheet'));
     await tester.pumpAndSettle();
 
-    // Check header and tabs
-    expect(find.text('Master Prompt IA Multimodal (Editable)'), findsOneWidget);
-    expect(find.text('Vista Previa'), findsOneWidget);
-    expect(find.text('Editor'), findsOneWidget);
-    expect(find.byIcon(Icons.copy_rounded), findsOneWidget);
+    // Check header and tabs in Dark Bento design
+    expect(find.text('Prompt Maestro'), findsOneWidget);
+    expect(find.text('Resumen Bento'), findsOneWidget);
+    expect(find.text('Editor de Prompt'), findsOneWidget);
+    expect(find.byIcon(Icons.copy_rounded), findsWidgets);
 
     // Check preview content contains custom prompt
     expect(find.text('Prompt de prueba personalizado'), findsOneWidget);
 
     // Test 1-tap copy button in header
-    await tester.tap(find.byIcon(Icons.copy_rounded));
+    await tester.tap(find.byIcon(Icons.copy_rounded).first);
     await tester.pumpAndSettle();
 
     // Switch to Editor tab
-    await tester.tap(find.text('Editor'));
+    await tester.tap(find.text('Editor de Prompt'));
     await tester.pumpAndSettle();
 
     // Edit text field
@@ -87,7 +87,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(savedPrompt, equals('Prompt modificado por el usuario'));
-    expect(find.text('Master Prompt IA Multimodal (Editable)'), findsNothing);
+    expect(find.text('Prompt Maestro'), findsNothing);
   });
 
   testWidgets('MasterPromptBottomSheet renders accurately in English', (tester) async {
@@ -134,11 +134,11 @@ void main() {
     await tester.tap(find.text('Open'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Multimodal AI Master Prompt (Editable)'), findsOneWidget);
-    expect(find.text('Preview'), findsOneWidget);
-    expect(find.text('Editor'), findsOneWidget);
+    expect(find.text('Prompt Maestro'), findsOneWidget);
+    expect(find.text('Resumen Bento'), findsOneWidget);
+    expect(find.text('Editor de Prompt'), findsOneWidget);
 
-    await tester.tap(find.text('Editor'));
+    await tester.tap(find.text('Editor de Prompt'));
     await tester.pumpAndSettle();
 
     expect(find.text('Restore Default'), findsOneWidget);
