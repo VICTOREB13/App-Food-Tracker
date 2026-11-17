@@ -333,7 +333,7 @@ jobs:
           echo "Versión detectada para APK: $VERSION"
 
       - name: Compilar APK de Android (Fat APK)
-        run: flutter build apk --release --build-name=${{ steps.app_version.outputs.VERSION }} --build-number=${{ github.run_number }}
+        run: flutter build apk --release --build-name=${{ steps.app_version.outputs.VERSION }} --build-number=${{ github.run_number }} --dart-define=APP_VERSION=${{ steps.app_version.outputs.VERSION }}
 
       - name: Verificar Firma Criptográfica del APK Compilado
         run: |
