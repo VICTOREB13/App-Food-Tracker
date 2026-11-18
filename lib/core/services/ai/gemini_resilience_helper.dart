@@ -11,23 +11,17 @@ class GeminiSchema {
   final Map<String, dynamic>? properties;
   final GeminiSchema? items;
 
-  const GeminiSchema.object({this.description, this.requiredProperties, this.properties})
-      : type = 'OBJECT', items = null;
-  const GeminiSchema.string({this.description})
-      : type = 'STRING', requiredProperties = null, properties = null, items = null;
-  const GeminiSchema.number({this.description})
-      : type = 'NUMBER', requiredProperties = null, properties = null, items = null;
-  const GeminiSchema.integer({this.description})
-      : type = 'INTEGER', requiredProperties = null, properties = null, items = null;
-  const GeminiSchema.array({this.description, this.items})
-      : type = 'ARRAY', requiredProperties = null, properties = null;
+  const GeminiSchema.object({this.description, this.requiredProperties, this.properties}) : type = 'OBJECT', items = null;
+  const GeminiSchema.string({this.description}) : type = 'STRING', requiredProperties = null, properties = null, items = null;
+  const GeminiSchema.number({this.description}) : type = 'NUMBER', requiredProperties = null, properties = null, items = null;
+  const GeminiSchema.integer({this.description}) : type = 'INTEGER', requiredProperties = null, properties = null, items = null;
+  const GeminiSchema.array({this.description, this.items}) : type = 'ARRAY', requiredProperties = null, properties = null;
 
   Map<String, dynamic> toMap() => {
     'type': type,
     if (description != null) 'description': description,
     if (requiredProperties != null) 'required': requiredProperties,
-    if (properties != null)
-      'properties': properties!.map((k, v) => MapEntry(k, v is GeminiSchema ? v.toMap() : v)),
+    if (properties != null) 'properties': properties!.map((k, v) => MapEntry(k, v is GeminiSchema ? v.toMap() : v)),
     if (items != null) 'items': items!.toMap(),
   };
 
@@ -96,15 +90,13 @@ class GeminiResilienceHelper {
 
   /// Resolves thinking config for Gemini 3.x/4.x models using thinkingLevel (never thinkingBudget)
   static Map<String, dynamic>? resolveThinkingConfig(String model, {String? customThinkingLevel}) {
-    final clean = model.replaceFirst(RegExp(r'^models/'), '').trim();
-    final lower = clean.toLowerCase();
-    final isReasoning = !lower.contains('lite') &&
-        (lower.startsWith('gemini-3') || lower.startsWith('gemini-4') || lower.contains('pro') || lower.contains('thinking'));
+    final clean = model.replaceFirst(RegExp(r'^models/'), '').trim().toLowerCase();
+    final isReasoning = !clean.contains('lite') &&
+        (clean.startsWith('gemini-3') || clean.startsWith('gemini-4') || clean.contains('pro') || clean.contains('thinking'));
     if (!isReasoning) return null;
     final normalized = customThinkingLevel?.toUpperCase().trim();
     if (normalized == 'OFF') return null;
-    final level = (normalized == 'AUTO' || normalized == null) ? 'MEDIUM' : normalized;
-    return {'thinkingLevel': level};
+    return {'thinkingLevel': (normalized == 'AUTO' || normalized == null) ? 'MEDIUM' : normalized};
   }
 
   /// Decoupled Chain-of-Thought meal analysis schema with free-form volumetric reasoning,
@@ -139,12 +131,12 @@ class GeminiResilienceHelper {
 
   static const String baseSystemInstruction = '''
 Experto en nutrición clínica y estimación física volumétrica 3D de alimentos.
-PIPELINE DE RAZONAMIENTO DESACOPLADO y causal en formato estricto JSON:
+PIPELINE CAUSAL ESTRICTO - PIPELINE DE RAZONAMIENTO DESACOPLADO y causal en formato estricto JSON:
 1. "razonamiento_volumetrico": Deducción 3D (vajilla, volumen cm³, densidad g/cm³, factor cocción, grasa oculta +5-10g).
 2. "plato": Nombre gastronómico representativo.
 3. "porcentaje_certeza": Entero 0-100 (visibilidad, nitidez y oclusión).
 4. "margen_error_kcal": Entero (+/- kcal).
-5. "items": Desglose individual de CADA alimento (nunca vacío ni 200g genérico).
+5. "items": Desglose obligatorio de ingredientes en 'items' (PROHIBIDO fijar 200g genéricos).
 Para cada ítem en "items" reporta: alimento, gramos_estimados, calorias, proteinas_g, carbohidratos_g, grasas_g, fibra_g, sodio_mg, azucar_g.
 Los totales nutricionales son derivados y calculados en cliente desde estos items.
 Reglas obligatorias de cubicaje:
@@ -206,11 +198,7 @@ Output ONLY structured JSON matching the schema.
     return buffer.toString();
   }
 
-  static String buildUserPrompt({
-    String? userContext,
-    double? dishwareDiameterCm,
-    String language = 'es',
-  }) {
+  static String buildUserPrompt({String? userContext, double? dishwareDiameterCm, String language = 'es'}) {
     final isEn = language.toLowerCase().startsWith('en');
     final buffer = StringBuffer();
     if (isEn) {
@@ -282,23 +270,21 @@ Output ONLY structured JSON matching the schema.
   }
 
   static String buildSpeechUserPrompt({String? userNotes}) {
-    final buffer = StringBuffer()
-      ..writeln('El comensal describe por voz natural los alimentos que consumió.')
-      ..writeln('Escucha minuciosamente el audio, transcribe e identifica cada alimento y porción indicada.')
-      ..writeln('Calcula sus gramos estimados, calorías, proteinas_g, carbohidratos_g, grasas_g y micronutrientes (fibra_g, sodio_mg, azucar_g).')
-      ..writeln('Genera el razonamiento volumétrico libre y el desglose estructurado en "items". Los totales son calculados en cliente.');
+    final buffer = StringBuffer(
+      'El comensal describe por voz natural los alimentos que consumió.\n'
+      'Escucha minuciosamente el audio, transcribe e identifica cada alimento y porción indicada.\n'
+      'Calcula sus gramos estimados, calorías, proteinas_g, carbohidratos_g, grasas_g y micronutrientes (fibra_g, sodio_mg, azucar_g).\n'
+      'Genera el razonamiento volumétrico libre y el desglose estructurado en "items". Los totales son calculados en cliente.\n',
+    );
     if (userNotes != null && userNotes.trim().isNotEmpty) buffer.writeln('\nNotas adicionales del comensal: ${userNotes.trim()}');
     return buffer.toString();
   }
 
-  static String buildVideoFramesUserPrompt({
-    required int framesCount,
-    String? userNotes,
-    double? dishwareDiameterCm,
-  }) {
-    final buffer = StringBuffer()
-      ..writeln('Se proporcionan $framesCount fotogramas clave de video capturados desde diferentes ángulos del plato.')
-      ..writeln('Realiza una inferencia volumétrica tridimensional combinando la perspectiva cenital y angular de los fotogramas para calcular con máxima precisión la profundidad, volumen y peso en gramos de cada alimento visible.');
+  static String buildVideoFramesUserPrompt({required int framesCount, String? userNotes, double? dishwareDiameterCm}) {
+    final buffer = StringBuffer(
+      'Se proporcionan $framesCount fotogramas clave de video capturados desde diferentes ángulos del plato.\n'
+      'Realiza una inferencia volumétrica tridimensional combinando la perspectiva cenital y angular de los fotogramas para calcular con máxima precisión la profundidad, volumen y peso en gramos de cada alimento visible.\n',
+    );
     if (dishwareDiameterCm != null && dishwareDiameterCm > 0) buffer.writeln('Escala métrica de referencia del plato: ${dishwareDiameterCm.toStringAsFixed(1)} cm de diámetro.');
     if (userNotes != null && userNotes.trim().isNotEmpty) buffer.writeln('\nNotas del comensal: ${userNotes.trim()}');
     return buffer.toString();
