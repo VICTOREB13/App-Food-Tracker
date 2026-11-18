@@ -3,8 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:food_tracker/core/database/database_service.dart';
 import 'package:food_tracker/core/interfaces/database_service_interface.dart';
 import 'package:food_tracker/core/interfaces/diet_advisor_service_interface.dart';
-import 'package:food_tracker/core/models/diet_pattern_insight.dart';
-import 'package:food_tracker/core/models/json_repair_helper.dart';
 import 'package:food_tracker/core/models/models.dart';
 import 'package:food_tracker/core/services/ai/gemini_rest_client.dart';
 import 'package:food_tracker/core/services/storage/secure_storage_service.dart';
@@ -34,6 +32,7 @@ class DietAdvisorService implements IDietAdvisorService {
 
   final Map<int, ({DietPatternInsight insight, DateTime time})> _cacheMap = {};
 
+  @override
   Future<DietPatternInsight> getDietPatternInsights({
     int days = 7,
     bool forceRefresh = false,

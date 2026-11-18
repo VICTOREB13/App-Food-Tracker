@@ -249,17 +249,29 @@ Output ONLY structured JSON matching the schema.
     if (isEn) {
       buffer.writeln("The diner substituted ingredient '$oldIngredient' with '$newIngredient'.\n"
           "Keep the volume and spatial distribution from the photo, but recalculate the specific macronutrients (with proteinas_g) and micronutrients for '$newIngredient'.");
-      if (dishwareDiameterCm != null && dishwareDiameterCm > 0) buffer.writeln('Plate metric scale reference: ${dishwareDiameterCm.toStringAsFixed(1)} cm diameter.');
+      if (dishwareDiameterCm != null && dishwareDiameterCm > 0) {
+        buffer.writeln('Plate metric scale reference: ${dishwareDiameterCm.toStringAsFixed(1)} cm diameter.');
+      }
       buffer.writeln('\nPrevious ingredients identified in photo:');
-      for (final item in currentItemsSummary) buffer.writeln('- $item');
-      if (userNotes != null && userNotes.trim().isNotEmpty) buffer.writeln('\nDiner notes: ${userNotes.trim()}');
+      for (final item in currentItemsSummary) {
+        buffer.writeln('- $item');
+      }
+      if (userNotes != null && userNotes.trim().isNotEmpty) {
+        buffer.writeln('\nDiner notes: ${userNotes.trim()}');
+      }
     } else {
       buffer.writeln("El comensal corrigió el ingrediente '$oldIngredient' por '$newIngredient'.\n"
           "Conserva el volumen y la distribución espacial de la foto, pero recalcula los macronutrientes (con proteinas_g) y micronutrientes específicos para '$newIngredient'.");
-      if (dishwareDiameterCm != null && dishwareDiameterCm > 0) buffer.writeln('Escala métrica de referencia del plato: ${dishwareDiameterCm.toStringAsFixed(1)} cm de diámetro.');
+      if (dishwareDiameterCm != null && dishwareDiameterCm > 0) {
+        buffer.writeln('Escala métrica de referencia del plato: ${dishwareDiameterCm.toStringAsFixed(1)} cm de diámetro.');
+      }
       buffer.writeln('\nIngredientes previos identificados en la foto:');
-      for (final item in currentItemsSummary) buffer.writeln('- $item');
-      if (userNotes != null && userNotes.trim().isNotEmpty) buffer.writeln('\nNotas del comensal: ${userNotes.trim()}');
+      for (final item in currentItemsSummary) {
+        buffer.writeln('- $item');
+      }
+      if (userNotes != null && userNotes.trim().isNotEmpty) {
+        buffer.writeln('\nNotas del comensal: ${userNotes.trim()}');
+      }
     }
     return buffer.toString();
   }

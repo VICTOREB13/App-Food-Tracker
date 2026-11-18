@@ -5,7 +5,6 @@ import 'package:food_tracker/core/models/models.dart';
 import 'package:food_tracker/features/food_entry/meal_controller.dart';
 import 'package:food_tracker/core/interfaces/nutritional_recommendation_service_interface.dart';
 import 'package:food_tracker/l10n/app_localizations.dart';
-import 'package:food_tracker/core/models/nutritional_recommendation.dart';
 import 'package:food_tracker/core/database/database_service.dart';
 import 'package:food_tracker/features/dashboard/services/nutritional_recommendation_service.dart';
 import 'package:food_tracker/features/dashboard/services/recommendations/recommendation_dish_catalog.dart';

@@ -317,6 +317,7 @@ void main() {
         name: 'models/gemini-2.5-flash',
         displayName: 'Gemini 2.5 Flash',
         description: 'Gemini 2.5 Flash.',
+        isRecommended: false,
       );
       expect(redundantPeriod.hasUsefulDescription, isFalse);
 
@@ -324,6 +325,7 @@ void main() {
         name: 'models/gemini-2.5-flash',
         displayName: 'Gemini 2.5 Flash',
         description: 'gemini-2.5-flash',
+        isRecommended: false,
       );
       expect(redundantId.hasUsefulDescription, isFalse);
 
@@ -331,6 +333,7 @@ void main() {
         name: 'models/gemini-2.5-flash',
         displayName: 'Gemini 2.5 Flash',
         description: 'Modelo de alta velocidad optimizado para análisis fotográfico.',
+        isRecommended: false,
       );
       expect(usefulModel.hasUsefulDescription, isTrue);
     });
