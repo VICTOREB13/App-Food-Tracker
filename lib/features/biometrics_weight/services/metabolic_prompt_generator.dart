@@ -31,7 +31,7 @@ class MetabolicPromptGenerator {
       buffer.writeln('- **Estimated Daily Steps**: ${profile.estimatedSteps} steps/day');
       buffer.writeln('- **Basal Metabolic Rate (BMR - Mifflin-St Jeor)**: ${profile.bmr.toStringAsFixed(0)} kcal/day');
       buffer.writeln('- **Total Daily Energy Expenditure (TDEE)**: ${profile.tdee.toStringAsFixed(0)} kcal/day\n');
-      buffer.writeln('## 3. Metabolic Target and Macro Distribution');
+      buffer.writeln('## 3. Metabolic Goals and Objectives');
       buffer.writeln('- **Body Goal**: $goalDisplay');
       buffer.writeln('- **Daily Caloric Budget**: ${profile.targetCalories.toStringAsFixed(0)} kcal/day');
       buffer.writeln('- **Protein**: ${profile.targetProtein.toStringAsFixed(0)} g/day (${(profile.targetProtein * 4.0).toStringAsFixed(0)} kcal)');
@@ -55,7 +55,7 @@ class MetabolicPromptGenerator {
       buffer.writeln('- **Pasos Diarios Estimados**: ${profile.estimatedSteps} pasos/día');
       buffer.writeln('- **Tasa Metabólica Basal (TMB / BMR - Mifflin-St Jeor)**: ${profile.bmr.toStringAsFixed(0)} kcal/día');
       buffer.writeln('- **Gasto Energético Diario Total (TDEE)**: ${profile.tdee.toStringAsFixed(0)} kcal/día\n');
-      buffer.writeln('## 3. Metas Metabólicas y Distribución de Macronutrientes');
+      buffer.writeln('## 3. Metas Metabólicas y Objetivos');
       buffer.writeln('- **Objetivo Corporal**: $goalDisplay');
       buffer.writeln('- **Presupuesto Calórico Diario**: ${profile.targetCalories.toStringAsFixed(0)} kcal/día');
       buffer.writeln('- **Proteínas**: ${profile.targetProtein.toStringAsFixed(0)} g/día (${(profile.targetProtein * 4.0).toStringAsFixed(0)} kcal)');

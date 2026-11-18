@@ -158,38 +158,16 @@ void main() {
 
     test('queries Gemini AI and parses structured response correctly', () async {
       final now = DateTime.now();
-      await DatabaseService.instance.saveUserProfile(
-        UserProfile(
-          name: 'Victor Test',
-          age: 28,
-          gender: 'male',
-          height: 178,
-          weight: 78,
-          bmr: 1750,
-          tdee: 2500,
-          targetCalories: 2200,
-          targetProtein: 150,
-          targetCarbs: 220,
-          targetFat: 70,
-          bodyGoal: 'ganar_musculo',
-        ),
-      );
+      await DatabaseService.instance.saveUserProfile(UserProfile(
+        name: 'Victor Test', age: 28, gender: 'male', height: 178, weight: 78,
+        bmr: 1750, tdee: 2500, targetCalories: 2200, targetProtein: 150,
+        targetCarbs: 220, targetFat: 70, bodyGoal: 'ganar_musculo',
+      ));
 
-      await DatabaseService.instance.insertMeal(
-        Meal(
-          id: 'meal_1',
-          name: 'Pechuga a la plancha con quinoa',
-          mealType: 'Almuerzo',
-          date: now,
-          calories: 650,
-          protein: 50,
-          carbs: 60,
-          fat: 18,
-          fiber: 8,
-          sodium: 450,
-          sugar: 4,
-        ),
-      );
+      await DatabaseService.instance.insertMeal(Meal(
+        id: 'meal_1', name: 'Pechuga a la plancha con quinoa', mealType: 'Almuerzo',
+        date: now, calories: 650, protein: 50, carbs: 60, fat: 18, fiber: 8, sodium: 450, sugar: 4,
+      ));
 
       await storageService.setGeminiApiKey('AIzaSyFakeKeyTest');
 
@@ -252,6 +230,12 @@ void main() {
     });
 
     test('parses conversational response without markdown fences via JsonRepairHelper', () async {
+      await DatabaseService.instance.insertMeal(Meal(
+        id: 'meal_conv_1', name: 'Comida Test', mealType: 'Almuerzo',
+        date: DateTime.now(), calories: 500, protein: 40, carbs: 50, fat: 15,
+      ));
+      await storageService.setGeminiApiKey('AIzaSyFakeKeyTest');
+
       final mockHttp = MockClient((request) async {
         const conversational = 'Claro, aquí tienes el análisis detallado:\n'
             '{"days_analyzed": 7, "fat_insight": "Grasas equilibradas.", "protein_insight": "Buena masa magra.", '
