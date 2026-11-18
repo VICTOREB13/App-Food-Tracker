@@ -127,6 +127,18 @@ void main() {
       expect(instruction, contains('totales'));
       expect(schema.properties?.containsKey('porcentaje_certeza'), isTrue);
       expect(schema.properties?.containsKey('margen_error_kcal'), isTrue);
+
+      final instructionEn = GeminiResilienceHelper.baseSystemInstructionEn;
+      expect(instructionEn, contains('DECOUPLED REASONING PIPELINE'));
+      expect(instructionEn, contains('razonamiento_volumetrico'));
+      expect(instructionEn, contains('items'));
+
+      final systemEn = GeminiResilienceHelper.buildSystemPrompt(language: 'en', masterPrompt: 'Low Carb');
+      expect(systemEn, contains('DINER BIOLOGICAL CONTEXT'));
+
+      final userPromptEn = GeminiResilienceHelper.buildUserPrompt(language: 'en', userContext: 'Dinner');
+      expect(userPromptEn, contains('Thoroughly analyze'));
+      expect(userPromptEn, contains('Dinner'));
     });
 
     test('MealAnalysisResult deserializes JSON generated with causal 3D properties', () {

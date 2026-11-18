@@ -37,6 +37,18 @@ void main() {
         maxOutputTokens: 8192,
       );
       expect(configCustomTokens['maxOutputTokens'], equals(8192));
+
+      final configAuto = GeminiRestClient.buildGenerationConfig(
+        model: 'gemini-3.8-flash',
+        thinkingLevel: 'AUTO',
+      );
+      expect(configAuto['thinkingConfig'], equals({'thinkingLevel': 'MEDIUM'}));
+
+      final configPrefixed = GeminiRestClient.buildGenerationConfig(
+        model: 'models/gemini-3.8-flash',
+        thinkingLevel: 'HIGH',
+      );
+      expect(configPrefixed['thinkingConfig'], equals({'thinkingLevel': 'HIGH'}));
     });
 
     test('generateContent sends valid headers and extracts candidate text', () async {
@@ -97,6 +109,8 @@ void main() {
     test('streamGenerateContent yields SSE chunks and ignores [DONE]', () async {
       final mockClient = MockClient.streaming((request, bodyStream) async {
         expect(request.headers['x-goog-api-key'], equals(cleanApiKey));
+        expect(request.headers['Accept'], equals('text/event-stream'));
+        expect(request.headers['Cache-Control'], equals('no-cache'));
         expect(request.url.toString(), contains('streamGenerateContent?alt=sse'));
 
         final sseData = 'data: {"candidates":[{"content":{"parts":[{"text":"Parte 1"}]}}]}\n\n'
@@ -156,25 +170,45 @@ void main() {
       expect(requestCount, equals(2));
     });
 
-    test('postDecision posts to /decisions and falls back to gemini-decision-1 on 404', () async {
-      int postCount = 0;
+    test('streamGenerateContent rethrows GeminiApiException when SSE stream cut happens mid-transfer', () async {
+      final mockClient = MockClient.streaming((request, bodyStream) async {
+        final controller = StreamController<List<int>>();
+        final sseData = 'data: {"candidates":[{"content":{"parts":[{"text":"Primer chunk"}]}}]}\n\n';
+        controller.add(utf8.encode(sseData));
+        scheduleMicrotask(() {
+          controller.addError(http.ClientException('TCP reset mid-stream'));
+          controller.close();
+        });
+        return http.StreamedResponse(controller.stream, 200);
+      });
+
+      final client = GeminiRestClient(client: mockClient);
+      final stream = client.streamGenerateContent(
+        apiKey: testApiKey,
+        model: 'gemini-3.8-flash',
+        contents: [],
+      );
+
+      expect(
+        () async {
+          await for (final _ in stream) {}
+        },
+        throwsA(isA<GeminiApiException>().having((e) => e.message, 'message', contains('SSE stream cut mid-transfer'))),
+      );
+    });
+
+    test('postDecision posts to generateContent with gemini-decision-1', () async {
       final mockClient = MockClient((request) async {
-        postCount++;
-        if (request.url.toString().endsWith('/decisions')) {
-          return http.Response('{"error": "Endpoint not found"}', 404);
-        }
-        if (request.url.toString().contains('gemini-decision-1:generateContent')) {
-          return http.Response(
-            jsonEncode({
-              'is_food': true,
-              'image_quality': 'high',
-              'dish_complexity': 'simple',
-              'meal_category': 'lunch',
-            }),
-            200,
-          );
-        }
-        return http.Response('Not Found', 404);
+        expect(request.url.toString(), contains('/models/gemini-decision-1:generateContent'));
+        return http.Response(
+          jsonEncode({
+            'is_food': true,
+            'image_quality': 'high',
+            'dish_complexity': 'simple',
+            'meal_category': 'lunch',
+          }),
+          200,
+        );
       });
 
       final client = GeminiRestClient(client: mockClient);
@@ -185,7 +219,6 @@ void main() {
 
       expect(decision['is_food'], isTrue);
       expect(decision['meal_category'], equals('lunch'));
-      expect(postCount, equals(2));
     });
 
     test('createCachedContent, getCachedContent, and deleteCachedContent execute properly', () async {

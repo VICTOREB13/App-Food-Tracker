@@ -191,6 +191,64 @@ void main() {
       expect(mealWithMap.items.length, equals(1));
       expect(mealWithMap.items.first.name, equals('Pollo'));
     });
+
+    test('Meal expone getters de telemetria y recalculateFromItems los preserva inmutablemente', () {
+      final initialBreakdown = json.encode({
+        'plato': 'Salmón con Quinoa',
+        'items': [
+          {'alimento': 'Salmón', 'gramos_estimados': 150, 'calorias': 300, 'proteinas_g': 34, 'carbohidratos_g': 0, 'grasas_g': 18}
+        ],
+        'model_used': 'gemini-3.8-flash',
+        'is_fallback': false,
+        'thinking_level': 'HIGH',
+        'is_partial': false,
+        'razonamiento_volumetrico': 'Deducción de volumen 3D para filete de salmón',
+      });
+
+      final meal = Meal(
+        name: 'Salmón con Quinoa',
+        aiBreakdownJson: initialBreakdown,
+      );
+
+      expect(meal.modelUsed, equals('gemini-3.8-flash'));
+      expect(meal.isFallback, isFalse);
+      expect(meal.thinkingLevel, equals('HIGH'));
+      expect(meal.isPartial, isFalse);
+
+      final newItems = [
+        FoodItem(name: 'Salmón', estimatedGrams: 200, calories: 400, protein: 45, carbs: 0, fat: 24),
+      ];
+      final updated = meal.recalculateFromItems(newItems);
+
+      expect(updated.modelUsed, equals('gemini-3.8-flash'));
+      expect(updated.isFallback, isFalse);
+      expect(updated.thinkingLevel, equals('HIGH'));
+      expect(updated.isPartial, isFalse);
+      expect(updated.calories, equals(400.0));
+      expect(updated.items.first.estimatedGrams, equals(200.0));
+      final updatedMap = json.decode(updated.aiBreakdownJson!) as Map<String, dynamic>;
+      expect(updatedMap['razonamiento_volumetrico'], equals('Deducción de volumen 3D para filete de salmón'));
+    });
+
+    test('Meal constructor con rawJson anidado extrae y preserva razonamiento_volumetrico', () {
+      final nestedJson = json.encode({
+        'plato': 'Pollo Asado',
+        'rawJson': json.encode({
+          'razonamiento_volumetrico': 'Deducción de 1/4 de pollo con piel dorada',
+        }),
+        'model_used': 'gemini-3.8-flash',
+      });
+      final meal = Meal(
+        name: 'Pollo Asado',
+        items: [
+          FoodItem(name: 'Pollo', estimatedGrams: 200, calories: 350, protein: 40, carbs: 0, fat: 20),
+        ],
+        aiBreakdownJson: nestedJson,
+      );
+      final decoded = json.decode(meal.aiBreakdownJson!) as Map<String, dynamic>;
+      expect(decoded['razonamiento_volumetrico'], equals('Deducción de 1/4 de pollo con piel dorada'));
+      expect(decoded['model_used'], equals('gemini-3.8-flash'));
+    });
   });
 
   group('MealController calculateStreakFromDates Tests', () {

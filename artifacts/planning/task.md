@@ -1,15 +1,52 @@
 ---
 tipo: task_list
 proyecto: App_Food_Tracker
-iteracion: v1.5.2
+iteracion: v1.5.3
 estado: activo
-fecha: 2026-11-16
-tags: [proyecto, tasks, checklist, v1-5-2, voice-mode, bento-typography, image-persistence, reactive-dashboard, master-prompt, context-window, thinking-levels, inference-telemetry]
+fecha: 2026-11-17
+tags: [proyecto, tasks, checklist, v1-5-3, ai-resilience, thinking-auto, master-prompt-bilingual, diet-pattern-engine, what-should-i-eat]
 ---
 
-# 📋 Checklist Maestro de Tareas de Agentes (v1.5.2)
+# 📋 Checklist Maestro de Tareas de Agentes (v1.5.3)
 
-> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.5.2. Cada tarea completada se marca con `[x]`.
+> **Mesa de Control (Project-Planner):** Este checklist asigna y verifica los entregables atómicos de la iteración v1.5.3. Cada tarea completada se marca con `[x]`.
+
+## 🌟 Iteración v1.5.3: Resiliencia de Inferencia AI, Modo AUTO de Razonamiento, Master Prompt Bilingüe Ultra-Denso y Motor de Recomendación Longitudinal ("What Should I Eat Today?")
+
+### 🤖 1. Resiliencia de Inferencia y Normalización de Modelos (Swarm: `engine`)
+- [x] (Software-Architect / `engine`) Sanitizar prefijo `models/` universalmente en `GeminiRestClient`, `GeminiModelService` y `GeminiResilienceHelper`.
+- [x] (Software-Architect / `engine`) Prevenir HTTP 400 `INVALID_ARGUMENT` reconstruyendo el payload dinámicamente en `executeWithRetry` al hacer fallback a modelos Lite.
+- [x] (Software-Architect / `engine`) Soporte resiliente a rupturas de sockets y cortes de stream con backoff exponencial y jitter aleatorio.
+- [x] (Software-Architect / `engine`) Implementar modo dinámico `AUTO` enlazado a la complejidad analizada por `gemini-decision-1` en el pre-gate.
+
+### 💾 2. Persistencia de Telemetría y De-duplicación UI (Swarm: `domain` & `bridge`)
+- [x] (Data-Specialist / `domain`) Serializar mapa enriquecido (`analysis.toMap()`) en `ai_breakdown_json`, persistiendo `model_used`, `is_fallback`, `thinking_level` y `razonamiento_volumetrico`.
+- [x] (Frontend-UI / `bridge`) Preservar badges de telemetría al navegar entre el timeline y `MealDetailView`.
+- [x] (Frontend-UI / `bridge`) Erradicar triple repetición de texto en el selector de modelos con `GeminiModelInfo.hasUsefulDescription`.
+
+### 📝 3. Master Prompt Ultra-Denso Bilingüe (Paso 1 - Swarm: `engine`)
+- [x] (Software-Architect / `engine`) Comprimir `baseSystemInstruction` (< 15 líneas) exigiendo obligatoriamente todos los campos de la app (`alimento, gramos_estimados, calorias, proteinas_g, carbohidratos_g, grasas_g, fibra_g, sodio_mg, azucar_g, razonamiento_volumetrico, plato, porcentaje_certeza, margen_error_kcal`).
+- [x] (Software-Architect / `engine`) Añadir `baseSystemInstructionEn` y parámetro `language: 'es'/'en'` en `GeminiResilienceHelper` y `GeminiVisionService`.
+- [x] (Software-Architect / `engine`) Unificar y desduplicar secciones de macronutrientes en `MetabolicPromptGenerator`.
+
+### 🥗 4. Motor de Recomendación Longitudinal ("What Should I Eat Today?" - Paso 2 - Swarm: `engine` & `bridge`)
+- [x] (Software-Architect / `engine`) Crear modelo `DietPatternInsight` y servicio `DietAdvisorService` conectando registros SQLite a 7, 14 y 30 días con Gemini.
+- [x] (Software-Architect / `engine`) Implementar caché multi-ventana (`Map<int, ...>`) y tolerancia a fallos con fallback offline determinista.
+- [x] (Frontend-UI / `bridge`) Crear modal Dark Bento `AiDietPatternSheet` con selector de 7, 14 y 30 días, tarjetas temáticas, menú visual de manos y snacks locales (Farmatodo).
+- [x] (Frontend-UI / `bridge`) Integrar botón de acceso rápido en `WhatToEatSheet` y `RecommendationDiagnosticCard`.
+
+### 🧹 5. Refactor & Untangle (DeepCoder)
+- [x] (Full-Stack / `DeepCoder`) Extraer `IDietAdvisorService` para inversión de dependencias y desacoplar vistas de implementaciones concretas.
+- [x] (Full-Stack / `DeepCoder`) Tipar fuertemente `List<Meal>` y robustecer parseo JSON con `JsonRepairHelper.repair`.
+- [x] (Full-Stack / `DeepCoder`) Auditar 100% de archivos en `lib/` estrictamente < 300 LoC.
+
+### 🛡️ 6. Quality Gate & Release Pipeline v1.5.3 (Swarm: `audit` & Orquestador)
+- [x] (Systems-Auditor / `audit`) Validar `bun test` y `bun run validate` 100% en verde.
+- [x] (Release-Engineer) Bump de versión a `1.5.3+1` en `pubspec.yaml` y `AppConstants.appVersion`.
+- [x] (Release-Engineer) Registrar notas en `artifacts/planning/changelog_v1.md`.
+- [x] (Release-Engineer) Commit semántico `chore(release): v1.5.3`, tag anotado `v1.5.3`, `git push` y monitoreo de GitHub Actions.
+
+---
 
 ## 🌟 Iteración v1.5.2: Audio & Voice Mode, Tipografía Bento, Persistencia de Fotos, Estado Reactivo, Telemetría de Modelo y Niveles de Razonamiento
 

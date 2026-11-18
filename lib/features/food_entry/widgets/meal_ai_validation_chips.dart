@@ -55,9 +55,11 @@ class MealAiValidationChips extends StatelessWidget {
       return 'Fallback: $name';
     }
     if (thinkingLevel != null && thinkingLevel != 'OFF') {
-      final effort = (thinkingLevel == 'HIGH' || thinkingLevel == 'XHIGH')
-          ? 'Alto'
-          : (thinkingLevel == 'LOW' ? 'Bajo' : 'Medio');
+      final effort = (thinkingLevel == 'XHIGH')
+          ? 'Muy Alto'
+          : (thinkingLevel == 'HIGH'
+              ? 'Alto'
+              : (thinkingLevel == 'LOW' ? 'Bajo' : (thinkingLevel == 'AUTO' ? 'Auto' : 'Medio')));
       return '$name · Esfuerzo: $effort';
     }
     return name;

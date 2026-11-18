@@ -152,7 +152,55 @@ void main() {
       expect(result.isFood, isFalse);
       expect(result.isPass, isFalse);
       expect(result.shouldWarn, isTrue);
-      expect(result.recommendedThinkingLevel, equals('MEDIUM'));
+      expect(result.recommendedThinkingLevel, equals('LOW'));
+    });
+
+    test('Candidate text with explanatory text surrounding json is parsed cleanly', () async {
+      await secureStorageService.setGeminiApiKey('AIzaSyValidKey');
+
+      final mockClient = MockClient((request) async {
+        final response = {
+          'candidates': [
+            {
+              'content': {
+                'parts': [
+                  {
+                    'text': 'Aquí tienes la evaluación del plato:\n```json\n{"is_food": true, "image_quality": "high", "dish_complexity": "extreme", "meal_category": "dinner"}\n```\nEspero que te sirva.'
+                  }
+                ]
+              }
+            }
+          ]
+        };
+        return http.Response(jsonEncode(response), 200);
+      });
+
+      final service = DecisionGateService(
+        restClient: GeminiRestClient(client: mockClient),
+        secureStorage: secureStorageService,
+        imageProcessor: dummyImageProcessor,
+      );
+
+      final result = await service.evaluatePhoto(photoBytes: dummyBytes);
+
+      expect(result.failOpen, isFalse);
+      expect(result.isFood, isTrue);
+      expect(result.dishComplexity, equals('extreme'));
+      expect(result.recommendedThinkingLevel, equals('XHIGH'));
+    });
+
+    test('recommendedThinkingLevel maps simple -> LOW, medium -> MEDIUM, complex -> HIGH, extreme -> XHIGH', () {
+      const rSimple = DecisionGateResult(isFood: true, imageQuality: 'high', dishComplexity: 'simple', mealCategory: 'lunch');
+      expect(rSimple.recommendedThinkingLevel, equals('LOW'));
+
+      const rMed = DecisionGateResult(isFood: true, imageQuality: 'high', dishComplexity: 'medium', mealCategory: 'lunch');
+      expect(rMed.recommendedThinkingLevel, equals('MEDIUM'));
+
+      const rComp = DecisionGateResult(isFood: true, imageQuality: 'high', dishComplexity: 'complex', mealCategory: 'lunch');
+      expect(rComp.recommendedThinkingLevel, equals('HIGH'));
+
+      const rExt = DecisionGateResult(isFood: true, imageQuality: 'high', dishComplexity: 'extreme', mealCategory: 'lunch');
+      expect(rExt.recommendedThinkingLevel, equals('XHIGH'));
     });
 
     test('Low image quality triggers warning even when is_food is true', () async {

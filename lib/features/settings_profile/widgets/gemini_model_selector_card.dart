@@ -33,10 +33,10 @@ class GeminiModelSelectorCard extends StatefulWidget {
 }
 
 class _GeminiModelSelectorCardState extends State<GeminiModelSelectorCard> {
-  String _thinkingLevel = 'MEDIUM';
+  String _thinkingLevel = 'AUTO';
   int _maxOutputTokens = 16384;
 
-  static const List<String> _thinkingLevels = ['OFF', 'LOW', 'MEDIUM', 'HIGH', 'XHIGH'];
+  static const List<String> _thinkingLevels = ['AUTO', 'OFF', 'LOW', 'MEDIUM', 'HIGH', 'XHIGH'];
   static const Map<String, int> _outputTokenOptions = {'4k': 4096, '8k': 8192, '16k': 16384};
 
   @override
@@ -71,30 +71,23 @@ class _GeminiModelSelectorCardState extends State<GeminiModelSelectorCard> {
   }
 
   Color _getBadgeColor(String? label) {
-    if (label == null) {
-      return AppColors.primary;
-    }
+    if (label == null) return AppColors.primary;
     final lower = label.toLowerCase();
-    if (lower.contains('think') || lower.contains('pro')) {
-      return AppColors.primary;
-    }
-    if (lower.contains('fast') || lower.contains('flash')) {
-      return AppColors.protein;
-    }
+    if (lower.contains('think') || lower.contains('pro')) return AppColors.primary;
+    if (lower.contains('fast') || lower.contains('flash')) return AppColors.protein;
+    if (lower.contains('lite')) return AppColors.carbs;
+    if (lower.contains('next')) return AppColors.protein;
     return AppColors.carbs;
   }
 
   String? _resolveBadgeLabel(GeminiModelInfo model) {
-    final lower = model.name.toLowerCase();
-    if (lower.contains('pro')) {
-      return 'Think';
-    }
-    if (lower.contains('flash')) {
-      return 'Fast';
-    }
     if (model.recommendationLabel != null && model.recommendationLabel!.isNotEmpty) {
       return model.recommendationLabel;
     }
+    final lower = model.name.toLowerCase();
+    if (lower.contains('lite')) return 'Lite';
+    if (lower.contains('pro')) return 'Think';
+    if (lower.contains('flash')) return 'Fast';
     return null;
   }
 
@@ -184,7 +177,7 @@ class _GeminiModelSelectorCardState extends State<GeminiModelSelectorCard> {
                       ),
                     ],
                   ]),
-                  if (currentModelInfo.description.isNotEmpty) ...[
+                  if (currentModelInfo.hasUsefulDescription) ...[
                     const SizedBox(height: 4),
                     Text(currentModelInfo.description, maxLines: 2, overflow: TextOverflow.ellipsis, style: GoogleFonts.inter(fontSize: 11, color: AppColors.textSecondary(context), height: 1.3)),
                   ],

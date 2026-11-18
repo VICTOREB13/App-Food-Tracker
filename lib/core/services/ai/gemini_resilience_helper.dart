@@ -96,11 +96,15 @@ class GeminiResilienceHelper {
 
   /// Resolves thinking config for Gemini 3.x/4.x models using thinkingLevel (never thinkingBudget)
   static Map<String, dynamic>? resolveThinkingConfig(String model, {String? customThinkingLevel}) {
-    final lower = model.toLowerCase();
+    final clean = model.replaceFirst(RegExp(r'^models/'), '').trim();
+    final lower = clean.toLowerCase();
     final isReasoning = !lower.contains('lite') &&
         (lower.startsWith('gemini-3') || lower.startsWith('gemini-4') || lower.contains('pro') || lower.contains('thinking'));
     if (!isReasoning) return null;
-    return {'thinkingLevel': customThinkingLevel ?? 'MEDIUM'};
+    final normalized = customThinkingLevel?.toUpperCase().trim();
+    if (normalized == 'OFF') return null;
+    final level = (normalized == 'AUTO' || normalized == null) ? 'MEDIUM' : normalized;
+    return {'thinkingLevel': level};
   }
 
   /// Decoupled Chain-of-Thought meal analysis schema with free-form volumetric reasoning,
@@ -111,16 +115,16 @@ class GeminiResilienceHelper {
     properties: {
       'razonamiento_volumetrico': Schema.string(description: 'Pensamiento y deducción física libre: escala de vajilla, formas 3D, densidad, cocción, aceites y grasas ocultas'),
       'plato': Schema.string(description: 'Nombre representativo del plato'),
-      'porcentaje_certeza': Schema.integer(description: 'Porcentaje estimado de certeza de la IA entre 0 y 100 basado en visibilidad, oclusión y nitidez de porciones'),
-      'margen_error_kcal': Schema.integer(description: 'Margen de error calórico estimado en kilocalorías (+/- kcal)'),
+      'porcentaje_certeza': Schema.integer(description: 'Certeza 0-100 basada en visibilidad, oclusión y nitidez'),
+      'margen_error_kcal': Schema.integer(description: 'Margen de error calórico estimado (+/- kcal)'),
       'items': Schema.array(
-        description: 'Lista de alimentos desglosados (1 único ítem si es preparación unitaria, o múltiples si contiene ingredientes variados)',
+        description: 'Lista de alimentos desglosados con macros y micronutrientes',
         items: Schema.object(
           requiredProperties: ['alimento', 'gramos_estimados', 'calorias', 'proteinas_g', 'carbohidratos_g', 'grasas_g'],
           properties: {
-            'alimento': Schema.string(description: 'Nombre del alimento individual'),
+            'alimento': Schema.string(description: 'Nombre individual'),
             'gramos_estimados': Schema.number(description: 'Masa derivada neta en gramos'),
-            'calorias': Schema.number(description: 'Calorías calculadas a partir de gramos_estimados'),
+            'calorias': Schema.number(description: 'Calorías calculadas'),
             'proteinas_g': Schema.number(description: 'Proteínas en gramos'),
             'carbohidratos_g': Schema.number(description: 'Carbohidratos en gramos'),
             'grasas_g': Schema.number(description: 'Grasas en gramos'),
@@ -134,81 +138,100 @@ class GeminiResilienceHelper {
   );
 
   static const String baseSystemInstruction = '''
-Eres un nutricionista clínico y experto en estimación física y volumétrica 3D de alimentos para comidas caseras y tradicionales.
-
-PIPELINE CAUSAL ESTRICTO - PIPELINE DE RAZONAMIENTO DESACOPLADO:
-1. 'razonamiento_volumetrico': Redacta primero un análisis de texto libre en lenguaje natural donde deduzcas:
-   - Escala métrica y vajilla de referencia (diámetro del plato en cm o vajilla visible).
-   - Formas tridimensionales de cada alimento y volumen espacial en cm³.
-   - Densidad física (g/cm³) y factor de cocción.
-   - Regla de Grasa Oculta en Comida Casera: detección visual de aceites, brillo superficial y grasa oculta en sofritos/guisos (5g y 10g adicionales de grasa).
-   - Masa neta derivada en gramos para cada componente.
-2. 'plato': Asigna el nombre gastronómico representativo de la comida.
-3. 'porcentaje_certeza' y 'margen_error_kcal':
-   - Estima 'porcentaje_certeza' como un entero entre 0 y 100 basado en visibilidad, nitidez y oclusión de porciones.
-   - Estima 'margen_error_kcal' como un entero en kilocalorías (+/- kcal) que refleje la incertidumbre de la estimación.
-4. 'items': Desglose obligatorio de ingredientes en 'items'. Desglosa cada alimento identificado con sus gramos estimados, macronutrientes (calorias, proteinas_g, carbohidratos_g, grasas_g) y micronutrientes (fibra_g, sodio_mg, azucar_g).
-   - Si la comida consta de un solo alimento o preparación unitaria, desglósalo como un único ítem en 'items'.
-   - Si la comida contiene múltiples alimentos combinados, desglosa individualmente cada ingrediente o elemento reconocible.
-   - Los totales nutricionales generales son derivados y calculados determinísticamente por la aplicación a partir de estos items.
-
-Ejemplo Few-Shot de salida:
-{
-  "razonamiento_volumetrico": "Plato hondo de 24 cm de diámetro con guiso de lentejas y arroz blanco. El arroz ocupa un volumen semiesférico de aprox. 150 cm³ con densidad 1.3 g/cm³, totalizando ~195g cocidos. Las lentejas ocupan aprox. 180 cm³ con caldo espeso (~200g). Se aprecia brillo de aceite de oliva en sofrito (+8g de grasa).",
-  "plato": "Lentejas estofadas con arroz blanco",
-  "porcentaje_certeza": 90,
-  "margen_error_kcal": 45,
-  "items": [
-    {"alimento": "Arroz blanco cocido", "gramos_estimados": 195, "calorias": 250, "proteinas_g": 5, "carbohidratos_g": 54, "grasas_g": 1, "fibra_g": 1.2, "sodio_mg": 2.0, "azucar_g": 0.1},
-    {"alimento": "Lentejas guisadas con sofrito", "gramos_estimados": 200, "calorias": 230, "proteinas_g": 16, "carbohidratos_g": 32, "grasas_g": 9, "fibra_g": 8.0, "sodio_mg": 380.0, "azucar_g": 2.5}
-  ]
-}
-
-Reglas obligatorias de cubicaje:
-- Puño cerrado ~ 1 taza de volumen (~140-180g de arroz cocido, ~130-160g de legumbres cocidas).
-- Palma de la mano (grosor del meñique) ~ 100-130g de carne, pollo o pescado cocido.
-- Pulgar / Falange distal ~ 1 cucharada o ~10-15g de aceite o grasa.
-- Dos manos ahuecadas ~ 50-80g de ensalada de hojas crudas.
-- Conversión cocido vs crudo: arroz y pasta multiplican su peso x2.5 a 3 por absorción de agua. Carnes merma 20% a 25%.
-- PROHIBIDO fijar 200g genéricos: deriva gramos por densidad visual y volumen 3D.
-- Porciones compartidas: si el contexto indica porción compartida, calcula exclusivamente la porción consumida.
-- Formato estricto: Responde únicamente con el JSON estructurado según el esquema.
+Experto en nutrición clínica y estimación física volumétrica 3D de alimentos.
+PIPELINE DE RAZONAMIENTO DESACOPLADO y causal en formato estricto JSON:
+1. "razonamiento_volumetrico": Deducción 3D (vajilla, volumen cm³, densidad g/cm³, factor cocción, grasa oculta +5-10g).
+2. "plato": Nombre gastronómico representativo (considera porciones compartidas).
+3. "porcentaje_certeza": Entero 0-100 (visibilidad, nitidez y oclusión).
+4. "margen_error_kcal": Entero (+/- kcal).
+5. "items": Desglose individual de CADA alimento (nunca vacío ni 200g genérico).
+Para cada ítem en "items" reporta: alimento, gramos_estimados, calorias, proteinas_g, carbohidratos_g, grasas_g, fibra_g, sodio_mg, azucar_g.
+Los totales nutricionales son derivados y calculados en cliente desde estos items.
+Reglas: Puño cerrado ~ 1 taza (150-180g arroz/legumbres); Palma de la mano ~ 100-130g carnes; Pulgar ~ 10-15g grasa; Dos manos ahuecadas ~ 60-80g ensalada.
+Conversión cocido vs crudo: Pasta y arroz absorben agua x2.5-3; Carnes merma 20-25%.
+Regla de Grasa Oculta en Comida Casera: asumir entre 5g y 10g adicionales de grasa en sofritos o cocción.
+Devuelve ÚNICAMENTE el JSON estructurado según el esquema.
 ''';
 
-  static String buildSystemPrompt({String? masterPrompt, String? pantryContext}) {
+  static const String baseSystemInstructionEn = '''
+Clinical nutritionist and 3D physical volumetric food estimation expert.
+DECOUPLED REASONING PIPELINE and strict causal JSON response:
+1. "razonamiento_volumetrico": Free-form 3D deduction (dishware scale, volume cm³, density g/cm³, cooking state, hidden fat/oil +5-10g).
+2. "plato": Representative culinary dish name.
+3. "porcentaje_certeza": Integer 0-100 (visibility, clarity, occlusion).
+4. "margen_error_kcal": Integer (+/- kcal).
+5. "items": Itemized breakdown of EVERY food item (never empty items or generic 200g).
+For each item in "items" report: alimento, gramos_estimados, calorias, proteinas_g, carbohidratos_g, grasas_g, fibra_g, sodio_mg, azucar_g.
+Nutritional totals are derived and computed on client from these items.
+Sizing rules: fist ~ 1 cup (150-180g rice/legumes); palm ~ 100-130g meat; thumb ~ 10-15g fat; 2 cupped hands ~ 60-80g salad.
+Rice/pasta expands 2.5-3x in water. Meat cooks down 20-25%.
+Output ONLY structured JSON matching the schema.
+''';
+
+  static String buildSystemPrompt({
+    String? masterPrompt,
+    String? pantryContext,
+    String language = 'es',
+  }) {
+    final isEn = language.toLowerCase().startsWith('en');
+    final baseInstruction = isEn ? baseSystemInstructionEn : baseSystemInstruction;
     if ((masterPrompt == null || masterPrompt.trim().isEmpty) &&
         (pantryContext == null || pantryContext.trim().isEmpty)) {
-      return baseSystemInstruction;
+      return baseInstruction;
     }
-    final buffer = StringBuffer(baseSystemInstruction);
+    final buffer = StringBuffer(baseInstruction);
     if (masterPrompt != null && masterPrompt.trim().isNotEmpty) {
-      buffer.writeln('\n--- CONTEXTO BIOLÓGICO Y METAS DEL COMENSAL (MASTER PROMPT) ---');
+      buffer.writeln(isEn
+          ? '\n--- DINER BIOLOGICAL CONTEXT & GOALS (MASTER PROMPT) ---'
+          : '\n--- CONTEXTO BIOLÓGICO Y METAS DEL COMENSAL (MASTER PROMPT) ---');
       buffer.writeln(masterPrompt.trim());
-      buffer.writeln('Ajusta tus estimaciones y observaciones considerando las metas calóricas, requerimientos y contexto nutricional del comensal.');
+      buffer.writeln(isEn
+          ? 'Adjust your estimates and observations taking into account the calorie goals and nutritional requirements of the diner.'
+          : 'Ajusta tus estimaciones y observaciones considerando las metas calóricas, requerimientos y contexto nutricional del comensal.');
     }
     if (pantryContext != null && pantryContext.trim().isNotEmpty) {
-      buffer.writeln('\n--- DESPENSA Y MARCAS PERSONALES DEL COMENSAL ---');
+      buffer.writeln(isEn
+          ? '\n--- DINER PANTRY & PERSONAL BRANDS ---'
+          : '\n--- DESPENSA Y MARCAS PERSONALES DEL COMENSAL ---');
       buffer.writeln(pantryContext.trim());
-      buffer.writeln('Si identificas alimentos o preparaciones derivadas de estas marcas (ej. arepas hechas con su harina de maíz habitual), utiliza prioritariamente los valores y proporciones de su despensa personal para maximizar la exactitud nutricional.');
+      buffer.writeln(isEn
+          ? 'If you identify foods derived from these brands, prioritize their pantry nutritional values.'
+          : 'Si identificas alimentos o preparaciones derivadas de estas marcas, utiliza prioritariamente los valores y proporciones de su despensa personal para maximizar la exactitud nutricional.');
     }
     return buffer.toString();
   }
 
-  static String buildUserPrompt({String? userContext, double? dishwareDiameterCm}) {
+  static String buildUserPrompt({
+    String? userContext,
+    double? dishwareDiameterCm,
+    String language = 'es',
+  }) {
+    final isEn = language.toLowerCase().startsWith('en');
     final buffer = StringBuffer();
-    buffer.writeln('Analiza minuciosamente esta comida casera y estima su desglose nutricional siguiendo las reglas volumétricas.');
-    buffer.writeln('ORDEN CAUSAL OBLIGATORIO: razonamiento_volumetrico (deducción libre 3D, vajilla, densidad, grasa) -> plato -> items.');
-    buffer.writeln('REGLAS FUNDAMENTALES DE DESGLOSE:');
-    buffer.writeln('1. DESGLOSE INDIVIDUAL OBLIGATORIO: Identifica y desglosa CADA alimento en "items" con proteinas_g y micronutrientes (fibra_g, sodio_mg, azucar_g). NUNCA devuelvas items vacío.');
-    buffer.writeln('2. COMIDAS UNITARIAS: Si el plato contiene un solo elemento (ej. manzana, sándwich, café), devuélvelo como 1 ítem en "items".');
-    buffer.writeln('3. GRAMOS REALISTAS: PROHIBIDO fijar 200g genéricos. Deriva gramos por densidad visual y volumen 3D.');
-    buffer.writeln('4. La suma de calorías, macronutrientes y micronutrientes de los items individuales conforma los totales calculados por la app.');
-
+    if (isEn) {
+      buffer.writeln('Thoroughly analyze this home-cooked meal and estimate its nutritional breakdown following volumetric rules.\n'
+          'MANDATORY CAUSAL ORDER: razonamiento_volumetrico (3D deduction, dishware, density, fat) -> plato -> items.\n'
+          'CORE BREAKDOWN RULES:\n'
+          '1. MANDATORY INDIVIDUAL BREAKDOWN: Identify and itemize EACH food in "items" with proteinas_g and micronutrients (fibra_g, sodio_mg, azucar_g). NEVER return empty items.\n'
+          '2. SINGLE-ITEM MEALS: If the dish is a single item, return it as 1 item in "items".\n'
+          '3. REALISTIC GRAMS: NEVER use generic 200g. Derive grams from visual density and 3D volume.\n'
+          '4. The sum of calories, macronutrients and micronutrients of individual items makes up the totals calculated by the app.');
+    } else {
+      buffer.writeln('Analiza minuciosamente esta comida casera y estima su desglose nutricional siguiendo las reglas volumétricas.\n'
+          'ORDEN CAUSAL OBLIGATORIO: razonamiento_volumetrico (deducción libre 3D, vajilla, densidad, grasa) -> plato -> items.\n'
+          'REGLAS FUNDAMENTALES DE DESGLOSE:\n'
+          '1. DESGLOSE INDIVIDUAL OBLIGATORIO: Identifica y desglosa CADA alimento en "items" con proteinas_g y micronutrientes (fibra_g, sodio_mg, azucar_g). NUNCA devuelvas items vacío.\n'
+          '2. COMIDAS UNITARIAS: Si el plato contiene un solo elemento (ej. manzana, sándwich, café), devuélvelo como 1 ítem en "items".\n'
+          '3. GRAMOS REALISTAS: PROHIBIDO fijar 200g genéricos. Deriva gramos por densidad visual y volumen 3D.\n'
+          '4. La suma de calorías, macronutrientes y micronutrientes de los items individuales conforma los totales calculados por la app.');
+    }
     if (dishwareDiameterCm != null && dishwareDiameterCm > 0) {
-      buffer.writeln('\nEscala métrica de referencia del comensal: El plato tiene un diámetro de ${dishwareDiameterCm.toStringAsFixed(1)} cm. Utiliza los bordes del plato como escala métrica geométrica absoluta para calcular el área, volumen y peso en gramos reales de los alimentos.');
+      buffer.writeln(isEn
+          ? '\nDiner metric scale reference: Plate diameter is ${dishwareDiameterCm.toStringAsFixed(1)} cm. Use plate edges as geometric reference scale to calculate area, volume, and gram weight.'
+          : '\nEscala métrica de referencia del comensal: El plato tiene un diámetro de ${dishwareDiameterCm.toStringAsFixed(1)} cm. Utiliza los bordes del plato como escala métrica geométrica absoluta para calcular el área, volumen y peso en gramos reales de los alimentos.');
     }
     if (userContext != null && userContext.trim().isNotEmpty) {
-      buffer.writeln('Contexto y notas del comensal: ${userContext.trim()}');
+      buffer.writeln(isEn ? 'Diner context and notes: ${userContext.trim()}' : 'Contexto y notas del comensal: ${userContext.trim()}');
     }
     return buffer.toString();
   }
@@ -219,32 +242,35 @@ Reglas obligatorias de cubicaje:
     required String newIngredient,
     String? userNotes,
     double? dishwareDiameterCm,
+    String language = 'es',
   }) {
+    final isEn = language.toLowerCase().startsWith('en');
     final buffer = StringBuffer();
-    buffer.writeln("El comensal corrigió el ingrediente '$oldIngredient' por '$newIngredient'.");
-    buffer.writeln("Conserva el volumen y la distribución espacial de la foto, pero recalcula los macronutrientes (con proteinas_g) y micronutrientes específicos para '$newIngredient'.");
-    if (dishwareDiameterCm != null && dishwareDiameterCm > 0) {
-      buffer.writeln('Escala métrica de referencia del plato: ${dishwareDiameterCm.toStringAsFixed(1)} cm de diámetro.');
-    }
-    buffer.writeln('\nIngredientes previos identificados en la foto:');
-    for (final item in currentItemsSummary) {
-      buffer.writeln('- $item');
-    }
-    if (userNotes != null && userNotes.trim().isNotEmpty) {
-      buffer.writeln('\nNotas del comensal: ${userNotes.trim()}');
+    if (isEn) {
+      buffer.writeln("The diner substituted ingredient '$oldIngredient' with '$newIngredient'.\n"
+          "Keep the volume and spatial distribution from the photo, but recalculate the specific macronutrients (with proteinas_g) and micronutrients for '$newIngredient'.");
+      if (dishwareDiameterCm != null && dishwareDiameterCm > 0) buffer.writeln('Plate metric scale reference: ${dishwareDiameterCm.toStringAsFixed(1)} cm diameter.');
+      buffer.writeln('\nPrevious ingredients identified in photo:');
+      for (final item in currentItemsSummary) buffer.writeln('- $item');
+      if (userNotes != null && userNotes.trim().isNotEmpty) buffer.writeln('\nDiner notes: ${userNotes.trim()}');
+    } else {
+      buffer.writeln("El comensal corrigió el ingrediente '$oldIngredient' por '$newIngredient'.\n"
+          "Conserva el volumen y la distribución espacial de la foto, pero recalcula los macronutrientes (con proteinas_g) y micronutrientes específicos para '$newIngredient'.");
+      if (dishwareDiameterCm != null && dishwareDiameterCm > 0) buffer.writeln('Escala métrica de referencia del plato: ${dishwareDiameterCm.toStringAsFixed(1)} cm de diámetro.');
+      buffer.writeln('\nIngredientes previos identificados en la foto:');
+      for (final item in currentItemsSummary) buffer.writeln('- $item');
+      if (userNotes != null && userNotes.trim().isNotEmpty) buffer.writeln('\nNotas del comensal: ${userNotes.trim()}');
     }
     return buffer.toString();
   }
 
   static String buildSpeechUserPrompt({String? userNotes}) {
-    final buffer = StringBuffer();
-    buffer.writeln('El comensal describe por voz natural los alimentos que consumió.');
-    buffer.writeln('Escucha minuciosamente el audio, transcribe e identifica cada alimento y porción indicada.');
-    buffer.writeln('Calcula sus gramos estimados, calorías, proteinas_g, carbohidratos_g, grasas_g y micronutrientes (fibra_g, sodio_mg, azucar_g).');
-    buffer.writeln('Genera el razonamiento volumétrico libre y el desglose estructurado en "items". Los totales son calculados en cliente.');
-    if (userNotes != null && userNotes.trim().isNotEmpty) {
-      buffer.writeln('\nNotas adicionales del comensal: ${userNotes.trim()}');
-    }
+    final buffer = StringBuffer()
+      ..writeln('El comensal describe por voz natural los alimentos que consumió.')
+      ..writeln('Escucha minuciosamente el audio, transcribe e identifica cada alimento y porción indicada.')
+      ..writeln('Calcula sus gramos estimados, calorías, proteinas_g, carbohidratos_g, grasas_g y micronutrientes (fibra_g, sodio_mg, azucar_g).')
+      ..writeln('Genera el razonamiento volumétrico libre y el desglose estructurado en "items". Los totales son calculados en cliente.');
+    if (userNotes != null && userNotes.trim().isNotEmpty) buffer.writeln('\nNotas adicionales del comensal: ${userNotes.trim()}');
     return buffer.toString();
   }
 
@@ -253,15 +279,11 @@ Reglas obligatorias de cubicaje:
     String? userNotes,
     double? dishwareDiameterCm,
   }) {
-    final buffer = StringBuffer();
-    buffer.writeln('Se proporcionan $framesCount fotogramas clave de video capturados desde diferentes ángulos del plato.');
-    buffer.writeln('Realiza una inferencia volumétrica tridimensional combinando la perspectiva cenital y angular de los fotogramas para calcular con máxima precisión la profundidad, volumen y peso en gramos de cada alimento visible.');
-    if (dishwareDiameterCm != null && dishwareDiameterCm > 0) {
-      buffer.writeln('Escala métrica de referencia del plato: ${dishwareDiameterCm.toStringAsFixed(1)} cm de diámetro.');
-    }
-    if (userNotes != null && userNotes.trim().isNotEmpty) {
-      buffer.writeln('\nNotas del comensal: ${userNotes.trim()}');
-    }
+    final buffer = StringBuffer()
+      ..writeln('Se proporcionan $framesCount fotogramas clave de video capturados desde diferentes ángulos del plato.')
+      ..writeln('Realiza una inferencia volumétrica tridimensional combinando la perspectiva cenital y angular de los fotogramas para calcular con máxima precisión la profundidad, volumen y peso en gramos de cada alimento visible.');
+    if (dishwareDiameterCm != null && dishwareDiameterCm > 0) buffer.writeln('Escala métrica de referencia del plato: ${dishwareDiameterCm.toStringAsFixed(1)} cm de diámetro.');
+    if (userNotes != null && userNotes.trim().isNotEmpty) buffer.writeln('\nNotas del comensal: ${userNotes.trim()}');
     return buffer.toString();
   }
 }

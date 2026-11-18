@@ -113,7 +113,7 @@ class DecisionGateService implements IDecisionGateService {
         'Reglas:\n'
         '- is_food (bool): true si hay comida/bebida, false si no hay alimentos.\n'
         '- image_quality (string): "high", "medium" o "low".\n'
-        '- dish_complexity (string): "simple" (1-2 ingredientes) o "complex" (elaborado/múltiples).\n'
+        '- dish_complexity (string): "simple" (1-2 ingredientes), "medium" (3-4 ingredientes), "complex" (elaborado/múltiples) o "extreme" (banquetes/recetas densas).\n'
         '- meal_category (string): "breakfast", "lunch", "dinner", "snack".';
   }
 
@@ -129,7 +129,17 @@ class DecisionGateService implements IDecisionGateService {
         if (parts != null && parts.isNotEmpty) {
           final text = parts.first['text'] as String?;
           if (text != null && text.trim().isNotEmpty) {
-            final cleaned = text.replaceAll('```json', '').replaceAll('```', '').trim();
+            var cleaned = text.trim();
+            final fenceMatch = RegExp(r'```(?:json)?\s*([\s\S]*?)\s*```').firstMatch(cleaned);
+            if (fenceMatch != null) {
+              cleaned = fenceMatch.group(1)!.trim();
+            } else {
+              final firstBrace = cleaned.indexOf('{');
+              final lastBrace = cleaned.lastIndexOf('}');
+              if (firstBrace != -1 && lastBrace != -1 && lastBrace > firstBrace) {
+                cleaned = cleaned.substring(firstBrace, lastBrace + 1).trim();
+              }
+            }
             final decoded = jsonDecode(cleaned) as Map<String, dynamic>;
             return DecisionGateResult.fromJson(decoded);
           }

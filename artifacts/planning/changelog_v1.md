@@ -18,6 +18,32 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 
 ---
 
+## [1.5.3] - 2026-11-17
+
+### AI Inference Resilience, Dynamic Thinking AUTO Mode, Ultra-Dense Bilingual Master Prompt & Longitudinal Diet Pattern Engine
+- **Inference Engine Resilience & Socket Fail-Safe**:
+  - Sanitized Google AI Studio `models/` prefix across `GeminiRestClient`, `GeminiModelService`, and `GeminiResilienceHelper`, fixing broken reasoning model detection and extending timeout budgets to 180s for thinking models.
+  - Dynamically reconfigured generation payloads inside the retry loop: automatically purges `thinkingConfig` and `cachedContent` on fallback to Lite models, eliminating HTTP 400 `INVALID_ARGUMENT` errors.
+  - Added resilient socket and stream disconnect detection (`OS error 10054`, `broken pipe`, `empty response`) with exponential backoff and random jitter.
+- **Dynamic Thinking `AUTO` Mode**:
+  - Added `AUTO` thinking level option in Settings and inference pipeline.
+  - In `AUTO` mode, dynamically derives reasoning effort (`LOW`, `MEDIUM`, `HIGH`, `XHIGH`) directly from `DecisionGateResult` complexity evaluated by `gemini-decision-1`.
+- **Persistent Inference Telemetry & Clean Model Selector**:
+  - Saved enriched analysis payload (`analysis.toMap()`) to SQLite, preserving `model_used`, `is_fallback`, `thinking_level`, and `razonamiento_volumetrico` across navigation transitions in `MealDetailView`.
+  - Added `GeminiModelInfo.hasUsefulDescription` to eliminate triple subtitle/title/id redundancy in the model selector.
+- **Ultra-Dense Bilingual Master Prompt (ES/EN) with Complete Nutrition**:
+  - Compressed base system prompt to an ultra-dense, causal format (< 15 lines) explicitly demanding all nutrients stored by the app: `alimento`, `gramos_estimados`, `calorias`, `proteinas_g`, `carbohidratos_g`, `grasas_g`, `fibra_g`, `sodio_mg`, `azucar_g`, plus `razonamiento_volumetrico`, `plato`, `porcentaje_certeza`, and `margen_error_kcal`.
+  - Added native English counterpart (`baseSystemInstructionEn`) and parameterized language selection (`String language = 'es'`).
+  - Unified metabolic goals and macro distribution in `MetabolicPromptGenerator`, eliminating duplicated protein/carb/fat lines.
+- **Longitudinal Diet Pattern Recommendation Engine ("What Should I Eat Today?")**:
+  - Created `DietPatternInsight` model and `DietAdvisorService` to query SQLite logs over 7, 14, and 30 days, detecting dietary patterns (fats/frying, strength protein deficit, fiber, sodium excess).
+  - Built interactive Dark Bento `AiDietPatternSheet` with period selector, visual hand-portion system (fist, palm, thumb), practical food swaps, and local market snacks (Farmatodo).
+  - Integrated quick-access triggers in `WhatToEatSheet` and `RecommendationDiagnosticCard`.
+  - Independent multi-window caching (`Map<int, ...>`) and resilient JSON syntax recovery via `JsonRepairHelper`.
+
+
+---
+
 ## [1.5.2] - 2026-11-16
 
 ### Voice Mode, Bento Typography, Image Persistence, Telemetry & Thinking Levels

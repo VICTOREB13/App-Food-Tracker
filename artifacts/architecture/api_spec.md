@@ -449,7 +449,34 @@ Para evitar alucinaciones autorregresivas y cuellos de botella de constrained gr
   }
   ```
 
+---
 
+## 🥗 13. Contratos de Inferencia Longitudinal y Diagnóstico de Hábitos (`IDietAdvisorService` & `DietPatternInsight`)
 
+### 13.1. Esquema JSON de Respuesta (`DietPatternInsight`)
+```json
+{
+  "days_analyzed": 7,
+  "fat_insight": "Diagnóstico clínico sobre grasas, aceites y frituras, balance de saturadas vs insaturadas.",
+  "protein_insight": "Diagnóstico proteico respecto a masa muscular y saciedad para el objetivo del comensal.",
+  "fiber_insight": "Diagnóstico de fibra vegetal, granos y saciedad digestiva.",
+  "sodium_insight": "Diagnóstico de sodio, quesos, embutidos y alimentos procesados.",
+  "visual_hand_menu": [
+    "Desayuno: [Alimento (palma/puño/pulgar)]",
+    "Almuerzo: [Alimento (palma/puño/pulgar)]",
+    "Cena: [Alimento (palma/puño/pulgar)]"
+  ],
+  "suggested_swaps": [
+    "Sustitución 1 adaptada a alimentos locales accesibles",
+    "Sustitución 2 de snack práctico y económico"
+  ],
+  "general_summary": "Resumen clínico claro y conciso de los hábitos observados.",
+  "analyzed_at": "2026-11-17T20:00:00.000Z"
+}
+```
 
+### 13.2. Contrato de Servicio (`IDietAdvisorService`)
+- `Future<DietPatternInsight> getDietPatternInsights({int days = 7, bool forceRefresh = false})`
+- **Fallback Determinista:** Ante ausencia de credenciales Gemini API o fallos de conexión, retorna `DietPatternInsight.fallback(days: days)` sin bloquear la interfaz.
+- **Caché:** Política de expiración en memoria de 60 minutos con clave compuesta por el número de días analizados.
 

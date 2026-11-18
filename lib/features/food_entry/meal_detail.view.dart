@@ -63,6 +63,7 @@ class _MealDetailViewState extends State<MealDetailView> {
       _calorieErrorMargin = meal.calorieErrorMargin;
       _aiBreakdownJson = meal.aiBreakdownJson;
       _isPartial = meal.isPartial;
+      _modelUsed = meal.modelUsed; _isFallback = meal.isFallback; _thinkingLevel = meal.thinkingLevel;
       _parseTelemetryFromJson(meal.aiBreakdownJson);
     }
   }
@@ -151,7 +152,7 @@ class _MealDetailViewState extends State<MealDetailView> {
           _carbs = analysis.totalCarbs; _fat = analysis.totalFat;
           _confidencePercentage = analysis.confidencePercentage;
           _calorieErrorMargin = analysis.calorieErrorMargin;
-          _aiBreakdownJson = analysis.rawJson;
+          _aiBreakdownJson = json.encode(analysis.toMap());
           _isPartial = analysis.isPartial;
           _modelUsed = analysis.modelUsed;
           _isFallback = analysis.isFallback;
@@ -226,15 +227,20 @@ class _MealDetailViewState extends State<MealDetailView> {
   }
 
   void _parseTelemetryFromJson(String? raw) {
-    if (raw == null || raw.isEmpty) {
-      return;
-    }
+    if (raw == null || raw.trim().isEmpty) return;
     try {
-      final d = json.decode(raw);
+      var c = raw.trim();
+      final m = RegExp(r'```(?:json)?\s*([\s\S]*?)\s*```').firstMatch(c);
+      if (m != null) c = m.group(1)!.trim();
+      final b1 = c.indexOf('{'), b2 = c.lastIndexOf('}');
+      if (b1 != -1 && b2 > b1) c = c.substring(b1, b2 + 1).trim();
+      final d = json.decode(c);
       if (d is Map<String, dynamic>) {
-        _modelUsed = d['model_used']?.toString() ?? d['modelUsed']?.toString();
-        _isFallback = d['is_fallback'] == true || d['isFallback'] == true;
-        _thinkingLevel = d['thinking_level']?.toString() ?? d['thinkingLevel']?.toString();
+        final mod = d['model_used']?.toString() ?? d['modelUsed']?.toString();
+        if (mod != null && mod.isNotEmpty) _modelUsed = mod;
+        if (d['is_fallback'] == true || d['isFallback'] == true) _isFallback = true;
+        final t = d['thinking_level']?.toString() ?? d['thinkingLevel']?.toString();
+        if (t != null && t.isNotEmpty) _thinkingLevel = t;
       }
     } catch (_) {}
   }
@@ -249,40 +255,25 @@ class _MealDetailViewState extends State<MealDetailView> {
         title: isEditing ? l10n.mealDetails : l10n.newMeal,
         actions: [
           if (isEditing)
-            IconButton(
-              icon: const Icon(Icons.delete_outline, color: AppColors.primaryLight),
-              tooltip: l10n.deleteMealTooltip,
-              onPressed: _deleteMeal,
-            ),
+            IconButton(icon: const Icon(Icons.delete_outline, color: AppColors.primaryLight), tooltip: l10n.deleteMealTooltip, onPressed: _deleteMeal),
         ],
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         children: [
-          MealImageCard(
-            imagePath: _imagePath, dishName: _nameController.text, onPickImage: _pickImage,
-            isAnalyzing: _isReanalyzing, analysisStage: _analysisStage, analysisProgress: _analysisProgress,
-          ),
+          MealImageCard(imagePath: _imagePath, dishName: _nameController.text, onPickImage: _pickImage, isAnalyzing: _isReanalyzing, analysisStage: _analysisStage, analysisProgress: _analysisProgress),
           if (_imagePath != null)
             Padding(padding: const EdgeInsets.only(top: 10), child: MealAiReanalyzeButton(isReanalyzing: _isReanalyzing, onPressed: _reanalyzeWithAi)),
           const SizedBox(height: 16),
           MealMacroChipsRow(calories: _calories, protein: _protein, carbs: _carbs, fat: _fat),
           const SizedBox(height: 8),
-          MealAiValidationChips(
-            confidencePercentage: _confidencePercentage, calorieErrorMargin: _calorieErrorMargin,
-            isPartial: _isPartial, modelUsed: _modelUsed, isFallback: _isFallback, thinkingLevel: _thinkingLevel,
-          ),
+          MealAiValidationChips(confidencePercentage: _confidencePercentage, calorieErrorMargin: _calorieErrorMargin, isPartial: _isPartial, modelUsed: _modelUsed, isFallback: _isFallback, thinkingLevel: _thinkingLevel),
           if (_fiber > 0 || _sodium > 0 || _sugar > 0)
             Padding(padding: const EdgeInsets.only(top: 8), child: MealMicronutrientChipsRow(fiber: _fiber, sodium: _sodium, sugar: _sugar)),
           const SizedBox(height: 16),
           MealFormFields(
-            nameController: _nameController, notesController: _notesController,
-            mealType: _mealType,
-            onMealTypeChanged: (val) {
-              if (val != null && val != _mealType) {
-                setState(() => _mealType = val);
-              }
-            },
+            nameController: _nameController, notesController: _notesController, mealType: _mealType,
+            onMealTypeChanged: (val) { if (val != null && val != _mealType) setState(() => _mealType = val); },
           ),
           const SizedBox(height: 16),
           FoodItemsListCard(items: _items, onAddItem: _addItem, onEditItem: _editItem, onDeleteItem: _deleteItem),

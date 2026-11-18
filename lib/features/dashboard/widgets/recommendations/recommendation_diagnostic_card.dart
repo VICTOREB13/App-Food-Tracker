@@ -6,9 +6,9 @@ import 'package:food_tracker/core/models/nutritional_recommendation.dart';
 import 'package:food_tracker/features/dashboard/services/nutritional_recommendation_service.dart';
 import 'package:food_tracker/core/services/theme/theme_manager.dart';
 import 'package:food_tracker/core/ui/components/ve_card.dart';
+import 'ai_diet_pattern_sheet.dart';
 
-/// Shows the nutritional recommendation diagnostic dialog in a bounded, scrollable modal
-/// completely separating content from the close action.
+/// Shows the nutritional recommendation diagnostic dialog in a bounded, scrollable modal.
 Future<void> showRecommendationDiagnosticDialog(
   BuildContext context, {
   NutritionalAnalysisReport? initialReport,
@@ -17,7 +17,7 @@ Future<void> showRecommendationDiagnosticDialog(
   final l10n = AppLocalizations.of(context);
   return showDialog<void>(
     context: context,
-    builder: (dialogCtx) => Dialog(
+    builder: (ctx) => Dialog(
       backgroundColor: AppColors.surface(context),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: AppColors.border(context))),
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
@@ -26,34 +26,24 @@ Future<void> showRecommendationDiagnosticDialog(
         child: ConstrainedBox(
           constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.85),
           child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(l10n.nutritionalDiagnosticTitle, style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary(context))),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close, size: 20),
-                    tooltip: l10n.closeButton,
-                    onPressed: () => Navigator.of(dialogCtx).pop(),
-                  ),
-                ],
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
+                child: Row(
+                  children: [
+                    Expanded(child: Text(l10n.nutritionalDiagnosticTitle, style: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary(context)))),
+                    IconButton(icon: const Icon(Icons.close, size: 20), tooltip: l10n.closeButton, onPressed: () => Navigator.of(ctx).pop()),
+                  ],
+                ),
               ),
-            ),
-            const Divider(height: 1),
-            Flexible(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(12),
-                child: RecommendationDiagnosticCard(initialReport: initialReport, service: service),
+              const Divider(height: 1),
+              Flexible(
+                child: SingleChildScrollView(padding: const EdgeInsets.all(12), child: RecommendationDiagnosticCard(initialReport: initialReport, service: service)),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
       ),
     ),
   );
@@ -64,11 +54,7 @@ class RecommendationDiagnosticCard extends StatefulWidget {
   final NutritionalAnalysisReport? initialReport;
   final INutritionalRecommendationService? service;
 
-  const RecommendationDiagnosticCard({
-    super.key,
-    this.initialReport,
-    this.service,
-  });
+  const RecommendationDiagnosticCard({super.key, this.initialReport, this.service});
 
   @override
   State<RecommendationDiagnosticCard> createState() => _RecommendationDiagnosticCardState();
@@ -83,8 +69,7 @@ class _RecommendationDiagnosticCardState extends State<RecommendationDiagnosticC
   void initState() {
     super.initState();
     if (widget.initialReport != null) {
-      _report = widget.initialReport;
-      _isLoading = false;
+      _report = widget.initialReport; _isLoading = false;
     } else {
       _loadReport();
     }
@@ -95,9 +80,16 @@ class _RecommendationDiagnosticCardState extends State<RecommendationDiagnosticC
     try {
       final s = widget.service ?? NutritionalRecommendationService.instance;
       final rep = await s.analyzeHistory(days: _selectedDays);
-      if (mounted) setState(() { _report = rep; _isLoading = false; });
+      if (mounted) {
+        setState(() {
+          _report = rep;
+          _isLoading = false;
+        });
+      }
     } catch (_) {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -112,31 +104,22 @@ class _RecommendationDiagnosticCardState extends State<RecommendationDiagnosticC
             children: [
               const Icon(Icons.analytics_outlined, color: AppColors.protein, size: 20),
               const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  l10n.nutritionalRecommendationEngine,
-                  style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.8, color: AppColors.textSecondary(context)),
-                ),
+              Expanded(child: Text(l10n.nutritionalRecommendationEngine, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 0.8, color: AppColors.textSecondary(context)))),
+              IconButton(
+                icon: const Icon(Icons.auto_awesome, size: 18, color: AppColors.primary),
+                tooltip: 'Diagnóstico IA', padding: EdgeInsets.zero, constraints: const BoxConstraints(),
+                onPressed: () => AiDietPatternSheet.show(context, initialDays: _selectedDays, service: widget.service),
               ),
             ],
           ),
           const SizedBox(height: 10),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8, runSpacing: 8, alignment: WrapAlignment.spaceBetween, crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Text(l10n.analyzeHistoryLabel, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
-              Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                children: [
-                  _buildPeriodChip(7, l10n.sevenDaysLabel),
-                  _buildPeriodChip(15, l10n.fifteenDaysLabel),
-                  _buildPeriodChip(30, l10n.thirtyDaysLabel),
-                ],
-              ),
+              Wrap(spacing: 6, runSpacing: 6, children: [
+                _buildPeriodChip(7, l10n.sevenDaysLabel), _buildPeriodChip(15, l10n.fifteenDaysLabel), _buildPeriodChip(30, l10n.thirtyDaysLabel),
+              ]),
             ],
           ),
           const SizedBox(height: 12),
@@ -156,7 +139,20 @@ class _RecommendationDiagnosticCardState extends State<RecommendationDiagnosticC
             Text(l10n.suggestedSmartSubstitutions, style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.bold)),
             const SizedBox(height: 6),
             ..._report!.fatReductionSwaps.map(_buildSwapRow),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => AiDietPatternSheet.show(context, initialDays: _selectedDays, service: widget.service),
+                icon: const Icon(Icons.auto_awesome, size: 15, color: AppColors.primary),
+                label: Text('Auditoría Profunda con IA (${_selectedDays}d)', style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700)),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: AppColors.primary.withValues(alpha: 0.4)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                ),
+              ),
+            ),
           ],
         ],
       ),
@@ -174,9 +170,7 @@ class _RecommendationDiagnosticCardState extends State<RecommendationDiagnosticC
           _loadReport();
         }
       },
-      selectedColor: AppColors.protein.withValues(alpha: 0.2),
-      visualDensity: VisualDensity.compact,
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      selectedColor: AppColors.protein.withValues(alpha: 0.2), visualDensity: VisualDensity.compact, materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
   }
 
@@ -210,15 +204,7 @@ class _RecommendationDiagnosticCardState extends State<RecommendationDiagnosticC
         const SizedBox(height: 2),
         Text(fraction, style: GoogleFonts.outfit(fontSize: 11, fontWeight: FontWeight.bold)),
         const SizedBox(height: 4),
-        SizedBox(
-          width: 54,
-          child: LinearProgressIndicator(
-            value: ratio.clamp(0.0, 1.0),
-            color: color,
-            backgroundColor: color.withValues(alpha: 0.2),
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ),
+        SizedBox(width: 54, child: LinearProgressIndicator(value: ratio.clamp(0.0, 1.0), color: color, backgroundColor: color.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(4))),
       ],
     );
   }
@@ -226,11 +212,7 @@ class _RecommendationDiagnosticCardState extends State<RecommendationDiagnosticC
   Widget _buildInsightTile({required String title, required String content, required Color color, required IconData icon}) {
     return Container(
       padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.25)),
-      ),
+      decoration: BoxDecoration(color: color.withValues(alpha: 0.06), borderRadius: BorderRadius.circular(8), border: Border.all(color: color.withValues(alpha: 0.25))),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

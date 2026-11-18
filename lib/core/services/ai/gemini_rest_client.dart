@@ -20,6 +20,7 @@ class GeminiRestClient {
 
   /// Supported canonical thinking levels for Gemini reasoning models.
   static const Set<String> validThinkingLevels = {
+    'AUTO',
     'OFF',
     'LOW',
     'MEDIUM',
@@ -47,14 +48,15 @@ class GeminiRestClient {
     final normalized = thinkingLevel?.toUpperCase().trim();
     if (normalized == 'OFF') return config;
 
-    final lower = model.toLowerCase();
+    final cleanModel = model.replaceFirst(RegExp(r'^models/'), '').trim();
+    final lower = cleanModel.toLowerCase();
     final isReasoning = !lower.contains('lite') &&
         (lower.startsWith('gemini-3') ||
             lower.startsWith('gemini-4') ||
             lower.contains('pro') ||
             lower.contains('thinking'));
     if (isReasoning) {
-      final level = (normalized != null && validThinkingLevels.contains(normalized))
+      final level = (normalized != null && validThinkingLevels.contains(normalized) && normalized != 'AUTO')
           ? normalized
           : 'MEDIUM';
       config['thinkingConfig'] = {'thinkingLevel': level};
@@ -74,12 +76,13 @@ class GeminiRestClient {
     int maxOutputTokens = 16384,
     Duration timeout = const Duration(seconds: 90),
   }) async {
-    final uri = Uri.parse('$baseUrl/models/$model:generateContent');
+    final cleanModel = model.replaceFirst(RegExp(r'^models/'), '').trim();
+    final uri = Uri.parse('$baseUrl/models/$cleanModel:generateContent');
     final payload = <String, dynamic>{
       'contents': contents,
       'generationConfig': generationConfig ??
           buildGenerationConfig(
-            model: model,
+            model: cleanModel,
             thinkingLevel: thinkingLevel,
             maxOutputTokens: maxOutputTokens,
           ),
@@ -118,12 +121,13 @@ class GeminiRestClient {
     int maxOutputTokens = 16384,
     Duration timeout = const Duration(seconds: 90),
   }) async* {
-    final uri = Uri.parse('$baseUrl/models/$model:streamGenerateContent?alt=sse');
+    final cleanModel = model.replaceFirst(RegExp(r'^models/'), '').trim();
+    final uri = Uri.parse('$baseUrl/models/$cleanModel:streamGenerateContent?alt=sse');
     final payload = <String, dynamic>{
       'contents': contents,
       'generationConfig': generationConfig ??
           buildGenerationConfig(
-            model: model,
+            model: cleanModel,
             thinkingLevel: thinkingLevel,
             maxOutputTokens: maxOutputTokens,
           ),
@@ -136,6 +140,8 @@ class GeminiRestClient {
     try {
       final request = http.Request('POST', uri)
         ..headers.addAll(_headers(apiKey))
+        ..headers['Accept'] = 'text/event-stream'
+        ..headers['Cache-Control'] = 'no-cache'
         ..body = jsonEncode(payload);
 
       final streamedResponse = await _client.send(request).timeout(timeout);
@@ -162,12 +168,15 @@ class GeminiRestClient {
       streamSucceeded = true;
     } catch (e) {
       debugPrint('GeminiRestClient: SSE cut ($e), activating unary fallback');
+      if (emittedChunks.isNotEmpty) {
+        throw GeminiApiException(statusCode: 500, message: 'SSE stream cut mid-transfer: $e');
+      }
     }
 
     if (!streamSucceeded && emittedChunks.isEmpty) {
       yield await generateContent(
         apiKey: apiKey,
-        model: model,
+        model: cleanModel,
         contents: contents,
         systemInstruction: systemInstruction,
         generationConfig: generationConfig,
@@ -179,38 +188,17 @@ class GeminiRestClient {
     }
   }
 
-  /// Sends a decision evaluation to `/v1beta/decisions` for `gemini-decision-1` (with fallback).
+  /// Evaluates decision using a standard generateContent call on Gemini Decisions 1 model.
   Future<Map<String, dynamic>> postDecision({
     required String apiKey,
     required Map<String, dynamic> body,
+    String model = 'gemini-decision-1',
     Duration timeout = const Duration(milliseconds: 2500),
   }) async {
-    final decisionUri = Uri.parse('$baseUrl/decisions');
-    try {
-      final response = await _client
-          .post(decisionUri, headers: _headers(apiKey), body: jsonEncode(body))
-          .timeout(timeout);
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        return jsonDecode(response.body) as Map<String, dynamic>;
-      }
-      if (response.statusCode == 404 || response.statusCode == 400) {
-        return await _fallbackDecisionModel(apiKey, body, timeout);
-      }
-      throw GeminiApiException(statusCode: response.statusCode, message: response.body);
-    } catch (e) {
-      if (e is TimeoutException) rethrow;
-      return await _fallbackDecisionModel(apiKey, body, timeout);
-    }
-  }
-
-  Future<Map<String, dynamic>> _fallbackDecisionModel(
-    String apiKey,
-    Map<String, dynamic> body,
-    Duration timeout,
-  ) async {
-    final fallbackUri = Uri.parse('$baseUrl/models/gemini-decision-1:generateContent');
+    final cleanModel = model.replaceFirst(RegExp(r'^models/'), '').trim();
+    final uri = Uri.parse('$baseUrl/models/$cleanModel:generateContent');
     final response = await _client
-        .post(fallbackUri, headers: _headers(apiKey), body: jsonEncode(body))
+        .post(uri, headers: _headers(apiKey), body: jsonEncode(body))
         .timeout(timeout);
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return jsonDecode(response.body) as Map<String, dynamic>;

@@ -229,5 +229,72 @@ void main() {
       expect(find.text('Flash (Rápidos)'), findsOneWidget);
       expect(find.text('Pro (Razonamiento)'), findsOneWidget);
     });
+
+    testWidgets('Muestra AUTO por defecto en NIVEL DE PENSAMIENTO y permite cambiarlo', (tester) async {
+      await tester.pumpWidget(buildWidget(
+        apiKey: 'AIzaSyValidKey',
+        models: sampleModels,
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('NIVEL DE PENSAMIENTO'), findsOneWidget);
+      expect(find.text('AUTO'), findsOneWidget);
+      expect(find.text('OFF'), findsOneWidget);
+      expect(find.text('LOW'), findsOneWidget);
+      expect(find.text('MEDIUM'), findsOneWidget);
+      expect(find.text('HIGH'), findsOneWidget);
+      expect(find.text('XHIGH'), findsOneWidget);
+
+      await tester.tap(find.text('HIGH'));
+      await tester.pumpAndSettle();
+
+      final stored = await SecureStorageService.instance.getThinkingLevel();
+      expect(stored, equals('HIGH'));
+    });
+
+    testWidgets('Oculta descripcion redundante cuando hasUsefulDescription es false', (tester) async {
+      const redundantModel = [
+        GeminiModelInfo(
+          name: 'gemini-2.5-flash',
+          displayName: 'Gemini 2.5 Flash',
+          description: 'Gemini 2.5 Flash',
+          isRecommended: true,
+          inputTokenLimit: 1048576,
+        ),
+      ];
+
+      await tester.pumpWidget(buildWidget(
+        apiKey: 'AIzaSyValidKey',
+        selectedModel: 'gemini-2.5-flash',
+        models: redundantModel,
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('ID: gemini-2.5-flash'), findsOneWidget);
+      expect(find.text('Gemini 2.5 Flash'), findsOneWidget);
+    });
+
+    testWidgets('Muestra badge Lite y color carbs para gemini-3.5-flash-lite', (tester) async {
+      const liteModel = [
+        GeminiModelInfo(
+          name: 'gemini-3.5-flash-lite',
+          displayName: 'Gemini 3.5 Flash Lite',
+          description: 'Modelo ligero de respaldo.',
+          isRecommended: false,
+          recommendationLabel: 'Lite',
+          inputTokenLimit: 1048576,
+        ),
+      ];
+
+      await tester.pumpWidget(buildWidget(
+        apiKey: 'AIzaSyValidKey',
+        selectedModel: 'gemini-3.5-flash-lite',
+        models: liteModel,
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Lite'), findsOneWidget);
+      expect(find.text('ID: gemini-3.5-flash-lite'), findsOneWidget);
+    });
   });
 }

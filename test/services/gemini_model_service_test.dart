@@ -194,6 +194,25 @@ void main() {
       );
       expect(customLiteConfig.containsKey('thinking_level'), isFalse);
       expect(customLiteConfig.containsKey('thinking_config'), isFalse);
+
+      final gen3WithPrefix = GeminiModelService.buildCallConfig(modelName: 'models/gemini-3.8-flash');
+      expect(gen3WithPrefix['model'], equals('gemini-3.8-flash'));
+      expect(gen3WithPrefix['thinking_level'], equals('MEDIUM'));
+      expect(GeminiModelService.supportsThinking('models/gemini-3.8-flash'), isTrue);
+      expect(GeminiModelService.resolveThinkingLevel('models/gemini-3.8-flash'), equals('MEDIUM'));
+
+      final configOff = GeminiModelService.buildCallConfig(
+        modelName: 'gemini-3.8-flash',
+        customThinkingLevel: 'OFF',
+      );
+      expect(configOff.containsKey('thinking_level'), isFalse);
+      expect(configOff.containsKey('thinking_config'), isFalse);
+
+      final configAuto = GeminiModelService.buildCallConfig(
+        modelName: 'gemini-3.8-flash',
+        customThinkingLevel: 'AUTO',
+      );
+      expect(configAuto['thinking_level'], equals('MEDIUM'));
     });
 
     test('isVisionCapableModel fallback heuristic filters non-vision when inputModalities is absent', () {
@@ -293,6 +312,27 @@ void main() {
 
       final copied = model.copyWith(recommendationLabel: null);
       expect(copied.recommendationLabel, isNull);
+
+      const redundantPeriod = GeminiModelInfo(
+        name: 'models/gemini-2.5-flash',
+        displayName: 'Gemini 2.5 Flash',
+        description: 'Gemini 2.5 Flash.',
+      );
+      expect(redundantPeriod.hasUsefulDescription, isFalse);
+
+      const redundantId = GeminiModelInfo(
+        name: 'models/gemini-2.5-flash',
+        displayName: 'Gemini 2.5 Flash',
+        description: 'gemini-2.5-flash',
+      );
+      expect(redundantId.hasUsefulDescription, isFalse);
+
+      const usefulModel = GeminiModelInfo(
+        name: 'models/gemini-2.5-flash',
+        displayName: 'Gemini 2.5 Flash',
+        description: 'Modelo de alta velocidad optimizado para análisis fotográfico.',
+      );
+      expect(usefulModel.hasUsefulDescription, isTrue);
     });
   });
 }

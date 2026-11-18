@@ -43,6 +43,16 @@ class GeminiModelInfo {
     this.inputModalities = const ['TEXT', 'IMAGE'],
   });
 
+  /// Determines whether [description] provides meaningful unique information
+  /// rather than repeating [displayName] or [name].
+  bool get hasUsefulDescription {
+    if (description.trim().isEmpty) return false;
+    final cleanDesc = description.replaceFirst(RegExp(r'^models/'), '').trim().toLowerCase().replaceAll(RegExp(r'[\s\-_\.:;,]'), '');
+    final cleanDisplay = displayName.trim().toLowerCase().replaceAll(RegExp(r'[\s\-_\.:;,]'), '');
+    final cleanName = name.replaceFirst(RegExp(r'^models/'), '').trim().toLowerCase().replaceAll(RegExp(r'[\s\-_\.:;,]'), '');
+    return cleanDesc.isNotEmpty && cleanDesc != cleanDisplay && cleanDesc != cleanName;
+  }
+
   /// Factory to parse official Google Generative Language API model JSON object
   factory GeminiModelInfo.fromGoogleJson(
     Map<String, dynamic> json, {

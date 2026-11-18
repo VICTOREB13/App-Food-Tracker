@@ -64,8 +64,21 @@ class DecisionGateResult {
 
   bool get isPass => isFood && imageQuality != 'low';
   bool get shouldWarn => !isFood || imageQuality == 'low';
-  String get recommendedThinkingLevel =>
-      (dishComplexity == 'complex' || dishComplexity == 'high') ? 'HIGH' : 'MEDIUM';
+  String get recommendedThinkingLevel {
+    switch (dishComplexity.toLowerCase().trim()) {
+      case 'simple':
+        return 'LOW';
+      case 'medium':
+        return 'MEDIUM';
+      case 'complex':
+      case 'high':
+        return 'HIGH';
+      case 'extreme':
+        return 'XHIGH';
+      default:
+        return 'MEDIUM';
+    }
+  }
 
   @override
   String toString() =>

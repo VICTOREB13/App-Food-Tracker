@@ -179,7 +179,7 @@ class AnalysisQueueService extends ChangeNotifier {
         name: analysis.dishName, mealType: task.mealType, date: task.date,
         imagePath: task.imagePath, calories: analysis.totalCalories,
         protein: analysis.totalProtein, carbs: analysis.totalCarbs, fat: analysis.totalFat,
-        notes: ingredientsSummary, items: analysis.items, aiBreakdownJson: analysis.rawJson,
+        notes: ingredientsSummary, items: analysis.items, aiBreakdownJson: json.encode(analysis.toMap()),
       ).recalculateFromItems(analysis.items);
 
       await DatabaseService.instance.upsertMeal(meal);

@@ -1,10 +1,13 @@
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:food_tracker/core/interfaces/database_service_interface.dart';
+import 'package:food_tracker/core/interfaces/diet_advisor_service_interface.dart';
 import 'package:food_tracker/core/interfaces/nutritional_recommendation_service_interface.dart';
 import 'package:food_tracker/core/models/daily_goals.dart';
+import 'package:food_tracker/core/models/diet_pattern_insight.dart';
 import 'package:food_tracker/core/models/nutritional_recommendation.dart';
 import 'package:food_tracker/core/database/database_service.dart';
+import 'package:food_tracker/core/services/ai/diet_advisor_service.dart';
 import 'package:food_tracker/features/dashboard/services/recommendations/recommendation_dish_catalog.dart';
 import 'package:food_tracker/features/dashboard/services/recommendations/recommendation_filter_engine.dart';
 import 'package:food_tracker/core/services/storage/secure_storage_service.dart';
@@ -24,15 +27,19 @@ class NutritionalRecommendationService implements INutritionalRecommendationServ
 
   final IDatabaseService? _dbOverride;
   final SecureStorageService? _storageOverride;
+  final IDietAdvisorService? _dietAdvisorOverride;
 
   IDatabaseService get _db => _dbOverride ?? DatabaseService.instance;
   SecureStorageService get _storage => _storageOverride ?? SecureStorageService.instance;
+  IDietAdvisorService get _dietAdvisor => _dietAdvisorOverride ?? DietAdvisorService.instance;
 
   NutritionalRecommendationService({
     IDatabaseService? databaseService,
     SecureStorageService? storageService,
+    IDietAdvisorService? dietAdvisorService,
   })  : _dbOverride = databaseService,
-        _storageOverride = storageService;
+        _storageOverride = storageService,
+        _dietAdvisorOverride = dietAdvisorService;
 
   Future<DailyGoals> _resolveGoals() async {
     try {
@@ -224,6 +231,17 @@ class NutritionalRecommendationService implements INutritionalRecommendationServ
       generalAdvice: advice,
       recommendedOptions: candidates,
       selectedCategory: activeCategory,
+    );
+  }
+
+  @override
+  Future<DietPatternInsight> getDietPatternInsights({
+    int days = 7,
+    bool forceRefresh = false,
+  }) {
+    return _dietAdvisor.getDietPatternInsights(
+      days: days,
+      forceRefresh: forceRefresh,
     );
   }
 

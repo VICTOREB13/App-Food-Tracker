@@ -755,6 +755,13 @@ Para garantizar la estricta mantenibilidad del monolito modular sin romper compa
   - Disparador visual con botón prominente `[Ver / Configurar]` e icono `Icons.tune_rounded`.
   - Detección de toque unificada mediante `InkWell`: tanto el botón explícito como el contenedor Bento completo despachan `MasterPromptBottomSheet.show(context, ...)`.
 
+### 16.4. Motor de Diagnóstico Longitudinal de Hábitos IA (`DietAdvisorService` & `DietPatternInsight`)
+- **Ubicación:** `lib/core/models/diet_pattern_insight.dart`, `lib/core/interfaces/diet_advisor_service_interface.dart`, `lib/core/services/ai/diet_advisor_service.dart` y `lib/features/dashboard/widgets/recommendations/ai_diet_pattern_sheet.dart`.
+- **Contrato `IDietAdvisorService`:** Interfaz pura desacoplada con método `Future<DietPatternInsight> getDietPatternInsights({int days = 7, bool forceRefresh = false})`.
+- **Modelo `DietPatternInsight`:** Entidad inmutable con patrón Sentinel (`copyWith`), parsing determinista de fechas (`ModelSanitizer.parseDate`) y serialización completa (`daysAnalyzed`, `fatInsight`, `proteinInsight`, `fiberInsight`, `sodiumInsight`, `visualHandMenu`, `suggestedSwaps`, `generalSummary`, `analyzedAt`).
+- **Resiliencia y Caché:** Caché en memoria de 60 minutos con clave compuesta (`days`), fallback determinista enriquecido ante ausencia de API Key o fallos de red, y delegación fluida desde `INutritionalRecommendationService`.
+- **Interfaz Dark Bento (`AiDietPatternSheet`):** Modal interactivo con selector de período (7, 14, 30 días), micro-tarjetas temáticas para Grasas/Aceites, Proteína/Metas, Fibra/Vegetales, Sodio, Menú Visual con método de manos y sustituciones prácticas.
+
 ---
 
 ## 🍰 17. Rebanadas Verticales Canónicas (Vertical Slice Architecture - VSA)

@@ -1,16 +1,16 @@
 ---
 tipo: audit_report
 proyecto: App_Food_Tracker
-iteracion: v1.5.2
+iteracion: v1.5.3
 veredicto: PASS
 estado: activo
-fecha: 2026-11-16
-tags: [proyecto, audit, quality-gate, v1-5-2, voice-mode, bento-typography, image-persistence, reactive-dashboard, master-prompt, context-window, thinking-levels, inference-telemetry]
+fecha: 2026-11-17
+tags: [proyecto, audit, quality-gate, v1-5-3, ai-resilience, thinking-auto, master-prompt-bilingual, diet-pattern-engine, what-should-i-eat]
 ---
 
-# 🛡️ Reporte de Auditoría Integral y Quality Gate (v1.5.2)
+# 🛡️ Reporte de Auditoría Integral y Quality Gate (v1.5.3)
 
-> **Systems-Auditor (Quality Gatekeeper):** Este documento certifica los resultados de la inspección técnica exhaustiva, paridad de contratos SDD, validación de suites de pruebas unitarias, análisis de texto e inferencia directa, auto-escalado tipográfico Bento, persistencia permanente de fotos en Android, refresco reactivo del Dashboard, rediseño Dark Bento de Master Prompt, telemetría de inferencia de modelos y presupuesto estricto de líneas de código (< 300 LoC) para la versión **v1.5.2** del proyecto **Victor Engineer - Food Tracker**.
+> **Systems-Auditor (Quality Gatekeeper):** Este documento certifica los resultados de la inspección técnica exhaustiva, paridad de contratos SDD, validación de suites de pruebas unitarias, resiliencia del motor de inferencia contra errores 400/429/sockets, modo AUTO de razonamiento, Master Prompt bilingüe ultra-denso con nutrición completa, motor longitudinal de patrones dietéticos ("What Should I Eat Today?") y presupuesto estricto de líneas de código (< 300 LoC) para la versión **v1.5.3** del proyecto **Victor Engineer - Food Tracker**.
 
 ---
 
@@ -20,13 +20,14 @@ tags: [proyecto, audit, quality-gate, v1-5-2, voice-mode, bento-typography, imag
 =====================================================
           QUALITY GATE VERDICT: STATUS: PASS
 =====================================================
- [✓] Voice & Text Ingestion: analyzeMealText implementado en GeminiVisionService; erradicado dummy audio y fake MP3.
- [✓] Bento Typography: FittedBox(maxLines: 1) en MacroBentoCard y MealDetailView previniendo saltos silábicos.
- [✓] Persistencia de Fotos: getApplicationDocumentsDirectory() como almacenamiento primario contra purgas de Android.
- [✓] Estado Reactivo: DashboardController.instance.loadDashboardData() enlazado a AnalysisQueueService (completed/failed).
- [✓] Rediseño Master Prompt: Modal Dark Bento con pestañas Resumen Bento vs. Editor y chips temáticos.
- [✓] Telemetría de Inferencia: modelUsed, isFallback y thinkingLevel serializados y mostrados en badge visual.
- [✓] Razonamiento Configurable: Niveles 'OFF', 'LOW', 'MEDIUM', 'HIGH', 'XHIGH' y tokens 4k/8k/16k en GeminiRestClient.
+ [✓] Resiliencia de Inferencia AI: Sanitización universal del prefijo models/ en GeminiRestClient y GeminiModelService.
+ [✓] Tolerancia a Fallback (Anti-400): Expurgo automático de thinkingConfig y cachedContent en fallback a Lite models.
+ [✓] Modo AUTO de Razonamiento: Selección dinámica del nivel de pensamiento (LOW/MEDIUM/HIGH/XHIGH) desde gemini-decision-1.
+ [✓] Persistencia de Telemetría: model_used, is_fallback, thinking_level y razonamiento_volumetrico persistidos en SQLite.
+ [✓] Master Prompt Bilingüe Ultra-Denso: Reducción a <15 líneas exigiendo todos los nutrientes de la app en ES y EN.
+ [✓] Motor Longitudinal de Hábitos: DietAdvisorService y DietPatternInsight analizando SQLite a 7, 14 y 30 días con caché multi-ventana.
+ [✓] Interfaz Dark Bento: AiDietPatternSheet con selector de ventana, menú visual de manos y snacks locales (Farmatodo).
+ [✓] Desacoplamiento ISP (/refactor-untangle): IDietAdvisorService independiente, sin typecasts inseguros y con JsonRepairHelper.
  [✓] Zero-Lint sin Supresiones: 0 directivas ignore en Dart/Flutter; analysis_options.yaml limpio y estricto.
  [✓] Paridad de Contratos SDD (lint_contracts.ts): 1 contrato en spec, 1 en código, 0 faltantes, 0 huérfanos.
  [✓] Suites Unitarias (Bun & Flutter Test): 100% en verde, suites nativas pasando sin errores.
@@ -37,7 +38,7 @@ tags: [proyecto, audit, quality-gate, v1-5-2, voice-mode, bento-typography, imag
 ```
 
 **Estatus:** `Status: PASS`  
-**Autorización:** Calidad y estabilidad técnica verificadas al 100% con cero defectos residuales y pleno cumplimiento de los estándares de desarrollo para v1.5.2.
+**Autorización:** Calidad y estabilidad técnica verificadas al 100% con cero defectos residuales y pleno cumplimiento de los estándares de desarrollo para v1.5.3.
 
 ---
 
@@ -66,6 +67,24 @@ tags: [proyecto, audit, quality-gate, v1-5-2, voice-mode, bento-typography, imag
   - Erradicación de `Radio<String>` deprecado en Flutter 3.50+ en favor de indicador táctil no deprecado `Icon(isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked)` en `model_picker_bottom_sheet.dart`.
   - Aplicación estricta de llaves `{ ... }` (`curly_braces_in_flow_control_structures`) en `gemini_model_selector_card.dart` y `model_picker_bottom_sheet.dart`.
   - Verificación absoluta de cero directivas `// ignore` en todo el repositorio.
+
+- **Motor de Patrones Dietéticos & Diagnóstico Longitudinal IA:**
+  - `DietPatternInsight` y `DietAdvisorService` analizan tendencias a 7, 14 y 30 días contra metas calóricas, desglose de grasas/aceites, proteína para fuerza, fibra, sodio y porciones por método de manos (puño, palma, pulgar).
+  - Interfaz desacoplada `IDietAdvisorService` creada en `lib/core/interfaces/diet_advisor_service_interface.dart` y registrada limpiamente en `getIt` sin casts inseguros.
+  - Caché multi-ventana (`Map<int, ({DietPatternInsight insight, DateTime time})>`) que preserva ventanas independientes de 7, 14 y 30 días sin desalojos cruzados.
+  - Parsing resiliente de respuestas de Gemini con `JsonRepairHelper` y extracción por llaves delimitadoras.
+  - Modelo `DietPatternInsight` inmutable con parsing determinista `ModelSanitizer.parseDate`, serialización completa y re-exportación canónica en `models.dart`.
+  - `AiDietPatternSheet` desacoplado para depender de `IDietAdvisorService` (eliminando acoplamiento con `NutritionalRecommendationService`), con indicador de carga corregido ante cambios de ventana temporal.
+  - `INutritionalRecommendationService` unificado para implementar `IDietAdvisorService` (ISP).
+  - Gatillos rápidos de auditoría integrados en `WhatToEatSheet` y `RecommendationDiagnosticCard`.
+  - Co-locación de suites de prueba en `test/services/diet_advisor_service_test.dart` (<300 LoC) y `test/widgets/ai_diet_pattern_sheet_test.dart`.
+
+- **Refactorización y Poda de Excedentes (/refactor-untangle):**
+  - Reducción preventiva de líneas en `meal.dart` (297 -> 286 LoC) y `gemini_resilience_helper.dart` (295 -> 289 LoC).
+  - Erradicación de código muerto (`_sentinel` no utilizado en `DietPatternInsight`).
+  - Sustitución de `List<dynamic>` por `List<Meal>` fuertemente tipado en `DietAdvisorService`.
+  - Saneamiento de mocks en tests eliminando métodos no implementados (`UnimplementedError`).
+  - 100% de los 262 archivos analizados en conformidad con VSA y SDD.
 
 ---
 

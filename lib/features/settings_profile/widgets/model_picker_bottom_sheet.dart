@@ -70,26 +70,21 @@ class _ModelPickerBottomSheetState extends State<ModelPickerBottomSheet> {
 
   Color _badgeColor(String label) {
     final lower = label.toLowerCase();
-    if (lower.contains('think') || lower.contains('pro')) {
-      return AppColors.primary;
-    }
-    if (lower.contains('fast') || lower.contains('flash')) {
-      return AppColors.protein;
-    }
+    if (lower.contains('think') || lower.contains('pro')) return AppColors.primary;
+    if (lower.contains('fast') || lower.contains('flash')) return AppColors.protein;
+    if (lower.contains('lite')) return AppColors.carbs;
+    if (lower.contains('next')) return AppColors.protein;
     return AppColors.carbs;
   }
 
   String _resolveBadgeLabel(GeminiModelInfo model) {
-    final lower = model.name.toLowerCase();
-    if (lower.contains('pro')) {
-      return 'Think';
-    }
-    if (lower.contains('flash')) {
-      return 'Fast';
-    }
     if (model.recommendationLabel != null && model.recommendationLabel!.isNotEmpty) {
       return model.recommendationLabel!;
     }
+    final lower = model.name.toLowerCase();
+    if (lower.contains('lite')) return 'Lite';
+    if (lower.contains('pro')) return 'Think';
+    if (lower.contains('flash')) return 'Fast';
     return 'Fast';
   }
 
@@ -232,8 +227,8 @@ class _ModelPickerBottomSheetState extends State<ModelPickerBottomSheet> {
                                     ],
                                   ),
                                   const SizedBox(height: 3),
-                                  Text(model.name, style: GoogleFonts.robotoMono(fontSize: 11, color: AppColors.textSecondary(context))),
-                                  if (model.description.isNotEmpty) ...[
+                                  Text('ID: ${model.name}', style: GoogleFonts.robotoMono(fontSize: 11, color: AppColors.textSecondary(context))),
+                                  if (model.hasUsefulDescription) ...[
                                     const SizedBox(height: 5),
                                     Text(model.description, maxLines: 2, overflow: TextOverflow.ellipsis, style: GoogleFonts.inter(fontSize: 11, color: AppColors.textMuted(context), height: 1.3)),
                                   ],

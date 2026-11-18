@@ -19,27 +19,28 @@ class Meal {
   final String? notes;
   final String? aiBreakdownJson;
 
-  bool get isPartial {
-    if (aiBreakdownJson != null && aiBreakdownJson!.isNotEmpty) {
-      try {
-        final decoded = json.decode(_cleanJson(aiBreakdownJson!));
-        if (decoded is Map<String, dynamic>) {
-          return decoded['is_partial'] == true || decoded['isPartial'] == true;
-        }
-      } catch (_) {}
+  Map<String, dynamic>? _decodeAiMap() {
+    if (aiBreakdownJson == null || aiBreakdownJson!.isEmpty) return null;
+    try {
+      final d = json.decode(_cleanJson(aiBreakdownJson!));
+      return d is Map<String, dynamic> ? d : null;
+    } catch (_) {
+      return null;
     }
-    return false;
   }
+
+  bool get isPartial => _decodeAiMap()?['is_partial'] == true || _decodeAiMap()?['isPartial'] == true;
+  String? get modelUsed => _decodeAiMap()?['model_used']?.toString() ?? _decodeAiMap()?['modelUsed']?.toString();
+  bool get isFallback => _decodeAiMap()?['is_fallback'] == true || _decodeAiMap()?['isFallback'] == true;
+  String? get thinkingLevel => _decodeAiMap()?['thinking_level']?.toString() ?? _decodeAiMap()?['thinkingLevel']?.toString();
 
   static const List<String> validMealTypes = ['Desayuno', 'Almuerzo', 'Cena', 'Snack'];
   static const Object _sentinel = Object();
 
   Meal({
-    String? id,
-    required String name,
-    String mealType = 'Almuerzo', DateTime? date, String? imagePath,
-    num? calories, num? protein, num? carbs, num? fat,
-    num? fiber, num? sodium, num? sugar, String? notes, String? aiBreakdownJson, List<FoodItem>? items,
+    String? id, required String name, String mealType = 'Almuerzo', DateTime? date, String? imagePath,
+    num? calories, num? protein, num? carbs, num? fat, num? fiber, num? sodium, num? sugar,
+    String? notes, String? aiBreakdownJson, List<FoodItem>? items,
   })  : id = ModelSanitizer.truncate(id, 128, fallback: const Uuid().v4()),
         name = ModelSanitizer.truncate(name, ModelSanitizer.maxNameLength, fallback: 'Comida'),
         mealType = _sanitizeMealType(mealType),
@@ -62,19 +63,13 @@ class Meal {
   static String _cleanJson(String raw) {
     var cleaned = raw.trim();
     final fenceMatch = RegExp(r'```(?:json)?\s*([\s\S]*?)\s*```').firstMatch(cleaned);
-    if (fenceMatch != null) {
-      cleaned = fenceMatch.group(1)!.trim();
-    } else {
-      final firstBrace = cleaned.indexOf('{');
-      final lastBrace = cleaned.lastIndexOf('}');
-      final firstBracket = cleaned.indexOf('[');
-      final lastBracket = cleaned.lastIndexOf(']');
-      if (firstBrace != -1 && lastBrace != -1 && lastBrace > firstBrace &&
-          (firstBracket == -1 || firstBrace < firstBracket)) {
-        cleaned = cleaned.substring(firstBrace, lastBrace + 1).trim();
-      } else if (firstBracket != -1 && lastBracket != -1 && lastBracket > firstBracket) {
-        cleaned = cleaned.substring(firstBracket, lastBracket + 1).trim();
-      }
+    if (fenceMatch != null) return fenceMatch.group(1)!.trim();
+    final firstBrace = cleaned.indexOf('{'), lastBrace = cleaned.lastIndexOf('}');
+    final firstBracket = cleaned.indexOf('['), lastBracket = cleaned.lastIndexOf(']');
+    if (firstBrace != -1 && lastBrace != -1 && lastBrace > firstBrace && (firstBracket == -1 || firstBrace < firstBracket)) {
+      return cleaned.substring(firstBrace, lastBrace + 1).trim();
+    } else if (firstBracket != -1 && lastBracket != -1 && lastBracket > firstBracket) {
+      return cleaned.substring(firstBracket, lastBracket + 1).trim();
     }
     return cleaned;
   }
@@ -88,24 +83,27 @@ class Meal {
   }) {
     if (items != null && items.isNotEmpty) {
       int? conf, margin;
+      String? modelUsed, thinkingLevel, reasoning;
+      bool? isPartial, isFallback;
       if (rawJson != null && rawJson.trim().isNotEmpty) {
         try {
-          final decoded = json.decode(_cleanJson(rawJson));
-          if (decoded is Map<String, dynamic>) {
-            final c = decoded['porcentaje_certeza'] ?? decoded['confidence_percentage'] ?? decoded['certeza'];
-            if (c is num) {
-              conf = c.toInt().clamp(0, 100);
-            } else if (c is String) {
-              final d = double.tryParse(c.replaceAll(RegExp(r'[^0-9.-]'), ''));
-              if (d != null) conf = d.round().clamp(0, 100);
+          final d = json.decode(_cleanJson(rawJson));
+          if (d is Map<String, dynamic>) {
+            final c = d['porcentaje_certeza'] ?? d['confidence_percentage'] ?? d['certeza'];
+            if (c is num) conf = c.toInt().clamp(0, 100);
+            final m = d['margen_error_kcal'] ?? d['calorie_error_margin'] ?? d['margen_error'];
+            if (m is num) margin = m.toInt().clamp(0, 2000);
+            modelUsed = d['model_used']?.toString() ?? d['modelUsed']?.toString();
+            thinkingLevel = d['thinking_level']?.toString() ?? d['thinkingLevel']?.toString();
+            reasoning = d['razonamiento_volumetrico']?.toString();
+            if (reasoning == null && d['rawJson'] != null) {
+              try {
+                final r = json.decode(_cleanJson(d['rawJson'].toString()));
+                if (r is Map<String, dynamic>) reasoning = r['razonamiento_volumetrico']?.toString();
+              } catch (_) {}
             }
-            final m = decoded['margen_error_kcal'] ?? decoded['calorie_error_margin'] ?? decoded['margen_error'];
-            if (m is num) {
-              margin = m.toInt().clamp(0, 2000);
-            } else if (m is String) {
-              final d = double.tryParse(m.replaceAll(RegExp(r'[^0-9.-]'), ''));
-              if (d != null) margin = d.round().clamp(0, 2000);
-            }
+            if (d['is_partial'] == true || d['isPartial'] == true) isPartial = true;
+            if (d['is_fallback'] == true || d['isFallback'] == true) isFallback = true;
           }
         } catch (_) {}
       }
@@ -120,6 +118,11 @@ class Meal {
         },
         if (conf != null) 'porcentaje_certeza': conf,
         if (margin != null) 'margen_error_kcal': margin,
+        if (isPartial == true) 'is_partial': true,
+        if (modelUsed != null) 'model_used': modelUsed,
+        if (isFallback == true) 'is_fallback': true,
+        if (thinkingLevel != null) 'thinking_level': thinkingLevel,
+        if (reasoning != null) 'razonamiento_volumetrico': reasoning,
       });
     }
     return rawJson;
@@ -190,45 +193,34 @@ class Meal {
   int? get calorieErrorMargin => _parseAiMetric(['margen_error_kcal', 'calorie_error_margin', 'margen_error']);
 
   int? _parseAiMetric(List<String> keys) {
-    if (aiBreakdownJson == null || aiBreakdownJson!.trim().isEmpty) return null;
-    try {
-      final decoded = json.decode(_cleanJson(aiBreakdownJson!));
-      if (decoded is Map<String, dynamic>) {
-        for (final k in keys) {
-          final val = decoded[k];
-          if (val is num) return val.toInt();
-          if (val is String) {
-            final cleanStr = val.replaceAll(RegExp(r'[^0-9.-]'), '');
-            final d = double.tryParse(cleanStr);
-            if (d != null) return d.round();
-          }
-        }
+    final d = _decodeAiMap();
+    if (d == null) return null;
+    for (final k in keys) {
+      final val = d[k];
+      if (val is num) return val.toInt();
+      if (val is String) {
+        final n = num.tryParse(val.replaceAll(RegExp(r'[^0-9.-]'), ''));
+        if (n != null) return n.round();
       }
-    } catch (_) {}
+    }
     return null;
   }
 
   Meal recalculateFromItems(List<FoodItem> newItems) {
     if (newItems.isEmpty) return this;
-    double totalCalories = 0.0, totalProtein = 0.0, totalCarbs = 0.0, totalFat = 0.0;
-    double totalFiber = 0.0, totalSodium = 0.0, totalSugar = 0.0;
-
+    double sumCal = 0, sumProt = 0, sumCarbs = 0, sumFat = 0, sumFiber = 0, sumSodium = 0, sumSugar = 0;
     for (final item in newItems) {
-      totalCalories += item.calories; totalProtein += item.protein;
-      totalCarbs += item.carbs; totalFat += item.fat;
-      totalFiber += item.fiber; totalSodium += item.sodium; totalSugar += item.sugar;
+      sumCal += item.calories; sumProt += item.protein; sumCarbs += item.carbs; sumFat += item.fat;
+      sumFiber += item.fiber; sumSodium += item.sodium; sumSugar += item.sugar;
     }
+    double eff(double sum, double cur) => (sum == 0.0 && cur > 0) ? cur : sum;
+    final effectiveCal = eff(sumCal, calories), effectiveProt = eff(sumProt, protein);
+    final effectiveCarbs = eff(sumCarbs, carbs), effectiveFat = eff(sumFat, fat);
+    final effectiveFiber = eff(sumFiber, fiber), effectiveSodium = eff(sumSodium, sodium), effectiveSugar = eff(sumSugar, sugar);
 
-    final effectiveCal = (totalCalories == 0.0 && calories > 0) ? calories : totalCalories;
-    final effectiveProt = (totalProtein == 0.0 && protein > 0) ? protein : totalProtein;
-    final effectiveCarbs = (totalCarbs == 0.0 && carbs > 0) ? carbs : totalCarbs;
-    final effectiveFat = (totalFat == 0.0 && fat > 0) ? fat : totalFat;
-    final effectiveFiber = (totalFiber == 0.0 && fiber > 0) ? fiber : totalFiber;
-    final effectiveSodium = (totalSodium == 0.0 && sodium > 0) ? sodium : totalSodium;
-    final effectiveSugar = (totalSugar == 0.0 && sugar > 0) ? sugar : totalSugar;
-
-    final conf = confidencePercentage;
-    final margin = calorieErrorMargin;
+    final conf = confidencePercentage, margin = calorieErrorMargin;
+    final model = modelUsed, fallback = isFallback, thinking = thinkingLevel, partial = isPartial;
+    final reasoning = _decodeAiMap()?['razonamiento_volumetrico']?.toString();
     final newBreakdown = json.encode({
       'plato': name,
       'items': newItems.map((e) => e.toJson()).toList(),
@@ -238,6 +230,11 @@ class Meal {
       },
       if (conf != null) 'porcentaje_certeza': conf,
       if (margin != null) 'margen_error_kcal': margin,
+      if (partial) 'is_partial': true,
+      if (model != null) 'model_used': model,
+      if (fallback) 'is_fallback': true,
+      if (thinking != null) 'thinking_level': thinking,
+      if (reasoning != null) 'razonamiento_volumetrico': reasoning,
     });
 
     return copyWith(
@@ -265,24 +262,22 @@ class Meal {
   }
 
   Map<String, dynamic> toSqliteMap() => {
-        'id': id, 'name': name, 'meal_type': mealType,
-        'date': date.toIso8601String(), 'image_path': imagePath,
-        'calories': calories, 'protein': protein, 'carbs': carbs, 'fat': fat,
-        'fiber': fiber, 'sodium': sodium, 'sugar': sugar,
-        'notes': notes, 'ai_breakdown_json': aiBreakdownJson,
-      };
+    'id': id, 'name': name, 'meal_type': mealType, 'date': date.toIso8601String(),
+    'image_path': imagePath, 'calories': calories, 'protein': protein, 'carbs': carbs,
+    'fat': fat, 'fiber': fiber, 'sodium': sodium, 'sugar': sugar, 'notes': notes,
+    'ai_breakdown_json': aiBreakdownJson,
+  };
 
   factory Meal.fromSqliteMap(Map<String, dynamic> map) => Meal(
-        id: map['id']?.toString(), name: map['name']?.toString() ?? 'Comida',
-        mealType: map['meal_type']?.toString() ?? 'Almuerzo',
-        date: ModelSanitizer.parseDate(map['date']), imagePath: map['image_path']?.toString(),
-        calories: ModelSanitizer.clampDouble(map['calories']),
-        protein: ModelSanitizer.clampDouble(map['protein']),
-        carbs: ModelSanitizer.clampDouble(map['carbs']), fat: ModelSanitizer.clampDouble(map['fat']),
-        fiber: ModelSanitizer.clampDouble(map['fiber']),
-        sodium: ModelSanitizer.clampDouble(map['sodium'], max: 50000.0), sugar: ModelSanitizer.clampDouble(map['sugar']),
-        notes: map['notes']?.toString(), aiBreakdownJson: map['ai_breakdown_json']?.toString(),
-      );
+    id: map['id']?.toString(), name: map['name']?.toString() ?? 'Comida',
+    mealType: map['meal_type']?.toString() ?? 'Almuerzo',
+    date: ModelSanitizer.parseDate(map['date']), imagePath: map['image_path']?.toString(),
+    calories: ModelSanitizer.clampDouble(map['calories']), protein: ModelSanitizer.clampDouble(map['protein']),
+    carbs: ModelSanitizer.clampDouble(map['carbs']), fat: ModelSanitizer.clampDouble(map['fat']),
+    fiber: ModelSanitizer.clampDouble(map['fiber']),
+    sodium: ModelSanitizer.clampDouble(map['sodium'], max: 50000.0), sugar: ModelSanitizer.clampDouble(map['sugar']),
+    notes: map['notes']?.toString(), aiBreakdownJson: map['ai_breakdown_json']?.toString(),
+  );
 
   Map<String, dynamic> toMap() => toSqliteMap();
   factory Meal.fromMap(Map<String, dynamic> map) => Meal.fromSqliteMap(map);

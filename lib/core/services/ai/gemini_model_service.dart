@@ -29,9 +29,13 @@ class GeminiModelService {
   /// Default thinking level for Gemini 3.8 Flash and Pro clinical models
   static const String defaultThinkingLevel = 'MEDIUM';
 
+  /// Sanitizes the model name by removing any 'models/' prefix.
+  static String sanitizeModelName(String modelName) =>
+      modelName.replaceFirst(RegExp(r'^models/'), '').trim();
+
   /// Determines whether a given Gemini model supports latent reasoning / clinical depth
   static bool supportsThinking(String modelName) {
-    final lower = modelName.toLowerCase();
+    final lower = sanitizeModelName(modelName).toLowerCase();
     if (lower.contains('lite')) return false;
     return lower.startsWith('gemini-3') ||
         lower.startsWith('gemini-4') ||
@@ -41,14 +45,14 @@ class GeminiModelService {
 
   /// Resolves the thinking budget for a given model (null for Gemini 3, Gemini 4, Lite, and non-thinking models)
   static int? resolveThinkingBudget(String modelName) {
-    final lower = modelName.toLowerCase();
+    final lower = sanitizeModelName(modelName).toLowerCase();
     if (lower.startsWith('gemini-3') || lower.startsWith('gemini-4') || lower.contains('lite')) return null;
     return supportsThinking(modelName) ? defaultThinkingBudget : null;
   }
 
   /// Resolves the thinking level for a given model ('MEDIUM' for Gemini 3.x / 4.x / Pro, null for Lite or non-thinking)
   static String? resolveThinkingLevel(String modelName) {
-    final lower = modelName.toLowerCase();
+    final lower = sanitizeModelName(modelName).toLowerCase();
     if (lower.contains('lite')) return null;
     if (lower.startsWith('gemini-3') || lower.startsWith('gemini-4') || lower.contains('pro')) {
       return defaultThinkingLevel;
@@ -63,13 +67,16 @@ class GeminiModelService {
     int? customThinkingBudget,
     String? customThinkingLevel,
   }) {
-    final config = <String, dynamic>{'model': modelName};
-    final lower = modelName.toLowerCase();
+    final clean = sanitizeModelName(modelName);
+    final config = <String, dynamic>{'model': clean};
+    final lower = clean.toLowerCase();
     if (lower.contains('lite')) {
       return config;
     }
     if (lower.startsWith('gemini-3') || lower.startsWith('gemini-4') || lower.contains('pro')) {
-      final level = customThinkingLevel ?? resolveThinkingLevel(modelName);
+      final norm = customThinkingLevel?.toUpperCase().trim();
+      if (norm == 'OFF') return config;
+      final level = (norm == 'AUTO') ? 'MEDIUM' : (norm ?? resolveThinkingLevel(clean));
       if (level != null) {
         config['thinking_level'] = level;
         config['thinking_config'] = {'thinking_level': level};
@@ -77,7 +84,7 @@ class GeminiModelService {
       }
       return config;
     }
-    final budget = customThinkingBudget ?? resolveThinkingBudget(modelName);
+    final budget = customThinkingBudget ?? resolveThinkingBudget(clean);
     if (budget != null) {
       config['thinking_budget'] = budget;
       config['thinking_config'] = {'thinking_budget': budget};

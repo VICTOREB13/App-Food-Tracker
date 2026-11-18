@@ -20,6 +20,7 @@ class MealAnalysisResult {
   final String? modelUsed;
   final bool isFallback;
   final String? thinkingLevel;
+  final String? reasoning;
 
   const MealAnalysisResult({
     required this.dishName, required this.items,
@@ -31,6 +32,7 @@ class MealAnalysisResult {
     this.modelUsed,
     this.isFallback = false,
     this.thinkingLevel,
+    this.reasoning,
   });
 
   static List<String> extractComponents(String text) => MealDecomposer.extractComponents(text);
@@ -73,6 +75,7 @@ class MealAnalysisResult {
     final String? effectiveModel = (data['model_used'] ?? data['modelUsed'] ?? modelUsed)?.toString();
     final bool effectiveFallback = data['is_fallback'] == true || data['isFallback'] == true || isFallback;
     final String? effectiveThinking = (data['thinking_level'] ?? data['thinkingLevel'] ?? thinkingLevel)?.toString();
+    final String? effectiveReasoning = (data['razonamiento_volumetrico'] ?? data['reasoning'])?.toString();
 
     final List<FoodItem> parsedItems = [];
     final dynamic itemsList = data['items'] ?? data['ingredientes'] ?? data['alimentos'] ??
@@ -217,6 +220,7 @@ class MealAnalysisResult {
       calorieErrorMargin: errorMargin, isPartial: partial,
       modelUsed: effectiveModel, isFallback: effectiveFallback,
       thinkingLevel: effectiveThinking,
+      reasoning: effectiveReasoning,
     );
   }
 
@@ -233,6 +237,7 @@ class MealAnalysisResult {
     if (modelUsed != null) 'model_used': modelUsed,
     'is_fallback': isFallback,
     if (thinkingLevel != null) 'thinking_level': thinkingLevel,
+    if (reasoning != null) 'razonamiento_volumetrico': reasoning,
     'rawJson': rawJson,
   };
 
@@ -242,7 +247,7 @@ class MealAnalysisResult {
     String? dishName, List<FoodItem>? items, double? totalCalories, double? totalProtein,
     double? totalCarbs, double? totalFat, double? totalFiber, double? totalSodium, double? totalSugar,
     String? rawJson, int? confidencePercentage, int? calorieErrorMargin, bool? isPartial,
-    String? modelUsed, bool? isFallback, String? thinkingLevel,
+    String? modelUsed, bool? isFallback, String? thinkingLevel, String? reasoning,
   }) => MealAnalysisResult(
     dishName: dishName ?? this.dishName, items: items ?? this.items,
     totalCalories: totalCalories ?? this.totalCalories, totalProtein: totalProtein ?? this.totalProtein,
@@ -255,5 +260,6 @@ class MealAnalysisResult {
     modelUsed: modelUsed ?? this.modelUsed,
     isFallback: isFallback ?? this.isFallback,
     thinkingLevel: thinkingLevel ?? this.thinkingLevel,
+    reasoning: reasoning ?? this.reasoning,
   );
 }

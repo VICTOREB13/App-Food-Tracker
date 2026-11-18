@@ -199,25 +199,28 @@ void main() {
       expect(result.totalFat, equals(3.5));
     });
 
-    test('serializes and deserializes modelUsed, isFallback, and thinkingLevel', () {
+    test('serializes and deserializes modelUsed, isFallback, thinkingLevel, and reasoning', () {
       const jsonStr = '''
       {
         "plato": "Tazón de Avena",
         "items": [],
         "model_used": "gemini-4-hydrogen",
         "is_fallback": true,
-        "thinking_level": "HIGH"
+        "thinking_level": "HIGH",
+        "razonamiento_volumetrico": "Deducción de porción de avena cocida en taza de 250ml"
       }
       ''';
       final result = MealAnalysisResult.fromJsonString(jsonStr);
       expect(result.modelUsed, equals('gemini-4-hydrogen'));
       expect(result.isFallback, isTrue);
       expect(result.thinkingLevel, equals('HIGH'));
+      expect(result.reasoning, contains('avena cocida'));
 
       final map = result.toMap();
       expect(map['model_used'], equals('gemini-4-hydrogen'));
       expect(map['is_fallback'], isTrue);
       expect(map['thinking_level'], equals('HIGH'));
+      expect(map['razonamiento_volumetrico'], contains('avena cocida'));
     });
   });
 }

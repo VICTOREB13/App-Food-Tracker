@@ -1,7 +1,8 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:uuid/uuid.dart';
-import 'package:food_tracker/features/food_entry/food_entry.dart';
+import 'package:food_tracker/core/models/models.dart';
+import 'package:food_tracker/features/food_entry/meal_controller.dart';
 import 'package:food_tracker/core/interfaces/nutritional_recommendation_service_interface.dart';
 import 'package:food_tracker/l10n/app_localizations.dart';
 import 'package:food_tracker/core/models/nutritional_recommendation.dart';
@@ -10,6 +11,7 @@ import 'package:food_tracker/features/dashboard/services/nutritional_recommendat
 import 'package:food_tracker/features/dashboard/services/recommendations/recommendation_dish_catalog.dart';
 import 'package:food_tracker/features/dashboard/services/recommendations/recommendation_filter_engine.dart';
 import 'package:food_tracker/core/services/theme/theme_manager.dart';
+import 'ai_diet_pattern_sheet.dart';
 import 'category_selector_bar.dart';
 import 'recommendation_budget_summary.dart';
 import 'recommendation_dish_card.dart';
@@ -95,18 +97,9 @@ class _WhatToEatSheetState extends State<WhatToEatSheet> {
         setState(() {
           _plan = (currentPlan ??
                   const TodayRecommendationPlan(
-                    remainingCalories: 1600.0,
-                    remainingProtein: 120.0,
-                    remainingCarbs: 180.0,
-                    remainingFat: 50.0,
-                    nextMealType: 'Almuerzo',
-                    generalAdvice: 'Opciones equilibradas según tu meta diaria.',
-                    recommendedOptions: [],
-                  ))
-              .copyWith(
-            recommendedOptions: fallbackDishes,
-            selectedCategory: targetCategory,
-          );
+                    remainingCalories: 1600.0, remainingProtein: 120.0, remainingCarbs: 180.0, remainingFat: 50.0,
+                    nextMealType: 'Almuerzo', generalAdvice: 'Opciones equilibradas según tu meta diaria.', recommendedOptions: [],
+                  )).copyWith(recommendedOptions: fallbackDishes, selectedCategory: targetCategory);
           _selectedCategory = targetCategory;
           _isLoading = false;
           _isRefreshing = false;
@@ -219,7 +212,28 @@ class _WhatToEatSheetState extends State<WhatToEatSheet> {
                             fontStyle: FontStyle.italic,
                           ),
                         ),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: 10),
+                        InkWell(
+                          onTap: () => AiDietPatternSheet.show(context, service: widget.service),
+                          borderRadius: BorderRadius.circular(10),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.auto_awesome, size: 16, color: AppColors.primary),
+                                const SizedBox(width: 8),
+                                Expanded(child: Text('Diagnóstico de Hábitos IA', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary))),
+                                const Icon(Icons.arrow_forward_ios, size: 11, color: AppColors.primary),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
                         CategorySelectorBar(
                           selectedCategory: _selectedCategory,
                           isRefreshing: _isRefreshing,

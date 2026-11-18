@@ -271,4 +271,9 @@ class _FakeNutritionalRecommendationService implements INutritionalRecommendatio
   }) async {
     return planToReturn.copyWith(selectedCategory: category ?? 'Todos');
   }
+
+  @override
+  Future<DietPatternInsight> getDietPatternInsights({int days = 7, bool forceRefresh = false}) async {
+    return DietPatternInsight.fallback(days: days);
+  }
 }

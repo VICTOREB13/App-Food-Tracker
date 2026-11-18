@@ -1,5 +1,6 @@
 export 'package:food_tracker/core/models/analysis_task.dart';
 export 'package:food_tracker/core/models/daily_goals.dart';
+export 'package:food_tracker/core/models/diet_pattern_insight.dart';
 export 'package:food_tracker/core/models/gemini_model_info.dart';
 export 'github_release_model.dart';
 export 'package:food_tracker/core/models/json_repair_helper.dart';
